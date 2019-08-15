@@ -16,24 +16,24 @@ function assert(value, message) {
   if (!value)
     throw new Error(message);
 }
-const clone = function (obj) {
+const jsonCopy = function (obj) {
     return JSON.parse(JSON.stringify(obj));
 };
-const mkdirp = {
-    sync: function (dir) {
-        // mkdir -p
-        child_process.spawnSync(
-            "mkdir",
-            [
-                "-p", dir
-            ],
-            {
-                stdio: [
-                    "ignore", 1, 2
-                ]
-            }
-        );
-    }
+const fsRmrSync = function (dir) {
+/*
+ * this function will synchronously "rm -fr" dir
+ */
+    child_process.execFileSync(
+        "rm",
+        [
+            "-fr", path.resolve(process.cwd(), dir)
+        ],
+        {
+            stdio: [
+                "ignore", 1, 2
+            ]
+        }
+    );
 };
 
 
@@ -53,7 +53,7 @@ const storagePath = './.nyc_output/js'
 class OutputFiles0 {
   constructor (coverageInfo) {
     // Clone coverageInfo to prevent mutating the passed in data
-    this.coverageInfo = clone(coverageInfo)
+    this.coverageInfo = jsonCopy(coverageInfo)
     this.iterator = 0
     this._parseAndIsolate()
   }
@@ -74,7 +74,15 @@ class OutputFiles0 {
       truncatedPath = truncatedPath.split('.js')[0]
       truncatedPath = pathLib.resolve(storagePath, truncatedPath)
     }
-    mkdirp.sync(storagePath)
+    // mkdir -p
+    child_process.spawnSync("mkdir", [
+        "-p", storagePath
+    ],
+    {
+        stdio: [
+            "ignore", 1, 2
+        ]
+    });
     if (fs.existsSync(truncatedPath + '.js')) {
       this.iterator++
       str = `${truncatedPath}-${this.iterator}.js`
@@ -735,13 +743,11 @@ require puppeteer/lib/Launcher.js
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const removeFolder = require('rimraf');
 const {Connection} = require('puppeteer/lib/Connection');
 const {Browser} = require('puppeteer/lib/Browser');
 const WebSocketTransport = require('puppeteer/lib/WebSocketTransport');
 
 const mkdtempAsync = Helper.promisify(fs.mkdtemp);
-const removeFolderAsync = Helper.promisify(removeFolder);
 
 const CHROME_PROFILE_PATH = path.join(os.tmpdir(), 'puppeteer_dev_profile-');
 
@@ -824,12 +830,6 @@ class Launcher {
     }
 
     let chromeExecutable = executablePath;
-    if (!executablePath) {
-      const {missingText, executablePath} = this._resolveExecutablePath();
-      if (missingText)
-        throw new Error(missingText);
-      chromeExecutable = executablePath;
-    }
 
     const usePipe = chromeArguments.includes('--remote-debugging-pipe');
     /** @type {!Array<"ignore"|"pipe">} */
@@ -864,9 +864,8 @@ class Launcher {
         chromeClosed = true;
         // Cleanup as processes exit.
         if (temporaryUserDataDir) {
-          removeFolderAsync(temporaryUserDataDir)
-              .then(() => fulfill())
-              .catch(err => console.error(err));
+          fsRmrSync(temporaryUserDataDir)
+          fulfill()
         } else {
           fulfill();
         }
@@ -927,7 +926,7 @@ class Launcher {
       }
       // Attempt to remove temporary profile directory to avoid littering.
       try {
-        removeFolder.sync(temporaryUserDataDir);
+        fsRmrSync(temporaryUserDataDir);
       } catch (e) { }
     }
   }
