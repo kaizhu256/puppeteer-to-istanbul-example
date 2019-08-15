@@ -548,8 +548,7 @@ class Helper {
     await client.send('Runtime.releaseObject', {objectId: remoteObject.objectId}).catch(error => {
       // Exceptions might happen in case of a page been navigated or closed.
       // Swallow these since they are harmless and we don't leak anything in this case.
-      // debugError(error);
-      return;
+      console.error(error);
     });
   }
 
@@ -739,11 +738,10 @@ require puppeteer/lib/Launcher.js
 const removeFolder = require('rimraf');
 const {Connection} = require('puppeteer/lib/Connection');
 const {Browser} = require('puppeteer/lib/Browser');
-const {helper, debugError} = require('puppeteer/lib/helper');
 const WebSocketTransport = require('puppeteer/lib/WebSocketTransport');
 
-const mkdtempAsync = helper.promisify(fs.mkdtemp);
-const removeFolderAsync = helper.promisify(removeFolder);
+const mkdtempAsync = Helper.promisify(fs.mkdtemp);
+const removeFolderAsync = Helper.promisify(removeFolder);
 
 const CHROME_PROFILE_PATH = path.join(os.tmpdir(), 'puppeteer_dev_profile-');
 
@@ -875,13 +873,13 @@ class Launcher {
       });
     });
 
-    const listeners = [ helper.addEventListener(process, 'exit', killChrome) ];
+    const listeners = [ Helper.addEventListener(process, 'exit', killChrome) ];
     if (handleSIGINT)
-      listeners.push(helper.addEventListener(process, 'SIGINT', () => { killChrome(); process.exit(130); }));
+      listeners.push(Helper.addEventListener(process, 'SIGINT', () => { killChrome(); process.exit(130); }));
     if (handleSIGTERM)
-      listeners.push(helper.addEventListener(process, 'SIGTERM', gracefullyCloseChrome));
+      listeners.push(Helper.addEventListener(process, 'SIGTERM', gracefullyCloseChrome));
     if (handleSIGHUP)
-      listeners.push(helper.addEventListener(process, 'SIGHUP', gracefullyCloseChrome));
+      listeners.push(Helper.addEventListener(process, 'SIGHUP', gracefullyCloseChrome));
     /** @type {?Connection} */
     let connection = null;
     try {
@@ -900,13 +898,13 @@ class Launcher {
      * @return {Promise}
      */
     function gracefullyCloseChrome() {
-      helper.removeEventListeners(listeners);
+      Helper.removeEventListeners(listeners);
       if (temporaryUserDataDir) {
         killChrome();
       } else if (connection) {
         // Attempt to close chrome gracefully
         connection.send('Browser.close').catch(error => {
-          debugError(error);
+          console.error(error);
           killChrome();
         });
       }
@@ -915,7 +913,7 @@ class Launcher {
 
     // This method has to be sync to be used as 'exit' event handler.
     function killChrome() {
-      helper.removeEventListeners(listeners);
+      Helper.removeEventListeners(listeners);
       if (chromeProcess.pid && !chromeProcess.killed && !chromeClosed) {
         // Force kill chrome.
         try {
@@ -975,10 +973,10 @@ function waitForWSEndpoint(chromeProcess, timeout, preferredRevision) {
     const rl = readline.createInterface({ input: chromeProcess.stderr });
     let stderr = '';
     const listeners = [
-      helper.addEventListener(rl, 'line', onLine),
-      helper.addEventListener(rl, 'close', () => onClose()),
-      helper.addEventListener(chromeProcess, 'exit', () => onClose()),
-      helper.addEventListener(chromeProcess, 'error', error => onClose(error))
+      Helper.addEventListener(rl, 'line', onLine),
+      Helper.addEventListener(rl, 'close', () => onClose()),
+      Helper.addEventListener(chromeProcess, 'exit', () => onClose()),
+      Helper.addEventListener(chromeProcess, 'error', error => onClose(error))
     ];
     const timeoutId = timeout ? setTimeout(onTimeout, timeout) : 0;
 
@@ -1016,7 +1014,7 @@ function waitForWSEndpoint(chromeProcess, timeout, preferredRevision) {
     function cleanup() {
       if (timeoutId)
         clearTimeout(timeoutId);
-      helper.removeEventListeners(listeners);
+      Helper.removeEventListeners(listeners);
     }
   });
 }
