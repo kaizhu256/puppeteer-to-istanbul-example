@@ -5,6 +5,15 @@ const path = require('path')
 
 
 /*
+require clone
+*/
+const clone = function (obj) {
+    return JSON.parse(JSON.stringify(obj));
+};
+
+
+
+/*
 require mkdirp
 */
 const mkdirp = {
@@ -34,7 +43,6 @@ require puppeteer-to-istanbul/lib/output-files.js
 
 // TODO: Put function interfaces on this file
 
-const clone = require('clone')
 const pathLib = require('path')
 
 const storagePath = './.nyc_output/js'
