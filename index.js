@@ -763,9 +763,6 @@ require puppeteer/lib/Puppeteer.js
  * limitations under the License.
  */
 const Launcher = require('puppeteer/lib/Launcher');
-const BrowserFetcher = require('puppeteer/lib/BrowserFetcher');
-const Errors = require('puppeteer/lib/Errors');
-const DeviceDescriptors = require('puppeteer/lib/DeviceDescriptors');
 
 class Puppeteer {
   /**
@@ -784,51 +781,6 @@ class Puppeteer {
    */
   launch(options) {
     return this._launcher.launch(options);
-  }
-
-  /**
-   * @param {!(Launcher.BrowserOptions & {browserWSEndpoint?: string, browserURL?: string, transport?: !Puppeteer.ConnectionTransport})} options
-   * @return {!Promise<!Puppeteer.Browser>}
-   */
-  connect(options) {
-    return this._launcher.connect(options);
-  }
-
-  /**
-   * @return {string}
-   */
-  executablePath() {
-    return this._launcher.executablePath();
-  }
-
-  /**
-   * @return {Object}
-   */
-  get devices() {
-    return DeviceDescriptors;
-  }
-
-  /**
-   * @return {Object}
-   */
-  get errors() {
-    return Errors;
-  }
-
-  /**
-   * @param {!Launcher.ChromeArgOptions=} options
-   * @return {!Array<string>}
-   */
-  defaultArgs(options) {
-    return this._launcher.defaultArgs(options);
-  }
-
-  /**
-   * @param {!BrowserFetcher.Options=} options
-   * @return {!BrowserFetcher}
-   */
-  createBrowserFetcher(options) {
-    return new BrowserFetcher(this._projectRoot, options);
   }
 };
 
