@@ -2,21 +2,9 @@
 const child_process = require('child_process')
 const fs = require('fs')
 const path = require('path')
-
-
-
-/*
-require clone
-*/
 const clone = function (obj) {
     return JSON.parse(JSON.stringify(obj));
 };
-
-
-
-/*
-require mkdirp
-*/
 const mkdirp = {
     sync: function (dir) {
         // mkdir -p
@@ -103,9 +91,47 @@ const OutputFiles = function (coverageInfo) {
 
 
 /*
+require puppeteer-to-istanbul/lib/puppeteer-to-v8.js
+*/
+class PuppeteerToV80 {
+  constructor (coverageInfo) {
+    this.coverageInfo = coverageInfo
+  }
+
+  convertCoverage () {
+    // Iterate through coverage info and create IDs
+    let id = 0
+
+    return this.coverageInfo.map(coverageItem => {
+      return {
+        scriptId: id++,
+        url: 'file://' + coverageItem.url,
+        functions: [{
+          ranges: coverageItem.ranges.map(this.convertRange),
+          isBlockCoverage: true
+        }]
+      }
+    })
+  }
+
+  // Takes in a Puppeteer range object with start and end properties and
+  // converts it to a V8 range with startOffset, endOffset, and count properties
+  convertRange (range) {
+    return {
+      startOffset: range.start,
+      endOffset: range.end,
+      count: 1
+    }
+  }
+}
+
+const PuppeteerToV8 = (coverageInfo) => new PuppeteerToV80(coverageInfo)
+
+
+
+/*
 require puppeteer-to-istanbul/lib/puppeteer-to-istanbul.js
 */
-const PuppeteerToV8 = require('puppeteer-to-istanbul/lib/puppeteer-to-v8')
 const v8toIstanbul = require('v8-to-istanbul')
 
 class PuppeteerToIstanbul0 {
