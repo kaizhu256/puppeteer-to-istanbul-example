@@ -12,7 +12,6 @@ require puppeteer-to-istanbul/lib/output-files.js
 
 // TODO: Put function interfaces on this file
 
-const fs = require('fs')
 const mkdirp = require('mkdirp')
 const clone = require('clone')
 const pathLib = require('path')
@@ -37,14 +36,14 @@ class OutputFiles0 {
     var truncatedPath = pathLib.basename(path)
 
     // Special case: when html present, strip and return specialized string
-    Eif (truncatedPath.includes('.html')) {
+    if (truncatedPath.includes('.html')) {
       truncatedPath = pathLib.resolve(storagePath, truncatedPath) + 'puppeteerTemp-inline'
     } else {
       truncatedPath = truncatedPath.split('.js')[0]
       truncatedPath = pathLib.resolve(storagePath, truncatedPath)
     }
     mkdirp.sync(storagePath)
-    Eif (fs.existsSync(truncatedPath + '.js')) {
+    if (fs.existsSync(truncatedPath + '.js')) {
       this.iterator++
       str = `${truncatedPath}-${this.iterator}.js`
       return str
