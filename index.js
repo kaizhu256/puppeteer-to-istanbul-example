@@ -4,8 +4,79 @@ const path = require('path')
 
 
 
-// require puppeteer-to-istanbul/lib/puppeteer-to-istanbul.js
-const OutputFiles = require('puppeteer-to-istanbul/lib/output-files')
+/*
+require puppeteer-to-istanbul/lib/output-files.js
+*/
+// output JavaScript bundled in puppeteer output to format
+// that can be eaten by Istanbul.
+
+// TODO: Put function interfaces on this file
+
+const fs = require('fs')
+const mkdirp = require('mkdirp')
+const clone = require('clone')
+const pathLib = require('path')
+
+const storagePath = './.nyc_output/js'
+
+class OutputFiles0 {
+  constructor (coverageInfo) {
+    // Clone coverageInfo to prevent mutating the passed in data
+    this.coverageInfo = clone(coverageInfo)
+    this.iterator = 0
+    this._parseAndIsolate()
+  }
+
+  rewritePath (path) {
+    // generate a new path relative to ./coverage/js.
+    // this would be around where you'd use mkdirp.
+
+    var str = ``
+
+    // Get the last element in the path name
+    var truncatedPath = pathLib.basename(path)
+
+    // Special case: when html present, strip and return specialized string
+    Eif (truncatedPath.includes('.html')) {
+      truncatedPath = pathLib.resolve(storagePath, truncatedPath) + 'puppeteerTemp-inline'
+    } else {
+      truncatedPath = truncatedPath.split('.js')[0]
+      truncatedPath = pathLib.resolve(storagePath, truncatedPath)
+    }
+    mkdirp.sync(storagePath)
+    Eif (fs.existsSync(truncatedPath + '.js')) {
+      this.iterator++
+      str = `${truncatedPath}-${this.iterator}.js`
+      return str
+    } else {
+      str = `${truncatedPath}.js`
+      return str
+    }
+  }
+
+  _parseAndIsolate () {
+    for (var i = 0; i < this.coverageInfo.length; i++) {
+      var path = this.rewritePath(this.coverageInfo[i].url)
+      this.coverageInfo[i].url = path
+      fs.writeFileSync(path, this.coverageInfo[i].text)
+    }
+  }
+
+  getTransformedCoverage () {
+    return this.coverageInfo
+  }
+}
+
+const OutputFiles = function (coverageInfo) {
+  return new OutputFiles0(coverageInfo)
+}
+
+
+
+/*
+require puppeteer-to-istanbul/lib/puppeteer-to-istanbul.js
+*/
+//!! const OutputFiles = require('puppeteer-to-istanbul/lib/output-files')
 //!! const mkdirp = require('mkdirp')
 const PuppeteerToV8 = require('puppeteer-to-istanbul/lib/puppeteer-to-v8')
 const v8toIstanbul = require('v8-to-istanbul')
@@ -35,7 +106,7 @@ class PuppeteerToIstanbul0 {
     })
 
     //!! mkdirp.sync('./.nyc_output')
-    fs.writeFileSync('./tmp/.nyc_output.out.json', JSON.stringify(fullJson), 'utf8')
+    fs.writeFileSync('./.nyc_output/out.json', JSON.stringify(fullJson), 'utf8')
   }
 }
 
@@ -45,7 +116,9 @@ const PuppeteerToIstanbul = function (coverageInfo) {
 
 
 
-// require puppeteer-to-istanbul
+/*
+require puppeteer-to-istanbul
+*/
 const pti = {
   write: (puppeteerFormat) => {
     const pti = PuppeteerToIstanbul(puppeteerFormat)
