@@ -1,6 +1,5 @@
 // require builtin
 function assert(value, message) {
-
 /**
  * @param {*} value
  * @param {string=} message
@@ -8,10 +7,8 @@ function assert(value, message) {
   if (!value)
     throw new Error(message);
 }
-const child_process = require('child_process')
 const fs = require('fs')
-const moduleCjs = require('module')
-const path = require('path')
+const child_process = require('child_process')
 const clone = function (obj) {
     return JSON.parse(JSON.stringify(obj));
 };
@@ -31,6 +28,8 @@ const mkdirp = {
         );
     }
 };
+const moduleCjs = require('module')
+const path = require('path')
 
 
 
