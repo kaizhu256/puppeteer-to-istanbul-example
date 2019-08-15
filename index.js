@@ -5,6 +5,28 @@ const path = require('path')
 
 
 /*
+require mkdirp
+*/
+const mkdirp = {
+    sync: function (dir) {
+        // mkdir -p
+        require("child_process").spawnSync(
+            "mkdir",
+            [
+                "-p", dir
+            ],
+            {
+                stdio: [
+                    "ignore", 1, 2
+                ]
+            }
+        );
+    }
+};
+
+
+
+/*
 require puppeteer-to-istanbul/lib/output-files.js
 */
 // output JavaScript bundled in puppeteer output to format
@@ -12,7 +34,7 @@ require puppeteer-to-istanbul/lib/output-files.js
 
 // TODO: Put function interfaces on this file
 
-const mkdirp = require('mkdirp')
+//!! const mkdirp = require('mkdirp')
 const clone = require('clone')
 const pathLib = require('path')
 
