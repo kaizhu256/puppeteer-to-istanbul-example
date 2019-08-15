@@ -434,7 +434,7 @@ const packageJson = require('puppeteer/package.json');
 const preferredRevision = packageJson.puppeteer.chromium_revision;
 const isPuppeteerCore = packageJson.name === 'puppeteer-core';
 
-module.exports = new Puppeteer(__dirname, preferredRevision, isPuppeteerCore);
+const puppeteer = new Puppeteer(__dirname, preferredRevision, isPuppeteerCore);
 
 
 
@@ -449,7 +449,6 @@ const pti = {
 };
 
 ;(async () => {
-  const puppeteer = require('puppeteer')
   const browser = await puppeteer.launch({
       headless: true,
       executablePath: "/root/Documents/puppeteer-to-istanbul-example/node_modules/puppeteer/.local-chromium/linux-674921/chrome-linux/chrome",
