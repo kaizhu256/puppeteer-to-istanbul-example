@@ -131,12 +131,101 @@ const PuppeteerToV8 = (coverageInfo) => new PuppeteerToV80(coverageInfo)
 
 
 /*
+require v8-to-istanbul/lib/branch.js
+*/
+class CovBranch {
+  constructor (startLine, startCol, endLine, endCol, count) {
+    this.startLine = startLine
+    this.startCol = startCol
+    this.endLine = endLine
+    this.endCol = endCol
+    this.count = count
+  }
+  toIstanbul () {
+    const location = {
+      start: {
+        line: this.startLine.line,
+        column: this.startCol - this.startLine.startCol
+      },
+      end: {
+        line: this.endLine.line,
+        column: this.endCol - this.endLine.startCol
+      }
+    }
+    return {
+      type: 'branch',
+      line: this.line,
+      loc: location,
+      locations: [Object.assign({}, location)]
+    }
+  }
+}
+
+
+
+/*
+require v8-to-istanbul/lib/line.js
+*/
+class CovLine {
+  constructor (line, startCol, endCol) {
+    this.line = line
+    this.startCol = startCol
+    this.endCol = endCol
+    this.count = 0
+  }
+  toIstanbul () {
+    return {
+      start: {
+        line: this.line,
+        column: 0
+      },
+      end: {
+        line: this.line,
+        column: this.endCol - this.startCol
+      }
+    }
+  }
+}
+
+
+
+/*
 require v8-to-istanbul/lib/script.js
 */
-const CovBranch = require('v8-to-istanbul/lib/branch')
-const CovLine = require('v8-to-istanbul/lib/line')
-const CovFunction = require('v8-to-istanbul/lib/function')
+class CovFunction {
+  constructor (name, startLine, startCol, endLine, endCol, count) {
+    this.name = name
+    this.startLine = startLine
+    this.startCol = startCol
+    this.endLine = endLine
+    this.endCol = endCol
+    this.count = count
+  }
+  toIstanbul () {
+    const loc = {
+      start: {
+        line: this.startLine.line,
+        column: this.startCol - this.startLine.startCol
+      },
+      end: {
+        line: this.endLine.line,
+        column: this.endCol - this.endLine.startCol
+      }
+    }
+    return {
+      name: this.name,
+      decl: loc,
+      loc: loc,
+      line: this.startLine.line
+    }
+  }
+}
 
+
+
+/*
+require v8-to-istanbul/lib/script.js
+*/
 // Node.js injects a header when executing a script.
 const cjsHeader = require('module').wrapper[0]
 
