@@ -4,9 +4,9 @@ const path = require('path')
 
 
 
-// require node_modules/puppeteer-to-istanbul/lib/puppeteer-to-istanbul.js
+// require puppeteer-to-istanbul/lib/puppeteer-to-istanbul.js
 const OutputFiles = require('puppeteer-to-istanbul/lib/output-files')
-const mkdirp = require('mkdirp')
+//!! const mkdirp = require('mkdirp')
 const PuppeteerToV8 = require('puppeteer-to-istanbul/lib/puppeteer-to-v8')
 const v8toIstanbul = require('v8-to-istanbul')
 
@@ -34,8 +34,8 @@ class PuppeteerToIstanbul0 {
       fullJson[keys[0]] = istanbulCoverage[keys[0]]
     })
 
-    mkdirp.sync('./.nyc_output')
-    fs.writeFileSync('./.nyc_output/out.json', JSON.stringify(fullJson), 'utf8')
+    //!! mkdirp.sync('./.nyc_output')
+    fs.writeFileSync('./tmp/.nyc_output.out.json', JSON.stringify(fullJson), 'utf8')
   }
 }
 
@@ -45,7 +45,7 @@ const PuppeteerToIstanbul = function (coverageInfo) {
 
 
 
-// require node_modules/puppeteer-to-istanbul
+// require puppeteer-to-istanbul
 const pti = {
   write: (puppeteerFormat) => {
     const pti = PuppeteerToIstanbul(puppeteerFormat)
