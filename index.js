@@ -407,35 +407,6 @@ const PuppeteerToIstanbul = function (coverageInfo) {
 
 
 /*
-require puppeteer/lib/Errors.js
-*/
-/**
- * Copyright 2018 Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-class TimeoutError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = this.constructor.name;
-    Error.captureStackTrace(this, this.constructor);
-  }
-}
-
-
-
-/*
 require puppeteer/lib/api.js
 */
 /**
@@ -475,7 +446,6 @@ const api = {
   Response: require('puppeteer/lib/NetworkManager').Response,
   SecurityDetails: require('puppeteer/lib/NetworkManager').SecurityDetails,
   Target: require('puppeteer/lib/Target').Target,
-  TimeoutError: require('puppeteer/lib/Errors').TimeoutError,
   Touchscreen: require('puppeteer/lib/Input').Touchscreen,
   Tracing: require('puppeteer/lib/Tracing'),
   Worker: require('puppeteer/lib/Worker').Worker,
@@ -678,7 +648,7 @@ class Helper {
     if (timeout) {
       eventTimeout = setTimeout(() => {
         cleanup();
-        rejectCallback(new TimeoutError('Timeout exceeded while waiting for event'));
+        rejectCallback(new Error('Timeout exceeded while waiting for event'));
       }, timeout);
     }
     function cleanup() {
@@ -697,7 +667,7 @@ class Helper {
    */
   static async waitWithTimeout(promise, taskName, timeout) {
     let reject;
-    const timeoutError = new TimeoutError(`waiting for ${taskName} failed: timeout ${timeout}ms exceeded`);
+    const timeoutError = new Error(`waiting for ${taskName} failed: timeout ${timeout}ms exceeded`);
     const timeoutPromise = new Promise((resolve, x) => reject = x);
     let timeoutTimer = null;
     if (timeout)
@@ -1066,7 +1036,7 @@ function waitForWSEndpoint(chromeProcess, timeout, preferredRevision) {
 
     function onTimeout() {
       cleanup();
-      reject(new TimeoutError(`Timed out after ${timeout} ms while trying to connect to Chrome! The only Chrome revision guaranteed to work is r${preferredRevision}`));
+      reject(new Error(`Timed out after ${timeout} ms while trying to connect to Chrome! The only Chrome revision guaranteed to work is r${preferredRevision}`));
     }
 
     /**
