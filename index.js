@@ -1,5 +1,10 @@
 const path = require('path')
-const pti = require('puppeteer-to-istanbul')
+const pti ={
+  write: (puppeteerFormat) => {
+    const pti = require('puppeteer-to-istanbul/lib/puppeteer-to-istanbul')(puppeteerFormat)
+    pti.writeIstanbulFormat()
+  }
+};
 
 ;(async () => {
   const puppeteer = require('puppeteer')
