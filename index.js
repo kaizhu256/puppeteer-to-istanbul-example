@@ -810,6 +810,7 @@ class Connection extends EventEmitter {
   _rawSend(message) {
     const id = ++this._lastId;
     message = JSON.stringify(Object.assign({}, message, {id}));
+    // console.error('SEND ► ' + message);
     this._transport.send(message);
     return id;
   }
@@ -820,6 +821,7 @@ class Connection extends EventEmitter {
   async _onMessage(message) {
     if (this._delay)
       await new Promise(f => setTimeout(f, this._delay));
+    // console.error('◀ RECV ' + message);
     const object = JSON.parse(message);
     if (object.method === 'Target.attachedToTarget') {
       const sessionId = object.params.sessionId;
