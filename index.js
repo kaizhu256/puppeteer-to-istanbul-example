@@ -130,10 +130,18 @@ const PuppeteerToV8 = (coverageInfo) => new PuppeteerToV80(coverageInfo)
 
 
 /*
+require v8-to-istanbul/index.js
+*/
+const Script = require('v8-to-istanbul/lib/script')
+
+const v8toIstanbul = function (path) {
+  return new Script(path)
+}
+
+
+/*
 require puppeteer-to-istanbul/lib/puppeteer-to-istanbul.js
 */
-const v8toIstanbul = require('v8-to-istanbul')
-
 class PuppeteerToIstanbul0 {
   constructor (coverageInfo) {
     this.coverageInfo = coverageInfo

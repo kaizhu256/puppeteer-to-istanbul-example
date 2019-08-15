@@ -6,7 +6,7 @@
   "scripts": {
     "precoverage": "rimraf coverage && rimraf .nyc_output",
     "coverage": "node index.js",
-    "coverage2": "npm_config_mode_coverage=node_modules shIstanbulCover index.js",
+    "coverage2": "npm_config_mode_coverage=node_modules ~/lib.utility2.sh shIstanbulCover index.js",
     "postcoverage": "ls -l .; nyc report --reporter=html; ls -l coverage/",
     "test": "standard"
   },
