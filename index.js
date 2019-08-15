@@ -1,4 +1,8 @@
 // require builtin
+const fs = require('fs')
+const child_process = require('child_process')
+const moduleCjs = require('module')
+const path = require('path')
 function assert(value, message) {
 /**
  * @param {*} value
@@ -7,8 +11,6 @@ function assert(value, message) {
   if (!value)
     throw new Error(message);
 }
-const fs = require('fs')
-const child_process = require('child_process')
 const clone = function (obj) {
     return JSON.parse(JSON.stringify(obj));
 };
@@ -28,8 +30,6 @@ const mkdirp = {
         );
     }
 };
-const moduleCjs = require('module')
-const path = require('path')
 
 
 
@@ -172,33 +172,7 @@ class CovBranch {
 
 
 /*
-require v8-to-istanbul/lib/line.js
-*/
-class CovLine {
-  constructor (line, startCol, endCol) {
-    this.line = line
-    this.startCol = startCol
-    this.endCol = endCol
-    this.count = 0
-  }
-  toIstanbul () {
-    return {
-      start: {
-        line: this.line,
-        column: 0
-      },
-      end: {
-        line: this.line,
-        column: this.endCol - this.startCol
-      }
-    }
-  }
-}
-
-
-
-/*
-require v8-to-istanbul/lib/script.js
+require v8-to-istanbul/lib/function.js
 */
 class CovFunction {
   constructor (name, startLine, startCol, endLine, endCol, count) {
@@ -225,6 +199,32 @@ class CovFunction {
       decl: loc,
       loc: loc,
       line: this.startLine.line
+    }
+  }
+}
+
+
+
+/*
+require v8-to-istanbul/lib/line.js
+*/
+class CovLine {
+  constructor (line, startCol, endCol) {
+    this.line = line
+    this.startCol = startCol
+    this.endCol = endCol
+    this.count = 0
+  }
+  toIstanbul () {
+    return {
+      start: {
+        line: this.line,
+        column: 0
+      },
+      end: {
+        line: this.line,
+        column: this.endCol - this.startCol
+      }
     }
   }
 }
@@ -402,6 +402,84 @@ const PuppeteerToIstanbul = function (coverageInfo) {
 
 
 /*
+require puppeteer/lib/Errors.js
+*/
+/**
+ * Copyright 2018 Google Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class TimeoutError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = this.constructor.name;
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+
+
+/*
+require puppeteer/lib/api.js
+*/
+/**
+ * Copyright 2019 Google Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const api = {
+  Accessibility: require('puppeteer/lib/Accessibility').Accessibility,
+  Browser: require('puppeteer/lib/Browser').Browser,
+  BrowserContext: require('puppeteer/lib/Browser').BrowserContext,
+  BrowserFetcher: require('puppeteer/lib/BrowserFetcher'),
+  CDPSession: require('puppeteer/lib/Connection').CDPSession,
+  ConsoleMessage: require('puppeteer/lib/Page').ConsoleMessage,
+  Coverage: require('puppeteer/lib/Coverage').Coverage,
+  Dialog: require('puppeteer/lib/Dialog').Dialog,
+  ElementHandle: require('puppeteer/lib/JSHandle').ElementHandle,
+  ExecutionContext: require('puppeteer/lib/ExecutionContext').ExecutionContext,
+  FileChooser: require('puppeteer/lib/Page').FileChooser,
+  Frame: require('puppeteer/lib/FrameManager').Frame,
+  JSHandle: require('puppeteer/lib/JSHandle').JSHandle,
+  Keyboard: require('puppeteer/lib/Input').Keyboard,
+  Mouse: require('puppeteer/lib/Input').Mouse,
+  Page: require('puppeteer/lib/Page').Page,
+  Puppeteer: require('puppeteer/lib/Puppeteer'),
+  Request: require('puppeteer/lib/NetworkManager').Request,
+  Response: require('puppeteer/lib/NetworkManager').Response,
+  SecurityDetails: require('puppeteer/lib/NetworkManager').SecurityDetails,
+  Target: require('puppeteer/lib/Target').Target,
+  TimeoutError: require('puppeteer/lib/Errors').TimeoutError,
+  Touchscreen: require('puppeteer/lib/Input').Touchscreen,
+  Tracing: require('puppeteer/lib/Tracing'),
+  Worker: require('puppeteer/lib/Worker').Worker,
+};
+
+
+
+/*
 require puppeteer/lib/helper.js
 */
 /**
@@ -419,9 +497,6 @@ require puppeteer/lib/helper.js
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {TimeoutError} = require('puppeteer/lib/Errors');
-const debugError = require('debug')(`puppeteer:error`);
-
 class Helper {
   /**
    * @param {Function|string} fun
@@ -499,7 +574,8 @@ class Helper {
     await client.send('Runtime.releaseObject', {objectId: remoteObject.objectId}).catch(error => {
       // Exceptions might happen in case of a page been navigated or closed.
       // Swallow these since they are harmless and we don't leak anything in this case.
-      debugError(error);
+      // debugError(error);
+      return;
     });
   }
 
@@ -694,7 +770,6 @@ try {
   asyncawait = false;
 }
 
-const api = require('puppeteer/lib/api');
 for (const className in api) {
   // Puppeteer-web excludes certain classes from bundle, e.g. BrowserFetcher.
   if (typeof api[className] === 'function')
