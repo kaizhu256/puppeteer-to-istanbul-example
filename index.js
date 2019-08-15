@@ -1,4 +1,5 @@
 // require builtin
+const child_process = require('child_process')
 const fs = require('fs')
 const path = require('path')
 
@@ -19,7 +20,7 @@ require mkdirp
 const mkdirp = {
     sync: function (dir) {
         // mkdir -p
-        require("child_process").spawnSync(
+        child_process.spawnSync(
             "mkdir",
             [
                 "-p", dir
@@ -43,7 +44,7 @@ require puppeteer-to-istanbul/lib/output-files.js
 
 // TODO: Put function interfaces on this file
 
-const pathLib = require('path')
+const pathLib = path
 
 const storagePath = './.nyc_output/js'
 
