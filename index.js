@@ -34,7 +34,6 @@ require puppeteer-to-istanbul/lib/output-files.js
 
 // TODO: Put function interfaces on this file
 
-//!! const mkdirp = require('mkdirp')
 const clone = require('clone')
 const pathLib = require('path')
 
@@ -97,8 +96,6 @@ const OutputFiles = function (coverageInfo) {
 /*
 require puppeteer-to-istanbul/lib/puppeteer-to-istanbul.js
 */
-//!! const OutputFiles = require('puppeteer-to-istanbul/lib/output-files')
-//!! const mkdirp = require('mkdirp')
 const PuppeteerToV8 = require('puppeteer-to-istanbul/lib/puppeteer-to-v8')
 const v8toIstanbul = require('v8-to-istanbul')
 
@@ -126,7 +123,6 @@ class PuppeteerToIstanbul0 {
       fullJson[keys[0]] = istanbulCoverage[keys[0]]
     })
 
-    //!! mkdirp.sync('./.nyc_output')
     fs.writeFileSync('./.nyc_output/out.json', JSON.stringify(fullJson), 'utf8')
   }
 }
