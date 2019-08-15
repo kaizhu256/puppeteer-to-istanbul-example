@@ -416,53 +416,6 @@ const PuppeteerToIstanbul = function (coverageInfo) {
 
 
 /*
-require puppeteer/lib/api.js
-*/
-/**
- * Copyright 2019 Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const api = {
-  Accessibility: require('puppeteer/lib/Accessibility').Accessibility,
-  Browser: require('puppeteer/lib/Browser').Browser,
-  BrowserContext: require('puppeteer/lib/Browser').BrowserContext,
-  CDPSession: require('puppeteer/lib/Connection').CDPSession,
-  ConsoleMessage: require('puppeteer/lib/Page').ConsoleMessage,
-  Coverage: require('puppeteer/lib/Coverage').Coverage,
-  Dialog: require('puppeteer/lib/Dialog').Dialog,
-  ElementHandle: require('puppeteer/lib/JSHandle').ElementHandle,
-  ExecutionContext: require('puppeteer/lib/ExecutionContext').ExecutionContext,
-  FileChooser: require('puppeteer/lib/Page').FileChooser,
-  Frame: require('puppeteer/lib/FrameManager').Frame,
-  JSHandle: require('puppeteer/lib/JSHandle').JSHandle,
-  Keyboard: require('puppeteer/lib/Input').Keyboard,
-  Mouse: require('puppeteer/lib/Input').Mouse,
-  Page: require('puppeteer/lib/Page').Page,
-  Puppeteer: require('puppeteer/lib/Puppeteer'),
-  Request: require('puppeteer/lib/NetworkManager').Request,
-  Response: require('puppeteer/lib/NetworkManager').Response,
-  SecurityDetails: require('puppeteer/lib/NetworkManager').SecurityDetails,
-  Target: require('puppeteer/lib/Target').Target,
-  Touchscreen: require('puppeteer/lib/Input').Touchscreen,
-  Tracing: require('puppeteer/lib/Tracing'),
-  Worker: require('puppeteer/lib/Worker').Worker,
-};
-
-
-
-/*
 require puppeteer/lib/helper.js
 */
 /**
@@ -1975,12 +1928,6 @@ require puppeteer
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-for (const className in api) {
-  // Puppeteer-web excludes certain classes from bundle, e.g. BrowserFetcher.
-  if (typeof api[className] === 'function')
-    Helper.installAsyncStackHooks(api[className]);
-}
 
 // If node does not support async await, use the compiled version.
 const packageJson = {
