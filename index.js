@@ -1517,7 +1517,6 @@ require puppeteer/lib/Target.js
  */
 
 const {Page} = require('puppeteer/lib/Page');
-const {Worker} = require('puppeteer/lib/Worker');
 
 class Target {
   /**
@@ -1575,27 +1574,6 @@ class Target {
           .then(client => Page.create(client, this, this._ignoreHTTPSErrors, this._defaultViewport, this._screenshotTaskQueue));
     }
     return this._pagePromise;
-  }
-
-  /**
-   * @return {!Promise<?Worker>}
-   */
-  async worker() {
-    if (this._targetInfo.type !== 'service_worker' && this._targetInfo.type !== 'shared_worker')
-      return null;
-    if (!this._workerPromise) {
-      this._workerPromise = this._sessionFactory().then(async client => {
-        // Top level workers have a fake page wrapping the actual worker.
-        const [targetAttached] = await Promise.all([
-          new Promise(x => client.once('Target.attachedToTarget', x)),
-          client.send('Target.setAutoAttach', {autoAttach: true, waitForDebuggerOnStart: false, flatten: true}),
-        ]);
-        const session = Connection.fromSession(client).session(targetAttached.sessionId);
-        // TODO(einbinder): Make workers send their console logs.
-        return new Worker(session, this._targetInfo.url, () => {} /* consoleAPICalled */, () => {} /* exceptionThrown */);
-      });
-    }
-    return this._workerPromise;
   }
 
   /**
