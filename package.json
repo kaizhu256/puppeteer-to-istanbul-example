@@ -6,6 +6,7 @@
   "scripts": {
     "precoverage": "rimraf coverage && rimraf .nyc_output",
     "coverage": "node index.js",
+    "coverage2": "npm_config_mode_coverage=node_modules shIstanbulCover index.js",
     "postcoverage": "nyc report --reporter=html && open coverage/index.html",
     "test": "standard"
   },
@@ -18,6 +19,8 @@
   "author": "Ben Coe <ben@npmjs.com>",
   "license": "ISC",
   "dependencies": {
+    "c8": "^5.0.1",
+    "nyc": "^14.1.1",
     "puppeteer": "^1.1.1",
     "puppeteer-to-istanbul": "^1.2.2",
     "rimraf": "^2.6.2"

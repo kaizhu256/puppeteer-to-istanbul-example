@@ -3,3 +3,5 @@ node_modules
 .nyc_output
 .DS_Store
 package-lock.json
+node_v8_coverage/
+tmp/
