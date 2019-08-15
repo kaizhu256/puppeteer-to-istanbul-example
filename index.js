@@ -458,7 +458,6 @@ const api = {
   Accessibility: require('puppeteer/lib/Accessibility').Accessibility,
   Browser: require('puppeteer/lib/Browser').Browser,
   BrowserContext: require('puppeteer/lib/Browser').BrowserContext,
-  BrowserFetcher: require('puppeteer/lib/BrowserFetcher'),
   CDPSession: require('puppeteer/lib/Connection').CDPSession,
   ConsoleMessage: require('puppeteer/lib/Page').ConsoleMessage,
   Coverage: require('puppeteer/lib/Coverage').Coverage,
@@ -768,7 +767,6 @@ require puppeteer/lib/Launcher.js
  * limitations under the License.
  */
 const removeFolder = require('rimraf');
-const BrowserFetcher = require('puppeteer/lib/BrowserFetcher');
 const {Connection} = require('puppeteer/lib/Connection');
 const {Browser} = require('puppeteer/lib/Browser');
 const {helper, debugError} = require('puppeteer/lib/helper');
@@ -1002,13 +1000,6 @@ class Launcher {
   }
 
   /**
-   * @return {string}
-   */
-  executablePath() {
-    return this._resolveExecutablePath().executablePath;
-  }
-
-  /**
    * @param {!(Launcher.BrowserOptions & {browserWSEndpoint?: string, browserURL?: string, transport?: !Puppeteer.ConnectionTransport})} options
    * @return {!Promise<!Browser>}
    */
@@ -1039,33 +1030,6 @@ class Launcher {
     const {browserContextIds} = await connection.send('Target.getBrowserContexts');
     return Browser.create(connection, browserContextIds, ignoreHTTPSErrors, defaultViewport, null, () => connection.send('Browser.close').catch(debugError));
   }
-
-  /**
-   * @return {{executablePath: string, missingText: ?string}}
-   */
-  _resolveExecutablePath() {
-    // puppeteer-core doesn't take into account PUPPETEER_* env variables.
-    if (!this._isPuppeteerCore) {
-      const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || process.env.npm_config_puppeteer_executable_path || process.env.npm_package_config_puppeteer_executable_path;
-      if (executablePath) {
-        const missingText = !fs.existsSync(executablePath) ? 'Tried to use PUPPETEER_EXECUTABLE_PATH env variable to launch browser but did not find any executable at: ' + executablePath : null;
-        return { executablePath, missingText };
-      }
-    }
-    const browserFetcher = new BrowserFetcher(this._projectRoot);
-    if (!this._isPuppeteerCore) {
-      const revision = process.env['PUPPETEER_CHROMIUM_REVISION'];
-      if (revision) {
-        const revisionInfo = browserFetcher.revisionInfo(revision);
-        const missingText = !revisionInfo.local ? 'Tried to use PUPPETEER_CHROMIUM_REVISION env variable to launch browser but did not find executable at: ' + revisionInfo.executablePath : null;
-        return {executablePath: revisionInfo.executablePath, missingText};
-      }
-    }
-    const revisionInfo = browserFetcher.revisionInfo(this._preferredRevision);
-    const missingText = !revisionInfo.local ? `Chromium revision is not downloaded. Run "npm install" or "yarn install"` : null;
-    return {executablePath: revisionInfo.executablePath, missingText};
-  }
-
 }
 
 /**
@@ -1122,39 +1086,6 @@ function waitForWSEndpoint(chromeProcess, timeout, preferredRevision) {
         clearTimeout(timeoutId);
       helper.removeEventListeners(listeners);
     }
-  });
-}
-
-/**
- * @param {string} browserURL
- * @return {!Promise<string>}
- */
-function getWSEndpoint(browserURL) {
-  let resolve, reject;
-  const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
-
-  const endpointURL = url.resolve(browserURL, '/json/version');
-  const protocol = endpointURL.startsWith('https') ? https : http;
-  const requestOptions = Object.assign(url.parse(endpointURL), { method: 'GET' });
-  const request = protocol.request(requestOptions, res => {
-    let data = '';
-    if (res.statusCode !== 200) {
-      // Consume response data to free up memory.
-      res.resume();
-      reject(new Error('HTTP ' + res.statusCode));
-      return;
-    }
-    res.setEncoding('utf8');
-    res.on('data', chunk => data += chunk);
-    res.on('end', () => resolve(JSON.parse(data).webSocketDebuggerUrl));
-  });
-
-  request.on('error', reject);
-  request.end();
-
-  return promise.catch(e => {
-    e.message = `Failed to fetch browser webSocket url from ${endpointURL}: ` + e.message;
-    throw e;
   });
 }
 
@@ -1250,13 +1181,6 @@ require puppeteer
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-let asyncawait = true;
-try {
-  new Function('async function test(){await 1}');
-} catch (error) {
-  asyncawait = false;
-}
 
 for (const className in api) {
   // Puppeteer-web excludes certain classes from bundle, e.g. BrowserFetcher.
