@@ -3770,8 +3770,6 @@ function computeQuadArea(quad) {
  * @property {number} height
  */
 
-module.exports = {createJSHandle, JSHandle, ElementHandle};
-
 
 
 /*
@@ -6575,8 +6573,6 @@ class Worker extends EventEmitter {
     return (await this._executionContextPromise).evaluateHandle(pageFunction, ...args);
   }
 }
-
-module.exports = {Worker};
 
 
 
