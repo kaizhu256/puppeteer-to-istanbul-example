@@ -1554,7 +1554,6 @@ require puppeteer/lib/Page.js
  */
 const {EmulationManager} = require('puppeteer/lib/EmulationManager');
 const {FrameManager} = require('puppeteer/lib/FrameManager');
-const {Keyboard, Mouse, Touchscreen} = require('puppeteer/lib/Input');
 const {Coverage} = require('puppeteer/lib/Coverage');
 const {Worker} = require('puppeteer/lib/Worker');
 const {createJSHandle} = require('puppeteer/lib/JSHandle');
@@ -1589,10 +1588,7 @@ class Page extends EventEmitter {
     this._closed = false;
     this._client = client;
     this._target = target;
-    this._keyboard = new Keyboard(client);
-    this._mouse = new Mouse(client, this._keyboard);
     this._timeoutSettings = new TimeoutSettings();
-    this._touchscreen = new Touchscreen(client, this._keyboard);
     /** @type {!FrameManager} */
     this._frameManager = new FrameManager(client, this, ignoreHTTPSErrors, this._timeoutSettings);
     this._emulationManager = new EmulationManager(client);
@@ -1716,20 +1712,6 @@ class Page extends EventEmitter {
    */
   mainFrame() {
     return this._frameManager.mainFrame();
-  }
-
-  /**
-   * @return {!Keyboard}
-   */
-  get keyboard() {
-    return this._keyboard;
-  }
-
-  /**
-   * @return {!Touchscreen}
-   */
-  get touchscreen() {
-    return this._touchscreen;
   }
 
   /**
@@ -2470,13 +2452,6 @@ class Page extends EventEmitter {
    */
   isClosed() {
     return this._closed;
-  }
-
-  /**
-   * @return {!Mouse}
-   */
-  get mouse() {
-    return this._mouse;
   }
 
   /**
