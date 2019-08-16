@@ -1573,7 +1573,6 @@ require puppeteer/lib/DOMWorld.js
 
 const {TimeoutError} = require('puppeteer/lib/Errors');
 const {Events} = require('puppeteer/lib/Events');
-const {TimeoutSettings} = require('puppeteer/lib/TimeoutSettings');
 const WebSocket = require('ws');
 
 const readFileAsync = promisify(fs.readFile);
@@ -1585,12 +1584,10 @@ class DOMWorld {
   /**
    * @param {!Puppeteer.FrameManager} frameManager
    * @param {!Puppeteer.Frame} frame
-   * @param {!Puppeteer.TimeoutSettings} timeoutSettings
    */
-  constructor(frameManager, frame, timeoutSettings) {
+  constructor(frameManager, frame) {
     this._frameManager = frameManager;
     this._frame = frame;
-    this._timeoutSettings = timeoutSettings;
 
     /** @type {?Promise<!Puppeteer.ElementHandle>} */
     this._documentPromise = null;
@@ -1757,7 +1754,7 @@ class DOMWorld {
   async setContent(html, options = {}) {
     const {
       waitUntil = ['load'],
-      timeout = this._timeoutSettings.navigationTimeout(),
+      timeout = 30000,
     } = options;
     // We rely upon the fact that document.open() will reset frame lifecycle with "init"
     // lifecycle event. @see https://crrev.com/608658
@@ -2019,7 +2016,7 @@ class DOMWorld {
   waitForFunction(pageFunction, options = {}, ...args) {
     const {
       polling = 'raf',
-      timeout = this._timeoutSettings.timeout(),
+      timeout = 30000,
     } = options;
     return new WaitTask(this, pageFunction, 'function', polling, timeout, ...args).promise;
   }
@@ -2041,7 +2038,7 @@ class DOMWorld {
     const {
       visible: waitForVisible = false,
       hidden: waitForHidden = false,
-      timeout = this._timeoutSettings.timeout(),
+      timeout = 30000,
     } = options;
     const polling = waitForVisible || waitForHidden ? 'raf' : 'mutation';
     const title = `${isXPath ? 'XPath' : 'selector'} "${selectorOrXPath}"${waitForHidden ? ' to be hidden' : ''}`;
@@ -2564,15 +2561,13 @@ class FrameManager extends EventEmitter {
    * @param {!Puppeteer.CDPSession} client
    * @param {!Puppeteer.Page} page
    * @param {boolean} ignoreHTTPSErrors
-   * @param {!Puppeteer.TimeoutSettings} timeoutSettings
    */
-  constructor(client, page, ignoreHTTPSErrors, timeoutSettings) {
+  constructor(client, page, ignoreHTTPSErrors) {
     super();
     this._client = client;
     this._page = page;
     this._networkManager = new NetworkManager(client, ignoreHTTPSErrors);
     this._networkManager.setFrameManager(this);
-    this._timeoutSettings = timeoutSettings;
     /** @type {!Map<string, !Frame>} */
     this._frames = new Map();
     /** @type {!Map<number, !ExecutionContext>} */
@@ -2923,9 +2918,9 @@ class Frame {
     /** @type {!Set<string>} */
     this._lifecycleEvents = new Set();
     /** @type {!DOMWorld} */
-    this._mainWorld = new DOMWorld(frameManager, this, frameManager._timeoutSettings);
+    this._mainWorld = new DOMWorld(frameManager);
     /** @type {!DOMWorld} */
-    this._secondaryWorld = new DOMWorld(frameManager, this, frameManager._timeoutSettings);
+    this._secondaryWorld = new DOMWorld(frameManager);
 
     /** @type {!Set<!Frame>} */
     this._childFrames = new Set();
@@ -5145,9 +5140,8 @@ class Page extends EventEmitter {
     this._closed = false;
     this._client = client;
     this._target = target;
-    this._timeoutSettings = new TimeoutSettings();
     /** @type {!FrameManager} */
-    this._frameManager = new FrameManager(client, this, ignoreHTTPSErrors, this._timeoutSettings);
+    this._frameManager = new FrameManager(client, this, ignoreHTTPSErrors);
     this._emulationManager = new EmulationManager(client);
     /** @type {!Map<string, Function>} */
     this._pageBindings = new Map();
@@ -5304,20 +5298,6 @@ class Page extends EventEmitter {
    */
   setOfflineMode(enabled) {
     return this._frameManager.networkManager().setOfflineMode(enabled);
-  }
-
-  /**
-   * @param {number} timeout
-   */
-  setDefaultNavigationTimeout(timeout) {
-    this._timeoutSettings.setDefaultNavigationTimeout(timeout);
-  }
-
-  /**
-   * @param {number} timeout
-   */
-  setDefaultTimeout(timeout) {
-    this._timeoutSettings.setDefaultTimeout(timeout);
   }
 
   /**
