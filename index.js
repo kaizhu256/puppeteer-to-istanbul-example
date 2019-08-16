@@ -1555,7 +1555,6 @@ require puppeteer/lib/Page.js
 const {EmulationManager} = require('puppeteer/lib/EmulationManager');
 const {FrameManager} = require('puppeteer/lib/FrameManager');
 const {Keyboard, Mouse, Touchscreen} = require('puppeteer/lib/Input');
-const Tracing = require('puppeteer/lib/Tracing');
 const {Coverage} = require('puppeteer/lib/Coverage');
 const {Worker} = require('puppeteer/lib/Worker');
 const {createJSHandle} = require('puppeteer/lib/JSHandle');
@@ -1597,7 +1596,6 @@ class Page extends EventEmitter {
     /** @type {!FrameManager} */
     this._frameManager = new FrameManager(client, this, ignoreHTTPSErrors, this._timeoutSettings);
     this._emulationManager = new EmulationManager(client);
-    this._tracing = new Tracing(client);
     /** @type {!Map<string, Function>} */
     this._pageBindings = new Map();
     this._coverage = new Coverage(client);
@@ -1779,13 +1777,6 @@ class Page extends EventEmitter {
    */
   get coverage() {
     return this._coverage;
-  }
-
-  /**
-   * @return {!Tracing}
-   */
-  get tracing() {
-    return this._tracing;
   }
 
   /**
