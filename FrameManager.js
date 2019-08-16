@@ -136,6 +136,7 @@ const Events = {
   Page: {
     Close: 'close',
     Console: 'console',
+    Dialog: 'dialog',
     DOMContentLoaded: 'domcontentloaded',
     Error: 'error',
     // Can't use just 'error' due to node.js special treatment of error events.
