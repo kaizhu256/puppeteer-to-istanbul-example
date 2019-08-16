@@ -1637,8 +1637,6 @@ class Page extends EventEmitter {
     networkManager.on(Events.NetworkManager.Response, event => this.emit(Events.Page.Response, event));
     networkManager.on(Events.NetworkManager.RequestFailed, event => this.emit(Events.Page.RequestFailed, event));
     networkManager.on(Events.NetworkManager.RequestFinished, event => this.emit(Events.Page.RequestFinished, event));
-    this._fileChooserInterceptionIsDisabled = false;
-    this._fileChooserInterceptors = new Set();
 
     client.on('Page.domContentEventFired', event => this.emit(Events.Page.DOMContentLoaded));
     client.on('Page.loadEventFired', event => this.emit(Events.Page.Load));
@@ -1648,7 +1646,6 @@ class Page extends EventEmitter {
     client.on('Inspector.targetCrashed', event => this._onTargetCrashed());
     client.on('Performance.metrics', event => this._emitMetrics(event));
     client.on('Log.entryAdded', event => this._onLogEntryAdded(event));
-    client.on('Page.fileChooserOpened', event => this._onFileChooser(event));
     this._target._isClosedPromise.then(() => {
       this.emit(Events.Page.Close);
       this._closed = true;
@@ -1661,44 +1658,7 @@ class Page extends EventEmitter {
       this._client.send('Target.setAutoAttach', {autoAttach: true, waitForDebuggerOnStart: false, flatten: true}),
       this._client.send('Performance.enable', {}),
       this._client.send('Log.enable', {}),
-      this._client.send('Page.setInterceptFileChooserDialog', {enabled: true}).catch(e => {
-        this._fileChooserInterceptionIsDisabled = true;
-      }),
     ]);
-  }
-
-  /**
-   * @param {!Protocol.Page.fileChooserOpenedPayload} event
-   */
-  _onFileChooser(event) {
-    if (!this._fileChooserInterceptors.size) {
-      this._client.send('Page.handleFileChooser', { action: 'fallback' }).catch(console.error);
-      return;
-    }
-    const interceptors = Array.from(this._fileChooserInterceptors);
-    this._fileChooserInterceptors.clear();
-    const fileChooser = new FileChooser(this._client, event);
-    for (const interceptor of interceptors)
-      interceptor.call(null, fileChooser);
-  }
-
-  /**
-   * @param {!{timeout?: number}=} options
-   * @return !Promise<!FileChooser>}
-   */
-  async waitForFileChooser(options = {}) {
-    if (this._fileChooserInterceptionIsDisabled)
-      throw new Error('File chooser handling does not work with multiple connections to the same page');
-    const {
-      timeout = this._timeoutSettings.timeout(),
-    } = options;
-    let callback;
-    const promise = new Promise(x => callback = x);
-    this._fileChooserInterceptors.add(callback);
-    return waitWithTimeout(promise, 'waiting for file chooser', timeout).catch(e => {
-      this._fileChooserInterceptors.delete(callback);
-      throw e;
-    });
   }
 
   /**
@@ -2798,52 +2758,6 @@ class ConsoleMessage {
     return this._location;
   }
 }
-
-class FileChooser {
-  /**
-   * @param {Puppeteer.CDPSession} client
-   * @param {!Protocol.Page.fileChooserOpenedPayload} event
-   */
-  constructor(client, event) {
-    this._client = client;
-    this._multiple = event.mode !== 'selectSingle';
-    this._handled = false;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isMultiple() {
-    return this._multiple;
-  }
-
-  /**
-   * @param {!Array<string>} filePaths
-   * @return {!Promise}
-   */
-  async accept(filePaths) {
-    assert(!this._handled, 'Cannot accept FileChooser which is already handled!');
-    this._handled = true;
-    const files = filePaths.map(filePath => path.resolve(filePath));
-    await this._client.send('Page.handleFileChooser', {
-      action: 'accept',
-      files,
-    });
-  }
-
-  /**
-   * @return {!Promise}
-   */
-  async cancel() {
-    assert(!this._handled, 'Cannot cancel FileChooser which is already handled!');
-    this._handled = true;
-    await this._client.send('Page.handleFileChooser', {
-      action: 'cancel',
-    });
-  }
-}
-
-module.exports = {Page, ConsoleMessage, FileChooser};
 
 
 
