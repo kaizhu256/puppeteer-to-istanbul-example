@@ -1154,7 +1154,6 @@ const Events = {
   Page: {
     Close: 'close',
     Console: 'console',
-    Dialog: 'dialog',
     DOMContentLoaded: 'domcontentloaded',
     Error: 'error',
     // Can't use just 'error' due to node.js special treatment of error events.
@@ -1553,7 +1552,6 @@ require puppeteer/lib/Page.js
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {Dialog} = require('puppeteer/lib/Dialog');
 const {EmulationManager} = require('puppeteer/lib/EmulationManager');
 const {FrameManager} = require('puppeteer/lib/FrameManager');
 const {Keyboard, Mouse, Touchscreen} = require('puppeteer/lib/Input');
@@ -1648,7 +1646,6 @@ class Page extends EventEmitter {
     client.on('Page.loadEventFired', event => this.emit(Events.Page.Load));
     client.on('Runtime.consoleAPICalled', event => this._onConsoleAPI(event));
     client.on('Runtime.bindingCalled', event => this._onBindingCalled(event));
-    client.on('Page.javascriptDialogOpening', event => this._onDialog(event));
     client.on('Runtime.exceptionThrown', exception => this._handleException(exception.exceptionDetails));
     client.on('Inspector.targetCrashed', event => this._onTargetCrashed());
     client.on('Performance.metrics', event => this._emitMetrics(event));
@@ -2149,21 +2146,6 @@ class Page extends EventEmitter {
     } : {};
     const message = new ConsoleMessage(type, textTokens.join(' '), args, location);
     this.emit(Events.Page.Console, message);
-  }
-
-  _onDialog(event) {
-    let dialogType = null;
-    if (event.type === 'alert')
-      dialogType = Dialog.Type.Alert;
-    else if (event.type === 'confirm')
-      dialogType = Dialog.Type.Confirm;
-    else if (event.type === 'prompt')
-      dialogType = Dialog.Type.Prompt;
-    else if (event.type === 'beforeunload')
-      dialogType = Dialog.Type.BeforeUnload;
-    assert(dialogType, 'Unknown javascript dialog type: ' + event.type);
-    const dialog = new Dialog(this._client, dialogType, event.message, event.defaultPrompt);
-    this.emit(Events.Page.Dialog, dialog);
   }
 
   /**
@@ -3193,9 +3175,10 @@ const pti = {
 
 ;(async () => {
   const browser = await puppeteer.launch({
-      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      dumpio: true,
       executablePath: "/root/Documents/puppeteer-to-istanbul-example/node_modules/puppeteer/.local-chromium/linux-674921/chrome-linux/chrome",
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      headless: true
   })
   const page = await browser.newPage()
 
