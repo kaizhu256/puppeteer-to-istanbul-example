@@ -1571,7 +1571,6 @@ require puppeteer/lib/DOMWorld.js
  * limitations under the License.
  */
 
-const {TimeoutError} = require('puppeteer/lib/Errors');
 const {Events} = require('puppeteer/lib/Events');
 const WebSocket = require('ws');
 
@@ -2113,7 +2112,7 @@ class WaitTask {
     // Since page navigation requires us to re-install the pageScript, we should track
     // timeout on our end.
     if (timeout) {
-      const timeoutError = new TimeoutError(`waiting for ${title} failed: timeout ${timeout}ms exceeded`);
+      const timeoutError = new Error(`waiting for ${title} failed: timeout ${timeout}ms exceeded`);
       this._timeoutTimer = setTimeout(() => this.terminate(timeoutError), timeout);
     }
     this.rerun();
@@ -4235,7 +4234,7 @@ class LifecycleWatcher {
       return new Promise(() => {});
     const errorMessage = 'Navigation Timeout Exceeded: ' + this._timeout + 'ms exceeded';
     return new Promise(fulfill => this._maximumTimer = setTimeout(fulfill, this._timeout))
-        .then(() => new TimeoutError(errorMessage));
+        .then(() => new Error(errorMessage));
   }
 
   /**
