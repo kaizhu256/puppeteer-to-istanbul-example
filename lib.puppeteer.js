@@ -33,7 +33,7 @@ file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0/
 //   const api = require('./lib/api');
 //   const {helper} = require('./lib/helper');
 // const packageJson = require('./package.json');
-// const childProcess = require('child_process');
+const childProcess = require('child_process');
 // const debugProtocol = require('debug')('puppeteer:protocol');
 // const debugError = require('debug')(`puppeteer:error`);
 const EventEmitter = require('events');
@@ -50,7 +50,7 @@ const readline = require('readline');
 // const removeRecursive = require('rimraf');
 const URL = require('url');
 const util = require('util');
-// const WebSocket = require('ws');
+const WebSocket = require('ws');
 // const {ExecutionContext, EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
 // const {createJSHandle, JSHandle} = require('./JSHandle');
 // const {Keyboard, Mouse, Touchscreen} = require('./Input');
@@ -59,7 +59,14 @@ const util = require('util');
 // const {helper, debugError, assert} = require('./helper');
 // const {helper, debugError} = require('./helper');
 // const { helper, assert } = require('./helper');
+
+
+
+const child_process = require('child_process');
 const debugError = console.error;
+const debugProtocol = function () {
+    return;
+}
 const removeFolder = function (dir, onError) {
 /*
  * this function will asynchronously "rm -fr" <dir>
