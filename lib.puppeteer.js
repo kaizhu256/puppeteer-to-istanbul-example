@@ -1,64 +1,16 @@
-/*
-file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0/
-*/
 "use strict";
-// require builtin
-// const {Accessibility} = require('./Accessibility');
-// const {Browser} = require('./Browser');
-// const BrowserFetcher = require('./BrowserFetcher');
-// const {Connection} = require('./Connection');
-// const {Coverage} = require('./Coverage');
-// const {DOMWorld} = require('./DOMWorld');
-// const DeviceDescriptors = require('./DeviceDescriptors');
-// const {Dialog} = require('./Dialog');
-// const {EmulationManager} = require('./EmulationManager');
-// const {TimeoutError} = require('./Errors');
-// const {Events} = require('./Events');
-// const {EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
-// const {FrameManager} = require('./FrameManager');
-// const {createJSHandle} = require('./JSHandle');
-// const Launcher = require('./Launcher');
-// const {LifecycleWatcher} = require('./LifecycleWatcher');
-// const {NetworkManager} = require('./NetworkManager');
-// const {Page} = require('./Page');
-// const PipeTransport = require('./PipeTransport');
-// const {Target} = require('./Target');
-// const {TaskQueue} = require('./TaskQueue');
-// const {TimeoutSettings} = require('./TimeoutSettings');
-// const Tracing = require('./Tracing');
-// const keyDefinitions = require('./USKeyboardLayout');
-// const WebSocketTransport = require('./WebSocketTransport');
-// const {Worker} = require('./Worker');
-// const {assert} = require('./helper');
-//   const api = require('./lib/api');
-//   const {helper} = require('./lib/helper');
-// const packageJson = require('./package.json');
+// hack-puppeteer - module.exports
 const childProcess = require('child_process');
-// const debugProtocol = require('debug')('puppeteer:protocol');
-// const debugError = require('debug')(`puppeteer:error`);
 const EventEmitter = require('events');
-// const extract = require('extract-zip');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
-// const ProxyAgent = require('https-proxy-agent');
-// const mime = require('mime');
 const os = require('os');
 const path = require('path');
-// const getProxyForUrl = require('proxy-from-env').getProxyForUrl;
 const readline = require('readline');
-// const removeRecursive = require('rimraf');
 const URL = require('url');
 const util = require('util');
 const WebSocket = require('ws');
-// const {ExecutionContext, EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
-// const {createJSHandle, JSHandle} = require('./JSHandle');
-// const {Keyboard, Mouse, Touchscreen} = require('./Input');
-// const {helper, assert, debugError} = require('./helper');
-// const {helper, assert} = require('./helper');
-// const {helper, debugError, assert} = require('./helper');
-// const {helper, debugError} = require('./helper');
-// const { helper, assert } = require('./helper');
 
 
 
@@ -92,6 +44,101 @@ removeFolder.sync = function (dir) {
     });
 };
 const removeRecursive = removeFolder;
+
+
+
+/*
+file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0/
+*/
+// require('./Accessibility') // Accessibility,,true
+// require('./Accessibility') // const {Accessibility} = require('./Accessibility');,true
+// require('./Browser') // Browser,,true
+// require('./Browser') // BrowserContext,,true
+// require('./Browser') // const {Browser} = require('./Browser');,true
+// require('./BrowserFetcher') // BrowserFetcher,,true
+// require('./BrowserFetcher') // const BrowserFetcher = require('./BrowserFetcher');,true
+// require('./Connection') // CDPSession,,true
+// require('./Connection') // const {Connection} = require('./Connection');,true
+// require('./Coverage') // Coverage,,true
+// require('./Coverage') // const {Coverage} = require('./Coverage');,true
+// require('./DOMWorld') // const {DOMWorld} = require('./DOMWorld');,true
+// require('./DeviceDescriptors') // const DeviceDescriptors = require('./DeviceDescriptors');,true
+// require('./Dialog') // Dialog,,true
+// require('./Dialog') // const {Dialog} = require('./Dialog');,true
+// require('./EmulationManager') // const {EmulationManager} = require('./EmulationManager');,true
+// require('./Errors') // TimeoutError,,true
+// require('./Errors') // const Errors = require('./Errors');,true
+// require('./Errors') // const {TimeoutError} = require('./Errors');,true
+// require('./Events') // const {Events} = require('./Events');,true
+// require('./ExecutionContext') // ExecutionContext,,true
+// require('./ExecutionContext') // const {EVALUATION_SCRIPT_URL} = require('./ExecutionContext');,true
+// require('./ExecutionContext') // const {ExecutionContext, EVALUATION_SCRIPT_URL} = require('./ExecutionContext');,true
+// require('./ExecutionContext') // const {ExecutionContext} = require('./ExecutionContext');,true
+// require('./FrameManager') // Frame,,true
+// require('./FrameManager') // const {FrameManager} = require('./FrameManager');,true
+// require('./Input') // Keyboard,,true
+// require('./Input') // Mouse,,true
+// require('./Input') // Touchscreen,,true
+// require('./Input') // const {Keyboard, Mouse, Touchscreen} = require('./Input');,true
+// require('./JSHandle') // ElementHandle,,true
+// require('./JSHandle') // JSHandle,,true
+// require('./JSHandle') // const {JSHandle} = require('./JSHandle');,true
+// require('./JSHandle') // const {createJSHandle, JSHandle} = require('./JSHandle');,true
+// require('./JSHandle') // const {createJSHandle} = require('./JSHandle');,true
+// require('./Launcher') // const Launcher = require('./Launcher');,true
+// require('./LifecycleWatcher') // const {LifecycleWatcher} = require('./LifecycleWatcher');,true
+// require('./NetworkManager') // Request,,true
+// require('./NetworkManager') // Response,,true
+// require('./NetworkManager') // SecurityDetails,,true
+// require('./NetworkManager') // const {NetworkManager} = require('./NetworkManager');,true
+// require('./Page') // ConsoleMessage,,true
+// require('./Page') // FileChooser,,true
+// require('./Page') // Page,,true
+// require('./Page') // const {Page} = require('./Page');,true
+// require('./PipeTransport') // const PipeTransport = require('./PipeTransport');,true
+// require('./Puppeteer') // Puppeteer,,true
+// require('./Target') // Target,,true
+// require('./Target') // const {Target} = require('./Target');,true
+// require('./TaskQueue') // const {TaskQueue} = require('./TaskQueue');,true
+// require('./TimeoutSettings') // const {TimeoutSettings} = require('./TimeoutSettings');,true
+// require('./Tracing') // Tracing,,true
+// require('./Tracing') // const Tracing = require('./Tracing');,true
+// require('./USKeyboardLayout') // const keyDefinitions = require('./USKeyboardLayout');,true
+// require('./WebSocketTransport') // const WebSocketTransport = require('./WebSocketTransport');,true
+// require('./Worker') // Worker,,true
+// require('./Worker') // const {Worker} = require('./Worker');,true
+// require('./helper') // const { helper, assert } = require('./helper');,true
+// require('./helper') // const {assert} = require('./helper');,true
+// require('./helper') // const {debugError} = require('./helper');,true
+// require('./helper') // const {helper, assert, debugError} = require('./helper');,true
+// require('./helper') // const {helper, assert} = require('./helper');,true
+// require('./helper') // const {helper, debugError, assert} = require('./helper');,true
+// require('./helper') // const {helper, debugError} = require('./helper');,true
+// require('./lib/Puppeteer') // const Puppeteer = asyncawait ? require('./lib/Puppeteer') : require('./node6/lib/Puppeteer');,true
+// require('./lib/api') // const api = require('./lib/api');,true
+// require('./lib/helper') // const {helper} = require('./lib/helper');,true
+// require('./package.json') // const packageJson = require('./package.json');,true
+// require('child_process') // const childProcess = require('child_process');,true
+// require('debug') // const debugError = require('debug')(`puppeteer:error`);,true
+// require('debug') // const debugProtocol = require('debug')('puppeteer:protocol');,true
+// require('events') // const EventEmitter = require('events');,true
+// require('extract-zip') // const extract = require('extract-zip');,true
+// require('fs') // const fs = require('fs');,true
+// require('http') // const http = require('http');,true
+// require('http') // require('http').request(options, requestCallback);,true
+// require('https') // const https = require('https');,true
+// require('https') // require('https').request(options, requestCallback) :,true
+// require('https-proxy-agent') // const ProxyAgent = require('https-proxy-agent');,true
+// require('mime') // const mime = require('mime');,true
+// require('os') // const os = require('os');,true
+// require('path') // const path = require('path');,true
+// require('proxy-from-env') // const getProxyForUrl = require('proxy-from-env').getProxyForUrl;,true
+// require('readline') // const readline = require('readline');,true
+// require('rimraf') // const removeFolder = require('rimraf');,true
+// require('rimraf') // const removeRecursive = require('rimraf');,true
+// require('url') // const URL = require('url');,true
+// require('util') // const util = require('util');,true
+// require('ws') // const WebSocket = require('ws');,true
 
 
 
