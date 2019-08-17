@@ -8742,7 +8742,7 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Puppeteer.js
 // const Errors = require('./Errors');
 // const DeviceDescriptors = require('./DeviceDescriptors');
 
-module.exports = class {
+const Puppeteer = class {
   /**
    * @param {string} projectRoot
    * @param {string} preferredRevision
@@ -9675,7 +9675,7 @@ if (asyncawait) {
 }
 
 // If node does not support async await, use the compiled version.
-const Puppeteer = asyncawait ? require('./lib/Puppeteer') : require('./node6/lib/Puppeteer');
+// const Puppeteer = asyncawait ? require('./lib/Puppeteer') : require('./node6/lib/Puppeteer');
 // const packageJson = require('./package.json');
 const preferredRevision = packageJson.puppeteer.chromium_revision;
 const isPuppeteerCore = packageJson.name === 'puppeteer-core';
