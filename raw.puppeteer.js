@@ -1,10 +1,358 @@
 /*
-file https://registry.npmjs.org/puppeteer/-/puppeteer-1.19.0.tgz
+file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0/lib
 shGithubDateCommitted https://github.com/GoogleChrome/puppeteer/commits/v1.19.0 # 2019-07-23T05:02:45Z
-rm -r /tmp/aa.js /tmp/package && curl https://registry.npmjs.org/puppeteer/-/puppeteer-1.19.0.tgz | tar -C /tmp -xz && find /tmp/package/lib -name "*.js" -type f | sort | xargs -n1 /bin/sh -c 'printf "\n/*\nfile puppeteer $0\n*/\n" >> /tmp/aa.js && cat "$0" >> /tmp/aa.js'
+(export VERSION=v1.19.0 && rm -fr /tmp/100 && mkdir -p /tmp/100 && node -e '
+/* jslint utility2:true */
+(function () {
+"use strict";
+([
+    "lib/helper.js",
+    "lib/Accessibility.js",
+    "lib/Browser.js",
+    "lib/BrowserFetcher.js",
+    "lib/Connection.js",
+    "lib/Coverage.js",
+    "lib/DOMWorld.js",
+    "lib/DeviceDescriptors.js",
+    "lib/Dialog.js",
+    "lib/EmulationManager.js",
+    "lib/Errors.js",
+    "lib/Events.js",
+    "lib/ExecutionContext.js",
+    "lib/FrameManager.js",
+    "lib/Input.js",
+    "lib/JSHandle.js",
+    "lib/Launcher.js",
+    "lib/LifecycleWatcher.js",
+    "lib/Multimap.js",
+    "lib/NetworkManager.js",
+    "lib/Page.js",
+    "lib/PipeTransport.js",
+    "lib/Puppeteer.js",
+    "lib/Target.js",
+    "lib/TaskQueue.js",
+    "lib/TimeoutSettings.js",
+    "lib/Tracing.js",
+    "lib/USKeyboardLayout.js",
+    "lib/WebSocketTransport.js",
+    "lib/Worker.js",
+    "lib/api.js",
+    "index.js"
+]).forEach(function (elem, ii) {
+    require("https").request((
+        "https://raw.githubusercontent.com/GoogleChrome/puppeteer/"
+        + process.env.VERSION + "/" + elem
+    ), function (res) {
+        res.pipe(require("fs").createWriteStream(
+            "/tmp/100/" + String(ii + 1).padStart(2, "0") + "-"
+            + require("path").basename(elem)
+        ));
+    }).end();
+});
+}());
+' && node -e '
+/* jslint utility2:true */
+(function () {
+"use strict";
+var data;
+data = "";
+require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
+    data += (
+        "/*\nfile https://github.com/GoogleChrome/puppeteer/blob/"
+        + process.env.VERSION + "/" + elem.split("-")[1] + "\n*/\n"
+        + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
+        + "\n\n\n\n"
+    );
+});
+require("fs").writeFileSync("/tmp/aa.js", data);
+}());
+')
 */
 /*
-file puppeteer /tmp/package/lib/Accessibility.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/helper.js
+*/
+/**
+ * Copyright 2017 Google Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const {TimeoutError} = require('./Errors');
+const debugError = require('debug')(`puppeteer:error`);
+const fs = require('fs');
+
+class Helper {
+  /**
+   * @param {Function|string} fun
+   * @param {!Array<*>} args
+   * @return {string}
+   */
+  static evaluationString(fun, ...args) {
+    if (Helper.isString(fun)) {
+      assert(args.length === 0, 'Cannot evaluate a string with arguments');
+      return /** @type {string} */ (fun);
+    }
+    return `(${fun})(${args.map(serializeArgument).join(',')})`;
+
+    /**
+     * @param {*} arg
+     * @return {string}
+     */
+    function serializeArgument(arg) {
+      if (Object.is(arg, undefined))
+        return 'undefined';
+      return JSON.stringify(arg);
+    }
+  }
+
+  /**
+   * @param {!Protocol.Runtime.ExceptionDetails} exceptionDetails
+   * @return {string}
+   */
+  static getExceptionMessage(exceptionDetails) {
+    if (exceptionDetails.exception)
+      return exceptionDetails.exception.description || exceptionDetails.exception.value;
+    let message = exceptionDetails.text;
+    if (exceptionDetails.stackTrace) {
+      for (const callframe of exceptionDetails.stackTrace.callFrames) {
+        const location = callframe.url + ':' + callframe.lineNumber + ':' + callframe.columnNumber;
+        const functionName = callframe.functionName || '<anonymous>';
+        message += `\n    at ${functionName} (${location})`;
+      }
+    }
+    return message;
+  }
+
+  /**
+   * @param {!Protocol.Runtime.RemoteObject} remoteObject
+   * @return {*}
+   */
+  static valueFromRemoteObject(remoteObject) {
+    assert(!remoteObject.objectId, 'Cannot extract value when objectId is given');
+    if (remoteObject.unserializableValue) {
+      if (remoteObject.type === 'bigint' && typeof BigInt !== 'undefined')
+        return BigInt(remoteObject.unserializableValue.replace('n', ''));
+      switch (remoteObject.unserializableValue) {
+        case '-0':
+          return -0;
+        case 'NaN':
+          return NaN;
+        case 'Infinity':
+          return Infinity;
+        case '-Infinity':
+          return -Infinity;
+        default:
+          throw new Error('Unsupported unserializable value: ' + remoteObject.unserializableValue);
+      }
+    }
+    return remoteObject.value;
+  }
+
+  /**
+   * @param {!Puppeteer.CDPSession} client
+   * @param {!Protocol.Runtime.RemoteObject} remoteObject
+   */
+  static async releaseObject(client, remoteObject) {
+    if (!remoteObject.objectId)
+      return;
+    await client.send('Runtime.releaseObject', {objectId: remoteObject.objectId}).catch(error => {
+      // Exceptions might happen in case of a page been navigated or closed.
+      // Swallow these since they are harmless and we don't leak anything in this case.
+      debugError(error);
+    });
+  }
+
+  /**
+   * @param {!Object} classType
+   */
+  static installAsyncStackHooks(classType) {
+    for (const methodName of Reflect.ownKeys(classType.prototype)) {
+      const method = Reflect.get(classType.prototype, methodName);
+      if (methodName === 'constructor' || typeof methodName !== 'string' || methodName.startsWith('_') || typeof method !== 'function' || method.constructor.name !== 'AsyncFunction')
+        continue;
+      Reflect.set(classType.prototype, methodName, function(...args) {
+        const syncStack = {};
+        Error.captureStackTrace(syncStack);
+        return method.call(this, ...args).catch(e => {
+          const stack = syncStack.stack.substring(syncStack.stack.indexOf('\n') + 1);
+          const clientStack = stack.substring(stack.indexOf('\n'));
+          if (e instanceof Error && e.stack && !e.stack.includes(clientStack))
+            e.stack += '\n  -- ASYNC --\n' + stack;
+          throw e;
+        });
+      });
+    }
+  }
+
+  /**
+   * @param {!NodeJS.EventEmitter} emitter
+   * @param {(string|symbol)} eventName
+   * @param {function(?):void} handler
+   * @return {{emitter: !NodeJS.EventEmitter, eventName: (string|symbol), handler: function(?)}}
+   */
+  static addEventListener(emitter, eventName, handler) {
+    emitter.on(eventName, handler);
+    return { emitter, eventName, handler };
+  }
+
+  /**
+   * @param {!Array<{emitter: !NodeJS.EventEmitter, eventName: (string|symbol), handler: function(?):void}>} listeners
+   */
+  static removeEventListeners(listeners) {
+    for (const listener of listeners)
+      listener.emitter.removeListener(listener.eventName, listener.handler);
+    listeners.splice(0, listeners.length);
+  }
+
+  /**
+   * @param {!Object} obj
+   * @return {boolean}
+   */
+  static isString(obj) {
+    return typeof obj === 'string' || obj instanceof String;
+  }
+
+  /**
+   * @param {!Object} obj
+   * @return {boolean}
+   */
+  static isNumber(obj) {
+    return typeof obj === 'number' || obj instanceof Number;
+  }
+
+  static promisify(nodeFunction) {
+    function promisified(...args) {
+      return new Promise((resolve, reject) => {
+        function callback(err, ...result) {
+          if (err)
+            return reject(err);
+          if (result.length === 1)
+            return resolve(result[0]);
+          return resolve(result);
+        }
+        nodeFunction.call(null, ...args, callback);
+      });
+    }
+    return promisified;
+  }
+
+  /**
+   * @param {!NodeJS.EventEmitter} emitter
+   * @param {(string|symbol)} eventName
+   * @param {function} predicate
+   * @return {!Promise}
+   */
+  static waitForEvent(emitter, eventName, predicate, timeout) {
+    let eventTimeout, resolveCallback, rejectCallback;
+    const promise = new Promise((resolve, reject) => {
+      resolveCallback = resolve;
+      rejectCallback = reject;
+    });
+    const listener = Helper.addEventListener(emitter, eventName, event => {
+      if (!predicate(event))
+        return;
+      cleanup();
+      resolveCallback(event);
+    });
+    if (timeout) {
+      eventTimeout = setTimeout(() => {
+        cleanup();
+        rejectCallback(new TimeoutError('Timeout exceeded while waiting for event'));
+      }, timeout);
+    }
+    function cleanup() {
+      Helper.removeEventListeners([listener]);
+      clearTimeout(eventTimeout);
+    }
+    return promise;
+  }
+
+  /**
+   * @template T
+   * @param {!Promise<T>} promise
+   * @param {string} taskName
+   * @param {number} timeout
+   * @return {!Promise<T>}
+   */
+  static async waitWithTimeout(promise, taskName, timeout) {
+    let reject;
+    const timeoutError = new TimeoutError(`waiting for ${taskName} failed: timeout ${timeout}ms exceeded`);
+    const timeoutPromise = new Promise((resolve, x) => reject = x);
+    let timeoutTimer = null;
+    if (timeout)
+      timeoutTimer = setTimeout(() => reject(timeoutError), timeout);
+    try {
+      return await Promise.race([promise, timeoutPromise]);
+    } finally {
+      if (timeoutTimer)
+        clearTimeout(timeoutTimer);
+    }
+  }
+
+  /**
+   * @param {!Puppeteer.CDPSession} client
+   * @param {string} handle
+   * @param {?string} path
+   * @return {!Promise<!Buffer>}
+   */
+  static async readProtocolStream(client, handle, path) {
+    let eof = false;
+    let file;
+    if (path)
+      file = await openAsync(path, 'w');
+    const bufs = [];
+    while (!eof) {
+      const response = await client.send('IO.read', {handle});
+      eof = response.eof;
+      const buf = Buffer.from(response.data, response.base64Encoded ? 'base64' : undefined);
+      bufs.push(buf);
+      if (path)
+        await writeAsync(file, buf);
+    }
+    if (path)
+      await closeAsync(file);
+    await client.send('IO.close', {handle});
+    let resultBuffer = null;
+    try {
+      resultBuffer = Buffer.concat(bufs);
+    } finally {
+      return resultBuffer;
+    }
+  }
+}
+
+const openAsync = Helper.promisify(fs.open);
+const writeAsync = Helper.promisify(fs.write);
+const closeAsync = Helper.promisify(fs.close);
+
+/**
+ * @param {*} value
+ * @param {string=} message
+ */
+function assert(value, message) {
+  if (!value)
+    throw new Error(message);
+}
+
+module.exports = {
+  helper: Helper,
+  assert,
+  debugError
+};
+
+
+
+/*
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Accessibility.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -429,8 +777,10 @@ class AXNode {
 
 module.exports = {Accessibility};
 
+
+
 /*
-file puppeteer /tmp/package/lib/Browser.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -816,8 +1166,10 @@ class BrowserContext extends EventEmitter {
 
 module.exports = {Browser, BrowserContext};
 
+
+
 /*
-file puppeteer /tmp/package/lib/BrowserFetcher.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/BrowserFetcher.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -1140,8 +1492,10 @@ function httpRequest(url, method, response) {
  * @property {string} revision
  */
 
+
+
 /*
-file puppeteer /tmp/package/lib/Connection.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -1386,8 +1740,10 @@ function rewriteError(error, message) {
 
 module.exports = {Connection, CDPSession};
 
+
+
 /*
-file puppeteer /tmp/package/lib/Coverage.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Coverage.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -1703,8 +2059,9 @@ function convertToDisjointRanges(nestedRanges) {
 }
 
 
+
 /*
-file puppeteer /tmp/package/lib/DOMWorld.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DOMWorld.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -2426,8 +2783,10 @@ async function waitForPredicatePageFunction(predicateBody, polling, timeout, ...
 
 module.exports = {DOMWorld};
 
+
+
 /*
-file puppeteer /tmp/package/lib/DeviceDescriptors.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DeviceDescriptors.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -3278,8 +3637,10 @@ module.exports = [
 for (const device of module.exports)
   module.exports[device.name] = device;
 
+
+
 /*
-file puppeteer /tmp/package/lib/Dialog.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Dialog.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -3365,8 +3726,10 @@ Dialog.Type = {
 
 module.exports = {Dialog};
 
+
+
 /*
-file puppeteer /tmp/package/lib/EmulationManager.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/EmulationManager.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -3423,8 +3786,10 @@ class EmulationManager {
 
 module.exports = {EmulationManager};
 
+
+
 /*
-file puppeteer /tmp/package/lib/Errors.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Errors.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -3456,8 +3821,10 @@ module.exports = {
   TimeoutError,
 };
 
+
+
 /*
-file puppeteer /tmp/package/lib/Events.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Events.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -3540,8 +3907,10 @@ const Events = {
 
 module.exports = { Events };
 
+
+
 /*
-file puppeteer /tmp/package/lib/ExecutionContext.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/ExecutionContext.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -3747,8 +4116,10 @@ class ExecutionContext {
 
 module.exports = {ExecutionContext, EVALUATION_SCRIPT_URL};
 
+
+
 /*
-file puppeteer /tmp/package/lib/FrameManager.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/FrameManager.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -4469,8 +4840,10 @@ function assertNoLegacyNavigationOptions(options) {
 
 module.exports = {FrameManager, Frame};
 
+
+
 /*
-file puppeteer /tmp/package/lib/Input.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Input.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -4786,8 +5159,10 @@ class Touchscreen {
 
 module.exports = { Keyboard, Mouse, Touchscreen};
 
+
+
 /*
-file puppeteer /tmp/package/lib/JSHandle.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/JSHandle.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -5315,8 +5690,10 @@ function computeQuadArea(quad) {
 
 module.exports = {createJSHandle, JSHandle, ElementHandle};
 
+
+
 /*
-file puppeteer /tmp/package/lib/Launcher.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Launcher.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -5764,8 +6141,10 @@ function getWSEndpoint(browserURL) {
 
 module.exports = Launcher;
 
+
+
 /*
-file puppeteer /tmp/package/lib/LifecycleWatcher.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/LifecycleWatcher.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -5966,8 +6345,10 @@ const puppeteerToProtocolLifecycle = {
 
 module.exports = {LifecycleWatcher};
 
+
+
 /*
-file puppeteer /tmp/package/lib/Multimap.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Multimap.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -6106,8 +6487,10 @@ class Multimap {
 
 module.exports = Multimap;
 
+
+
 /*
-file puppeteer /tmp/package/lib/NetworkManager.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/NetworkManager.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -6908,8 +7291,10 @@ const STATUS_TEXTS = {
 
 module.exports = {Request, Response, NetworkManager, SecurityDetails};
 
+
+
 /*
-file puppeteer /tmp/package/lib/Page.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Page.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -8262,8 +8647,10 @@ class FileChooser {
 
 module.exports = {Page, ConsoleMessage, FileChooser};
 
+
+
 /*
-file puppeteer /tmp/package/lib/PipeTransport.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/PipeTransport.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -8346,8 +8733,10 @@ class PipeTransport {
 
 module.exports = PipeTransport;
 
+
+
 /*
-file puppeteer /tmp/package/lib/Puppeteer.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Puppeteer.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -8435,8 +8824,9 @@ module.exports = class {
 };
 
 
+
 /*
-file puppeteer /tmp/package/lib/Target.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Target.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -8595,8 +8985,10 @@ class Target {
 
 module.exports = {Target};
 
+
+
 /*
-file puppeteer /tmp/package/lib/TaskQueue.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/TaskQueue.js
 */
 class TaskQueue {
   constructor() {
@@ -8615,8 +9007,11 @@ class TaskQueue {
 }
 
 module.exports = {TaskQueue};
+
+
+
 /*
-file puppeteer /tmp/package/lib/TimeoutSettings.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/TimeoutSettings.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -8676,8 +9071,10 @@ class TimeoutSettings {
 
 module.exports = {TimeoutSettings};
 
+
+
 /*
-file puppeteer /tmp/package/lib/Tracing.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Tracing.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -8752,8 +9149,10 @@ class Tracing {
 
 module.exports = Tracing;
 
+
+
 /*
-file puppeteer /tmp/package/lib/USKeyboardLayout.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/USKeyboardLayout.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -9043,8 +9442,11 @@ module.exports = {
   'VolumeDown': {'keyCode': 182, 'key': 'VolumeDown', 'code': 'VolumeDown', 'location': 4},
   'VolumeUp': {'keyCode': 183, 'key': 'VolumeUp', 'code': 'VolumeUp', 'location': 4},
 };
+
+
+
 /*
-file puppeteer /tmp/package/lib/WebSocketTransport.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/WebSocketTransport.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -9115,8 +9517,10 @@ class WebSocketTransport {
 
 module.exports = WebSocketTransport;
 
+
+
 /*
-file puppeteer /tmp/package/lib/Worker.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Worker.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -9199,8 +9603,10 @@ class Worker extends EventEmitter {
 
 module.exports = {Worker};
 
+
+
 /*
-file puppeteer /tmp/package/lib/api.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/api.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -9246,8 +9652,10 @@ module.exports = {
   Worker: require('./Worker').Worker,
 };
 
+
+
 /*
-file puppeteer /tmp/package/lib/helper.js
+file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/index.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -9264,265 +9672,34 @@ file puppeteer /tmp/package/lib/helper.js
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {TimeoutError} = require('./Errors');
-const debugError = require('debug')(`puppeteer:error`);
-const fs = require('fs');
 
-class Helper {
-  /**
-   * @param {Function|string} fun
-   * @param {!Array<*>} args
-   * @return {string}
-   */
-  static evaluationString(fun, ...args) {
-    if (Helper.isString(fun)) {
-      assert(args.length === 0, 'Cannot evaluate a string with arguments');
-      return /** @type {string} */ (fun);
-    }
-    return `(${fun})(${args.map(serializeArgument).join(',')})`;
+let asyncawait = true;
+try {
+  new Function('async function test(){await 1}');
+} catch (error) {
+  asyncawait = false;
+}
 
-    /**
-     * @param {*} arg
-     * @return {string}
-     */
-    function serializeArgument(arg) {
-      if (Object.is(arg, undefined))
-        return 'undefined';
-      return JSON.stringify(arg);
-    }
-  }
-
-  /**
-   * @param {!Protocol.Runtime.ExceptionDetails} exceptionDetails
-   * @return {string}
-   */
-  static getExceptionMessage(exceptionDetails) {
-    if (exceptionDetails.exception)
-      return exceptionDetails.exception.description || exceptionDetails.exception.value;
-    let message = exceptionDetails.text;
-    if (exceptionDetails.stackTrace) {
-      for (const callframe of exceptionDetails.stackTrace.callFrames) {
-        const location = callframe.url + ':' + callframe.lineNumber + ':' + callframe.columnNumber;
-        const functionName = callframe.functionName || '<anonymous>';
-        message += `\n    at ${functionName} (${location})`;
-      }
-    }
-    return message;
-  }
-
-  /**
-   * @param {!Protocol.Runtime.RemoteObject} remoteObject
-   * @return {*}
-   */
-  static valueFromRemoteObject(remoteObject) {
-    assert(!remoteObject.objectId, 'Cannot extract value when objectId is given');
-    if (remoteObject.unserializableValue) {
-      if (remoteObject.type === 'bigint' && typeof BigInt !== 'undefined')
-        return BigInt(remoteObject.unserializableValue.replace('n', ''));
-      switch (remoteObject.unserializableValue) {
-        case '-0':
-          return -0;
-        case 'NaN':
-          return NaN;
-        case 'Infinity':
-          return Infinity;
-        case '-Infinity':
-          return -Infinity;
-        default:
-          throw new Error('Unsupported unserializable value: ' + remoteObject.unserializableValue);
-      }
-    }
-    return remoteObject.value;
-  }
-
-  /**
-   * @param {!Puppeteer.CDPSession} client
-   * @param {!Protocol.Runtime.RemoteObject} remoteObject
-   */
-  static async releaseObject(client, remoteObject) {
-    if (!remoteObject.objectId)
-      return;
-    await client.send('Runtime.releaseObject', {objectId: remoteObject.objectId}).catch(error => {
-      // Exceptions might happen in case of a page been navigated or closed.
-      // Swallow these since they are harmless and we don't leak anything in this case.
-      debugError(error);
-    });
-  }
-
-  /**
-   * @param {!Object} classType
-   */
-  static installAsyncStackHooks(classType) {
-    for (const methodName of Reflect.ownKeys(classType.prototype)) {
-      const method = Reflect.get(classType.prototype, methodName);
-      if (methodName === 'constructor' || typeof methodName !== 'string' || methodName.startsWith('_') || typeof method !== 'function' || method.constructor.name !== 'AsyncFunction')
-        continue;
-      Reflect.set(classType.prototype, methodName, function(...args) {
-        const syncStack = {};
-        Error.captureStackTrace(syncStack);
-        return method.call(this, ...args).catch(e => {
-          const stack = syncStack.stack.substring(syncStack.stack.indexOf('\n') + 1);
-          const clientStack = stack.substring(stack.indexOf('\n'));
-          if (e instanceof Error && e.stack && !e.stack.includes(clientStack))
-            e.stack += '\n  -- ASYNC --\n' + stack;
-          throw e;
-        });
-      });
-    }
-  }
-
-  /**
-   * @param {!NodeJS.EventEmitter} emitter
-   * @param {(string|symbol)} eventName
-   * @param {function(?):void} handler
-   * @return {{emitter: !NodeJS.EventEmitter, eventName: (string|symbol), handler: function(?)}}
-   */
-  static addEventListener(emitter, eventName, handler) {
-    emitter.on(eventName, handler);
-    return { emitter, eventName, handler };
-  }
-
-  /**
-   * @param {!Array<{emitter: !NodeJS.EventEmitter, eventName: (string|symbol), handler: function(?):void}>} listeners
-   */
-  static removeEventListeners(listeners) {
-    for (const listener of listeners)
-      listener.emitter.removeListener(listener.eventName, listener.handler);
-    listeners.splice(0, listeners.length);
-  }
-
-  /**
-   * @param {!Object} obj
-   * @return {boolean}
-   */
-  static isString(obj) {
-    return typeof obj === 'string' || obj instanceof String;
-  }
-
-  /**
-   * @param {!Object} obj
-   * @return {boolean}
-   */
-  static isNumber(obj) {
-    return typeof obj === 'number' || obj instanceof Number;
-  }
-
-  static promisify(nodeFunction) {
-    function promisified(...args) {
-      return new Promise((resolve, reject) => {
-        function callback(err, ...result) {
-          if (err)
-            return reject(err);
-          if (result.length === 1)
-            return resolve(result[0]);
-          return resolve(result);
-        }
-        nodeFunction.call(null, ...args, callback);
-      });
-    }
-    return promisified;
-  }
-
-  /**
-   * @param {!NodeJS.EventEmitter} emitter
-   * @param {(string|symbol)} eventName
-   * @param {function} predicate
-   * @return {!Promise}
-   */
-  static waitForEvent(emitter, eventName, predicate, timeout) {
-    let eventTimeout, resolveCallback, rejectCallback;
-    const promise = new Promise((resolve, reject) => {
-      resolveCallback = resolve;
-      rejectCallback = reject;
-    });
-    const listener = Helper.addEventListener(emitter, eventName, event => {
-      if (!predicate(event))
-        return;
-      cleanup();
-      resolveCallback(event);
-    });
-    if (timeout) {
-      eventTimeout = setTimeout(() => {
-        cleanup();
-        rejectCallback(new TimeoutError('Timeout exceeded while waiting for event'));
-      }, timeout);
-    }
-    function cleanup() {
-      Helper.removeEventListeners([listener]);
-      clearTimeout(eventTimeout);
-    }
-    return promise;
-  }
-
-  /**
-   * @template T
-   * @param {!Promise<T>} promise
-   * @param {string} taskName
-   * @param {number} timeout
-   * @return {!Promise<T>}
-   */
-  static async waitWithTimeout(promise, taskName, timeout) {
-    let reject;
-    const timeoutError = new TimeoutError(`waiting for ${taskName} failed: timeout ${timeout}ms exceeded`);
-    const timeoutPromise = new Promise((resolve, x) => reject = x);
-    let timeoutTimer = null;
-    if (timeout)
-      timeoutTimer = setTimeout(() => reject(timeoutError), timeout);
-    try {
-      return await Promise.race([promise, timeoutPromise]);
-    } finally {
-      if (timeoutTimer)
-        clearTimeout(timeoutTimer);
-    }
-  }
-
-  /**
-   * @param {!Puppeteer.CDPSession} client
-   * @param {string} handle
-   * @param {?string} path
-   * @return {!Promise<!Buffer>}
-   */
-  static async readProtocolStream(client, handle, path) {
-    let eof = false;
-    let file;
-    if (path)
-      file = await openAsync(path, 'w');
-    const bufs = [];
-    while (!eof) {
-      const response = await client.send('IO.read', {handle});
-      eof = response.eof;
-      const buf = Buffer.from(response.data, response.base64Encoded ? 'base64' : undefined);
-      bufs.push(buf);
-      if (path)
-        await writeAsync(file, buf);
-    }
-    if (path)
-      await closeAsync(file);
-    await client.send('IO.close', {handle});
-    let resultBuffer = null;
-    try {
-      resultBuffer = Buffer.concat(bufs);
-    } finally {
-      return resultBuffer;
-    }
+if (asyncawait) {
+  const {helper} = require('./lib/helper');
+  const api = require('./lib/api');
+  for (const className in api) {
+    // Puppeteer-web excludes certain classes from bundle, e.g. BrowserFetcher.
+    if (typeof api[className] === 'function')
+      helper.installAsyncStackHooks(api[className]);
   }
 }
 
-const openAsync = Helper.promisify(fs.open);
-const writeAsync = Helper.promisify(fs.write);
-const closeAsync = Helper.promisify(fs.close);
+// If node does not support async await, use the compiled version.
+const Puppeteer = asyncawait ? require('./lib/Puppeteer') : require('./node6/lib/Puppeteer');
+const packageJson = require('./package.json');
+const preferredRevision = packageJson.puppeteer.chromium_revision;
+const isPuppeteerCore = packageJson.name === 'puppeteer-core';
 
-/**
- * @param {*} value
- * @param {string=} message
- */
-function assert(value, message) {
-  if (!value)
-    throw new Error(message);
-}
+module.exports = new Puppeteer(__dirname, preferredRevision, isPuppeteerCore);
 
-module.exports = {
-  helper: Helper,
-  assert,
-  debugError
-};
+
+
+/*
+file none
+*/
