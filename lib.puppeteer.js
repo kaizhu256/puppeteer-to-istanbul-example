@@ -3622,7 +3622,7 @@ module.exports = [
 for (const device of module.exports)
   module.exports[device.name] = device;
 // hack-puppeteer - module.exports
-const DeviceDescriptors = module.exports
+const DeviceDescriptors = module.exports;
 
 
 
@@ -6323,7 +6323,6 @@ class LifecycleWatcher {
   }
 }
 
-// hack-puppeteer - module.exports
 const puppeteerToProtocolLifecycle = {
   'load': 'load',
   'domcontentloaded': 'DOMContentLoaded',
@@ -8746,7 +8745,7 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Puppeteer.js
 // const Errors = require('./Errors');
 // const DeviceDescriptors = require('./DeviceDescriptors');
 
-const Puppeteer = class {
+module.exports = class {
   /**
    * @param {string} projectRoot
    * @param {string} preferredRevision
@@ -8810,6 +8809,8 @@ const Puppeteer = class {
     return new BrowserFetcher(this._projectRoot, options);
   }
 };
+// hack-puppeteer - module.exports
+const Puppeteer = module.exports;
 
 
 
@@ -9173,8 +9174,7 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/USKeyboardLayout.js
 /**
  * @type {Object<string, KeyDefinition>}
  */
-// hack-puppeteer - module.exports
-const USKeyboardLayout = {
+module.exports = {
   '0': {'keyCode': 48, 'key': '0', 'code': 'Digit0'},
   '1': {'keyCode': 49, 'key': '1', 'code': 'Digit1'},
   '2': {'keyCode': 50, 'key': '2', 'code': 'Digit2'},
@@ -9431,6 +9431,8 @@ const USKeyboardLayout = {
   'VolumeDown': {'keyCode': 182, 'key': 'VolumeDown', 'code': 'VolumeDown', 'location': 4},
   'VolumeUp': {'keyCode': 183, 'key': 'VolumeUp', 'code': 'VolumeUp', 'location': 4},
 };
+// hack-puppeteer - module.exports
+const USKeyboardLayout = module.exports;
 
 
 
@@ -9613,8 +9615,7 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/api.js
  * limitations under the License.
  */
 
-// hack-puppeteer - module.exports
-const api = {
+module.exports = {
   Accessibility,
   Browser,
   BrowserContext,
@@ -9641,6 +9642,8 @@ const api = {
   Tracing,
   Worker,
 };
+// hack-puppeteer - module.exports
+const api = module.exports;
 
 
 
@@ -9681,6 +9684,7 @@ if (asyncawait) {
 }
 
 // If node does not support async await, use the compiled version.
+// hack-puppeteer - module.exports
 // const Puppeteer = asyncawait ? require('./lib/Puppeteer') : require('./node6/lib/Puppeteer');
 // const packageJson = require('./package.json');
 const preferredRevision = packageJson.puppeteer.chromium_revision;
