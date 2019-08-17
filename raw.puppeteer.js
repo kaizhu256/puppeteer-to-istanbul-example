@@ -49,22 +49,25 @@ shGithubDateCommitted https://github.com/GoogleChrome/puppeteer/commits/v1.19.0 
         ));
     }).end();
 });
-}());
-' && node -e '
-/* jslint utility2:true */
-(function () {
-"use strict";
-var data;
-data = "";
-require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
-    data += (
-        "/*\nfile https://github.com/GoogleChrome/puppeteer/blob/"
-        + process.env.VERSION + "/" + elem.split("-")[1] + "\n*/\n"
-        + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
-        + "\n\n\n\n"
-    );
+process.on("exit", function () {
+    var data;
+    data = "";
+    require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
+        data += (
+            "/*\nfile https://github.com/GoogleChrome/puppeteer/blob/"
+            + process.env.VERSION + "/" + elem.split("-")[1] + "\n*/\n"
+            + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
+            + "\n\n\n\n"
+        );
+    });
+    data = data.replace((
+        /^ *?const .+? = require\(/gm
+    ), "// $&");
+    data = data.replace((
+        /^ *?const .+? = require\(/gm
+    ), "// $&");
+    require("fs").writeFileSync("/tmp/aa.js", data.trim() + "\n");
 });
-require("fs").writeFileSync("/tmp/aa.js", data);
 }());
 ')
 */
@@ -86,9 +89,9 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/helper.js
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {TimeoutError} = require('./Errors');
-const debugError = require('debug')(`puppeteer:error`);
-const fs = require('fs');
+// const {TimeoutError} = require('./Errors');
+// const debugError = require('debug')(`puppeteer:error`);
+// const fs = require('fs');
 
 class Helper {
   /**
@@ -798,11 +801,11 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
  * limitations under the License.
  */
 
-const { helper, assert } = require('./helper');
-const {Target} = require('./Target');
-const EventEmitter = require('events');
-const {TaskQueue} = require('./TaskQueue');
-const {Events} = require('./Events');
+// const { helper, assert } = require('./helper');
+// const {Target} = require('./Target');
+// const EventEmitter = require('events');
+// const {TaskQueue} = require('./TaskQueue');
+// const {Events} = require('./Events');
 
 class Browser extends EventEmitter {
   /**
@@ -1187,18 +1190,18 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/BrowserFetcher.js
  * limitations under the License.
  */
 
-const os = require('os');
-const fs = require('fs');
-const path = require('path');
-const extract = require('extract-zip');
-const util = require('util');
-const URL = require('url');
-const {helper, assert} = require('./helper');
-const removeRecursive = require('rimraf');
+// const os = require('os');
+// const fs = require('fs');
+// const path = require('path');
+// const extract = require('extract-zip');
+// const util = require('util');
+// const URL = require('url');
+// const {helper, assert} = require('./helper');
+// const removeRecursive = require('rimraf');
 // @ts-ignore
-const ProxyAgent = require('https-proxy-agent');
+// const ProxyAgent = require('https-proxy-agent');
 // @ts-ignore
-const getProxyForUrl = require('proxy-from-env').getProxyForUrl;
+// const getProxyForUrl = require('proxy-from-env').getProxyForUrl;
 
 const DEFAULT_DOWNLOAD_HOST = 'https://storage.googleapis.com';
 
@@ -1512,10 +1515,10 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {assert} = require('./helper');
-const {Events} = require('./Events');
-const debugProtocol = require('debug')('puppeteer:protocol');
-const EventEmitter = require('events');
+// const {assert} = require('./helper');
+// const {Events} = require('./Events');
+// const debugProtocol = require('debug')('puppeteer:protocol');
+// const EventEmitter = require('events');
 
 class Connection extends EventEmitter {
   /**
@@ -1761,9 +1764,9 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Coverage.js
  * limitations under the License.
  */
 
-const {helper, debugError, assert} = require('./helper');
+// const {helper, debugError, assert} = require('./helper');
 
-const {EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
+// const {EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
 
 /**
  * @typedef {Object} CoverageEntry
@@ -2079,10 +2082,10 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DOMWorld.js
  * limitations under the License.
  */
 
-const fs = require('fs');
-const {helper, assert} = require('./helper');
-const {LifecycleWatcher} = require('./LifecycleWatcher');
-const {TimeoutError} = require('./Errors');
+// const fs = require('fs');
+// const {helper, assert} = require('./helper');
+// const {LifecycleWatcher} = require('./LifecycleWatcher');
+// const {TimeoutError} = require('./Errors');
 const readFileAsync = helper.promisify(fs.readFile);
 
 /**
@@ -3658,7 +3661,7 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Dialog.js
  * limitations under the License.
  */
 
-const {assert} = require('./helper');
+// const {assert} = require('./helper');
 
 class Dialog {
   /**
@@ -3928,8 +3931,8 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/ExecutionContext.js
  * limitations under the License.
  */
 
-const {helper, assert} = require('./helper');
-const {createJSHandle, JSHandle} = require('./JSHandle');
+// const {helper, assert} = require('./helper');
+// const {createJSHandle, JSHandle} = require('./JSHandle');
 
 const EVALUATION_SCRIPT_URL = '__puppeteer_evaluation_script__';
 const SOURCE_URL_REGEX = /^[\040\t]*\/\/[@#] sourceURL=\s*(\S*?)\s*$/m;
@@ -4137,13 +4140,13 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/FrameManager.js
  * limitations under the License.
  */
 
-const EventEmitter = require('events');
-const {helper, assert, debugError} = require('./helper');
-const {Events} = require('./Events');
-const {ExecutionContext, EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
-const {LifecycleWatcher} = require('./LifecycleWatcher');
-const {DOMWorld} = require('./DOMWorld');
-const {NetworkManager} = require('./NetworkManager');
+// const EventEmitter = require('events');
+// const {helper, assert, debugError} = require('./helper');
+// const {Events} = require('./Events');
+// const {ExecutionContext, EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
+// const {LifecycleWatcher} = require('./LifecycleWatcher');
+// const {DOMWorld} = require('./DOMWorld');
+// const {NetworkManager} = require('./NetworkManager');
 
 const UTILITY_WORLD_NAME = '__puppeteer_utility_world__';
 
@@ -4861,8 +4864,8 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Input.js
  * limitations under the License.
  */
 
-const {assert} = require('./helper');
-const keyDefinitions = require('./USKeyboardLayout');
+// const {assert} = require('./helper');
+// const keyDefinitions = require('./USKeyboardLayout');
 
 /**
  * @typedef {Object} KeyDescription
@@ -5180,8 +5183,8 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/JSHandle.js
  * limitations under the License.
  */
 
-const {helper, assert, debugError} = require('./helper');
-const path = require('path');
+// const {helper, assert, debugError} = require('./helper');
+// const path = require('path');
 
 function createJSHandle(context, remoteObject) {
   const frame = context.frame();
@@ -5710,22 +5713,22 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Launcher.js
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const os = require('os');
-const path = require('path');
-const http = require('http');
-const https = require('https');
-const URL = require('url');
-const removeFolder = require('rimraf');
-const childProcess = require('child_process');
-const BrowserFetcher = require('./BrowserFetcher');
-const {Connection} = require('./Connection');
-const {Browser} = require('./Browser');
-const readline = require('readline');
-const fs = require('fs');
-const {helper, assert, debugError} = require('./helper');
-const {TimeoutError} = require('./Errors');
-const WebSocketTransport = require('./WebSocketTransport');
-const PipeTransport = require('./PipeTransport');
+// const os = require('os');
+// const path = require('path');
+// const http = require('http');
+// const https = require('https');
+// const URL = require('url');
+// const removeFolder = require('rimraf');
+// const childProcess = require('child_process');
+// const BrowserFetcher = require('./BrowserFetcher');
+// const {Connection} = require('./Connection');
+// const {Browser} = require('./Browser');
+// const readline = require('readline');
+// const fs = require('fs');
+// const {helper, assert, debugError} = require('./helper');
+// const {TimeoutError} = require('./Errors');
+// const WebSocketTransport = require('./WebSocketTransport');
+// const PipeTransport = require('./PipeTransport');
 
 const mkdtempAsync = helper.promisify(fs.mkdtemp);
 const removeFolderAsync = helper.promisify(removeFolder);
@@ -6162,9 +6165,9 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/LifecycleWatcher.js
  * limitations under the License.
  */
 
-const {helper, assert} = require('./helper');
-const {Events} = require('./Events');
-const {TimeoutError} = require('./Errors');
+// const {helper, assert} = require('./helper');
+// const {Events} = require('./Events');
+// const {TimeoutError} = require('./Errors');
 
 class LifecycleWatcher {
   /**
@@ -6507,9 +6510,9 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/NetworkManager.js
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const EventEmitter = require('events');
-const {helper, assert, debugError} = require('./helper');
-const {Events} = require('./Events');
+// const EventEmitter = require('events');
+// const {helper, assert, debugError} = require('./helper');
+// const {Events} = require('./Events');
 
 class NetworkManager extends EventEmitter {
   /**
@@ -7312,23 +7315,23 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Page.js
  * limitations under the License.
  */
 
-const fs = require('fs');
-const path = require('path');
-const EventEmitter = require('events');
-const mime = require('mime');
-const {Events} = require('./Events');
-const {Connection} = require('./Connection');
-const {Dialog} = require('./Dialog');
-const {EmulationManager} = require('./EmulationManager');
-const {FrameManager} = require('./FrameManager');
-const {Keyboard, Mouse, Touchscreen} = require('./Input');
-const Tracing = require('./Tracing');
-const {helper, debugError, assert} = require('./helper');
-const {Coverage} = require('./Coverage');
-const {Worker} = require('./Worker');
-const {createJSHandle} = require('./JSHandle');
-const {Accessibility} = require('./Accessibility');
-const {TimeoutSettings} = require('./TimeoutSettings');
+// const fs = require('fs');
+// const path = require('path');
+// const EventEmitter = require('events');
+// const mime = require('mime');
+// const {Events} = require('./Events');
+// const {Connection} = require('./Connection');
+// const {Dialog} = require('./Dialog');
+// const {EmulationManager} = require('./EmulationManager');
+// const {FrameManager} = require('./FrameManager');
+// const {Keyboard, Mouse, Touchscreen} = require('./Input');
+// const Tracing = require('./Tracing');
+// const {helper, debugError, assert} = require('./helper');
+// const {Coverage} = require('./Coverage');
+// const {Worker} = require('./Worker');
+// const {createJSHandle} = require('./JSHandle');
+// const {Accessibility} = require('./Accessibility');
+// const {TimeoutSettings} = require('./TimeoutSettings');
 const writeFileAsync = helper.promisify(fs.writeFile);
 
 class Page extends EventEmitter {
@@ -8667,7 +8670,7 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/PipeTransport.js
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {helper, debugError} = require('./helper');
+// const {helper, debugError} = require('./helper');
 
 /**
  * @implements {!Puppeteer.ConnectionTransport}
@@ -8753,10 +8756,10 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Puppeteer.js
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const Launcher = require('./Launcher');
-const BrowserFetcher = require('./BrowserFetcher');
-const Errors = require('./Errors');
-const DeviceDescriptors = require('./DeviceDescriptors');
+// const Launcher = require('./Launcher');
+// const BrowserFetcher = require('./BrowserFetcher');
+// const Errors = require('./Errors');
+// const DeviceDescriptors = require('./DeviceDescriptors');
 
 module.exports = class {
   /**
@@ -8844,10 +8847,10 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Target.js
  * limitations under the License.
  */
 
-const {Events} = require('./Events');
-const {Page} = require('./Page');
-const {Worker} = require('./Worker');
-const {Connection} = require('./Connection');
+// const {Events} = require('./Events');
+// const {Page} = require('./Page');
+// const {Worker} = require('./Worker');
+// const {Connection} = require('./Connection');
 
 class Target {
   /**
@@ -9091,7 +9094,7 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Tracing.js
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {helper, assert} = require('./helper');
+// const {helper, assert} = require('./helper');
 
 class Tracing {
   /**
@@ -9463,7 +9466,7 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/WebSocketTransport.j
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const WebSocket = require('ws');
+// const WebSocket = require('ws');
 
 /**
  * @implements {!Puppeteer.ConnectionTransport}
@@ -9537,10 +9540,10 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Worker.js
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const EventEmitter = require('events');
-const {debugError} = require('./helper');
-const {ExecutionContext} = require('./ExecutionContext');
-const {JSHandle} = require('./JSHandle');
+// const EventEmitter = require('events');
+// const {debugError} = require('./helper');
+// const {ExecutionContext} = require('./ExecutionContext');
+// const {JSHandle} = require('./JSHandle');
 
 class Worker extends EventEmitter {
   /**
@@ -9681,8 +9684,8 @@ try {
 }
 
 if (asyncawait) {
-  const {helper} = require('./lib/helper');
-  const api = require('./lib/api');
+//   const {helper} = require('./lib/helper');
+//   const api = require('./lib/api');
   for (const className in api) {
     // Puppeteer-web excludes certain classes from bundle, e.g. BrowserFetcher.
     if (typeof api[className] === 'function')
@@ -9692,7 +9695,7 @@ if (asyncawait) {
 
 // If node does not support async await, use the compiled version.
 const Puppeteer = asyncawait ? require('./lib/Puppeteer') : require('./node6/lib/Puppeteer');
-const packageJson = require('./package.json');
+// const packageJson = require('./package.json');
 const preferredRevision = packageJson.puppeteer.chromium_revision;
 const isPuppeteerCore = packageJson.name === 'puppeteer-core';
 

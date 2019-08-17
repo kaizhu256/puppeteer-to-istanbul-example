@@ -3,25 +3,25 @@ file https://registry.npmjs.org/puppeteer/-/puppeteer-1.19.0.tgz
 */
 "use strict";
 // require builtin
-const EventEmitter = require ('events');
-const fs = require ('fs')
-const child_process = require ('child_process')
-const http = require ('http');
-const https = require ('https');
-const mime = require ('mime');
-const moduleCjs = require ('module')
-const os = require ('os');
-const path = require ('path');
-const readline = require ('readline');
-const url = require ('url');
-
-
-
-const clone = function (obj) {
-    return JSON.parse(JSON.stringify(obj));
-};
-const debugError = console.error;
-const removeFolderSync = function (dir) {
+const EventEmitter = require('events');
+const ProxyAgent = require('https-proxy-agent');
+const URL = require('url');
+const WebSocket = require('ws');
+const childProcess = require('child_process');
+const debugError = require('debug')(`puppeteer:error`);
+const debugProtocol = require('debug')('puppeteer:protocol');
+const extract = require('extract-zip');
+const fs = require('fs');
+const getProxyForUrl = require('proxy-from-env').getProxyForUrl;
+const http = require('http');
+const https = require('https');
+const mime = require('mime');
+const os = require('os');
+const path = require('path');
+const readline = require('readline');
+const removeFolder = require('rimraf');
+const removeRecursive = require('rimraf');
+const util = require('util');
 /*
  * this function will synchronously "rm -fr" dir
  */
@@ -38,6 +38,7 @@ const removeFolder = function (dir, onError) {
     setTimeout(onError);
 };
 removeFolder.sync = removeFolderSync;
+const removeRecursive = removeFolder;
 
 
 
