@@ -331,6 +331,7 @@ module.exports = {
   assert,
   debugError
 };
+// hack-puppeteer - module.exports
 const helper = Helper;
 
 
@@ -3620,6 +3621,8 @@ module.exports = [
 ];
 for (const device of module.exports)
   module.exports[device.name] = device;
+// hack-puppeteer - module.exports
+const DeviceDescriptors = module.exports
 
 
 
@@ -6320,6 +6323,7 @@ class LifecycleWatcher {
   }
 }
 
+// hack-puppeteer - module.exports
 const puppeteerToProtocolLifecycle = {
   'load': 'load',
   'domcontentloaded': 'DOMContentLoaded',
@@ -9169,7 +9173,8 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/USKeyboardLayout.js
 /**
  * @type {Object<string, KeyDefinition>}
  */
-module.exports = {
+// hack-puppeteer - module.exports
+const USKeyboardLayout = {
   '0': {'keyCode': 48, 'key': '0', 'code': 'Digit0'},
   '1': {'keyCode': 49, 'key': '1', 'code': 'Digit1'},
   '2': {'keyCode': 50, 'key': '2', 'code': 'Digit2'},
@@ -9608,7 +9613,8 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/api.js
  * limitations under the License.
  */
 
-module.exports = {
+// hack-puppeteer - module.exports
+const api = {
   Accessibility,
   Browser,
   BrowserContext,

@@ -83,9 +83,6 @@ process.on("exit", function () {
 });
 }());
 ' '
--module.exports = class {
-+const Puppeteer = class {
-
 ')
 */
 /*
