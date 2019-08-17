@@ -61,11 +61,11 @@ process.on("exit", function () {
         );
     });
     aa = aa.replace((
+        /^ *?const .+? = require\(/gm
+    ), "// $&");
+    aa = aa.replace((
         /(\w+?): require\(.*?,/gm
     ), "$1,");
-    aa = aa.replace((
-        /.*? require\(/gm
-    ), "// $&");
     process.argv[1].replace((
         /^(-[\S\s]*?\n)(\+[\S\s]*?\n)\n/gm
     ), function (ignore, match1, match2) {
