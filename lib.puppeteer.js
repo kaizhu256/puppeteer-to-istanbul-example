@@ -22,10 +22,24 @@ const readline = require('readline');
 //!! const removeFolder = require('rimraf');
 //!! const removeRecursive = require('rimraf');
 const util = require('util');
+const debugError = console.error;
+const removeFolder = function (dir, onError) {
 /*
- * this function will synchronously "rm -fr" dir
+ * this function will asynchronously "rm -fr" <dir>
  */
-    child_process.execFileSync("rm", [
+    child_process.spawn("rm", [
+        "-fr", path.resolve(process.cwd(), dir)
+    ], {
+        stdio: [
+            "ignore", 1, 2
+        ]
+    }).on("exit", onError);
+};
+removeFolder.sync = function (dir) {
+/*
+ * this function will synchronously "rm -fr" <dir>
+ */
+    child_process.spawnSync("rm", [
         "-fr", path.resolve(process.cwd(), dir)
     ], {
         stdio: [
@@ -33,11 +47,6 @@ const util = require('util');
         ]
     });
 };
-const removeFolder = function (dir, onError) {
-    removeFolderSync(dir);
-    setTimeout(onError);
-};
-removeFolder.sync = removeFolderSync;
 const removeRecursive = removeFolder;
 
 
@@ -322,6 +331,7 @@ module.exports = {
   assert,
   debugError
 };
+const helper = Helper;
 
 
 
