@@ -4,7 +4,9 @@ shGithubDateCommitted https://github.com/GoogleChrome/puppeteer/commits/v1.19.0 
 (export VERSION=v1.19.0 && rm -fr /tmp/100 && mkdir -p /tmp/100 && node -e '
 /* jslint utility2:true */
 (function () {
+/*jslint node*/
 "use strict";
+var dict;
 ([
     "package.json",
     "lib/helper.js",
@@ -55,36 +57,30 @@ process.on("exit", function () {
     aa = "";
     require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
         aa += (
-            "/*\nfile https://github.com/GoogleChrome/puppeteer/blob/"
+            "\n\n\n\n/*\nfile https://github.com/GoogleChrome/puppeteer/blob/"
             + process.env.VERSION + "/" + elem.split("-")[1] + "\n*/\n"
             + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
-            + "\n\n\n\n"
         );
     });
+    //!! dict = {};
+    //!! aa = aa.replace((
+        //!! /^.*?\b(require\(.*?\)).*?$/gm
+    //!! ), function (match0, match1) {
+        //!! dict["// " + match1.trim() + " // " + match0.trim()] = true;
+        //!! return "";
+    //!! });
+    //!! aa = Object.entries(dict).sort().join("\n") + "\n\n\n\n" + aa;
     aa = aa.replace((
-        /^ *?const .+? = require\(/gm
+        /^\u0020*?const\u0020.+?\u0020=\u0020require\(/gm
     ), "// $&");
     aa = aa.replace((
-        /(\w+?): require\(.*?,/gm
+        /(\w+?):\u0020require\(.*?,/gm
     ), "$1,");
-    process.argv[1].replace((
-        /^(-[\S\s]*?\n)(\+[\S\s]*?\n)\n/gm
-    ), function (ignore, match1, match2) {
-        aa = aa.replace(
-            match1.replace((
-                /^-/gm
-            ), ""),
-            match2.replace((
-                /^\+/gm
-            ), "")
-        );
-    });
     aa = aa.trim() + "\n";
     require("fs").writeFileSync("/tmp/aa.js", aa);
 });
 }());
-' '
-' && cat /tmp/aa.js | grep -E '// .* = require\(' | sort -k 4 -u)
+'
 */
 /*
 file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/package.json
