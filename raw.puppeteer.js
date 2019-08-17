@@ -62,14 +62,14 @@ process.on("exit", function () {
             + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
         );
     });
-    //!! dict = {};
-    //!! aa = aa.replace((
-        //!! /^.*?\b(require\(.*?\)).*?$/gm
-    //!! ), function (match0, match1) {
-        //!! dict["// " + match1.trim() + " // " + match0.trim()] = true;
-        //!! return "";
-    //!! });
-    //!! aa = Object.entries(dict).sort().join("\n") + "\n\n\n\n" + aa;
+    dict = {};
+    aa.replace((
+        /^.*?\b(require\(.*?\)).*?$/gm
+    ), function (match0, match1) {
+        dict["// " + match1.trim() + " // " + match0.trim()] = true;
+        return "";
+    });
+    aa = Object.entries(dict).sort().join("\n") + aa;
     aa = aa.replace((
         /^\u0020*?const\u0020.+?\u0020=\u0020require\(/gm
     ), "// $&");
@@ -80,8 +80,100 @@ process.on("exit", function () {
     require("fs").writeFileSync("/tmp/aa.js", aa);
 });
 }());
-'
+')
 */
+// require('./Accessibility') // Accessibility,,true
+// require('./Accessibility') // const {Accessibility} = require('./Accessibility');,true
+// require('./Browser') // Browser,,true
+// require('./Browser') // BrowserContext,,true
+// require('./Browser') // const {Browser} = require('./Browser');,true
+// require('./BrowserFetcher') // BrowserFetcher,,true
+// require('./BrowserFetcher') // const BrowserFetcher = require('./BrowserFetcher');,true
+// require('./Connection') // CDPSession,,true
+// require('./Connection') // const {Connection} = require('./Connection');,true
+// require('./Coverage') // Coverage,,true
+// require('./Coverage') // const {Coverage} = require('./Coverage');,true
+// require('./DOMWorld') // const {DOMWorld} = require('./DOMWorld');,true
+// require('./DeviceDescriptors') // const DeviceDescriptors = require('./DeviceDescriptors');,true
+// require('./Dialog') // Dialog,,true
+// require('./Dialog') // const {Dialog} = require('./Dialog');,true
+// require('./EmulationManager') // const {EmulationManager} = require('./EmulationManager');,true
+// require('./Errors') // TimeoutError,,true
+// require('./Errors') // const Errors = require('./Errors');,true
+// require('./Errors') // const {TimeoutError} = require('./Errors');,true
+// require('./Events') // const {Events} = require('./Events');,true
+// require('./ExecutionContext') // ExecutionContext,,true
+// require('./ExecutionContext') // const {EVALUATION_SCRIPT_URL} = require('./ExecutionContext');,true
+// require('./ExecutionContext') // const {ExecutionContext, EVALUATION_SCRIPT_URL} = require('./ExecutionContext');,true
+// require('./ExecutionContext') // const {ExecutionContext} = require('./ExecutionContext');,true
+// require('./FrameManager') // Frame,,true
+// require('./FrameManager') // const {FrameManager} = require('./FrameManager');,true
+// require('./Input') // Keyboard,,true
+// require('./Input') // Mouse,,true
+// require('./Input') // Touchscreen,,true
+// require('./Input') // const {Keyboard, Mouse, Touchscreen} = require('./Input');,true
+// require('./JSHandle') // ElementHandle,,true
+// require('./JSHandle') // JSHandle,,true
+// require('./JSHandle') // const {JSHandle} = require('./JSHandle');,true
+// require('./JSHandle') // const {createJSHandle, JSHandle} = require('./JSHandle');,true
+// require('./JSHandle') // const {createJSHandle} = require('./JSHandle');,true
+// require('./Launcher') // const Launcher = require('./Launcher');,true
+// require('./LifecycleWatcher') // const {LifecycleWatcher} = require('./LifecycleWatcher');,true
+// require('./NetworkManager') // Request,,true
+// require('./NetworkManager') // Response,,true
+// require('./NetworkManager') // SecurityDetails,,true
+// require('./NetworkManager') // const {NetworkManager} = require('./NetworkManager');,true
+// require('./Page') // ConsoleMessage,,true
+// require('./Page') // FileChooser,,true
+// require('./Page') // Page,,true
+// require('./Page') // const {Page} = require('./Page');,true
+// require('./PipeTransport') // const PipeTransport = require('./PipeTransport');,true
+// require('./Puppeteer') // Puppeteer,,true
+// require('./Target') // Target,,true
+// require('./Target') // const {Target} = require('./Target');,true
+// require('./TaskQueue') // const {TaskQueue} = require('./TaskQueue');,true
+// require('./TimeoutSettings') // const {TimeoutSettings} = require('./TimeoutSettings');,true
+// require('./Tracing') // Tracing,,true
+// require('./Tracing') // const Tracing = require('./Tracing');,true
+// require('./USKeyboardLayout') // const keyDefinitions = require('./USKeyboardLayout');,true
+// require('./WebSocketTransport') // const WebSocketTransport = require('./WebSocketTransport');,true
+// require('./Worker') // Worker,,true
+// require('./Worker') // const {Worker} = require('./Worker');,true
+// require('./helper') // const { helper, assert } = require('./helper');,true
+// require('./helper') // const {assert} = require('./helper');,true
+// require('./helper') // const {debugError} = require('./helper');,true
+// require('./helper') // const {helper, assert, debugError} = require('./helper');,true
+// require('./helper') // const {helper, assert} = require('./helper');,true
+// require('./helper') // const {helper, debugError, assert} = require('./helper');,true
+// require('./helper') // const {helper, debugError} = require('./helper');,true
+// require('./lib/Puppeteer') // const Puppeteer = asyncawait ? require('./lib/Puppeteer') : require('./node6/lib/Puppeteer');,true
+// require('./lib/api') // const api = require('./lib/api');,true
+// require('./lib/helper') // const {helper} = require('./lib/helper');,true
+// require('./package.json') // const packageJson = require('./package.json');,true
+// require('child_process') // const childProcess = require('child_process');,true
+// require('debug') // const debugError = require('debug')(`puppeteer:error`);,true
+// require('debug') // const debugProtocol = require('debug')('puppeteer:protocol');,true
+// require('events') // const EventEmitter = require('events');,true
+// require('extract-zip') // const extract = require('extract-zip');,true
+// require('fs') // const fs = require('fs');,true
+// require('http') // const http = require('http');,true
+// require('http') // require('http').request(options, requestCallback);,true
+// require('https') // const https = require('https');,true
+// require('https') // require('https').request(options, requestCallback) :,true
+// require('https-proxy-agent') // const ProxyAgent = require('https-proxy-agent');,true
+// require('mime') // const mime = require('mime');,true
+// require('os') // const os = require('os');,true
+// require('path') // const path = require('path');,true
+// require('proxy-from-env') // const getProxyForUrl = require('proxy-from-env').getProxyForUrl;,true
+// require('readline') // const readline = require('readline');,true
+// require('rimraf') // const removeFolder = require('rimraf');,true
+// require('rimraf') // const removeRecursive = require('rimraf');,true
+// require('url') // const URL = require('url');,true
+// require('util') // const util = require('util');,true
+// require('ws') // const WebSocket = require('ws');,true
+
+
+
 /*
 file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/package.json
 */
