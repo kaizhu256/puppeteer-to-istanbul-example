@@ -50,25 +50,39 @@ shGithubDateCommitted https://github.com/GoogleChrome/puppeteer/commits/v1.19.0 
     }).end();
 });
 process.on("exit", function () {
-    var data;
-    data = "";
+    var aa;
+    aa = "";
     require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
-        data += (
+        aa += (
             "/*\nfile https://github.com/GoogleChrome/puppeteer/blob/"
             + process.env.VERSION + "/" + elem.split("-")[1] + "\n*/\n"
             + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
             + "\n\n\n\n"
         );
     });
-    data = data.replace((
+    aa = aa.replace((
         /^ *?const .+? = require\(/gm
     ), "// $&");
-    data = data.replace((
-        /^ *?const .+? = require\(/gm
-    ), "// $&");
-    require("fs").writeFileSync("/tmp/aa.js", data.trim() + "\n");
+    aa = aa.replace((
+        /(\w+?): require\(.*?,/gm
+    ), "$1,");
+    process.argv[1].replace((
+        /^(-[\S\s]*?\n)(\+[\S\s]*?\n)\n/gm
+    ), function (ignore, match1, match2) {
+        aa = aa.replace(
+            match1.replace((
+                /^-/gm
+            ), ""),
+            match2.replace((
+                /^\+/gm
+            ), "")
+        );
+    });
+    aa = aa.trim() + "\n";
+    require("fs").writeFileSync("/tmp/aa.js", aa);
 });
 }());
+' '
 ')
 */
 /*
@@ -9628,31 +9642,31 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/api.js
  */
 
 module.exports = {
-  Accessibility: require('./Accessibility').Accessibility,
-  Browser: require('./Browser').Browser,
-  BrowserContext: require('./Browser').BrowserContext,
-  BrowserFetcher: require('./BrowserFetcher'),
-  CDPSession: require('./Connection').CDPSession,
-  ConsoleMessage: require('./Page').ConsoleMessage,
-  Coverage: require('./Coverage').Coverage,
-  Dialog: require('./Dialog').Dialog,
-  ElementHandle: require('./JSHandle').ElementHandle,
-  ExecutionContext: require('./ExecutionContext').ExecutionContext,
-  FileChooser: require('./Page').FileChooser,
-  Frame: require('./FrameManager').Frame,
-  JSHandle: require('./JSHandle').JSHandle,
-  Keyboard: require('./Input').Keyboard,
-  Mouse: require('./Input').Mouse,
-  Page: require('./Page').Page,
-  Puppeteer: require('./Puppeteer'),
-  Request: require('./NetworkManager').Request,
-  Response: require('./NetworkManager').Response,
-  SecurityDetails: require('./NetworkManager').SecurityDetails,
-  Target: require('./Target').Target,
-  TimeoutError: require('./Errors').TimeoutError,
-  Touchscreen: require('./Input').Touchscreen,
-  Tracing: require('./Tracing'),
-  Worker: require('./Worker').Worker,
+  Accessibility,
+  Browser,
+  BrowserContext,
+  BrowserFetcher,
+  CDPSession,
+  ConsoleMessage,
+  Coverage,
+  Dialog,
+  ElementHandle,
+  ExecutionContext,
+  FileChooser,
+  Frame,
+  JSHandle,
+  Keyboard,
+  Mouse,
+  Page,
+  Puppeteer,
+  Request,
+  Response,
+  SecurityDetails,
+  Target,
+  TimeoutError,
+  Touchscreen,
+  Tracing,
+  Worker,
 };
 
 
