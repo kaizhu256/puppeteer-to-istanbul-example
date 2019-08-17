@@ -1,5 +1,5 @@
 /*
-file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0/lib
+file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0/
 shGithubDateCommitted https://github.com/GoogleChrome/puppeteer/commits/v1.19.0 # 2019-07-23T05:02:45Z
 (export VERSION=v1.19.0 && rm -fr /tmp/100 && mkdir -p /tmp/100 && node -e '
 /* jslint utility2:true */

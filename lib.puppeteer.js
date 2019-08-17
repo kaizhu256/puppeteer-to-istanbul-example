@@ -1,5 +1,5 @@
 /*
-file https://registry.npmjs.org/puppeteer/-/puppeteer-1.19.0.tgz
+file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0/
 */
 "use strict";
 // require builtin
@@ -36,7 +36,7 @@ file https://registry.npmjs.org/puppeteer/-/puppeteer-1.19.0.tgz
 // const childProcess = require('child_process');
 // const debugProtocol = require('debug')('puppeteer:protocol');
 // const debugError = require('debug')(`puppeteer:error`);
-// const EventEmitter = require('events');
+const EventEmitter = require('events');
 // const extract = require('extract-zip');
 const fs = require('fs');
 const http = require('http');
@@ -59,6 +59,7 @@ const util = require('util');
 // const {helper, debugError, assert} = require('./helper');
 // const {helper, debugError} = require('./helper');
 // const { helper, assert } = require('./helper');
+const debugError = console.error;
 const removeFolder = function (dir, onError) {
 /*
  * this function will asynchronously "rm -fr" <dir>
