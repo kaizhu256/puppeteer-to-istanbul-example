@@ -84,7 +84,7 @@ process.on("exit", function () {
 });
 }());
 ' '
-')
+' && cat /tmp/aa.js | grep -E '// .* = require\(' | sort -k 4 -u)
 */
 /*
 file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/package.json

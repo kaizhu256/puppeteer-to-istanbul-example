@@ -3,26 +3,62 @@ file https://registry.npmjs.org/puppeteer/-/puppeteer-1.19.0.tgz
 */
 "use strict";
 // require builtin
-const EventEmitter = require('events');
-//!! const ProxyAgent = require('https-proxy-agent');
-const URL = require('url');
-//!! const WebSocket = require('ws');
-const childProcess = require('child_process');
-//!! const debugError = require('debug')(`puppeteer:error`);
-//!! const debugProtocol = require('debug')('puppeteer:protocol');
-//!! const extract = require('extract-zip');
+// const {Accessibility} = require('./Accessibility');
+// const {Browser} = require('./Browser');
+// const BrowserFetcher = require('./BrowserFetcher');
+// const {Connection} = require('./Connection');
+// const {Coverage} = require('./Coverage');
+// const {DOMWorld} = require('./DOMWorld');
+// const DeviceDescriptors = require('./DeviceDescriptors');
+// const {Dialog} = require('./Dialog');
+// const {EmulationManager} = require('./EmulationManager');
+// const {TimeoutError} = require('./Errors');
+// const {Events} = require('./Events');
+// const {EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
+// const {FrameManager} = require('./FrameManager');
+// const {createJSHandle} = require('./JSHandle');
+// const Launcher = require('./Launcher');
+// const {LifecycleWatcher} = require('./LifecycleWatcher');
+// const {NetworkManager} = require('./NetworkManager');
+// const {Page} = require('./Page');
+// const PipeTransport = require('./PipeTransport');
+// const {Target} = require('./Target');
+// const {TaskQueue} = require('./TaskQueue');
+// const {TimeoutSettings} = require('./TimeoutSettings');
+// const Tracing = require('./Tracing');
+// const keyDefinitions = require('./USKeyboardLayout');
+// const WebSocketTransport = require('./WebSocketTransport');
+// const {Worker} = require('./Worker');
+// const {assert} = require('./helper');
+//   const api = require('./lib/api');
+//   const {helper} = require('./lib/helper');
+// const packageJson = require('./package.json');
+// const childProcess = require('child_process');
+// const debugProtocol = require('debug')('puppeteer:protocol');
+// const debugError = require('debug')(`puppeteer:error`);
+// const EventEmitter = require('events');
+// const extract = require('extract-zip');
 const fs = require('fs');
-//!! const getProxyForUrl = require('proxy-from-env').getProxyForUrl;
 const http = require('http');
 const https = require('https');
-//!! const mime = require('mime');
+// const ProxyAgent = require('https-proxy-agent');
+// const mime = require('mime');
 const os = require('os');
 const path = require('path');
+// const getProxyForUrl = require('proxy-from-env').getProxyForUrl;
 const readline = require('readline');
-//!! const removeFolder = require('rimraf');
-//!! const removeRecursive = require('rimraf');
+// const removeRecursive = require('rimraf');
+const URL = require('url');
 const util = require('util');
-const debugError = console.error;
+// const WebSocket = require('ws');
+// const {ExecutionContext, EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
+// const {createJSHandle, JSHandle} = require('./JSHandle');
+// const {Keyboard, Mouse, Touchscreen} = require('./Input');
+// const {helper, assert, debugError} = require('./helper');
+// const {helper, assert} = require('./helper');
+// const {helper, debugError, assert} = require('./helper');
+// const {helper, debugError} = require('./helper');
+// const { helper, assert } = require('./helper');
 const removeFolder = function (dir, onError) {
 /*
  * this function will asynchronously "rm -fr" <dir>
@@ -54,7 +90,8 @@ const removeRecursive = removeFolder;
 /*
 file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/package.json
 */
-{
+// hack-puppeteer - module.exports
+const packageJson = {
   "name": "puppeteer",
   "version": "1.19.0",
   "description": "A high-level API to control headless Chrome over the DevTools Protocol",
