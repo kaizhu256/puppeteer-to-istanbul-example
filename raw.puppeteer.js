@@ -26,7 +26,7 @@ var dict;
         + process.env.VERSION + "/" + elem
     ), function (res) {
         res.pipe(require("fs").createWriteStream(
-            "/tmp/100/" + String(ii + 1).padStart(2, "0") + "-"
+            "/tmp/100/" + String(ii + 1).padStart(2, "0") + "_"
             + require("path").basename(elem)
         ));
     }).end();
@@ -37,7 +37,7 @@ process.on("exit", function () {
     require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
         aa += (
             "\n\n\n\n/*\nlib https://github.com/websockets/ws/blob/"
-            + process.env.VERSION + "/" + elem.split("-")[1] + "\n*/\n"
+            + process.env.VERSION + "/" + elem.split("_")[1] + "\n*/\n"
             + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
         );
     });
@@ -3643,7 +3643,7 @@ var dict;
         + process.env.VERSION + "/" + elem
     ), function (res) {
         res.pipe(require("fs").createWriteStream(
-            "/tmp/100/" + String(ii + 1).padStart(2, "0") + "-"
+            "/tmp/100/" + String(ii + 1).padStart(2, "0") + "_"
             + require("path").basename(elem)
         ));
     }).end();
@@ -3654,7 +3654,7 @@ process.on("exit", function () {
     require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
         aa += (
             "\n\n\n\n/*\nlib https://github.com/GoogleChrome/puppeteer/blob/"
-            + process.env.VERSION + "/" + elem.split("-")[1] + "\n*/\n"
+            + process.env.VERSION + "/" + elem.split("_")[1] + "\n*/\n"
             + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
         );
     });

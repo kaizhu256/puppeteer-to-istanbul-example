@@ -8,9 +8,9 @@ const https = require('https');
 const os = require('os');
 const path = require('path');
 const readline = require('readline');
+const { Writable } = require('stream');
 const URL = require('url');
 const util = require('util');
-const WebSocket = require('ws');
 
 
 
@@ -429,6 +429,9 @@ const EventTarget = {
 };
 
 module.exports = EventTarget;
+// hack-puppeteer - module.exports
+const addEventListener = EventTarget.addEventListener;
+const removeEventListener = EventTarget.removeEventListener;
 
 
 
@@ -1193,12 +1196,13 @@ lib https://github.com/websockets/ws/blob/7.1.2/receiver.js
 // const { Writable } = require('stream');
 
 // const PerMessageDeflate = require('./permessage-deflate');
-const {
-  BINARY_TYPES,
-  EMPTY_BUFFER,
-  kStatusCode,
-  kWebSocket
-} = require('./constants');
+// hack-puppeteer - module.exports
+// const {
+  // BINARY_TYPES,
+  // EMPTY_BUFFER,
+  // kStatusCode,
+  // kWebSocket
+// } = require('./constants');
 // const { concat, toArrayBuffer, unmask } = require('./buffer-util');
 // const { isValidStatusCode, isValidUTF8 } = require('./validation');
 
@@ -2242,7 +2246,7 @@ exports.isValidStatusCode = (code) => {
 
 
 /*
-lib https://github.com/websockets/ws/blob/7.1.2/websocket
+lib https://github.com/websockets/ws/blob/7.1.2/websocket-server.js
 */
 'use strict';
 
@@ -2669,14 +2673,15 @@ lib https://github.com/websockets/ws/blob/7.1.2/websocket.js
 // const PerMessageDeflate = require('./permessage-deflate');
 // const Receiver = require('./receiver');
 // const Sender = require('./sender');
-const {
-  BINARY_TYPES,
-  EMPTY_BUFFER,
-  GUID,
-  kStatusCode,
-  kWebSocket,
-  NOOP
-} = require('./constants');
+// hack-puppeteer - module.exports
+// const {
+  // BINARY_TYPES,
+  // EMPTY_BUFFER,
+  // GUID,
+  // kStatusCode,
+  // kWebSocket,
+  // NOOP
+// } = require('./constants');
 // const { addEventListener, removeEventListener } = require('./event-target');
 // const { format, parse } = require('./extension');
 // const { toBuffer } = require('./buffer-util');
@@ -3574,7 +3579,8 @@ lib https://github.com/websockets/ws/blob/7.1.2/index.js
 
 // const WebSocket = require('./lib/websocket');
 
-WebSocket.createWebSocketStream = require('./lib/stream');
+// hack-puppeteer - module.exports
+WebSocket.createWebSocketStream = createWebSocketStream;
 WebSocket.Server = require('./lib/websocket-server');
 WebSocket.Receiver = require('./lib/receiver');
 WebSocket.Sender = require('./lib/sender');
