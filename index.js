@@ -116,45 +116,6 @@ const OutputFiles = function (coverageInfo) {
 
 
 /*
-require puppeteer-to-istanbul/lib/puppeteer-to-v8.js
-*/
-class PuppeteerToV80 {
-  constructor (coverageInfo) {
-    this.coverageInfo = coverageInfo
-  }
-
-  convertCoverage () {
-    // Iterate through coverage info and create IDs
-    let id = 0
-
-    return this.coverageInfo.map(coverageItem => {
-      return {
-        scriptId: id++,
-        url: 'file://' + coverageItem.url,
-        functions: [{
-          ranges: coverageItem.ranges.map(this.convertRange),
-          isBlockCoverage: true
-        }]
-      }
-    })
-  }
-
-  // Takes in a Puppeteer range object with start and end properties and
-  // converts it to a V8 range with startOffset, endOffset, and count properties
-  convertRange (range) {
-    return {
-      startOffset: range.start,
-      endOffset: range.end,
-      count: 1
-    }
-  }
-}
-
-const PuppeteerToV8 = (coverageInfo) => new PuppeteerToV80(coverageInfo)
-
-
-
-/*
 require v8-to-istanbul/lib/branch.js
 */
 class CovBranch {
@@ -400,19 +361,38 @@ const puppeteer = require("./lib.puppeteer.js");
 
   // Disable JavaScript coverage
   const jsCoverage = await page.coverage.stopJSCoverage()
-  var fullJson = {}
-  PuppeteerToV8(
-      OutputFiles(jsCoverage).getTransformedCoverage()
-  ).convertCoverage().forEach(jsFile => {
+  // init covIstanbul
+  var coverageInfo = OutputFiles(jsCoverage).getTransformedCoverage();
+  // Iterate through coverage info and create IDs
+  let id = 0
+  var covV8;
+  covV8 = coverageInfo.map(coverageItem => {
+    return {
+      scriptId: id++,
+      url: 'file://' + coverageItem.url,
+      functions: [{
+        ranges: coverageItem.ranges.map(function (range) {
+          // Takes in a Puppeteer range object with start and end properties and
+          // converts it to a V8 range with startOffset, endOffset, and count properties
+          return {
+            startOffset: range.start,
+            endOffset: range.end,
+            count: 1
+          }
+        }),
+        isBlockCoverage: true
+      }]
+    }
+  });
+  var covIstanbul = {};
+  covV8.forEach(jsFile => {
     const script = new CovScript(jsFile.url)
     script.applyCoverage(jsFile.functions)
-
     let istanbulCoverage = script.toIstanbul()
-    let keys = Object.keys(istanbulCoverage)
-
-    fullJson[keys[0]] = istanbulCoverage[keys[0]]
+    var key = Object.keys(istanbulCoverage)[0];
+    covIstanbul[key] = istanbulCoverage[key];
   })
-  fs.writeFileSync('./.nyc_output/out.json', JSON.stringify(fullJson), 'utf8')
+  fs.writeFileSync('./.nyc_output/out.json', JSON.stringify(covIstanbul), 'utf8')
 
   await browser.close()
 })()
