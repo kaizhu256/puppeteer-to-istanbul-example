@@ -1,6 +1,6 @@
 /*
 file https://github.com/websockets/ws/tree/6.2.1
-shGithubDateCommitted https://github.com/websockets/ws/commits/6.2.1 # 2019-03-27T08:34:10Z
+shGithubDateCommitted https://github.com/websockets/ws/commits/6.2.1 # 2019-08-12T15:47:05Z
 (export VERSION=6.2.1 && rm -fr /tmp/100 && mkdir -p /tmp/100 && node -e '
 /* jslint utility2:true */
 (function () {
