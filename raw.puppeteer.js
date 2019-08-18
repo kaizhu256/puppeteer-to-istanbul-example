@@ -1,24 +1,96 @@
 /*
 filehttps://github.com/STRML/async-limiter/tree/v1.0.1
 shGithubDateCommitted https://github.com/STRML/async-limiter/commits/v1.0.1 # 2019-06-07T18:37:03Z
-(export GITHUB_REPO=STRML/async-limiter && export VERSION=v1.0.1 && rm -fr /tmp/100 && mkdir -p /tmp/100 && node -e '
+rm -f /tmp/aa.js && for GITHUB_REPO in \
+    STRML/async-limiter \
+    broofa/node-mime \
+    websockets/ws \
+    GoogleChrome/puppeteer; do rm -fr /tmp/aa && mkdir -p /tmp/aa && GITHUB_REPO="$GITHUB_REPO" node -e '
 /* jslint utility2:true */
 (function () {
 /*jslint node*/
 "use strict";
 var dict;
-([
-    "Mime.js",
-    "types/other.js",
-    "types/standard.js",
-    "index.js"
-]).forEach(function (elem, ii) {
+var list;
+var version
+switch (process.env.GITHUB_REPO) {
+case "GoogleChrome/puppeteer":
+    list = [
+        "package.json",
+        "lib/helper.js",
+        "lib/Accessibility.js",
+        "lib/Browser.js",
+        "lib/BrowserFetcher.js",
+        "lib/Connection.js",
+        "lib/Coverage.js",
+        "lib/DOMWorld.js",
+        "lib/DeviceDescriptors.js",
+        "lib/Dialog.js",
+        "lib/EmulationManager.js",
+        "lib/Errors.js",
+        "lib/Events.js",
+        "lib/ExecutionContext.js",
+        "lib/FrameManager.js",
+        "lib/Input.js",
+        "lib/JSHandle.js",
+        "lib/Launcher.js",
+        "lib/LifecycleWatcher.js",
+        "lib/Multimap.js",
+        "lib/NetworkManager.js",
+        "lib/Page.js",
+        "lib/PipeTransport.js",
+        "lib/Puppeteer.js",
+        "lib/Target.js",
+        "lib/TaskQueue.js",
+        "lib/TimeoutSettings.js",
+        "lib/Tracing.js",
+        "lib/USKeyboardLayout.js",
+        "lib/WebSocketTransport.js",
+        "lib/Worker.js",
+        "lib/api.js",
+        "index.js"
+    ];
+    version = "v1.19.0";
+    break;
+case "STRML/async-limiter":
+    list = [
+        "index.js"
+    ];
+    version = "v1.0.1";
+    break;
+case "broofa/node-mime":
+    list = [
+        "Mime.js",
+        "types/other.js",
+        "types/standard.js",
+        "index.js"
+    ];
+    version = "v2.4.4";
+    break;
+case "websockets/ws":
+    list = [
+        "lib/validation.js",
+        "lib/buffer-util.js",
+        "lib/constants.js",
+        "lib/event-target.js",
+        "lib/extension.js",
+        "lib/permessage-deflate.js",
+        "lib/receiver.js",
+        "lib/sender.js",
+        "lib/websocket-server.js",
+        "lib/websocket.js",
+        "index.js"
+    ];
+    version = "6.2.1";
+    break;
+}
+list.forEach(function (elem, ii) {
     require("https").request((
         "https://raw.githubusercontent.com/" + process.env.GITHUB_REPO + "/"
-        + process.env.VERSION + "/" + elem
+        + version + "/" + elem
     ), function (res) {
         res.pipe(require("fs").createWriteStream(
-            "/tmp/100/" + String(ii + 1).padStart(2, "0") + "_"
+            "/tmp/aa/" + String(ii + 1).padStart(2, "0") + "_"
             + require("path").basename(elem)
         ));
     }).end();
@@ -26,12 +98,12 @@ var dict;
 process.on("exit", function () {
     var aa;
     aa = "";
-    require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
+    require("fs").readdirSync("/tmp/aa").sort().forEach(function (elem) {
         aa += (
             "\n\n\n\n/*\nlib https://github.com/"
             + process.env.GITHUB_REPO + "/blob/"
-            + process.env.VERSION + "/" + elem.split("_")[1] + "\n*/\n"
-            + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
+            + version + "/" + elem.split("_")[1] + "\n*/\n"
+            + require("fs").readFileSync("/tmp/aa/" + elem, "utf8").trim()
         );
     });
     dict = {};
@@ -48,71 +120,85 @@ process.on("exit", function () {
     aa = aa.replace((
         /(\w+?):\u0020require\(.*?,/gm
     ), "$1,");
-    aa = aa.trim() + "\n";
-    require("fs").writeFileSync("/tmp/aa.js", aa);
+    aa = aa.trim() + "\n\n\n\n";
+    require("fs").appendFileSync("/tmp/aa.js", aa);
 });
 }());
-')
+'; done
 */
-
-
-
 /*
-filehttps://github.com/broofa/node-mime/tree/v2.4.4
-shGithubDateCommitted https://github.com/broofa/node-mime/commits/v2.4.4 # 2019-06-07T18:37:03Z
-(export GITHUB_REPO=broofa/node-mime && export VERSION=v2.4.4 && rm -fr /tmp/100 && mkdir -p /tmp/100 && node -e '
-/* jslint utility2:true */
-(function () {
-/*jslint node*/
-"use strict";
-var dict;
-([
-    "Mime.js",
-    "types/other.js",
-    "types/standard.js",
-    "index.js"
-]).forEach(function (elem, ii) {
-    require("https").request((
-        "https://raw.githubusercontent.com/" + process.env.GITHUB_REPO + "/"
-        + process.env.VERSION + "/" + elem
-    ), function (res) {
-        res.pipe(require("fs").createWriteStream(
-            "/tmp/100/" + String(ii + 1).padStart(2, "0") + "_"
-            + require("path").basename(elem)
-        ));
-    }).end();
-});
-process.on("exit", function () {
-    var aa;
-    aa = "";
-    require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
-        aa += (
-            "\n\n\n\n/*\nlib https://github.com/"
-            + process.env.GITHUB_REPO + "/blob/"
-            + process.env.VERSION + "/" + elem.split("_")[1] + "\n*/\n"
-            + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
-        );
-    });
-    dict = {};
-    aa.replace((
-        /^.*?\b(require\(.*?\)).*?$/gm
-    ), function (match0, match1) {
-        dict["// " + match1.trim() + " // " + match0.trim()] = true;
-        return "";
-    });
-    aa = Object.keys(dict).sort().join("\n") + aa;
-    aa = aa.replace((
-        /^\u0020*?const\u0020.+?\u0020=\u0020require\(/gm
-    ), "// $&");
-    aa = aa.replace((
-        /(\w+?):\u0020require\(.*?,/gm
-    ), "$1,");
-    aa = aa.trim() + "\n";
-    require("fs").writeFileSync("/tmp/aa.js", aa);
-});
-}());
-')
+lib https://github.com/STRML/async-limiter/blob/v1.0.1/index.js
 */
+'use strict';
+
+function Queue(options) {
+  if (!(this instanceof Queue)) {
+    return new Queue(options);
+  }
+
+  options = options || {};
+  this.concurrency = options.concurrency || Infinity;
+  this.pending = 0;
+  this.jobs = [];
+  this.cbs = [];
+  this._done = done.bind(this);
+}
+
+var arrayAddMethods = [
+  'push',
+  'unshift',
+  'splice'
+];
+
+arrayAddMethods.forEach(function(method) {
+  Queue.prototype[method] = function() {
+    var methodResult = Array.prototype[method].apply(this.jobs, arguments);
+    this._run();
+    return methodResult;
+  };
+});
+
+Object.defineProperty(Queue.prototype, 'length', {
+  get: function() {
+    return this.pending + this.jobs.length;
+  }
+});
+
+Queue.prototype._run = function() {
+  if (this.pending === this.concurrency) {
+    return;
+  }
+  if (this.jobs.length) {
+    var job = this.jobs.shift();
+    this.pending++;
+    job(this._done);
+    this._run();
+  }
+
+  if (this.pending === 0) {
+    while (this.cbs.length !== 0) {
+      var cb = this.cbs.pop();
+      process.nextTick(cb);
+    }
+  }
+};
+
+Queue.prototype.onDone = function(cb) {
+  if (typeof cb === 'function') {
+    this.cbs.push(cb);
+    this._run();
+  }
+};
+
+function done() {
+  this.pending--;
+  this._run();
+}
+
+module.exports = Queue;
+
+
+
 // require('./Mime') // var Mime = require('./Mime');
 // require('./types/standard') // module.exports = new Mime(require('./types/standard'), require('./types/other'));
 
@@ -243,69 +329,6 @@ module.exports = new Mime(require('./types/standard'), require('./types/other'))
 
 
 
-/*
-file https://github.com/websockets/ws/tree/6.2.1
-shGithubDateCommitted https://github.com/websockets/ws/commits/6.2.1 # 2019-08-12T15:47:05Z
-(export GITHUB_REPO=websockets/ws && export VERSION=6.2.1 && rm -fr /tmp/100 && mkdir -p /tmp/100 && node -e '
-/* jslint utility2:true */
-(function () {
-/*jslint node*/
-"use strict";
-var dict;
-([
-    "lib/validation.js",
-    "lib/buffer-util.js",
-    "lib/constants.js",
-    "lib/event-target.js",
-    "lib/extension.js",
-    "lib/permessage-deflate.js",
-    "lib/receiver.js",
-    "lib/sender.js",
-    "lib/websocket-server.js",
-    "lib/websocket.js",
-    "index.js"
-]).forEach(function (elem, ii) {
-    require("https").request((
-        "https://raw.githubusercontent.com/" + process.env.GITHUB_REPO + "/"
-        + process.env.VERSION + "/" + elem
-    ), function (res) {
-        res.pipe(require("fs").createWriteStream(
-            "/tmp/100/" + String(ii + 1).padStart(2, "0") + "_"
-            + require("path").basename(elem)
-        ));
-    }).end();
-});
-process.on("exit", function () {
-    var aa;
-    aa = "";
-    require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
-        aa += (
-            "\n\n\n\n/*\nlib https://github.com/"
-            + process.env.GITHUB_REPO + "/blob/"
-            + process.env.VERSION + "/" + elem.split("_")[1] + "\n*/\n"
-            + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
-        );
-    });
-    dict = {};
-    aa.replace((
-        /^.*?\b(require\(.*?\)).*?$/gm
-    ), function (match0, match1) {
-        dict["// " + match1.trim() + " // " + match0.trim()] = true;
-        return "";
-    });
-    aa = Object.keys(dict).sort().join("\n") + aa;
-    aa = aa.replace((
-        /^\u0020*?const\u0020.+?\u0020=\u0020require\(/gm
-    ), "// $&");
-    aa = aa.replace((
-        /(\w+?):\u0020require\(.*?,/gm
-    ), "$1,");
-    aa = aa.trim() + "\n";
-    require("fs").writeFileSync("/tmp/aa.js", aa);
-});
-}());
-')
-*/
 // require('./buffer-util') // const bufferUtil = require('./buffer-util');
 // require('./buffer-util') // const { concat, toArrayBuffer, unmask } = require('./buffer-util');
 // require('./buffer-util') // const { mask: applyMask, toBuffer } = require('./buffer-util');
@@ -3640,90 +3663,6 @@ module.exports = WebSocket;
 
 
 
-/*
-file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0
-shGithubDateCommitted https://github.com/GoogleChrome/puppeteer/commits/v1.19.0 # 2019-07-23T05:02:45Z
-(export VERSION=v1.19.0 && rm -fr /tmp/100 && mkdir -p /tmp/100 && node -e '
-/* jslint utility2:true */
-(function () {
-/*jslint node*/
-"use strict";
-var dict;
-([
-    "package.json",
-    "lib/helper.js",
-    "lib/Accessibility.js",
-    "lib/Browser.js",
-    "lib/BrowserFetcher.js",
-    "lib/Connection.js",
-    "lib/Coverage.js",
-    "lib/DOMWorld.js",
-    "lib/DeviceDescriptors.js",
-    "lib/Dialog.js",
-    "lib/EmulationManager.js",
-    "lib/Errors.js",
-    "lib/Events.js",
-    "lib/ExecutionContext.js",
-    "lib/FrameManager.js",
-    "lib/Input.js",
-    "lib/JSHandle.js",
-    "lib/Launcher.js",
-    "lib/LifecycleWatcher.js",
-    "lib/Multimap.js",
-    "lib/NetworkManager.js",
-    "lib/Page.js",
-    "lib/PipeTransport.js",
-    "lib/Puppeteer.js",
-    "lib/Target.js",
-    "lib/TaskQueue.js",
-    "lib/TimeoutSettings.js",
-    "lib/Tracing.js",
-    "lib/USKeyboardLayout.js",
-    "lib/WebSocketTransport.js",
-    "lib/Worker.js",
-    "lib/api.js",
-    "index.js"
-]).forEach(function (elem, ii) {
-    require("https").request((
-        "https://raw.githubusercontent.com/GoogleChrome/puppeteer/"
-        + process.env.VERSION + "/" + elem
-    ), function (res) {
-        res.pipe(require("fs").createWriteStream(
-            "/tmp/100/" + String(ii + 1).padStart(2, "0") + "_"
-            + require("path").basename(elem)
-        ));
-    }).end();
-});
-process.on("exit", function () {
-    var aa;
-    aa = "";
-    require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
-        aa += (
-            "\n\n\n\n/*\nlib https://github.com/GoogleChrome/puppeteer/blob/"
-            + process.env.VERSION + "/" + elem.split("_")[1] + "\n*/\n"
-            + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
-        );
-    });
-    dict = {};
-    aa.replace((
-        /^.*?\b(require\(.*?\)).*?$/gm
-    ), function (match0, match1) {
-        dict["// " + match1.trim() + " // " + match0.trim()] = true;
-        return "";
-    });
-    aa = Object.keys(dict).sort().join("\n") + aa;
-    aa = aa.replace((
-        /^\u0020*?const\u0020.+?\u0020=\u0020require\(/gm
-    ), "// $&");
-    aa = aa.replace((
-        /(\w+?):\u0020require\(.*?,/gm
-    ), "$1,");
-    aa = aa.trim() + "\n";
-    require("fs").writeFileSync("/tmp/aa.js", aa);
-});
-}());
-')
-*/
 // require('./Accessibility') // Accessibility,
 // require('./Accessibility') // const {Accessibility} = require('./Accessibility');
 // require('./Browser') // Browser,
