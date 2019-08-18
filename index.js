@@ -33,6 +33,14 @@ require puppeteer-to-istanbul/lib/output-files.js
 const pathLib = path
 
 const storagePath = './.nyc_output/js'
+// mkdir -p
+child_process.spawnSync("mkdir", [
+    "-p", storagePath
+], {
+    stdio: [
+        "ignore", 1, 2
+    ]
+});
 
 
 
@@ -261,7 +269,7 @@ const puppeteer = require("./lib.puppeteer.js");
 
 
 
-;(async () => {
+;(async function () {
   const browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
       dumpio: true,
@@ -289,11 +297,11 @@ const puppeteer = require("./lib.puppeteer.js");
   // Clone covPuppeteer to prevent mutating the passed in data
   covPuppeteer = JSON.parse(JSON.stringify(covPuppeteer));
   let iiInline = 0;
-  function rewritePath (path) {
+  covPuppeteer.forEach(function (elem) {
     // generate a new path relative to ./coverage/js.
     // this would be around where you'd use mkdirp.
     // Get the last element in the path name
-    let basename = pathLib.basename(path)
+    let basename = pathLib.basename(elem.url)
     // Special case: when html present, strip and return specialized string
     if (basename.includes('.html')) {
       basename = pathLib.resolve(storagePath, basename) + 'puppeteerTemp-inline'
@@ -301,35 +309,20 @@ const puppeteer = require("./lib.puppeteer.js");
       basename = basename.split('.js')[0]
       basename = pathLib.resolve(storagePath, basename)
     }
-    // mkdir -p
-    child_process.spawnSync("mkdir", [
-        "-p", storagePath
-    ], {
-        stdio: [
-            "ignore", 1, 2
-        ]
-    });
     if (fs.existsSync(basename + '.js')) {
       iiInline += 1;
-      path = basename + "-" + iiInline + ".js";
+      elem.url = basename + "-" + iiInline + ".js";
     } else {
-      path = basename + ".js";
+      elem.url = basename + ".js";
     }
-    return path;
-  }
-  covPuppeteer.forEach(function (elem) {
-    let path;
-    path = elem.url;
-    path = rewritePath(path);
-    elem.url = path;
-    fs.writeFileSync(path, elem.text);
+    fs.writeFileSync(elem.url, elem.text);
   });
 
   // init cov8
   // Iterate through coverage info and create IDs
   let id = 0
   var covV8;
-  covV8 = covPuppeteer.map(coverageItem => {
+  covV8 = covPuppeteer.map(function (coverageItem) {
     return {
       scriptId: id++,
       url: 'file://' + coverageItem.url,
@@ -350,7 +343,7 @@ const puppeteer = require("./lib.puppeteer.js");
 
   // init covIstanbul
   var covIstanbul = {};
-  covV8.forEach(jsFile => {
+  covV8.forEach(function (jsFile) {
     const script = new CovScript(jsFile.url)
     script.applyCoverage(jsFile.functions)
     let istanbulCoverage = script.toIstanbul()
