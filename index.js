@@ -23,63 +23,6 @@ function assert(value, message) {
 
 
 /*
-require puppeteer-to-istanbul/lib/output-files.js
-*/
-// output JavaScript bundled in puppeteer output to format
-// that can be eaten by Istanbul.
-
-// TODO: Put function interfaces on this file
-
-const pathLib = path
-
-const storagePath = './.nyc_output/js'
-
-const OutputFiles = function (coverageInfo) {
-  // Clone coverageInfo to prevent mutating the passed in data
-  var coverageInfo = JSON.parse(JSON.stringify(coverageInfo));
-  var iterator = 0;
-
-  function rewritePath (path) {
-    // generate a new path relative to ./coverage/js.
-    // this would be around where you'd use mkdirp.
-    var str = ``
-    // Get the last element in the path name
-    var truncatedPath = pathLib.basename(path)
-    // Special case: when html present, strip and return specialized string
-    if (truncatedPath.includes('.html')) {
-      truncatedPath = pathLib.resolve(storagePath, truncatedPath) + 'puppeteerTemp-inline'
-    } else {
-      truncatedPath = truncatedPath.split('.js')[0]
-      truncatedPath = pathLib.resolve(storagePath, truncatedPath)
-    }
-    // mkdir -p
-    child_process.spawnSync("mkdir", [
-        "-p", storagePath
-    ], {
-        stdio: [
-            "ignore", 1, 2
-        ]
-    });
-    if (fs.existsSync(truncatedPath + '.js')) {
-      iterator++
-      str = `${truncatedPath}-${iterator}.js`
-      return str
-    } else {
-      str = `${truncatedPath}.js`
-      return str
-    }
-  }
-  for (var i = 0; i < coverageInfo.length; i++) {
-    var path = rewritePath(coverageInfo[i].url)
-    coverageInfo[i].url = path
-    fs.writeFileSync(path, coverageInfo[i].text)
-  }
-  return coverageInfo;
-}
-
-
-
-/*
 require v8-to-istanbul/lib/branch.js
 */
 class CovBranch {
@@ -328,7 +271,46 @@ const puppeteer = require("./lib.puppeteer.js");
   var covPuppeteer = await page.coverage.stopJSCoverage()
   // output JavaScript bundled in puppeteer output to format
   // that can be eaten by Istanbul.
-  covPuppeteer = OutputFiles(covPuppeteer);
+    const storagePath = './.nyc_output/js'
+  // Clone covPuppeteer to prevent mutating the passed in data
+  var covPuppeteer = JSON.parse(JSON.stringify(covPuppeteer));
+  var iterator = 0;
+
+  function rewritePath (path) {
+    // generate a new path relative to ./coverage/js.
+    // this would be around where you'd use mkdirp.
+    var str = ``
+    // Get the last element in the path name
+    var truncatedPath = path.basename(path)
+    // Special case: when html present, strip and return specialized string
+    if (truncatedPath.includes('.html')) {
+      truncatedPath = path.resolve(storagePath, truncatedPath) + 'puppeteerTemp-inline'
+    } else {
+      truncatedPath = truncatedPath.split('.js')[0]
+      truncatedPath = path.resolve(storagePath, truncatedPath)
+    }
+    // mkdir -p
+    child_process.spawnSync("mkdir", [
+        "-p", storagePath
+    ], {
+        stdio: [
+            "ignore", 1, 2
+        ]
+    });
+    if (fs.existsSync(truncatedPath + '.js')) {
+      iterator++
+      str = `${truncatedPath}-${iterator}.js`
+      return str
+    } else {
+      str = `${truncatedPath}.js`
+      return str
+    }
+  }
+  for (var i = 0; i < covPuppeteer.length; i++) {
+    var path = rewritePath(covPuppeteer[i].url)
+    covPuppeteer[i].url = path
+    fs.writeFileSync(path, covPuppeteer[i].text)
+  }
   // Iterate through coverage info and create IDs
   let id = 0
   var covV8;
