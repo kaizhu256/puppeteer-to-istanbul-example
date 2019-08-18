@@ -5,7 +5,6 @@ const fs = require ('fs')
 const child_process = require ('child_process')
 const http = require ('http');
 const https = require ('https');
-const mime = require ('mime');
 const moduleCjs = require ('module')
 const os = require ('os');
 const path = require ('path');
