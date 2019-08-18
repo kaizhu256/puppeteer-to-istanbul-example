@@ -36,7 +36,7 @@ process.on("exit", function () {
     aa = "";
     require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
         aa += (
-            "\n\n\n\n/*\nfile https://github.com/websockets/ws/blob/"
+            "\n\n\n\n/*\nlib https://github.com/websockets/ws/blob/"
             + process.env.VERSION + "/" + elem.split("-")[1] + "\n*/\n"
             + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
         );
@@ -102,7 +102,7 @@ process.on("exit", function () {
 
 
 /*
-file https://github.com/websockets/ws/blob/7.1.2/buffer
+lib https://github.com/websockets/ws/blob/7.1.2/buffer
 */
 'use strict';
 
@@ -252,7 +252,7 @@ try {
 
 
 /*
-file https://github.com/websockets/ws/blob/7.1.2/constants.js
+lib https://github.com/websockets/ws/blob/7.1.2/constants.js
 */
 'use strict';
 
@@ -268,7 +268,7 @@ module.exports = {
 
 
 /*
-file https://github.com/websockets/ws/blob/7.1.2/event
+lib https://github.com/websockets/ws/blob/7.1.2/event
 */
 'use strict';
 
@@ -444,7 +444,7 @@ module.exports = EventTarget;
 
 
 /*
-file https://github.com/websockets/ws/blob/7.1.2/extension.js
+lib https://github.com/websockets/ws/blob/7.1.2/extension.js
 */
 'use strict';
 
@@ -673,7 +673,7 @@ module.exports = { format, parse };
 
 
 /*
-file https://github.com/websockets/ws/blob/7.1.2/permessage
+lib https://github.com/websockets/ws/blob/7.1.2/permessage
 */
 'use strict';
 
@@ -1197,7 +1197,7 @@ function inflateOnError(err) {
 
 
 /*
-file https://github.com/websockets/ws/blob/7.1.2/receiver.js
+lib https://github.com/websockets/ws/blob/7.1.2/receiver.js
 */
 'use strict';
 
@@ -1695,7 +1695,7 @@ function error(ErrorCtor, message, prefix, statusCode) {
 
 
 /*
-file https://github.com/websockets/ws/blob/7.1.2/sender.js
+lib https://github.com/websockets/ws/blob/7.1.2/sender.js
 */
 'use strict';
 
@@ -2061,7 +2061,7 @@ module.exports = Sender;
 
 
 /*
-file https://github.com/websockets/ws/blob/7.1.2/stream.js
+lib https://github.com/websockets/ws/blob/7.1.2/stream.js
 */
 'use strict';
 
@@ -2217,7 +2217,7 @@ module.exports = createWebSocketStream;
 
 
 /*
-file https://github.com/websockets/ws/blob/7.1.2/validation.js
+lib https://github.com/websockets/ws/blob/7.1.2/validation.js
 */
 'use strict';
 
@@ -2253,7 +2253,7 @@ exports.isValidStatusCode = (code) => {
 
 
 /*
-file https://github.com/websockets/ws/blob/7.1.2/websocket
+lib https://github.com/websockets/ws/blob/7.1.2/websocket
 */
 'use strict';
 
@@ -2665,7 +2665,7 @@ function abortHandshake(socket, code, message, headers) {
 
 
 /*
-file https://github.com/websockets/ws/blob/7.1.2/websocket.js
+lib https://github.com/websockets/ws/blob/7.1.2/websocket.js
 */
 'use strict';
 
@@ -3579,7 +3579,7 @@ function socketOnError() {
 
 
 /*
-file https://github.com/websockets/ws/blob/7.1.2/index.js
+lib https://github.com/websockets/ws/blob/7.1.2/index.js
 */
 'use strict';
 
@@ -3653,7 +3653,7 @@ process.on("exit", function () {
     aa = "";
     require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
         aa += (
-            "\n\n\n\n/*\nfile https://github.com/GoogleChrome/puppeteer/blob/"
+            "\n\n\n\n/*\nlib https://github.com/GoogleChrome/puppeteer/blob/"
             + process.env.VERSION + "/" + elem.split("-")[1] + "\n*/\n"
             + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
         );
@@ -3771,7 +3771,7 @@ process.on("exit", function () {
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/package.json
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/package.json
 */
 {
   "name": "puppeteer",
@@ -3850,7 +3850,7 @@ file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/package.json
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/helper.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/helper.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -4133,7 +4133,7 @@ module.exports = {
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Accessibility.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Accessibility.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -4561,7 +4561,7 @@ module.exports = {Accessibility};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -4950,7 +4950,7 @@ module.exports = {Browser, BrowserContext};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/BrowserFetcher.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/BrowserFetcher.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -5276,7 +5276,7 @@ function httpRequest(url, method, response) {
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -5524,7 +5524,7 @@ module.exports = {Connection, CDPSession};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Coverage.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Coverage.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -5842,7 +5842,7 @@ function convertToDisjointRanges(nestedRanges) {
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DOMWorld.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DOMWorld.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -6567,7 +6567,7 @@ module.exports = {DOMWorld};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DeviceDescriptors.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DeviceDescriptors.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -7421,7 +7421,7 @@ for (const device of module.exports)
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Dialog.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Dialog.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -7510,7 +7510,7 @@ module.exports = {Dialog};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/EmulationManager.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/EmulationManager.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -7570,7 +7570,7 @@ module.exports = {EmulationManager};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Errors.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Errors.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -7605,7 +7605,7 @@ module.exports = {
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Events.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Events.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -7691,7 +7691,7 @@ module.exports = { Events };
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/ExecutionContext.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/ExecutionContext.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -7900,7 +7900,7 @@ module.exports = {ExecutionContext, EVALUATION_SCRIPT_URL};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/FrameManager.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/FrameManager.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -8624,7 +8624,7 @@ module.exports = {FrameManager, Frame};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Input.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Input.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -8943,7 +8943,7 @@ module.exports = { Keyboard, Mouse, Touchscreen};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/JSHandle.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/JSHandle.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -9474,7 +9474,7 @@ module.exports = {createJSHandle, JSHandle, ElementHandle};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Launcher.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Launcher.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -9925,7 +9925,7 @@ module.exports = Launcher;
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/LifecycleWatcher.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/LifecycleWatcher.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -10129,7 +10129,7 @@ module.exports = {LifecycleWatcher};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Multimap.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Multimap.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -10271,7 +10271,7 @@ module.exports = Multimap;
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/NetworkManager.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/NetworkManager.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -11075,7 +11075,7 @@ module.exports = {Request, Response, NetworkManager, SecurityDetails};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Page.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Page.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -12431,7 +12431,7 @@ module.exports = {Page, ConsoleMessage, FileChooser};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/PipeTransport.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/PipeTransport.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -12517,7 +12517,7 @@ module.exports = PipeTransport;
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Puppeteer.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Puppeteer.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -12607,7 +12607,7 @@ module.exports = class {
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Target.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Target.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -12769,7 +12769,7 @@ module.exports = {Target};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/TaskQueue.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/TaskQueue.js
 */
 class TaskQueue {
   constructor() {
@@ -12792,7 +12792,7 @@ module.exports = {TaskQueue};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/TimeoutSettings.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/TimeoutSettings.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -12855,7 +12855,7 @@ module.exports = {TimeoutSettings};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Tracing.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Tracing.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -12933,7 +12933,7 @@ module.exports = Tracing;
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/USKeyboardLayout.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/USKeyboardLayout.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -13227,7 +13227,7 @@ module.exports = {
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/WebSocketTransport.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/WebSocketTransport.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -13301,7 +13301,7 @@ module.exports = WebSocketTransport;
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Worker.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Worker.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -13387,7 +13387,7 @@ module.exports = {Worker};
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/api.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/api.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -13436,7 +13436,7 @@ module.exports = {
 
 
 /*
-file https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/index.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/index.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
