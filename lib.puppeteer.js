@@ -96,16 +96,8 @@ lib https://github.com/websockets/ws/blob/6.2.1/validation.js
 */
 'use strict';
 
-try {
-//   const isValidUTF8 = require('utf-8-validate');
-
-  exports.isValidUTF8 =
-    typeof isValidUTF8 === 'object'
-      ? isValidUTF8.Validation.isValidUTF8 // utf-8-validate@<3.0.0
-      : isValidUTF8;
-} catch (e) /* istanbul ignore next */ {
-  exports.isValidUTF8 = () => true;
-}
+// hack-puppeteer - module.exports
+exports.isValidUTF8 = () => true;
 
 /**
  * Checks if a status code is allowed in a close frame.
@@ -250,35 +242,9 @@ function viewToBuffer(view) {
   return buf;
 }
 
-try {
-//   const bufferUtil = require('bufferutil');
-  const bu = bufferUtil.BufferUtil || bufferUtil;
-
-  module.exports = {
-    concat,
-    mask(source, mask, output, offset, length) {
-      if (length < 48) _mask(source, mask, output, offset, length);
-      else bu.mask(source, mask, output, offset, length);
-    },
-    toArrayBuffer,
-    toBuffer,
-    unmask(buffer, mask) {
-      if (buffer.length < 32) _unmask(buffer, mask);
-      else bu.unmask(buffer, mask);
-    }
-  };
-} catch (e) /* istanbul ignore next */ {
-  module.exports = {
-    concat,
-    mask: _mask,
-    toArrayBuffer,
-    toBuffer,
-    unmask: _unmask
-  };
-}
 // hack-puppeteer - module.exports
 const applyMask = _mask;
-const bufferUtil = module.exports;
+const bufferUtil = { concat };
 const mask = _mask;
 const unmask = _mask;
 
@@ -13208,12 +13174,8 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/index.js
  * limitations under the License.
  */
 
+// hack-puppeteer - module.exports
 let asyncawait = true;
-try {
-  new Function('async function test(){await 1}');
-} catch (error) {
-  asyncawait = false;
-}
 
 if (asyncawait) {
 //   const {helper} = require('./lib/helper');
