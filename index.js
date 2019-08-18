@@ -296,12 +296,16 @@ const puppeteer = require("./lib.puppeteer.js");
   // that can be eaten by Istanbul.
   // Clone covPuppeteer to prevent mutating the passed in data
   covPuppeteer = JSON.parse(JSON.stringify(covPuppeteer));
+
+  // debug
+  fs.writeFileSync("tmp/aa.json", JSON.stringify(covPuppeteer, null, 4));
+
   let iiInline = 0;
-  covPuppeteer.forEach(function (elem) {
+  covPuppeteer.forEach(function (file) {
     // generate a new path relative to ./coverage/js.
     // this would be around where you'd use mkdirp.
     // Get the last element in the path name
-    let basename = pathLib.basename(elem.url)
+    let basename = pathLib.basename(file.url)
     // Special case: when html present, strip and return specialized string
     if (basename.includes('.html')) {
       basename = pathLib.resolve(storagePath, basename) + 'puppeteerTemp-inline'
@@ -311,23 +315,23 @@ const puppeteer = require("./lib.puppeteer.js");
     }
     if (fs.existsSync(basename + '.js')) {
       iiInline += 1;
-      elem.url = basename + "-" + iiInline + ".js";
+      file.url = basename + "-" + iiInline + ".js";
     } else {
-      elem.url = basename + ".js";
+      file.url = basename + ".js";
     }
-    fs.writeFileSync(elem.url, elem.text);
+    fs.writeFileSync(file.url, file.text);
   });
 
   // init cov8
   // Iterate through coverage info and create IDs
   let id = 0
   var covV8;
-  covV8 = covPuppeteer.map(function (coverageItem) {
+  covV8 = covPuppeteer.map(function (file) {
     return {
       scriptId: id++,
-      url: 'file://' + coverageItem.url,
+      url: 'file://' + file.url,
       functions: [{
-        ranges: coverageItem.ranges.map(function (range) {
+        ranges: file.ranges.map(function (range) {
           // Takes in a Puppeteer range object with start and end properties and
           // converts it to a V8 range with startOffset, endOffset, and count properties
           return {
