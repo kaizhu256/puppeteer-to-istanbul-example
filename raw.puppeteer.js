@@ -103,8 +103,8 @@ process.on("exit", function () {
     require("fs").readdirSync("/tmp/aa").sort().forEach(function (elem) {
         aa += (
             "\n\n\n\n/*\nlib https://github.com/"
-            + process.env.GITHUB_REPO + "/blob/"
-            + version + "/" + elem.split("_")[1] + "\n*/\n"
+            + process.env.GITHUB_REPO + "/blob/" + version
+            + "/" + elem.split("_")[1] + "\n*/\n"
             + require("fs").readFileSync("/tmp/aa/" + elem, "utf8").trim()
         );
     });
@@ -115,7 +115,12 @@ process.on("exit", function () {
         dict["// " + match1.trim() + " // " + match0.trim()] = true;
         return "";
     });
-    aa = Object.keys(dict).sort().join("\n") + aa;
+    aa = (
+        "/*\nfile https://github.com/"
+        + process.env.GITHUB_REPO + "/tree/" + version + "\n*/\n"
+        + Object.keys(dict).sort().join("\n")
+        + aa
+    );
     aa = aa.replace((
         /^\u0020*?const\u0020.+?\u0020=\u0020require\(/gm
     ), "// $&");
@@ -128,6 +133,12 @@ process.on("exit", function () {
 }());
 '; done
 */
+/*
+file https://github.com/STRML/async-limiter/tree/v1.0.1
+*/
+
+
+
 /*
 lib https://github.com/STRML/async-limiter/blob/v1.0.1/index.js
 */
@@ -201,8 +212,9 @@ module.exports = Queue;
 
 
 
-// require('./Mime') // var Mime = require('./Mime');
-// require('./types/standard') // module.exports = new Mime(require('./types/standard'), require('./types/other'));
+/*
+file https://github.com/broofa/node-mime/tree/v2.4.4
+*/
 
 
 
@@ -331,38 +343,9 @@ module.exports = new Mime(require('./types/standard'), require('./types/other'))
 
 
 
-// require('./buffer-util') // const bufferUtil = require('./buffer-util');
-// require('./buffer-util') // const { concat, toArrayBuffer, unmask } = require('./buffer-util');
-// require('./buffer-util') // const { mask: applyMask, toBuffer } = require('./buffer-util');
-// require('./constants') // const { EMPTY_BUFFER } = require('./constants');
-// require('./constants') // const { GUID } = require('./constants');
-// require('./constants') // const { kStatusCode, NOOP } = require('./constants');
-// require('./constants') // } = require('./constants');
-// require('./event-target') // const EventTarget = require('./event-target');
-// require('./extension') // const extension = require('./extension');
-// require('./lib/receiver') // WebSocket.Receiver = require('./lib/receiver');
-// require('./lib/sender') // WebSocket.Sender = require('./lib/sender');
-// require('./lib/websocket') // const WebSocket = require('./lib/websocket');
-// require('./lib/websocket-server') // WebSocket.Server = require('./lib/websocket-server');
-// require('./permessage-deflate') // const PerMessageDeflate = require('./permessage-deflate');
-// require('./receiver') // const Receiver = require('./receiver');
-// require('./sender') // const Sender = require('./sender');
-// require('./validation') // const { isValidStatusCode } = require('./validation');
-// require('./validation') // const { isValidStatusCode, isValidUTF8 } = require('./validation');
-// require('./websocket') // const WebSocket = require('./websocket');
-// require('async-limiter') // const Limiter = require('async-limiter');
-// require('bufferutil') // const bufferUtil = require('bufferutil');
-// require('crypto') // const crypto = require('crypto');
-// require('crypto') // const { randomBytes } = require('crypto');
-// require('events') // const EventEmitter = require('events');
-// require('http') // const http = require('http');
-// require('https') // const https = require('https');
-// require('net') // const net = require('net');
-// require('stream') // const { Writable } = require('stream');
-// require('tls') // const tls = require('tls');
-// require('url') // const url = require('url');
-// require('utf-8-validate') // const isValidUTF8 = require('utf-8-validate');
-// require('zlib') // const zlib = require('zlib');
+/*
+file https://github.com/websockets/ws/tree/6.2.1
+*/
 
 
 
@@ -3665,95 +3648,9 @@ module.exports = WebSocket;
 
 
 
-// require('./Accessibility') // Accessibility,
-// require('./Accessibility') // const {Accessibility} = require('./Accessibility');
-// require('./Browser') // Browser,
-// require('./Browser') // BrowserContext,
-// require('./Browser') // const {Browser} = require('./Browser');
-// require('./BrowserFetcher') // BrowserFetcher,
-// require('./BrowserFetcher') // const BrowserFetcher = require('./BrowserFetcher');
-// require('./Connection') // CDPSession,
-// require('./Connection') // const {Connection} = require('./Connection');
-// require('./Coverage') // Coverage,
-// require('./Coverage') // const {Coverage} = require('./Coverage');
-// require('./DOMWorld') // const {DOMWorld} = require('./DOMWorld');
-// require('./DeviceDescriptors') // const DeviceDescriptors = require('./DeviceDescriptors');
-// require('./Dialog') // Dialog,
-// require('./Dialog') // const {Dialog} = require('./Dialog');
-// require('./EmulationManager') // const {EmulationManager} = require('./EmulationManager');
-// require('./Errors') // TimeoutError,
-// require('./Errors') // const Errors = require('./Errors');
-// require('./Errors') // const {TimeoutError} = require('./Errors');
-// require('./Events') // const {Events} = require('./Events');
-// require('./ExecutionContext') // ExecutionContext,
-// require('./ExecutionContext') // const {EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
-// require('./ExecutionContext') // const {ExecutionContext, EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
-// require('./ExecutionContext') // const {ExecutionContext} = require('./ExecutionContext');
-// require('./FrameManager') // Frame,
-// require('./FrameManager') // const {FrameManager} = require('./FrameManager');
-// require('./Input') // Keyboard,
-// require('./Input') // Mouse,
-// require('./Input') // Touchscreen,
-// require('./Input') // const {Keyboard, Mouse, Touchscreen} = require('./Input');
-// require('./JSHandle') // ElementHandle,
-// require('./JSHandle') // JSHandle,
-// require('./JSHandle') // const {JSHandle} = require('./JSHandle');
-// require('./JSHandle') // const {createJSHandle, JSHandle} = require('./JSHandle');
-// require('./JSHandle') // const {createJSHandle} = require('./JSHandle');
-// require('./Launcher') // const Launcher = require('./Launcher');
-// require('./LifecycleWatcher') // const {LifecycleWatcher} = require('./LifecycleWatcher');
-// require('./NetworkManager') // Request,
-// require('./NetworkManager') // Response,
-// require('./NetworkManager') // SecurityDetails,
-// require('./NetworkManager') // const {NetworkManager} = require('./NetworkManager');
-// require('./Page') // ConsoleMessage,
-// require('./Page') // FileChooser,
-// require('./Page') // Page,
-// require('./Page') // const {Page} = require('./Page');
-// require('./PipeTransport') // const PipeTransport = require('./PipeTransport');
-// require('./Puppeteer') // Puppeteer,
-// require('./Target') // Target,
-// require('./Target') // const {Target} = require('./Target');
-// require('./TaskQueue') // const {TaskQueue} = require('./TaskQueue');
-// require('./TimeoutSettings') // const {TimeoutSettings} = require('./TimeoutSettings');
-// require('./Tracing') // Tracing,
-// require('./Tracing') // const Tracing = require('./Tracing');
-// require('./USKeyboardLayout') // const keyDefinitions = require('./USKeyboardLayout');
-// require('./WebSocketTransport') // const WebSocketTransport = require('./WebSocketTransport');
-// require('./Worker') // Worker,
-// require('./Worker') // const {Worker} = require('./Worker');
-// require('./helper') // const { helper, assert } = require('./helper');
-// require('./helper') // const {assert} = require('./helper');
-// require('./helper') // const {debugError} = require('./helper');
-// require('./helper') // const {helper, assert, debugError} = require('./helper');
-// require('./helper') // const {helper, assert} = require('./helper');
-// require('./helper') // const {helper, debugError, assert} = require('./helper');
-// require('./helper') // const {helper, debugError} = require('./helper');
-// require('./lib/Puppeteer') // const Puppeteer = asyncawait ? require('./lib/Puppeteer') : require('./node6/lib/Puppeteer');
-// require('./lib/api') // const api = require('./lib/api');
-// require('./lib/helper') // const {helper} = require('./lib/helper');
-// require('./package.json') // const packageJson = require('./package.json');
-// require('child_process') // const childProcess = require('child_process');
-// require('debug') // const debugError = require('debug')(`puppeteer:error`);
-// require('debug') // const debugProtocol = require('debug')('puppeteer:protocol');
-// require('events') // const EventEmitter = require('events');
-// require('extract-zip') // const extract = require('extract-zip');
-// require('fs') // const fs = require('fs');
-// require('http') // const http = require('http');
-// require('http') // require('http').request(options, requestCallback);
-// require('https') // const https = require('https');
-// require('https') // require('https').request(options, requestCallback) :
-// require('https-proxy-agent') // const ProxyAgent = require('https-proxy-agent');
-// require('mime') // const mime = require('mime');
-// require('os') // const os = require('os');
-// require('path') // const path = require('path');
-// require('proxy-from-env') // const getProxyForUrl = require('proxy-from-env').getProxyForUrl;
-// require('readline') // const readline = require('readline');
-// require('rimraf') // const removeFolder = require('rimraf');
-// require('rimraf') // const removeRecursive = require('rimraf');
-// require('url') // const URL = require('url');
-// require('util') // const util = require('util');
-// require('ws') // const WebSocket = require('ws');
+/*
+file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0
+*/
 
 
 
