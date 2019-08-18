@@ -3581,9 +3581,9 @@ lib https://github.com/websockets/ws/blob/7.1.2/index.js
 
 // hack-puppeteer - module.exports
 WebSocket.createWebSocketStream = createWebSocketStream;
-WebSocket.Server = require('./lib/websocket-server');
-WebSocket.Receiver = require('./lib/receiver');
-WebSocket.Sender = require('./lib/sender');
+WebSocket.Server = WebSocketServer;
+WebSocket.Receiver = Receiver;
+WebSocket.Sender = Sender.js;
 
 module.exports = WebSocket;
 
