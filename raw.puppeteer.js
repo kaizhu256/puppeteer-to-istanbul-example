@@ -1,4 +1,63 @@
 /*
+filehttps://github.com/STRML/async-limiter/tree/v1.0.1
+shGithubDateCommitted https://github.com/STRML/async-limiter/commits/v1.0.1 # 2019-06-07T18:37:03Z
+(export GITHUB_REPO=STRML/async-limiter && VERSION=v1.0.1 && rm -fr /tmp/100 && mkdir -p /tmp/100 && node -e '
+/* jslint utility2:true */
+(function () {
+/*jslint node*/
+"use strict";
+var dict;
+([
+    "Mime.js",
+    "types/other.js",
+    "types/standard.js",
+    "index.js"
+]).forEach(function (elem, ii) {
+    require("https").request((
+        "https://raw.githubusercontent.com/" + process.env.GITHUB_REPO + "/"
+        + process.env.VERSION + "/" + elem
+    ), function (res) {
+        res.pipe(require("fs").createWriteStream(
+            "/tmp/100/" + String(ii + 1).padStart(2, "0") + "_"
+            + require("path").basename(elem)
+        ));
+    }).end();
+});
+process.on("exit", function () {
+    var aa;
+    aa = "";
+    require("fs").readdirSync("/tmp/100").sort().forEach(function (elem) {
+        aa += (
+            "\n\n\n\n/*\nlib https://github.com/"
+            + process.env.GITHUB_REPO + "/blob/"
+            + process.env.VERSION + "/" + elem.split("_")[1] + "\n*/\n"
+            + require("fs").readFileSync("/tmp/100/" + elem, "utf8").trim()
+        );
+    });
+    dict = {};
+    aa.replace((
+        /^.*?\b(require\(.*?\)).*?$/gm
+    ), function (match0, match1) {
+        dict["// " + match1.trim() + " // " + match0.trim()] = true;
+        return "";
+    });
+    aa = Object.keys(dict).sort().join("\n") + aa;
+    aa = aa.replace((
+        /^\u0020*?const\u0020.+?\u0020=\u0020require\(/gm
+    ), "// $&");
+    aa = aa.replace((
+        /(\w+?):\u0020require\(.*?,/gm
+    ), "$1,");
+    aa = aa.trim() + "\n";
+    require("fs").writeFileSync("/tmp/aa.js", aa);
+});
+}());
+')
+*/
+
+
+
+/*
 filehttps://github.com/broofa/node-mime/tree/v2.4.4
 shGithubDateCommitted https://github.com/broofa/node-mime/commits/v2.4.4 # 2019-06-07T18:37:03Z
 (export VERSION=v2.4.4 && rm -fr /tmp/100 && mkdir -p /tmp/100 && node -e '
