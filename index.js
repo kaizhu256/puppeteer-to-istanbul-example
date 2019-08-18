@@ -19,25 +19,6 @@ function assert(value, message) {
   if (!value)
     throw new Error(message);
 }
-const jsonCopy = function (obj) {
-    return JSON.parse(JSON.stringify(obj));
-};
-const fsRmrSync = function (dir) {
-/*
- * this function will synchronously "rm -fr" dir
- */
-    child_process.execFileSync(
-        "rm",
-        [
-            "-fr", path.resolve(process.cwd(), dir)
-        ],
-        {
-            stdio: [
-                "ignore", 1, 2
-            ]
-        }
-    );
-};
 
 
 
@@ -53,23 +34,17 @@ const pathLib = path
 
 const storagePath = './.nyc_output/js'
 
-class OutputFiles0 {
-  constructor (coverageInfo) {
-    // Clone coverageInfo to prevent mutating the passed in data
-    this.coverageInfo = jsonCopy(coverageInfo)
-    this.iterator = 0
-    this._parseAndIsolate()
-  }
+const OutputFiles = function (coverageInfo) {
+  // Clone coverageInfo to prevent mutating the passed in data
+  var coverageInfo = JSON.parse(JSON.stringify(coverageInfo));
+  var iterator = 0;
 
-  rewritePath (path) {
+  function rewritePath (path) {
     // generate a new path relative to ./coverage/js.
     // this would be around where you'd use mkdirp.
-
     var str = ``
-
     // Get the last element in the path name
     var truncatedPath = pathLib.basename(path)
-
     // Special case: when html present, strip and return specialized string
     if (truncatedPath.includes('.html')) {
       truncatedPath = pathLib.resolve(storagePath, truncatedPath) + 'puppeteerTemp-inline'
@@ -80,37 +55,26 @@ class OutputFiles0 {
     // mkdir -p
     child_process.spawnSync("mkdir", [
         "-p", storagePath
-    ],
-    {
+    ], {
         stdio: [
             "ignore", 1, 2
         ]
     });
     if (fs.existsSync(truncatedPath + '.js')) {
-      this.iterator++
-      str = `${truncatedPath}-${this.iterator}.js`
+      iterator++
+      str = `${truncatedPath}-${iterator}.js`
       return str
     } else {
       str = `${truncatedPath}.js`
       return str
     }
   }
-
-  _parseAndIsolate () {
-    for (var i = 0; i < this.coverageInfo.length; i++) {
-      var path = this.rewritePath(this.coverageInfo[i].url)
-      this.coverageInfo[i].url = path
-      fs.writeFileSync(path, this.coverageInfo[i].text)
-    }
+  for (var i = 0; i < coverageInfo.length; i++) {
+    var path = rewritePath(coverageInfo[i].url)
+    coverageInfo[i].url = path
+    fs.writeFileSync(path, coverageInfo[i].text)
   }
-
-  getTransformedCoverage () {
-    return this.coverageInfo
-  }
-}
-
-const OutputFiles = function (coverageInfo) {
-  return new OutputFiles0(coverageInfo)
+  return coverageInfo;
 }
 
 
@@ -360,13 +324,15 @@ const puppeteer = require("./lib.puppeteer.js");
   await page.goto(url)
 
   // Disable JavaScript coverage
-  const jsCoverage = await page.coverage.stopJSCoverage()
-  // init covIstanbul
-  var coverageInfo = OutputFiles(jsCoverage).getTransformedCoverage();
+  // init covPuppeteer
+  var covPuppeteer = await page.coverage.stopJSCoverage()
+  // output JavaScript bundled in puppeteer output to format
+  // that can be eaten by Istanbul.
+  covPuppeteer = OutputFiles(covPuppeteer);
   // Iterate through coverage info and create IDs
   let id = 0
   var covV8;
-  covV8 = coverageInfo.map(coverageItem => {
+  covV8 = covPuppeteer.map(coverageItem => {
     return {
       scriptId: id++,
       url: 'file://' + coverageItem.url,
