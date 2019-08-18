@@ -288,7 +288,7 @@ const puppeteer = require("./lib.puppeteer.js");
   // that can be eaten by Istanbul.
   // Clone covPuppeteer to prevent mutating the passed in data
   covPuppeteer = JSON.parse(JSON.stringify(covPuppeteer));
-  let iterator = 0;
+  let iiInline = 0;
   function rewritePath (path) {
     // generate a new path relative to ./coverage/js.
     // this would be around where you'd use mkdirp.
@@ -311,19 +311,19 @@ const puppeteer = require("./lib.puppeteer.js");
         ]
     });
     if (fs.existsSync(truncatedPath + '.js')) {
-      iterator++
-      str = `${truncatedPath}-${iterator}.js`
+      iiInline += 1;
+      str = truncatedPath + "-" + iiInline + ".js";
       return str
     } else {
       str = `${truncatedPath}.js`
       return str
     }
   }
-  for (let i = 0; i < covPuppeteer.length; i++) {
-    let path = rewritePath(covPuppeteer[i].url)
-    covPuppeteer[i].url = path
-    fs.writeFileSync(path, covPuppeteer[i].text)
-  }
+  covPuppeteer.forEach(function (elem) {
+    let path = rewritePath(elem.url)
+    elem.url = path
+    fs.writeFileSync(path, elem.text)
+  });
 
   // init cov8
   // Iterate through coverage info and create IDs
