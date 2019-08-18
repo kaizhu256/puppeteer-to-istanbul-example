@@ -1,3 +1,4 @@
+(function () {
 "use strict";
 // hack-puppeteer - module.exports
 const childProcess = require('child_process');
@@ -253,6 +254,15 @@ module.exports = {
   EMPTY_BUFFER: Buffer.alloc(0),
   NOOP: () => {}
 };
+// hack-puppeteer - module.exports
+const {
+  BINARY_TYPES,
+  GUID,
+  kStatusCode,
+  kWebSocket,
+  EMPTY_BUFFER,
+  NOOP
+} = module.exports;
 
 
 
@@ -13416,3 +13426,4 @@ module.exports = new Puppeteer(__dirname, preferredRevision, isPuppeteerCore);
 /*
 file none
 */
+}());
