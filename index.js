@@ -292,15 +292,14 @@ const puppeteer = require("./lib.puppeteer.js");
   function rewritePath (path) {
     // generate a new path relative to ./coverage/js.
     // this would be around where you'd use mkdirp.
-    let str = "";
     // Get the last element in the path name
-    let truncatedPath = pathLib.basename(path)
+    let basename = pathLib.basename(path)
     // Special case: when html present, strip and return specialized string
-    if (truncatedPath.includes('.html')) {
-      truncatedPath = pathLib.resolve(storagePath, truncatedPath) + 'puppeteerTemp-inline'
+    if (basename.includes('.html')) {
+      basename = pathLib.resolve(storagePath, basename) + 'puppeteerTemp-inline'
     } else {
-      truncatedPath = truncatedPath.split('.js')[0]
-      truncatedPath = pathLib.resolve(storagePath, truncatedPath)
+      basename = basename.split('.js')[0]
+      basename = pathLib.resolve(storagePath, basename)
     }
     // mkdir -p
     child_process.spawnSync("mkdir", [
@@ -310,13 +309,13 @@ const puppeteer = require("./lib.puppeteer.js");
             "ignore", 1, 2
         ]
     });
-    if (fs.existsSync(truncatedPath + '.js')) {
+    if (fs.existsSync(basename + '.js')) {
       iiInline += 1;
-      str = truncatedPath + "-" + iiInline + ".js";
+      path = basename + "-" + iiInline + ".js";
     } else {
-      str = truncatedPath + ".js";
+      path = basename + ".js";
     }
-    return str;
+    return path;
   }
   covPuppeteer.forEach(function (elem) {
     let path;
