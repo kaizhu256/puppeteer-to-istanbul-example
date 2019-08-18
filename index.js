@@ -34,49 +34,6 @@ const pathLib = path
 
 const storagePath = './.nyc_output/js'
 
-const OutputFiles = function (covPuppeteer) {
-  // Clone covPuppeteer to prevent mutating the passed in data
-  covPuppeteer = JSON.parse(JSON.stringify(covPuppeteer));
-  let iterator = 0;
-
-  function rewritePath (path) {
-    // generate a new path relative to ./coverage/js.
-    // this would be around where you'd use mkdirp.
-    let str = ``
-    // Get the last element in the path name
-    let truncatedPath = pathLib.basename(path)
-    // Special case: when html present, strip and return specialized string
-    if (truncatedPath.includes('.html')) {
-      truncatedPath = pathLib.resolve(storagePath, truncatedPath) + 'puppeteerTemp-inline'
-    } else {
-      truncatedPath = truncatedPath.split('.js')[0]
-      truncatedPath = pathLib.resolve(storagePath, truncatedPath)
-    }
-    // mkdir -p
-    child_process.spawnSync("mkdir", [
-        "-p", storagePath
-    ], {
-        stdio: [
-            "ignore", 1, 2
-        ]
-    });
-    if (fs.existsSync(truncatedPath + '.js')) {
-      iterator++
-      str = `${truncatedPath}-${iterator}.js`
-      return str
-    } else {
-      str = `${truncatedPath}.js`
-      return str
-    }
-  }
-  for (let i = 0; i < covPuppeteer.length; i++) {
-    let path = rewritePath(covPuppeteer[i].url)
-    covPuppeteer[i].url = path
-    fs.writeFileSync(path, covPuppeteer[i].text)
-  }
-  return covPuppeteer;
-}
-
 
 
 /*
