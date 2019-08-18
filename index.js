@@ -292,7 +292,7 @@ const puppeteer = require("./lib.puppeteer.js");
   function rewritePath (path) {
     // generate a new path relative to ./coverage/js.
     // this would be around where you'd use mkdirp.
-    let str = ``
+    let str = "";
     // Get the last element in the path name
     let truncatedPath = pathLib.basename(path)
     // Special case: when html present, strip and return specialized string
@@ -313,16 +313,17 @@ const puppeteer = require("./lib.puppeteer.js");
     if (fs.existsSync(truncatedPath + '.js')) {
       iiInline += 1;
       str = truncatedPath + "-" + iiInline + ".js";
-      return str
     } else {
-      str = `${truncatedPath}.js`
-      return str
+      str = truncatedPath + ".js";
     }
+    return str;
   }
   covPuppeteer.forEach(function (elem) {
-    let path = rewritePath(elem.url)
-    elem.url = path
-    fs.writeFileSync(path, elem.text)
+    let path;
+    path = elem.url;
+    path = rewritePath(path);
+    elem.url = path;
+    fs.writeFileSync(path, elem.text);
   });
 
   // init cov8
