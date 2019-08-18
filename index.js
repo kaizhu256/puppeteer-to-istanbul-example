@@ -354,7 +354,7 @@ const puppeteer = require("./lib.puppeteer.js");
     var key = Object.keys(istanbulCoverage)[0];
     covIstanbul[key] = istanbulCoverage[key];
   })
-  fs.writeFileSync('./.nyc_output/out.json', JSON.stringify(covIstanbul), 'utf8')
+  fs.writeFileSync('./.nyc_output/out.json', JSON.stringify(covIstanbul, null, 4), 'utf8')
 
   await browser.close()
 })()
