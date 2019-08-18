@@ -1,11 +1,13 @@
 /*
-filehttps://github.com/STRML/async-limiter/tree/v1.0.1
+file https://github.com/STRML/async-limiter/tree/v1.0.1
 shGithubDateCommitted https://github.com/STRML/async-limiter/commits/v1.0.1 # 2019-06-07T18:37:03Z
-rm -f /tmp/aa.js && for GITHUB_REPO in \
-    STRML/async-limiter \
-    broofa/node-mime \
-    websockets/ws \
-    GoogleChrome/puppeteer; do rm -fr /tmp/aa && mkdir -p /tmp/aa && GITHUB_REPO="$GITHUB_REPO" node -e '
+file https://github.com/broofa/node-mime/tree/v2.4.4
+shGithubDateCommitted https://github.com/broofa/node-mime/commits/v2.4.4 # 2019-06-07T18:37:03Z
+file https://github.com/websockets/ws/tree/6.2.1
+shGithubDateCommitted https://github.com/websockets/ws/commits/6.2.1 # 2019-08-12T15:47:05Z
+file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0
+shGithubDateCommitted https://github.com/GoogleChrome/puppeteer/commits/v1.19.0 # 2019-07-23T05:02:45Z
+rm -f /tmp/aa.js && for GITHUB_REPO in STRML/async-limiter broofa/node-mime websockets/ws GoogleChrome/puppeteer; do rm -fr /tmp/aa && mkdir -p /tmp/aa && GITHUB_REPO="$GITHUB_REPO" node -e '
 /* jslint utility2:true */
 (function () {
 /*jslint node*/
