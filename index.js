@@ -373,39 +373,6 @@ function parsePath (scriptPath) {
 
 
 /*
-require puppeteer-to-istanbul/lib/puppeteer-to-istanbul.js
-*/
-class PuppeteerToIstanbul {
-  constructor (coverageInfo) {
-    this.coverageInfo = coverageInfo
-    this.puppeteerToConverter = OutputFiles(coverageInfo).getTransformedCoverage()
-    this.puppeteerToV8Info = PuppeteerToV8(this.puppeteerToConverter).convertCoverage()
-  }
-
-  setCoverageInfo (coverageInfo) {
-    this.coverageInfo = coverageInfo
-  }
-
-  writeIstanbulFormat () {
-    var fullJson = {}
-
-    this.puppeteerToV8Info.forEach(jsFile => {
-      const script = new CovScript(jsFile.url)
-      script.applyCoverage(jsFile.functions)
-
-      let istanbulCoverage = script.toIstanbul()
-      let keys = Object.keys(istanbulCoverage)
-
-      fullJson[keys[0]] = istanbulCoverage[keys[0]]
-    })
-
-    fs.writeFileSync('./.nyc_output/out.json', JSON.stringify(fullJson), 'utf8')
-  }
-}
-
-
-
-/*
 require puppeteer-to-istanbul
 */
 const puppeteer = require("./lib.puppeteer.js");
@@ -433,6 +400,19 @@ const puppeteer = require("./lib.puppeteer.js");
 
   // Disable JavaScript coverage
   const jsCoverage = await page.coverage.stopJSCoverage()
-  new PuppeteerToIstanbul(jsCoverage).writeIstanbulFormat()
+  var fullJson = {}
+  PuppeteerToV8(
+      OutputFiles(jsCoverage).getTransformedCoverage()
+  ).convertCoverage().forEach(jsFile => {
+    const script = new CovScript(jsFile.url)
+    script.applyCoverage(jsFile.functions)
+
+    let istanbulCoverage = script.toIstanbul()
+    let keys = Object.keys(istanbulCoverage)
+
+    fullJson[keys[0]] = istanbulCoverage[keys[0]]
+  })
+  fs.writeFileSync('./.nyc_output/out.json', JSON.stringify(fullJson), 'utf8')
+
   await browser.close()
 })()
