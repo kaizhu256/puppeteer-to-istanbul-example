@@ -54,6 +54,85 @@ const removeRecursive = removeFolder;
 
 
 /*
+file https://github.com/STRML/async-limiter/tree/v1.0.1
+*/
+
+
+
+/*
+lib https://github.com/STRML/async-limiter/blob/v1.0.1/index.js
+*/
+'use strict';
+
+function Queue(options) {
+  if (!(this instanceof Queue)) {
+    return new Queue(options);
+  }
+
+  options = options || {};
+  this.concurrency = options.concurrency || Infinity;
+  this.pending = 0;
+  this.jobs = [];
+  this.cbs = [];
+  this._done = done.bind(this);
+}
+
+var arrayAddMethods = [
+  'push',
+  'unshift',
+  'splice'
+];
+
+arrayAddMethods.forEach(function(method) {
+  Queue.prototype[method] = function() {
+    var methodResult = Array.prototype[method].apply(this.jobs, arguments);
+    this._run();
+    return methodResult;
+  };
+});
+
+Object.defineProperty(Queue.prototype, 'length', {
+  get: function() {
+    return this.pending + this.jobs.length;
+  }
+});
+
+Queue.prototype._run = function() {
+  if (this.pending === this.concurrency) {
+    return;
+  }
+  if (this.jobs.length) {
+    var job = this.jobs.shift();
+    this.pending++;
+    job(this._done);
+    this._run();
+  }
+
+  if (this.pending === 0) {
+    while (this.cbs.length !== 0) {
+      var cb = this.cbs.pop();
+      process.nextTick(cb);
+    }
+  }
+};
+
+Queue.prototype.onDone = function(cb) {
+  if (typeof cb === 'function') {
+    this.cbs.push(cb);
+    this._run();
+  }
+};
+
+function done() {
+  this.pending--;
+  this._run();
+}
+
+module.exports = Queue;
+
+
+
+/*
 file https://github.com/broofa/node-mime/tree/v2.4.4
 */
 // require('./Mime') // var Mime = require('./Mime');
