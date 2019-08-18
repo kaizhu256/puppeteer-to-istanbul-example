@@ -270,7 +270,11 @@ const puppeteer = require("./lib.puppeteer.js");
 
 ;(async function () {
   const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: [
+          '--disable-setuid-sandbox',
+          "--incognito",
+          '--no-sandbox'
+      ],
       dumpio: true,
       executablePath: "/root/Documents/puppeteer-to-istanbul-example/node_modules/puppeteer/.local-chromium/linux-674921/chrome-linux/chrome",
       headless: true
