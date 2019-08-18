@@ -1,6 +1,6 @@
 ///usr/bin/env node
 /*
- * lib.utility2.js (2019.8.12)
+ * lib.utility2.js (2019.8.17)
  * https://github.com/kaizhu256/node-utility2
  * this zero-dependency package will provide a collection of high-level functions to to build, test, and deploy webapps
  *
@@ -2358,7 +2358,9 @@ local.ajax = function (opt, onError) {
     var bufferValidateAndCoerce;
     var isDone;
     var local2;
+    var onError2;
     var onEvent;
+    var stack;
     var streamCleanup;
     var timeout;
     var tmp;
@@ -2495,9 +2497,17 @@ local.ajax = function (opt, onError) {
             // cleanup reqStream and resStream
             streamCleanup(xhr.reqStream);
             streamCleanup(xhr.resStream);
-            onError(xhr.err, xhr);
+            onError2(xhr.err, xhr);
             break;
         }
+    };
+    // init onError2
+    stack = new Error().stack;
+    onError2 = function (err, xhr) {
+        if (err && typeof err.stack === "string") {
+            err.stack += "\n" + stack;
+        }
+        onError(err, xhr);
     };
     streamCleanup = function (stream) {
     /*
@@ -2556,10 +2566,6 @@ local.ajax = function (opt, onError) {
         xhr.resHeaders = {};
         xhr.timeStart = xhr.timeStart || Date.now();
     };
-    // init onError
-    if (local2.onErrorWithStack) {
-        onError = local2.onErrorWithStack(onError);
-    }
     // init xhr - XMLHttpRequest
     xhr = (
         local.isBrowser
@@ -2626,7 +2632,7 @@ local.ajax = function (opt, onError) {
     // init timerTimeout
     xhr.timerTimeout = setTimeout(function () {
         xhr.err = xhr.err || new Error(
-            "onTimeout - errTimeout - "
+            "onTimeout - "
             + timeout + " ms - " + "ajax " + xhr.method + " " + xhr.url
         );
         xhr.abort();
@@ -4695,17 +4701,13 @@ local.fsRmrSync = function (dir) {
 /*
  * this function will synchronously "rm -fr" dir
  */
-    local.child_process.execFileSync(
-        "rm",
-        [
-            "-fr", local.path.resolve(process.cwd(), dir)
-        ],
-        {
-            stdio: [
-                "ignore", 1, 2
-            ]
-        }
-    );
+    local.child_process.execFileSync("rm", [
+        "-fr", local.path.resolve(process.cwd(), dir)
+    ], {
+        stdio: [
+            "ignore", 1, 2
+        ]
+    });
 };
 
 local.fsWriteFileWithMkdirpSync = function (file, data, mode) {
@@ -5203,12 +5205,9 @@ local.middlewareAssetsCached = function (req, res, next) {
         switch (opt.modeNext) {
         case 1:
             // skip gzip
-            if (
-                res.headersSent
-                || !(
-                    /\bgzip\b/
-                ).test(req.headers["accept-encoding"])
-            ) {
+            if (res.headersSent || !(
+                /\bgzip\b/
+            ).test(req.headers["accept-encoding"])) {
                 opt.modeNext += 1;
                 opt.onNext();
                 return;
@@ -5738,13 +5737,13 @@ local.onErrorWithStack = function (onError) {
         /(.*?)\n.*?$/m
     ), "$1");
     onError2 = function (err, data, meta) {
+        // append current-stack to err.stack
         if (
             err
             && typeof err.stack === "string"
             && err !== local.errDefault
             && String(err.stack).indexOf(stack.split("\n")[2]) < 0
         ) {
-            // append current-stack to err.stack
             err.stack += "\n" + stack;
         }
         onError(err, data, meta);
@@ -5913,15 +5912,13 @@ local.onParallelList = function (opt, onEach, onError) {
 
 local.onTimeout = function (onError, timeout, message) {
 /*
- * this function will create a timeout-err-handler,
+ * this function will create <timeout>-handler,
  * that appends current-stack to any err encountered
  */
     onError = local.onErrorWithStack(onError);
     // create timerTimeout
     return setTimeout(function () {
-        onError(new Error(
-            "onTimeout - errTimeout - " + timeout + " ms - " + message
-        ));
+        onError(new Error("onTimeout - " + timeout + " ms - " + message));
     // coerce to finite integer
     }, timeout);
 };
@@ -6635,7 +6632,7 @@ local.serverRespondHeadSet = function (ignore, res, statusCode, headers) {
 
 local.serverRespondTimeoutDefault = function (req, res, timeout) {
 /*
- * this function will create a timeout-err-handler for server-<req>
+ * this function will create <timeout>-handler for server-<req>
  */
     var isDone;
     var onError;
@@ -7067,7 +7064,9 @@ local.templateRender = function (template, dict, opt) {
         }
         // iteratively lookup nested values in the dict
         argList[0].split(".").forEach(function (key) {
-            value = value && value[key];
+            if (key !== "this") {
+                value = value && value[key];
+            }
         });
         return value;
     };
@@ -7707,15 +7706,15 @@ local.testRunDefault = function (opt) {
     local.ajaxProgressUpdate();
     // mock serverLog
     local._testRunConsoleError = local._testRunConsoleError || console.error;
-    console.error = function (arg0) {
+    console.error = function (...argList) {
     /*
      * this function will ignore serverLog-messages during test-run
      */
         /* istanbul ignore next */
         if (!globalThis.__coverage__ && !(
             /^serverLog\u0020-\u0020\{/
-        ).test(arg0)) {
-            local._testRunConsoleError.apply(console, arguments); // jslint ignore:line
+        ).test(argList[0])) {
+            local._testRunConsoleError(...argList);
         }
     };
     if (!local.isBrowser) {
@@ -7799,8 +7798,7 @@ local.testRunDefault = function (opt) {
     // shallow-copy testPlatform.testCaseList to prevent side-effects
     // from in-place sort from testReportMerge
     local.onParallelList({
-        list: testPlatform.testCaseList.slice(),
-        rateLimit: Infinity
+        list: testPlatform.testCaseList.slice()
     }, function (testCase, onParallel) {
         var onError;
         var timerTimeout;
