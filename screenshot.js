@@ -7,12 +7,12 @@
 //!! const URL = require("url");
 const child_process = require("child_process");
 //!! const crypto = require("crypto");
-const fs = require("fs");
+//!! const fs = require("fs");
 //!! const http = require("http");
 //!! const https = require("https");
 //!! const net = require("net");
-const os = require("os");
-const path = require("path");
+//!! const os = require("os");
+//!! const path = require("path");
 //!! const readline = require("readline");
 //!! const tls = require("tls");
 //!! const url = require("url");
@@ -26,7 +26,7 @@ local = {};
 
 var browser;
 var chromeProcess;
-var temporaryUserDataDir;
+//!! var temporaryUserDataDir;
 local.gracefullyCloseChrome = function () {
 /**
   * @return {Promise}
@@ -35,15 +35,15 @@ local.gracefullyCloseChrome = function () {
     process.removeListener("SIGINT", local.killChrome130);
     process.removeListener("SIGTERM", local.gracefullyCloseChrome);
     process.removeListener("SIGHUP", local.gracefullyCloseChrome);
-    if (temporaryUserDataDir) {
+    //!! if (temporaryUserDataDir) {
+        //!! local.killChrome();
+    //!! } else if (connection) {
+    // Attempt to close chrome gracefully
+    connection.send("Browser.close").catch(function (err) {
+        console.error(err);
         local.killChrome();
-    } else if (connection) {
-        // Attempt to close chrome gracefully
-        connection.send("Browser.close").catch(function (err) {
-            console.error(err);
-            local.killChrome();
-        });
-    }
+    });
+    //!! }
     return waitForChromeToClose;
 };
 
@@ -68,14 +68,14 @@ local.killChrome = function () {
         // the process might have already stopped
         } catch (ignore) {}
     }
-    // Attempt to remove temporary profile directory to avoid littering.
-    child_process.spawnSync("rm", [
-        "-fr", temporaryUserDataDir
-    ], {
-        stdio: [
-            "ignore", 1, 2
-        ]
-    });
+    //!! // Attempt to remove temporary profile directory to avoid littering.
+    //!! child_process.spawnSync("rm", [
+        //!! "-fr", temporaryUserDataDir
+    //!! ], {
+        //!! stdio: [
+            //!! "ignore", 1, 2
+        //!! ]
+    //!! });
 };
 
 local.killChrome130 = function () {
@@ -83,18 +83,18 @@ local.killChrome130 = function () {
     process.exit(130);
 };
 
-temporaryUserDataDir = await new Promise(function (resolve, reject) {
-    fs.mkdtemp(path.join(
-        os.tmpdir(),
-        "puppeteer_dev_profile-"
-    ), function (err, data) {
-        if (err) {
-            reject(err);
-            return;
-        }
-        resolve(data);
-    });
-});
+//!! temporaryUserDataDir = await new Promise(function (resolve, reject) {
+    //!! fs.mkdtemp(path.join(
+        //!! os.tmpdir(),
+        //!! "puppeteer_dev_profile-"
+    //!! ), function (err, data) {
+        //!! if (err) {
+            //!! reject(err);
+            //!! return;
+        //!! }
+        //!! resolve(data);
+    //!! });
+//!! });
 chromeProcess = child_process.spawn((
     "node_modules/puppeteer/.local-chromium"
     + "/linux-674921/chrome-linux/chrome"
@@ -105,8 +105,8 @@ chromeProcess = child_process.spawn((
     "--incognito",
     "--mute-audio",
     "--no-sandbox",
-    "--remote-debugging-port=0",
-    `--user-data-dir=${temporaryUserDataDir}`
+    "--remote-debugging-port=0"
+    //!! `--user-data-dir=${temporaryUserDataDir}`
 ], {
     // On non-windows platforms, `detached: false` makes child process
     // a leader of a new process group, making it possible
@@ -126,16 +126,16 @@ let chromeClosed = false;
 const waitForChromeToClose = new Promise(function (fulfill) {
     chromeProcess.once("exit", function () {
         chromeClosed = true;
-        // Cleanup as processes exit.
-        if (temporaryUserDataDir) {
-            child_process.spawnSync("rm", [
-                "-fr", temporaryUserDataDir
-            ], {
-                stdio: [
-                    "ignore", 1, 2
-                ]
-            });
-        }
+        //!! // Cleanup as processes exit.
+        //!! if (temporaryUserDataDir) {
+            //!! child_process.spawnSync("rm", [
+                //!! "-fr", temporaryUserDataDir
+            //!! ], {
+                //!! stdio: [
+                    //!! "ignore", 1, 2
+                //!! ]
+            //!! });
+        //!! }
         fulfill();
     });
 });
