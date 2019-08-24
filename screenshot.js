@@ -156,29 +156,10 @@ var listenersProcess;
 var listenersRemove;
 var page;
 var path;
+var preferredRevision;
 var readline;
 var timeout;
 var waitForChromeToClose;
-//!! // hack-puppeteer - module.exports
-//!! const EventEmitter = require("events");
-//!! const URL = require("url");
-child_process = require("child_process");
-//!! const crypto = require("crypto");
-fs = require("fs");
-//!! const http = require("http");
-//!! const https = require("https");
-//!! const net = require("net");
-//!! const os = require("os");
-path = require("path");
-readline = require("readline");
-//!! const tls = require("tls");
-//!! const url = require("url");
-//!! const util = require("util");
-//!! const { Writable} = require("stream");
-//!! const { randomBytes} = require("crypto");
-
-module.exports = require("./.a00.js");
-
 listenersAdd = function (list) {
     list.forEach(function (elem) {
         elem[0].on(elem[1], elem[2]);
@@ -226,6 +207,26 @@ killChrome = function () {
 };
 
 // init
+//!! EventEmitter = require("events");
+//!! URL = require("url");
+child_process = require("child_process");
+//!! crypto = require("crypto");
+fs = require("fs");
+//!! http = require("http");
+//!! https = require("https");
+//!! net = require("net");
+//!! os = require("os");
+path = require("path");
+readline = require("readline");
+//!! tls = require("tls");
+//!! url = require("url");
+//!! util = require("util");
+//!! { Writable} = require("stream");
+//!! { randomBytes} = require("crypto");
+
+module.exports = require("./.a00.js");
+
+preferredRevision = 674921;
 timeout = 30000;
 chromeProcess = child_process.spawn((
     "node_modules/puppeteer/.local-chromium"
@@ -324,7 +325,8 @@ try {
             reject(new Error(
                 "Timed out after " + timeout
                 + " ms while trying to connect to Chrome!"
-                + " The only Chrome revision guaranteed to work is 674921"
+                + " The only Chrome revision guaranteed to work is "
+                + preferredRevision
             ));
         };
         rl = readline.createInterface({
