@@ -399,9 +399,9 @@ await page._screenshotTaskQueue._chain.then(function () {
 // screenshot - html
 tmp = page._frameManager._mainFrame._secondaryWorld._contextPromise;
 tmp = await local.identity(tmp);
-console.error(
-    tmp.evaluate.toString()
-);
+//!! console.error(
+    //!! tmp.evaluate.toString()
+//!! );
 tmp = await tmp._evaluateInternal(
     true,
     Function( // jslint ignore:line
