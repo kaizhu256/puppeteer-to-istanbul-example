@@ -144,6 +144,7 @@
 (async function () {
 "use strict";
 var browser;
+var browserWSEndpoint;
 var child_process;
 var chromeClosed;
 var chromeProcess;
@@ -151,7 +152,9 @@ var fs;
 var gracefullyCloseChrome;
 var killChrome130;
 var killChrome;
+var timeout;
 var waitForChromeToClose;
+var waitForWSEndpoint;
 //!! // hack-puppeteer - module.exports
 //!! const EventEmitter = require("events");
 //!! const URL = require("url");
@@ -216,6 +219,64 @@ killChrome130 = function () {
     process.exit(130);
 };
 
+/**
+  * @param {!Puppeteer.ChildProcess} chromeProcess
+  * @param {number} timeout
+  * @return {!Promise<string>}
+  */
+waitForWSEndpoint = function (chromeProcess) {
+    return new Promise(function (resolve, reject) {
+        const rl = readline.createInterface({ input: chromeProcess.stderr });
+        let stderr = '';
+        const listeners = [
+            helper.addEventListener(rl, 'line', onLine),
+            helper.addEventListener(rl, 'close', () => onClose()),
+            helper.addEventListener(chromeProcess, 'exit', () => onClose()),
+            helper.addEventListener(chromeProcess, 'error', error => onClose(error))
+        ];
+        const timeoutId = setTimeout(onTimeout, timeout);
+
+        /**
+          * @param {!Error=} error
+          */
+        function onClose(error) {
+            cleanup();
+            reject(new Error([
+                'Failed to launch chrome!' + (error ? ' ' + error.message : ''),
+                stderr,
+                '',
+                'TROUBLESHOOTING: https://github.com/GoogleChrome/puppeteer/blob/master/docs/troubleshooting.md',
+                '',
+            ].join('\n')));
+        }
+
+        function onTimeout() {
+            cleanup();
+            reject(new TimeoutError(`Timed out after ${timeout} ms while trying to connect to Chrome! The only Chrome revision guaranteed to work is 674921}`));
+        }
+
+        /**
+          * @param {string} line
+          */
+        function onLine(line) {
+            stderr += line + '\n';
+            const match = line.match(/^DevTools listening on (ws:\/\/.*)$/);
+            if (!match)
+                return;
+            cleanup();
+            resolve(match[1]);
+        }
+
+        function cleanup() {
+            if (timeoutId)
+                clearTimeout(timeoutId);
+            helper.removeEventListeners(listeners);
+        }
+    });
+}
+
+
+timeout = 30000;
 chromeProcess = child_process.spawn((
     "node_modules/puppeteer/.local-chromium"
     + "/linux-674921/chrome-linux/chrome"
@@ -256,9 +317,8 @@ process.addListener("SIGHUP", gracefullyCloseChrome);
 /** @type {?Connection} */
 let connection = null;
 try {
-    const browserWSEndpoint = await module.exports.waitForWSEndpoint(
+    browserWSEndpoint = await module.exports.waitForWSEndpoint(
         chromeProcess,
-        30000,
         674921
     );
     const transport = await module.exports.WebSocketTransport.create(
