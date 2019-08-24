@@ -1242,46 +1242,6 @@ function initAsClient(websocket, address, protocols, options) {
         });
     }
 
-    req.on('error', (err) => {
-        if (websocket._req.aborted) return;
-
-        req = websocket._req = null;
-        websocket.readyState = WebSocket.CLOSING;
-        websocket.emit('error', err);
-        websocket.emitClose();
-    });
-
-    req.on('response', (res) => {
-        const location = res.headers.location;
-        const statusCode = res.statusCode;
-
-        if (
-            location &&
-            opts.followRedirects &&
-            statusCode >= 300 &&
-            statusCode < 400
-        ) {
-            if (++websocket._redirects > opts.maxRedirects) {
-                abortHandshake(websocket, req, 'Maximum redirects exceeded');
-                return;
-            }
-
-            req.abort();
-
-            const addr = url.URL
-                ? new url.URL(location, address)
-                : url.resolve(address, location);
-
-            initAsClient(websocket, addr, protocols, options);
-        } else if (!websocket.emit('unexpected-response', req, res)) {
-            abortHandshake(
-                websocket,
-                req,
-                `Unexpected server response: ${res.statusCode}`
-            );
-        }
-    });
-
     req.on('upgrade', (res, socket, head) => {
         websocket.emit('upgrade', res);
 
@@ -1428,21 +1388,6 @@ function socketOnEnd() {
     websocket.readyState = WebSocket.CLOSING;
     websocket._receiver.end();
     this.end();
-}
-
-/**
-  * The listener of the `net.Socket` `'error'` event.
-  *
-  * @private
-  */
-function socketOnError() {
-    const websocket = this[kWebSocket];
-
-    this.removeListener('error', socketOnError);
-    this.on('error', NOOP);
-
-    websocket.readyState = WebSocket.CLOSING;
-    this.destroy();
 }
 
 
