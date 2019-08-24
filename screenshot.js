@@ -226,13 +226,15 @@ killChrome130 = function () {
   */
 waitForWSEndpoint = function (chromeProcess) {
     return new Promise(function (resolve, reject) {
-        const rl = readline.createInterface({ input: chromeProcess.stderr });
-        let stderr = '';
+        const rl = readline.createInterface({
+            input: chromeProcess.stderr
+        });
+        let stderr = "";
         const listeners = [
-            helper.addEventListener(rl, 'line', onLine),
-            helper.addEventListener(rl, 'close', () => onClose()),
-            helper.addEventListener(chromeProcess, 'exit', () => onClose()),
-            helper.addEventListener(chromeProcess, 'error', error => onClose(error))
+            helper.addEventListener(rl, "line", onLine),
+            helper.addEventListener(rl, "close", onClose),
+            helper.addEventListener(chromeProcess, "exit", onClose),
+            helper.addEventListener(chromeProcess, "error", onClose)
         ];
         const timeoutId = setTimeout(onTimeout, timeout);
 
@@ -241,40 +243,44 @@ waitForWSEndpoint = function (chromeProcess) {
           */
         function onClose(error) {
             cleanup();
-            reject(new Error([
-                'Failed to launch chrome!' + (error ? ' ' + error.message : ''),
-                stderr,
-                '',
-                'TROUBLESHOOTING: https://github.com/GoogleChrome/puppeteer/blob/master/docs/troubleshooting.md',
-                '',
-            ].join('\n')));
+            reject(new Error(
+                "Failed to launch chrome!" + error.message + "\n"
+                + stderr + "\n\n"
+                + "TROUBLESHOOTING: https://github.com/GoogleChrome/puppeteer"
+                + "/blob/master/docs/troubleshooting.md\n\n"
+            ));
         }
 
         function onTimeout() {
             cleanup();
-            reject(new TimeoutError(`Timed out after ${timeout} ms while trying to connect to Chrome! The only Chrome revision guaranteed to work is 674921}`));
+            reject(new Error(
+                `Timed out after ${timeout} ms while trying to connect to Chrome! The only Chrome revision guaranteed to work is 674921}` // jslint ignore:line
+            ));
         }
 
         /**
           * @param {string} line
           */
         function onLine(line) {
-            stderr += line + '\n';
-            const match = line.match(/^DevTools listening on (ws:\/\/.*)$/);
-            if (!match)
+            stderr += line + "\n";
+            const match = line.match(
+                /^DevTools\u0020listening\u0020on\u0020(ws:\/\/.*)$/
+            );
+            if (!match) {
                 return;
-            cleanup();
+            }
+    cleanup();
             resolve(match[1]);
         }
 
         function cleanup() {
-            if (timeoutId)
+            if (timeoutId) {
                 clearTimeout(timeoutId);
+            }
             helper.removeEventListeners(listeners);
         }
     });
 }
-
 
 timeout = 30000;
 chromeProcess = child_process.spawn((
