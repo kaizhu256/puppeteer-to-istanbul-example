@@ -1290,31 +1290,6 @@ class Sender {
     }
 
     /**
-      * Executes queued send operations.
-      *
-      * @private
-      */
-    dequeue() {
-        while (!this._deflating && this._queue.length) {
-            const params = this._queue.shift();
-
-            this._bufferedBytes -= params[1].length;
-            params[0].apply(this, params.slice(1));
-        }
-    }
-
-    /**
-      * Enqueues a send operation.
-      *
-      * @param {Array} params Send operation parameters.
-      * @private
-      */
-    enqueue(params) {
-        this._bufferedBytes += params[1].length;
-        this._queue.push(params);
-    }
-
-    /**
       * Sends a frame.
       *
       * @param {Buffer[]} list The frame to send
