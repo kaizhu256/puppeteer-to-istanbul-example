@@ -3010,14 +3010,6 @@ class Page extends EventEmitter {
 
         client.on('Page.domContentEventFired', event => this.emit(Events.Page.DOMContentLoaded));
         client.on('Page.loadEventFired', event => this.emit(Events.Page.Load));
-        client.on('Runtime.consoleAPICalled', event => this._onConsoleAPI(event));
-        client.on('Runtime.bindingCalled', event => this._onBindingCalled(event));
-        client.on('Page.javascriptDialogOpening', event => this._onDialog(event));
-        client.on('Runtime.exceptionThrown', exception => this._handleException(exception.exceptionDetails));
-        client.on('Inspector.targetCrashed', event => this._onTargetCrashed());
-        client.on('Performance.metrics', event => this._emitMetrics(event));
-        client.on('Log.entryAdded', event => this._onLogEntryAdded(event));
-        client.on('Page.fileChooserOpened', event => this._onFileChooser(event));
         this._target._isClosedPromise.then(() => {
             this.emit(Events.Page.Close);
             this._closed = true;
@@ -3030,9 +3022,6 @@ class Page extends EventEmitter {
             this._client.send('Target.setAutoAttach', {autoAttach: true, waitForDebuggerOnStart: false, flatten: true}),
             this._client.send('Performance.enable', {}),
             this._client.send('Log.enable', {}),
-            this._client.send('Page.setInterceptFileChooserDialog', {enabled: true}).catch(e => {
-                this._fileChooserInterceptionIsDisabled = true;
-            }),
         ]);
     }
 
@@ -3051,8 +3040,6 @@ class Page extends EventEmitter {
     async setViewport(viewport) {
         const needsReload = await this._emulationManager.emulateViewport(viewport);
         this._viewport = viewport;
-        if (needsReload)
-            await this.reload();
     }
 
     /**
@@ -3063,37 +3050,10 @@ class Page extends EventEmitter {
     async _screenshotTask(format, options) {
         await this._client.send('Target.activateTarget', {targetId: this._target._targetId});
         let clip = options.clip ? processClip(options.clip) : undefined;
-
-        if (options.fullPage) {
-            const metrics = await this._client.send('Page.getLayoutMetrics');
-            const width = Math.ceil(metrics.contentSize.width);
-            const height = Math.ceil(metrics.contentSize.height);
-
-            // Overwrite clip for full page at all times.
-            clip = { x: 0, y: 0, width, height, scale: 1 };
-            const {
-                isMobile = false,
-                deviceScaleFactor = 1,
-                isLandscape = false
-            } = this._viewport || {};
-            /** @type {!Protocol.Emulation.ScreenOrientation} */
-            const screenOrientation = isLandscape ? { angle: 90, type: 'landscapePrimary' } : { angle: 0, type: 'portraitPrimary' };
-            await this._client.send('Emulation.setDeviceMetricsOverride', { mobile: isMobile, width, height, deviceScaleFactor, screenOrientation });
-        }
         const shouldSetDefaultBackground = options.omitBackground && format === 'png';
-        if (shouldSetDefaultBackground)
-            await this._client.send('Emulation.setDefaultBackgroundColorOverride', { color: { r: 0, g: 0, b: 0, a: 0 } });
         const result = await this._client.send('Page.captureScreenshot', { format, quality: options.quality, clip });
-        if (shouldSetDefaultBackground)
-            await this._client.send('Emulation.setDefaultBackgroundColorOverride');
-
-        if (options.fullPage && this._viewport)
-            await this.setViewport(this._viewport);
-
         const buffer = options.encoding === 'base64' ? result.data : Buffer.from(result.data, 'base64');
-        if (options.path)
-            await writeFileAsync(options.path, buffer);
-        return buffer;
+        await writeFileAsync(options.path, buffer);
     }
 }
 module.exports = {Page};
@@ -3146,16 +3106,7 @@ class Target {
         /** @type {?Promise<!Worker>} */
         this._workerPromise = null;
         this._initializedPromise = new Promise(fulfill => this._initializedCallback = fulfill).then(async success => {
-            if (!success)
-                return false;
             const opener = this.opener();
-            if (!opener || !opener._pagePromise || this.type() !== 'page')
-                return true;
-            const openerPage = await opener._pagePromise;
-            if (!openerPage.listenerCount(Events.Page.Popup))
-                return true;
-            const popupPage = await this.page();
-            openerPage.emit(Events.Page.Popup, popupPage);
             return true;
         });
         this._isClosedPromise = new Promise(fulfill => this._closedCallback = fulfill);
@@ -3190,13 +3141,6 @@ class Target {
         if (type === 'page' || type === 'background_page' || type === 'service_worker' || type === 'shared_worker' || type === 'browser')
             return type;
         return 'other';
-    }
-
-    /**
-      * @return {!Puppeteer.Browser}
-      */
-    browser() {
-        return this._browserContext.browser();
     }
 
     /**
