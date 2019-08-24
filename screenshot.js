@@ -1,6 +1,6 @@
 /* jslint utility2:true */
 
-(async function () {
+(async function (local) {
 "use strict";
 //!! // hack-puppeteer - module.exports
 //!! const EventEmitter = require("events");
@@ -22,18 +22,18 @@ const path = require("path");
 
 module.exports = require("./.a00.js");
 
-
+local = {};
 
 var browser;
 var chromeProcess;
 var gracefullyCloseChrome;
-var killChrome130;
-var killChrome;
-var removeListeners;
 var temporaryUserDataDir;
 // This method has to be sync to be used as 'exit' event handler.
-killChrome = function () {
-    removeListeners();
+local.killChrome = function () {
+    process.removeListener("exit", local.killChrome);
+    process.removeListener("SIGINT", local.killChrome130);
+    process.removeListener("SIGTERM", gracefullyCloseChrome);
+    process.removeListener("SIGHUP", gracefullyCloseChrome);
     if (chromeProcess.pid && !chromeProcess.killed && !chromeClosed) {
         // Force kill chrome.
         try {
@@ -61,29 +61,25 @@ killChrome = function () {
   * @return {Promise}
   */
 gracefullyCloseChrome = function () {
-    removeListeners();
+    process.removeListener("exit", local.killChrome);
+    process.removeListener("SIGINT", local.killChrome130);
+    process.removeListener("SIGTERM", gracefullyCloseChrome);
+    process.removeListener("SIGHUP", gracefullyCloseChrome);
     if (temporaryUserDataDir) {
-        killChrome();
+        local.killChrome();
     } else if (connection) {
         // Attempt to close chrome gracefully
         connection.send("Browser.close").catch(function (err) {
             console.error(err);
-            killChrome();
+            local.killChrome();
         });
     }
     return waitForChromeToClose;
 };
 
-killChrome130 = function () {
-    killChrome();
+local.killChrome130 = function () {
+    local.killChrome();
     process.exit(130);
-};
-
-removeListeners = function () {
-    process.removeListener("exit", killChrome);
-    process.removeListener("SIGINT", killChrome130);
-    process.removeListener("SIGTERM", gracefullyCloseChrome);
-    process.removeListener("SIGHUP", gracefullyCloseChrome);
 };
 
 temporaryUserDataDir = await new Promise(function (resolve, reject) {
@@ -143,8 +139,8 @@ const waitForChromeToClose = new Promise(function (fulfill) {
     });
 });
 
-process.addListener("exit", killChrome);
-process.addListener("SIGINT", killChrome130);
+process.addListener("exit", local.killChrome);
+process.addListener("SIGINT", local.killChrome130);
 process.addListener("SIGTERM", gracefullyCloseChrome);
 process.addListener("SIGHUP", gracefullyCloseChrome);
 /** @type {?Connection} */
@@ -175,7 +171,7 @@ try {
     });
     //!! return browser;
 } catch (errCaught) {
-    killChrome();
+    local.killChrome();
     console.error(errCaught);
 }
 
