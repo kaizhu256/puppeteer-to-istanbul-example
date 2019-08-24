@@ -143,6 +143,7 @@
 
 (async function (local) {
 "use strict";
+var assert;
 var browser;
 var browserWSEndpoint;
 var child_process;
@@ -160,7 +161,7 @@ var preferredRevision;
 var readline;
 var timeout;
 var waitForChromeToClose;
-local.nop(path);
+local.nop(assert, fs, path);
 
 listenersAdd = function (list) {
     list.forEach(function (elem) {
@@ -209,6 +210,7 @@ killChrome = function () {
 };
 
 // init
+assert = require("assert");
 //!! EventEmitter = require("events");
 //!! URL = require("url");
 child_process = require("child_process");
@@ -380,10 +382,25 @@ page = await browser.newPage();
 
 
 await page.goto("https://www.example.com");
-await page.screenshot({
+
+async function screenshot() {
+/**
+  * @param {!ScreenshotOptions=} options
+  * @return {!Promise<!Buffer|!String>}
+  */
+    const result = page._screenshotTaskQueue._chain.then(
+        page._screenshotTask.bind(page, "png", {
+            path: "tmp/aa.png"
+        })
+    );
+    page._screenshotTaskQueue._chain = result.catch(local.nop);
+    return result;
+}
+
+await screenshot({
     path: "tmp/aa.png"
 });
-fs.writeFileSync("tmp/aa.html", await page.content());
+//!! fs.writeFileSync("tmp/aa.html", await page.content());
 
 
 
