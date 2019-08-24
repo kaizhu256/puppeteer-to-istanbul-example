@@ -1886,7 +1886,6 @@ const Events = {
         FrameNavigated: Symbol('Events.FrameManager.FrameNavigated'),
         FrameDetached: Symbol('Events.FrameManager.FrameDetached'),
         LifecycleEvent: Symbol('Events.FrameManager.LifecycleEvent'),
-        FrameNavigatedWithinDocument: Symbol('Events.FrameManager.FrameNavigatedWithinDocument'),
         ExecutionContextCreated: Symbol('Events.FrameManager.ExecutionContextCreated'),
         ExecutionContextDestroyed: Symbol('Events.FrameManager.ExecutionContextDestroyed'),
     },
@@ -2062,7 +2061,6 @@ class FrameManager extends EventEmitter {
 
         this._client.on('Page.frameAttached', event => this._onFrameAttached(event.frameId, event.parentFrameId));
         this._client.on('Page.frameNavigated', event => this._onFrameNavigated(event.frame));
-        this._client.on('Page.navigatedWithinDocument', event => this._onFrameNavigatedWithinDocument(event.frameId, event.url));
         this._client.on('Page.frameDetached', event => this._onFrameDetached(event.frameId));
         this._client.on('Page.frameStoppedLoading', event => this._onFrameStoppedLoading(event.frameId));
         this._client.on('Runtime.executionContextCreated', event => this._onExecutionContextCreated(event.context));
@@ -2428,7 +2426,6 @@ class LifecycleWatcher {
         this._eventListeners = [
             helper.addEventListener(frameManager._client, Events.CDPSession.Disconnected, () => this._terminate(new Error('Navigation failed because browser has disconnected!'))),
             helper.addEventListener(this._frameManager, Events.FrameManager.LifecycleEvent, this._checkLifecycleComplete.bind(this)),
-            helper.addEventListener(this._frameManager, Events.FrameManager.FrameNavigatedWithinDocument, this._navigatedWithinDocument.bind(this)),
             helper.addEventListener(this._frameManager, Events.FrameManager.FrameDetached, this._onFrameDetached.bind(this)),
             helper.addEventListener(this._frameManager.networkManager(), Events.NetworkManager.Request, this._onRequest.bind(this)),
         ];
@@ -2523,16 +2520,6 @@ class LifecycleWatcher {
         const errorMessage = 'Navigation Timeout Exceeded: ' + this._timeout + 'ms exceeded';
         return new Promise(fulfill => this._maximumTimer = setTimeout(fulfill, this._timeout))
                 .then(() => new Error(errorMessage));
-    }
-
-    /**
-      * @param {!Puppeteer.Frame} frame
-      */
-    _navigatedWithinDocument(frame) {
-        if (frame !== this._frame)
-            return;
-        this._hasSameDocumentNavigation = true;
-        this._checkLifecycleComplete();
     }
 
     _checkLifecycleComplete() {
