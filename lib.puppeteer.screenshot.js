@@ -279,27 +279,6 @@ class OpenEvent extends Event {
 }
 
 /**
-  * Class representing an error event.
-  *
-  * @extends Event
-  * @private
-  */
-class ErrorEvent extends Event {
-    /**
-      * Create a new `ErrorEvent`.
-      *
-      * @param {Object} error The error that generated this event
-      * @param {WebSocket} target A reference to the target to which the event was dispatched
-      */
-    constructor(error, target) {
-        super('error', target);
-
-        this.message = error.message;
-        this.error = error;
-    }
-}
-
-/**
   * This provides methods for emulating the `EventTarget` interface. It's not
   * meant to be used directly.
   *
@@ -348,23 +327,6 @@ const EventTarget = {
             this.on(method, listener);
         }
     },
-
-    /**
-      * Remove an event listener.
-      *
-      * @param {String} method A string representing the event type to remove
-      * @param {Function} listener The listener to remove
-      * @public
-      */
-    removeEventListener(method, listener) {
-        const listeners = this.listeners(method);
-
-        for (var i = 0; i < listeners.length; i++) {
-            if (listeners[i] === listener || listeners[i]._listener === listener) {
-                this.removeListener(method, listeners[i]);
-            }
-        }
-    }
 };
 
 module.exports = EventTarget;
@@ -672,21 +634,6 @@ class Receiver extends Writable {
     }
 
     /**
-      * Reads mask bytes.
-      *
-      * @private
-      */
-    getMask() {
-        if (this._bufferedBytes < 4) {
-            this._loop = false;
-            return;
-        }
-
-        this._mask = this.consume(4);
-        this._state = GET_DATA;
-    }
-
-    /**
       * Reads data bytes.
       *
       * @param {Function} cb Callback
@@ -768,71 +715,9 @@ class Receiver extends Writable {
 
         this._state = GET_INFO;
     }
-
-    /**
-      * Handles a control message.
-      *
-      * @param {Buffer} data Data to handle
-      * @return {(Error|RangeError|undefined)} A possible error
-      * @private
-      */
-    controlMessage(data) {
-        if (this._opcode === 0x08) {
-            this._loop = false;
-
-            if (data.length === 0) {
-                this.emit('conclude', 1005, '');
-                this.end();
-            } else if (data.length === 1) {
-                return error(RangeError, 'invalid payload length 1', true, 1002);
-            } else {
-                const code = data.readUInt16BE(0);
-
-                if (!isValidStatusCode(code)) {
-                    return error(RangeError, `invalid status code ${code}`, true, 1002);
-                }
-
-                const buf = data.slice(2);
-
-                if (!isValidUTF8(buf)) {
-                    return error(Error, 'invalid UTF-8 sequence', true, 1007);
-                }
-
-                this.emit('conclude', code, buf.toString());
-                this.end();
-            }
-        } else if (this._opcode === 0x09) {
-            this.emit('ping', data);
-        } else {
-            this.emit('pong', data);
-        }
-
-        this._state = GET_INFO;
-    }
 }
 
 module.exports = Receiver;
-
-/**
-  * Builds an error object.
-  *
-  * @param {(Error|RangeError)} ErrorCtor The error constructor
-  * @param {String} message The error message
-  * @param {Boolean} prefix Specifies whether or not to add a default prefix to
-  *     `message`
-  * @param {Number} statusCode The status code
-  * @return {(Error|RangeError)} The error
-  * @private
-  */
-function error(ErrorCtor, message, prefix, statusCode) {
-    const err = new ErrorCtor(
-        prefix ? `Invalid WebSocket frame: ${message}` : message
-    );
-
-    Error.captureStackTrace(err, error);
-    err[kStatusCode] = statusCode;
-    return err;
-}
 
 
 
