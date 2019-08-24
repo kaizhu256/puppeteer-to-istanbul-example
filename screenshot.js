@@ -154,7 +154,6 @@ var killChrome;
 var listenersAdd;
 var listenersProcess;
 var listenersRemove;
-var listenersWebsocket;
 var readline;
 var timeout;
 var waitForChromeToClose;
@@ -225,18 +224,57 @@ killChrome = function () {
     }
 };
 
-waitForWSEndpoint = function (chromeProcess) {
-/**
-  * @param {!Puppeteer.ChildProcess} chromeProcess
-  * @param {number} timeout
-  * @return {!Promise<string>}
-  */
+waitForWSEndpoint = function () {
     return new Promise(function (resolve, reject) {
-        const rl = readline.createInterface({
+        var cleanup;
+        var listeners;
+        var onClose;
+        var onLine;
+        var onTimeout;
+        var rl;
+        var stderr;
+        var timeoutId;
+        cleanup = function () {
+            clearTimeout(timeoutId);
+            listenersRemove(listeners);
+        };
+        onClose = function (error) {
+        /**
+          * @param {!Error=} error
+          */
+            cleanup();
+            reject(new Error(
+                "Failed to launch chrome!" + error.message + "\n"
+                + stderr + "\n\n"
+                + "TROUBLESHOOTING: https://github.com/GoogleChrome/puppeteer"
+                + "/blob/master/docs/troubleshooting.md\n\n"
+            ));
+        };
+        onLine = function (line) {
+        /**
+          * @param {string} line
+          */
+            stderr += line + "\n";
+            const match = line.match(
+                /^DevTools\u0020listening\u0020on\u0020(ws:\/\/.*)$/
+            );
+            if (!match) {
+                return;
+            }
+            cleanup();
+            resolve(match[1]);
+        };
+        onTimeout = function () {
+            cleanup();
+            reject(new Error(
+                `Timed out after ${timeout} ms while trying to connect to Chrome! The only Chrome revision guaranteed to work is 674921}` // jslint ignore:line
+            ));
+        };
+        rl = readline.createInterface({
             input: chromeProcess.stderr
         });
-        let stderr = "";
-        listenersWebsocket = listenersAdd([
+        stderr = "";
+        listeners = listenersAdd([
             [
                 rl, "line", onLine
             ],
@@ -250,51 +288,9 @@ waitForWSEndpoint = function (chromeProcess) {
                 chromeProcess, "error", onClose
             ]
         ]);
-        const timeoutId = setTimeout(onTimeout, timeout);
-
-        /**
-          * @param {!Error=} error
-          */
-        function onClose(error) {
-            cleanup();
-            reject(new Error(
-                "Failed to launch chrome!" + error.message + "\n"
-                + stderr + "\n\n"
-                + "TROUBLESHOOTING: https://github.com/GoogleChrome/puppeteer"
-                + "/blob/master/docs/troubleshooting.md\n\n"
-            ));
-        }
-
-        function onTimeout() {
-            cleanup();
-            reject(new Error(
-                `Timed out after ${timeout} ms while trying to connect to Chrome! The only Chrome revision guaranteed to work is 674921}` // jslint ignore:line
-            ));
-        }
-
-        /**
-          * @param {string} line
-          */
-        function onLine(line) {
-            stderr += line + "\n";
-            const match = line.match(
-                /^DevTools\u0020listening\u0020on\u0020(ws:\/\/.*)$/
-            );
-            if (!match) {
-                return;
-            }
-    cleanup();
-            resolve(match[1]);
-        }
-
-        function cleanup() {
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-            }
-            listenersRemove(listenersWebsocket);
-        }
+        timeoutId = setTimeout(onTimeout, timeout);
     });
-}
+};
 
 // init
 timeout = 30000;
@@ -351,10 +347,7 @@ listenersProcess = listenersAdd([
 /** @type {?Connection} */
 let connection = null;
 try {
-    browserWSEndpoint = await module.exports.waitForWSEndpoint(
-        chromeProcess,
-        674921
-    );
+    browserWSEndpoint = await waitForWSEndpoint();
     const transport = await module.exports.WebSocketTransport.create(
         browserWSEndpoint
     );
