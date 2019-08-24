@@ -2835,34 +2835,6 @@ class Request {
     }
 
     /**
-      * @return {string}
-      */
-    resourceType() {
-        return this._resourceType;
-    }
-
-    /**
-      * @return {string}
-      */
-    method() {
-        return this._method;
-    }
-
-    /**
-      * @return {string|undefined}
-      */
-    postData() {
-        return this._postData;
-    }
-
-    /**
-      * @return {!Object}
-      */
-    headers() {
-        return this._headers;
-    }
-
-    /**
       * @return {?Response}
       */
     response() {
@@ -3023,26 +2995,6 @@ class Page extends EventEmitter {
 
         /** @type {!Map<string, Worker>} */
         this._workers = new Map();
-        client.on('Target.attachedToTarget', event => {
-            if (event.targetInfo.type !== 'worker') {
-                // If we don't detach from service workers, they will never die.
-                client.send('Target.detachFromTarget', {
-                    sessionId: event.sessionId
-                }).catch(debugError);
-                return;
-            }
-            const session = Connection.fromSession(client).session(event.sessionId);
-            const worker = new Worker(session, event.targetInfo.url, this._addConsoleMessage.bind(this), this._handleException.bind(this));
-            this._workers.set(event.sessionId, worker);
-            this.emit(Events.Page.WorkerCreated, worker);
-        });
-        client.on('Target.detachedFromTarget', event => {
-            const worker = this._workers.get(event.sessionId);
-            if (!worker)
-                return;
-            this.emit(Events.Page.WorkerDestroyed, worker);
-            this._workers.delete(event.sessionId);
-        });
 
         this._frameManager.on(Events.FrameManager.FrameAttached, event => this.emit(Events.Page.FrameAttached, event));
         this._frameManager.on(Events.FrameManager.FrameDetached, event => this.emit(Events.Page.FrameDetached, event));
@@ -3213,13 +3165,6 @@ class Target {
     }
 
     /**
-      * @return {!Promise<!Puppeteer.CDPSession>}
-      */
-    createCDPSession() {
-        return this._sessionFactory();
-    }
-
-    /**
       * @return {!Promise<?Page>}
       */
     async page() {
@@ -3228,27 +3173,6 @@ class Target {
                     .then(client => Page.create(client, this, this._ignoreHTTPSErrors, this._defaultViewport, this._screenshotTaskQueue));
         }
         return this._pagePromise;
-    }
-
-    /**
-      * @return {!Promise<?Worker>}
-      */
-    async worker() {
-        if (this._targetInfo.type !== 'service_worker' && this._targetInfo.type !== 'shared_worker')
-            return null;
-        if (!this._workerPromise) {
-            this._workerPromise = this._sessionFactory().then(async client => {
-                // Top level workers have a fake page wrapping the actual worker.
-                const [targetAttached] = await Promise.all([
-                    new Promise(x => client.once('Target.attachedToTarget', x)),
-                    client.send('Target.setAutoAttach', {autoAttach: true, waitForDebuggerOnStart: false, flatten: true}),
-                ]);
-                const session = Connection.fromSession(client).session(targetAttached.sessionId);
-                // TODO(einbinder): Make workers send their console logs.
-                return new Worker(session, this._targetInfo.url, () => {} /* consoleAPICalled */, () => {} /* exceptionThrown */);
-            });
-        }
-        return this._workerPromise;
     }
 
     /**
