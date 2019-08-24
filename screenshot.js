@@ -416,13 +416,13 @@ covPuppeteer.forEach(function (file) {
     // Get the last element in the path name
     basename = pathLib.basename(file.url);
     // Special case: when html present, strip and return specialized string
-    if (basename.includes('.html')) {
-        basename = pathLib.resolve(storagePath, basename) + 'puppeteerTemp-inline'
+    if (basename.includes(".html")) {
+        basename = pathLib.resolve(storagePath, basename) + "puppeteerTemp-inline";
     } else {
-        basename = basename.split('.js')[0]
-        basename = pathLib.resolve(storagePath, basename)
+        basename = basename.split(".js")[0];
+        basename = pathLib.resolve(storagePath, basename);
     }
-    if (fs.existsSync(basename + '.js')) {
+    if (fs.existsSync(basename + ".js")) {
         iiInline += 1;
         file.url = basename + "-" + iiInline + ".js";
     } else {
@@ -432,38 +432,39 @@ covPuppeteer.forEach(function (file) {
 });
 // init cov8
 // Iterate through coverage info and create IDs
-let id = 0
+let id = 0;
 var covV8;
 covV8 = covPuppeteer.map(function (file) {
     return {
         scriptId: id++,
-        url: 'file://' + file.url,
-        functions: [{
-            ranges: file.ranges.map(function (range) {
-                // Takes in a Puppeteer range object with start and end properties and
-                // converts it to a V8 range with startOffset, endOffset, and count properties
-                return {
-                    startOffset: range.start,
-                    endOffset: range.end,
-                    count: 1
-                }
-            }),
-            isBlockCoverage: true
-        }]
+        url: "file://" + file.url,
+        functions: [
+            {
+                ranges: file.ranges.map(function (range) {
+                    // Takes in a Puppeteer range object with start and end properties and
+                    // converts it to a V8 range with startOffset, endOffset, and count properties
+                    return {
+                        startOffset: range.start,
+                        endOffset: range.end,
+                        count: 1
+                    };
+                }),
+                isBlockCoverage: true
+            }
+        ]
     };
 });
 // init covIstanbul
 var covIstanbul = {};
 covV8.forEach(function (jsFile) {
-    const script = new CovScript(jsFile.url)
-    script.applyCoverage(jsFile.functions)
-    let istanbulCoverage = script.toIstanbul()
+    const script = new CovScript(jsFile.url);
+    script.applyCoverage(jsFile.functions);
+    let istanbulCoverage = script.toIstanbul();
     var key = Object.keys(istanbulCoverage)[0];
     covIstanbul[key] = istanbulCoverage[key];
-})
-fs.writeFileSync('./.nyc_output/out.json', JSON.stringify(covIstanbul, null, 4), 'utf8');
+});
+fs.writeFileSync("./.nyc_output/out.json", JSON.stringify(covIstanbul, null, 4), "utf8");
 }());
-
 
 await browser.close();
 }(globalThis.globalLocal));
