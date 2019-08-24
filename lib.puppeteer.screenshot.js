@@ -323,36 +323,6 @@ function _mask(source, mask, output, offset, length) {
 }
 
 /**
-  * Unmasks a buffer using the given mask.
-  *
-  * @param {Buffer} buffer The buffer to unmask
-  * @param {Buffer} mask The mask to use
-  * @public
-  */
-function _unmask(buffer, mask) {
-    // Required until https://github.com/nodejs/node/issues/9006 is resolved.
-    const length = buffer.length;
-    for (var i = 0; i < length; i++) {
-        buffer[i] ^= mask[i & 3];
-    }
-}
-
-/**
-  * Converts a buffer to an `ArrayBuffer`.
-  *
-  * @param {Buffer} buf The buffer to convert
-  * @return {ArrayBuffer} Converted buffer
-  * @public
-  */
-function toArrayBuffer(buf) {
-    if (buf.byteLength === buf.buffer.byteLength) {
-        return buf.buffer;
-    }
-
-    return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-}
-
-/**
   * Converts `data` to a `Buffer`.
   *
   * @param {*} data The data to convert
@@ -374,23 +344,6 @@ function toBuffer(data) {
     } else {
         buf = Buffer.from(data);
         toBuffer.readOnly = false;
-    }
-
-    return buf;
-}
-
-/**
-  * Converts an `ArrayBuffer` view into a buffer.
-  *
-  * @param {(DataView|TypedArray)} view The view to convert
-  * @return {Buffer} Converted view
-  * @private
-  */
-function viewToBuffer(view) {
-    const buf = Buffer.from(view.buffer);
-
-    if (view.byteLength !== view.buffer.byteLength) {
-        return buf.slice(view.byteOffset, view.byteOffset + view.byteLength);
     }
 
     return buf;
@@ -3905,7 +3858,7 @@ class Helper {
         if (timeout) {
             eventTimeout = setTimeout(() => {
                 cleanup();
-                rejectCallback(new TimeoutError('Timeout exceeded while waiting for event'));
+                rejectCallback(new Error('Timeout exceeded while waiting for event'));
             }, timeout);
         }
         function cleanup() {
@@ -3924,7 +3877,7 @@ class Helper {
       */
     static async waitWithTimeout(promise, taskName, timeout) {
         let reject;
-        const timeoutError = new TimeoutError(`waiting for ${taskName} failed: timeout ${timeout}ms exceeded`);
+        const timeoutError = new Error(`waiting for ${taskName} failed: timeout ${timeout}ms exceeded`);
         const timeoutPromise = new Promise((resolve, x) => reject = x);
         let timeoutTimer = null;
         if (timeout)
@@ -6264,7 +6217,7 @@ class WaitTask {
         // Since page navigation requires us to re-install the pageScript, we should track
         // timeout on our end.
         if (timeout) {
-            const timeoutError = new TimeoutError(`waiting for ${title} failed: timeout ${timeout}ms exceeded`);
+            const timeoutError = new Error(`waiting for ${title} failed: timeout ${timeout}ms exceeded`);
             this._timeoutTimer = setTimeout(() => this.terminate(timeoutError), timeout);
         }
         this.rerun();
@@ -7428,43 +7381,6 @@ class EmulationManager {
 }
 
 module.exports = {EmulationManager};
-
-
-
-/*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Errors.js
-*/
-/**
-  * Copyright 2018 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
-class CustomError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = this.constructor.name;
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
-
-class TimeoutError extends CustomError {}
-
-module.exports = {
-    TimeoutError,
-};
-// hack-puppeteer - module.exports
-const Errors = module.exports;
 
 
 
@@ -9547,7 +9463,7 @@ function waitForWSEndpoint(chromeProcess, timeout, preferredRevision) {
 
         function onTimeout() {
             cleanup();
-            reject(new TimeoutError(`Timed out after ${timeout} ms while trying to connect to Chrome! The only Chrome revision guaranteed to work is r${preferredRevision}`));
+            reject(new Error(`Timed out after ${timeout} ms while trying to connect to Chrome! The only Chrome revision guaranteed to work is r${preferredRevision}`));
         }
 
         /**
@@ -9780,7 +9696,7 @@ class LifecycleWatcher {
             return new Promise(() => {});
         const errorMessage = 'Navigation Timeout Exceeded: ' + this._timeout + 'ms exceeded';
         return new Promise(fulfill => this._maximumTimer = setTimeout(fulfill, this._timeout))
-                .then(() => new TimeoutError(errorMessage));
+                .then(() => new Error(errorMessage));
     }
 
     /**
