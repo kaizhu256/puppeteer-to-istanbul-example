@@ -2650,17 +2650,6 @@ class NetworkManager extends EventEmitter {
       */
     _onRequestWillBeSent(event) {
         // Request interception doesn't happen for data URLs with Network Service.
-        if (this._protocolRequestInterceptionEnabled && !event.request.url.startsWith('data:')) {
-            const requestId = event.requestId;
-            const interceptionId = this._requestIdToInterceptionId.get(requestId);
-            if (interceptionId) {
-                this._onRequest(event, interceptionId);
-                this._requestIdToInterceptionId.delete(requestId);
-            } else {
-                this._requestIdToRequestWillBeSentEvent.set(event.requestId, event);
-            }
-            return;
-        }
         this._onRequest(event, null);
     }
 
