@@ -205,6 +205,7 @@ removeFolder.sync = function (dir) {
         });
 };
 const removeRecursive = removeFolder;
+const timeout = 30000;
 
 
 
@@ -1342,7 +1343,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
 
 const readyStates = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
 const protocolVersions = [8, 13];
-const closeTimeout = 30 * 1000;
 
 /**
   * Class representing a WebSocket.
@@ -1549,7 +1549,7 @@ class WebSocket extends EventEmitter {
         //
         this._closeTimer = setTimeout(
             this._socket.destroy.bind(this._socket),
-            closeTimeout
+            timeout
         );
     }
 
@@ -2127,7 +2127,6 @@ file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0
 // require('./Target') // Target,
 // require('./Target') // const {Target} = require('./Target');
 // require('./TaskQueue') // const {TaskQueue} = require('./TaskQueue');
-// require('./TimeoutSettings') // const {TimeoutSettings} = require('./TimeoutSettings');
 // require('./Tracing') // Tracing,
 // require('./Tracing') // const Tracing = require('./Tracing');
 // require('./USKeyboardLayout') // const keyDefinitions = require('./USKeyboardLayout');
@@ -3005,9 +3004,6 @@ class Browser extends EventEmitter {
       * @return {!Promise<!Target>}
       */
     async waitForTarget(predicate, options = {}) {
-        const {
-            timeout = 30000
-        } = options;
         const existingTarget = this.targets().find(predicate);
         if (existingTarget)
             return existingTarget;
@@ -4115,12 +4111,10 @@ class DOMWorld {
     /**
       * @param {!Puppeteer.FrameManager} frameManager
       * @param {!Puppeteer.Frame} frame
-      * @param {!Puppeteer.TimeoutSettings} timeoutSettings
       */
-    constructor(frameManager, frame, timeoutSettings) {
+    constructor(frameManager, frame) {
         this._frameManager = frameManager;
         this._frame = frame;
-        this._timeoutSettings = timeoutSettings;
 
         /** @type {?Promise<!Puppeteer.ElementHandle>} */
         this._documentPromise = null;
@@ -4287,7 +4281,6 @@ class DOMWorld {
     async setContent(html, options = {}) {
         const {
             waitUntil = ['load'],
-            timeout = this._timeoutSettings.navigationTimeout(),
         } = options;
         // We rely upon the fact that document.open() will reset frame lifecycle with "init"
         // lifecycle event. @see https://crrev.com/608658
@@ -4549,7 +4542,6 @@ class DOMWorld {
     waitForFunction(pageFunction, options = {}, ...args) {
         const {
             polling = 'raf',
-            timeout = this._timeoutSettings.timeout(),
         } = options;
         return new WaitTask(this, pageFunction, 'function', polling, timeout, ...args).promise;
     }
@@ -4571,7 +4563,6 @@ class DOMWorld {
         const {
             visible: waitForVisible = false,
             hidden: waitForHidden = false,
-            timeout = this._timeoutSettings.timeout(),
         } = options;
         const polling = waitForVisible || waitForHidden ? 'raf' : 'mutation';
         const title = `${isXPath ? 'XPath' : 'selector'} "${selectorOrXPath}"${waitForHidden ? ' to be hidden' : ''}`;
@@ -6142,15 +6133,13 @@ class FrameManager extends EventEmitter {
       * @param {!Puppeteer.CDPSession} client
       * @param {!Puppeteer.Page} page
       * @param {boolean} ignoreHTTPSErrors
-      * @param {!Puppeteer.TimeoutSettings} timeoutSettings
       */
-    constructor(client, page, ignoreHTTPSErrors, timeoutSettings) {
+    constructor(client, page, ignoreHTTPSErrors) {
         super();
         this._client = client;
         this._page = page;
         this._networkManager = new NetworkManager(client, ignoreHTTPSErrors);
         this._networkManager.setFrameManager(this);
-        this._timeoutSettings = timeoutSettings;
         /** @type {!Map<string, !Frame>} */
         this._frames = new Map();
         /** @type {!Map<number, !ExecutionContext>} */
@@ -6200,7 +6189,6 @@ class FrameManager extends EventEmitter {
         const {
             referer = this._networkManager.extraHTTPHeaders()['referer'],
             waitUntil = ['load'],
-            timeout = this._timeoutSettings.navigationTimeout(),
         } = options;
 
         const watcher = new LifecycleWatcher(this, frame, waitUntil, timeout);
@@ -6247,7 +6235,6 @@ class FrameManager extends EventEmitter {
         assertNoLegacyNavigationOptions(options);
         const {
             waitUntil = ['load'],
-            timeout = this._timeoutSettings.navigationTimeout(),
         } = options;
         const watcher = new LifecycleWatcher(this, frame, waitUntil, timeout);
         const error = await Promise.race([
@@ -6501,9 +6488,9 @@ class Frame {
         /** @type {!Set<string>} */
         this._lifecycleEvents = new Set();
         /** @type {!DOMWorld} */
-        this._mainWorld = new DOMWorld(frameManager, this, frameManager._timeoutSettings);
+        this._mainWorld = new DOMWorld(frameManager, this);
         /** @type {!DOMWorld} */
-        this._secondaryWorld = new DOMWorld(frameManager, this, frameManager._timeoutSettings);
+        this._secondaryWorld = new DOMWorld(frameManager, this);
 
         /** @type {!Set<!Frame>} */
         this._childFrames = new Set();
@@ -8867,7 +8854,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Page.js
 // const {Worker} = require('./Worker');
 // const {createJSHandle} = require('./JSHandle');
 // const {Accessibility} = require('./Accessibility');
-// const {TimeoutSettings} = require('./TimeoutSettings');
 const writeFileAsync = helper.promisify(fs.writeFile);
 
 class Page extends EventEmitter {
@@ -8900,11 +8886,10 @@ class Page extends EventEmitter {
         this._target = target;
         this._keyboard = new Keyboard(client);
         this._mouse = new Mouse(client, this._keyboard);
-        this._timeoutSettings = new TimeoutSettings();
         this._touchscreen = new Touchscreen(client, this._keyboard);
         this._accessibility = new Accessibility(client);
         /** @type {!FrameManager} */
-        this._frameManager = new FrameManager(client, this, ignoreHTTPSErrors, this._timeoutSettings);
+        this._frameManager = new FrameManager(client, this, ignoreHTTPSErrors);
         this._emulationManager = new EmulationManager(client);
         /** @type {!Map<string, Function>} */
         this._pageBindings = new Map();
@@ -9000,9 +8985,6 @@ class Page extends EventEmitter {
     async waitForFileChooser(options = {}) {
         if (this._fileChooserInterceptionIsDisabled)
             throw new Error('File chooser handling does not work with multiple connections to the same page');
-        const {
-            timeout = this._timeoutSettings.timeout(),
-        } = options;
         let callback;
         const promise = new Promise(x => callback = x);
         this._fileChooserInterceptors.add(callback);
@@ -9123,20 +9105,6 @@ class Page extends EventEmitter {
       */
     setOfflineMode(enabled) {
         return this._frameManager.networkManager().setOfflineMode(enabled);
-    }
-
-    /**
-      * @param {number} timeout
-      */
-    setDefaultNavigationTimeout(timeout) {
-        this._timeoutSettings.setDefaultNavigationTimeout(timeout);
-    }
-
-    /**
-      * @param {number} timeout
-      */
-    setDefaultTimeout(timeout) {
-        this._timeoutSettings.setDefaultTimeout(timeout);
     }
 
     /**
@@ -9529,9 +9497,6 @@ class Page extends EventEmitter {
       * @return {!Promise<!Puppeteer.Request>}
       */
     async waitForRequest(urlOrPredicate, options = {}) {
-        const {
-            timeout = this._timeoutSettings.timeout(),
-        } = options;
         return helper.waitForEvent(this._frameManager.networkManager(), Events.NetworkManager.Request, request => {
             if (helper.isString(urlOrPredicate))
                 return (urlOrPredicate === request.url());
@@ -9547,9 +9512,6 @@ class Page extends EventEmitter {
       * @return {!Promise<!Puppeteer.Response>}
       */
     async waitForResponse(urlOrPredicate, options = {}) {
-        const {
-            timeout = this._timeoutSettings.timeout(),
-        } = options;
         return helper.waitForEvent(this._frameManager.networkManager(), Events.NetworkManager.Response, response => {
             if (helper.isString(urlOrPredicate))
                 return (urlOrPredicate === response.url());
@@ -10540,69 +10502,6 @@ class TaskQueue {
 }
 
 module.exports = {TaskQueue};
-
-
-
-/*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/TimeoutSettings.js
-*/
-/**
-  * Copyright 2019 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
-const DEFAULT_TIMEOUT = 30000;
-
-class TimeoutSettings {
-    constructor() {
-        this._defaultTimeout = null;
-        this._defaultNavigationTimeout = null;
-    }
-
-    /**
-      * @param {number} timeout
-      */
-    setDefaultTimeout(timeout) {
-        this._defaultTimeout = timeout;
-    }
-
-    /**
-      * @param {number} timeout
-      */
-    setDefaultNavigationTimeout(timeout) {
-        this._defaultNavigationTimeout = timeout;
-    }
-
-    /**
-      * @return {number}
-      */
-    navigationTimeout() {
-        if (this._defaultNavigationTimeout !== null)
-            return this._defaultNavigationTimeout;
-        if (this._defaultTimeout !== null)
-            return this._defaultTimeout;
-        return DEFAULT_TIMEOUT;
-    }
-
-    timeout() {
-        if (this._defaultTimeout !== null)
-            return this._defaultTimeout;
-        return DEFAULT_TIMEOUT;
-    }
-}
-
-module.exports = {TimeoutSettings};
 
 
 
