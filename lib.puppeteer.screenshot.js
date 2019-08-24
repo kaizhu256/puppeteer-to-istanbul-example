@@ -104,19 +104,7 @@ lib https://github.com/websockets/ws/blob/6.2.1/buffer-util.js
   * @public
   */
 function concat(list, totalLength) {
-    if (list.length === 0) return EMPTY_BUFFER;
-    if (list.length === 1) return list[0];
-
-    const target = Buffer.allocUnsafe(totalLength);
-    var offset = 0;
-
-    for (var i = 0; i < list.length; i++) {
-        const buf = list[i];
-        buf.copy(target, offset);
-        offset += buf.length;
-    }
-
-    return target;
+    return list[0];
 }
 
 /**
@@ -502,62 +490,12 @@ class Receiver extends Writable {
 
         const buf = this.consume(2);
 
-        if ((buf[0] & 0x30) !== 0x00) {
-            this._loop = false;
-            return error(RangeError, 'RSV2 and RSV3 must be clear', true, 1002);
-        }
-
         const compressed = (buf[0] & 0x40) === 0x40;
 
         this._fin = (buf[0] & 0x80) === 0x80;
         this._opcode = buf[0] & 0x0f;
         this._payloadLength = buf[1] & 0x7f;
 
-        if (this._opcode === 0x00) {
-            if (compressed) {
-                this._loop = false;
-                return error(RangeError, 'RSV1 must be clear', true, 1002);
-            }
-
-            if (!this._fragmented) {
-                this._loop = false;
-                return error(RangeError, 'invalid opcode 0', true, 1002);
-            }
-
-            this._opcode = this._fragmented;
-        } else if (this._opcode === 0x01 || this._opcode === 0x02) {
-            if (this._fragmented) {
-                this._loop = false;
-                return error(RangeError, `invalid opcode ${this._opcode}`, true, 1002);
-            }
-
-            this._compressed = compressed;
-        } else if (this._opcode > 0x07 && this._opcode < 0x0b) {
-            if (!this._fin) {
-                this._loop = false;
-                return error(RangeError, 'FIN must be set', true, 1002);
-            }
-
-            if (compressed) {
-                this._loop = false;
-                return error(RangeError, 'RSV1 must be clear', true, 1002);
-            }
-
-            if (this._payloadLength > 0x7d) {
-                this._loop = false;
-                return error(
-                    RangeError,
-                    `invalid payload length ${this._payloadLength}`,
-                    true,
-                    1002
-                );
-            }
-        } else {
-            this._loop = false;
-            return error(RangeError, `invalid opcode ${this._opcode}`, true, 1002);
-        }
-
-        if (!this._fin && !this._fragmented) this._fragmented = this._opcode;
         this._masked = (buf[1] & 0x80) === 0x80;
 
         if (this._payloadLength === 126) this._state = GET_PAYLOAD_LENGTH_16;
@@ -572,11 +510,6 @@ class Receiver extends Writable {
       * @private
       */
     getPayloadLength16() {
-        if (this._bufferedBytes < 2) {
-            this._loop = false;
-            return;
-        }
-
         this._payloadLength = this.consume(2).readUInt16BE(0);
         return this.haveLength();
     }
@@ -595,20 +528,6 @@ class Receiver extends Writable {
 
         const buf = this.consume(8);
         const num = buf.readUInt32BE(0);
-
-        //
-        // The maximum safe integer in JavaScript is 2^53 - 1. An error is returned
-        // if payload length is greater than this number.
-        //
-        if (num > Math.pow(2, 53 - 32) - 1) {
-            this._loop = false;
-            return error(
-                RangeError,
-                'Unsupported WebSocket frame: payload length > 2^53 - 1',
-                false,
-                1009
-            );
-        }
 
         this._payloadLength = num * Math.pow(2, 32) + buf.readUInt32BE(4);
         return this.haveLength();
@@ -688,29 +607,8 @@ class Receiver extends Writable {
             this._messageLength = 0;
             this._fragmented = 0;
             this._fragments = [];
-
-            if (this._opcode === 2) {
-                var data;
-
-                if (this._binaryType === 'nodebuffer') {
-                    data = concat(fragments, messageLength);
-                } else if (this._binaryType === 'arraybuffer') {
-                    data = toArrayBuffer(concat(fragments, messageLength));
-                } else {
-                    data = fragments;
-                }
-
-                this.emit('message', data);
-            } else {
-                const buf = concat(fragments, messageLength);
-
-                if (!isValidUTF8(buf)) {
-                    this._loop = false;
-                    return error(Error, 'invalid UTF-8 sequence', true, 1007);
-                }
-
-                this.emit('message', buf.toString());
-            }
+            const buf = concat(fragments, messageLength);
+            this.emit('message', buf.toString());
         }
 
         this._state = GET_INFO;
