@@ -2459,31 +2459,6 @@ class Browser extends EventEmitter {
         }
     }
 
-    /**
-      * @return {!Promise<!Array<!Puppeteer.Page>>}
-      */
-    async pages() {
-        const contextPages = await Promise.all(this.browserContexts().map(context => context.pages()));
-        // Flatten array.
-        return contextPages.reduce((acc, x) => acc.concat(x), []);
-    }
-
-    /**
-      * @return {!Promise<string>}
-      */
-    async version() {
-        const version = await this._getVersion();
-        return version.product;
-    }
-
-    /**
-      * @return {!Promise<string>}
-      */
-    async userAgent() {
-        const version = await this._getVersion();
-        return version.userAgent;
-    }
-
     async close() {
         await this._closeCallback.call(null);
         this.disconnect();
@@ -2491,20 +2466,6 @@ class Browser extends EventEmitter {
 
     disconnect() {
         this._connection.dispose();
-    }
-
-    /**
-      * @return {boolean}
-      */
-    isConnected() {
-        return !this._connection._closed;
-    }
-
-    /**
-      * @return {!Promise<!Object>}
-      */
-    _getVersion() {
-        return this._connection.send('Browser.getVersion');
     }
 }
 
@@ -2522,94 +2483,10 @@ class BrowserContext extends EventEmitter {
     }
 
     /**
-      * @return {!Array<!Target>} target
-      */
-    targets() {
-        return this._browser.targets().filter(target => target.browserContext() === this);
-    }
-
-    /**
-      * @param {function(!Target):boolean} predicate
-      * @param {{timeout?: number}=} options
-      * @return {!Promise<!Target>}
-      */
-    waitForTarget(predicate, options) {
-        return this._browser.waitForTarget(target => target.browserContext() === this && predicate(target), options);
-    }
-
-    /**
-      * @return {!Promise<!Array<!Puppeteer.Page>>}
-      */
-    async pages() {
-        const pages = await Promise.all(
-                this.targets()
-                        .filter(target => target.type() === 'page')
-                        .map(target => target.page())
-        );
-        return pages.filter(page => !!page);
-    }
-
-    /**
-      * @return {boolean}
-      */
-    isIncognito() {
-        return !!this._id;
-    }
-
-    /**
-      * @param {string} origin
-      * @param {!Array<string>} permissions
-      */
-    async overridePermissions(origin, permissions) {
-        const webPermissionToProtocol = new Map([
-            ['geolocation', 'geolocation'],
-            ['midi', 'midi'],
-            ['notifications', 'notifications'],
-            ['push', 'push'],
-            ['camera', 'videoCapture'],
-            ['microphone', 'audioCapture'],
-            ['background-sync', 'backgroundSync'],
-            ['ambient-light-sensor', 'sensors'],
-            ['accelerometer', 'sensors'],
-            ['gyroscope', 'sensors'],
-            ['magnetometer', 'sensors'],
-            ['accessibility-events', 'accessibilityEvents'],
-            ['clipboard-read', 'clipboardRead'],
-            ['clipboard-write', 'clipboardWrite'],
-            ['payment-handler', 'paymentHandler'],
-            // chrome-specific permissions we have.
-            ['midi-sysex', 'midiSysex'],
-        ]);
-        permissions = permissions.map(permission => {
-            const protocolPermission = webPermissionToProtocol.get(permission);
-            if (!protocolPermission)
-                throw new Error('Unknown permission: ' + permission);
-            return protocolPermission;
-        });
-        await this._connection.send('Browser.grantPermissions', {origin, browserContextId: this._id || undefined, permissions});
-    }
-
-    async clearPermissionOverrides() {
-        await this._connection.send('Browser.resetPermissions', {browserContextId: this._id || undefined});
-    }
-
-    /**
       * @return {!Promise<!Puppeteer.Page>}
       */
     newPage() {
         return this._browser._createPageInContext(this._id);
-    }
-
-    /**
-      * @return {!Browser}
-      */
-    browser() {
-        return this._browser;
-    }
-
-    async close() {
-        assert(this._id, 'Non-incognito profiles cannot be closed!');
-        await this._browser._disposeContext(this._id);
     }
 }
 
@@ -2823,12 +2700,6 @@ class CDPSession extends EventEmitter {
         }
     }
 
-    async detach() {
-        if (!this._connection)
-            throw new Error(`Session already detached. Most likely the ${this._targetType} has been closed.`);
-        await this._connection.send('Target.detachFromTarget',  {sessionId: this._sessionId});
-    }
-
     _onClosed() {
         for (const callback of this._callbacks.values())
             callback.reject(rewriteError(callback.error, `Protocol error (${callback.method}): Target closed.`));
@@ -2836,29 +2707,6 @@ class CDPSession extends EventEmitter {
         this._connection = null;
         this.emit(Events.CDPSession.Disconnected);
     }
-}
-
-/**
-  * @param {!Error} error
-  * @param {string} method
-  * @param {{error: {message: string, data: any}}} object
-  * @return {!Error}
-  */
-function createProtocolError(error, method, object) {
-    let message = `Protocol error (${method}): ${object.error.message}`;
-    if ('data' in object.error)
-        message += ` ${object.error.data}`;
-    return rewriteError(error, message);
-}
-
-/**
-  * @param {!Error} error
-  * @param {string} message
-  * @return {!Error}
-  */
-function rewriteError(error, message) {
-    error.message = message;
-    return error;
 }
 
 module.exports = {Connection, CDPSession};
