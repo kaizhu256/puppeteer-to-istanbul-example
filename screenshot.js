@@ -382,12 +382,17 @@ page = await browser.newPage();
 
 
 
-await page.goto("https://www.example.com");
+await page.goto("https://www.highcharts.com/stock/demo/stock-tools-gui");
+
+// screenshot - wait 2000 ms
+await new Promise(function (resolve) {
+    setTimeout(resolve, 2000);
+});
 
 // screenshot - png
 await page._screenshotTaskQueue._chain.then(function () {
     return page._screenshotTask("png", {
-        path: "tmp/aa.png"
+        path: ".aa.png"
     });
 });
 
@@ -413,7 +418,7 @@ return html;`
 //!! }
 //!! tmp = await page._frameManager._mainFrame._secondaryWorld.evaluate(
 //!! );
-fs.writeFileSync("tmp/aa.html", tmp);
+fs.writeFileSync(".aa.html", tmp);
 
 
 
