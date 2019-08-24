@@ -2462,6 +2462,17 @@ class LifecycleWatcher {
     }
 
     /**
+      * @param {!Puppeteer.Frame} frame
+      */
+    _onFrameDetached(frame) {
+        if (this._frame === frame) {
+            this._terminationCallback.call(null, new Error('Navigating frame was detached'));
+            return;
+        }
+        this._checkLifecycleComplete();
+    }
+
+    /**
       * @return {?Puppeteer.Response}
       */
     navigationResponse() {
@@ -2469,10 +2480,31 @@ class LifecycleWatcher {
     }
 
     /**
+      * @param {!Error} error
+      */
+    _terminate(error) {
+        this._terminationCallback.call(null, error);
+    }
+
+    /**
+      * @return {!Promise<?Error>}
+      */
+    sameDocumentNavigationPromise() {
+        return this._sameDocumentNavigationPromise;
+    }
+
+    /**
       * @return {!Promise<?Error>}
       */
     newDocumentNavigationPromise() {
         return this._newDocumentNavigationPromise;
+    }
+
+    /**
+      * @return {!Promise}
+      */
+    lifecyclePromise() {
+        return this._lifecyclePromise;
     }
 
     /**
@@ -2486,9 +2518,21 @@ class LifecycleWatcher {
       * @return {!Promise<?Error>}
       */
     _createTimeoutPromise() {
+        if (!this._timeout)
+            return new Promise(() => {});
         const errorMessage = 'Navigation Timeout Exceeded: ' + this._timeout + 'ms exceeded';
         return new Promise(fulfill => this._maximumTimer = setTimeout(fulfill, this._timeout))
                 .then(() => new Error(errorMessage));
+    }
+
+    /**
+      * @param {!Puppeteer.Frame} frame
+      */
+    _navigatedWithinDocument(frame) {
+        if (frame !== this._frame)
+            return;
+        this._hasSameDocumentNavigation = true;
+        this._checkLifecycleComplete();
     }
 
     _checkLifecycleComplete() {
@@ -2609,6 +2653,27 @@ class NetworkManager extends EventEmitter {
     }
 
     /**
+      * @param {?{username: string, password: string}} credentials
+      */
+    async authenticate(credentials) {
+        this._credentials = credentials;
+        await this._updateProtocolRequestInterception();
+    }
+
+    /**
+      * @param {!Object<string, string>} extraHTTPHeaders
+      */
+    async setExtraHTTPHeaders(extraHTTPHeaders) {
+        this._extraHTTPHeaders = {};
+        for (const key of Object.keys(extraHTTPHeaders)) {
+            const value = extraHTTPHeaders[key];
+            assert(helper.isString(value), `Expected value of header "${key}" to be String, but "${typeof value}" is found.`);
+            this._extraHTTPHeaders[key.toLowerCase()] = value;
+        }
+        await this._client.send('Network.setExtraHTTPHeaders', { headers: this._extraHTTPHeaders });
+    }
+
+    /**
       * @return {!Object<string, string>}
       */
     extraHTTPHeaders() {
@@ -2620,6 +2685,17 @@ class NetworkManager extends EventEmitter {
       */
     _onRequestWillBeSent(event) {
         // Request interception doesn't happen for data URLs with Network Service.
+        if (this._protocolRequestInterceptionEnabled && !event.request.url.startsWith('data:')) {
+            const requestId = event.requestId;
+            const interceptionId = this._requestIdToInterceptionId.get(requestId);
+            if (interceptionId) {
+                this._onRequest(event, interceptionId);
+                this._requestIdToInterceptionId.delete(requestId);
+            } else {
+                this._requestIdToRequestWillBeSentEvent.set(event.requestId, event);
+            }
+            return;
+        }
         this._onRequest(event, null);
     }
 
@@ -2699,6 +2775,24 @@ class NetworkManager extends EventEmitter {
         this._attemptedAuthentications.delete(request._interceptionId);
         this.emit(Events.NetworkManager.RequestFinished, request);
     }
+
+    /**
+      * @param {!Protocol.Network.loadingFailedPayload} event
+      */
+    _onLoadingFailed(event) {
+        const request = this._requestIdToRequest.get(event.requestId);
+        // For certain requestIds we never receive requestWillBeSent event.
+        // @see https://crbug.com/750469
+        if (!request)
+            return;
+        request._failureText = event.errorText;
+        const response = request.response();
+        if (response)
+            response._bodyLoadedPromiseFulfill.call(null);
+        this._requestIdToRequest.delete(request._requestId);
+        this._attemptedAuthentications.delete(request._interceptionId);
+        this.emit(Events.NetworkManager.RequestFailed, request);
+    }
 }
 
 class Request {
@@ -2738,6 +2832,34 @@ class Request {
       */
     url() {
         return this._url;
+    }
+
+    /**
+      * @return {string}
+      */
+    resourceType() {
+        return this._resourceType;
+    }
+
+    /**
+      * @return {string}
+      */
+    method() {
+        return this._method;
+    }
+
+    /**
+      * @return {string|undefined}
+      */
+    postData() {
+        return this._postData;
+    }
+
+    /**
+      * @return {!Object}
+      */
+    headers() {
+        return this._headers;
     }
 
     /**
