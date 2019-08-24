@@ -2513,28 +2513,6 @@ class FrameManager extends EventEmitter {
     }
 
     /**
-      * @param {!Puppeteer.Frame} frame
-      * @param {!{timeout?: number, waitUntil?: string|!Array<string>}=} options
-      * @return {!Promise<?Puppeteer.Response>}
-      */
-    async waitForFrameNavigation(frame, options = {}) {
-        assertNoLegacyNavigationOptions(options);
-        const {
-            waitUntil = ['load'],
-        } = options;
-        const watcher = new LifecycleWatcher(this, frame, waitUntil, timeout);
-        const error = await Promise.race([
-            watcher.timeoutOrTerminationPromise(),
-            watcher.sameDocumentNavigationPromise(),
-            watcher.newDocumentNavigationPromise()
-        ]);
-        watcher.dispose();
-        if (error)
-            throw error;
-        return watcher.navigationResponse();
-    }
-
-    /**
       * @param {!Protocol.Page.lifecycleEventPayload} event
       */
     _onLifecycleEvent(event) {
@@ -2597,20 +2575,6 @@ class FrameManager extends EventEmitter {
       */
     frame(frameId) {
         return this._frames.get(frameId) || null;
-    }
-
-    /**
-      * @param {string} frameId
-      * @param {?string} parentFrameId
-      */
-    _onFrameAttached(frameId, parentFrameId) {
-        if (this._frames.has(frameId))
-            return;
-        assert(parentFrameId);
-        const parentFrame = this._frames.get(parentFrameId);
-        const frame = new Frame(this, this._client, parentFrame, frameId);
-        this._frames.set(frame._id, frame);
-        this.emit(Events.FrameManager.FrameAttached, frame);
     }
 
     /**
