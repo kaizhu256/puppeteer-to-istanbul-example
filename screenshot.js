@@ -160,6 +160,7 @@ var path;
 var preferredRevision;
 var readline;
 var timeout;
+var tmp;
 var waitForChromeToClose;
 local.nop(assert, fs, path);
 
@@ -383,24 +384,18 @@ page = await browser.newPage();
 
 await page.goto("https://www.example.com");
 
-async function screenshot() {
-/**
-  * @param {!ScreenshotOptions=} options
-  * @return {!Promise<!Buffer|!String>}
-  */
-    const result = page._screenshotTaskQueue._chain.then(
-        page._screenshotTask.bind(page, "png", {
-            path: "tmp/aa.png"
-        })
-    );
-    page._screenshotTaskQueue._chain = result.catch(local.nop);
-    return result;
-}
+// screenshot - png
+await page._screenshotTaskQueue._chain.then(
+    page._screenshotTask.bind(page, "png", {
+        path: "tmp/aa.png"
+    })
+);
+//!! page._screenshotTaskQueue._chain = result.catch(local.nop);
+console.error(page.content.toString());
 
-await screenshot({
-    path: "tmp/aa.png"
-});
-//!! fs.writeFileSync("tmp/aa.html", await page.content());
+// screenshot - html
+tmp = await page._frameManager.mainFrame().content();
+fs.writeFileSync("tmp/aa.html", tmp);
 
 
 
