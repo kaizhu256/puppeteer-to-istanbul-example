@@ -1410,78 +1410,6 @@ module.exports = WebSocket;
 /*
 file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0
 */
-// require('./Browser') // Browser,
-// require('./Browser') // BrowserContext,
-// require('./Browser') // const {Browser} = require('./Browser');
-// require('./BrowserFetcher') // BrowserFetcher,
-// require('./BrowserFetcher') // const BrowserFetcher = require('./BrowserFetcher');
-// require('./Connection') // CDPSession,
-// require('./Connection') // const {Connection} = require('./Connection');
-// require('./DOMWorld') // const {DOMWorld} = require('./DOMWorld');
-// require('./EmulationManager') // const {EmulationManager} = require('./EmulationManager');
-// require('./Errors') // TimeoutError,
-// require('./Errors') // const Errors = require('./Errors');
-// require('./Errors') // const {TimeoutError} = require('./Errors');
-// require('./Events') // const {Events} = require('./Events');
-// require('./ExecutionContext') // ExecutionContext,
-// require('./ExecutionContext') // const {EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
-// require('./ExecutionContext') // const {ExecutionContext, EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
-// require('./ExecutionContext') // const {ExecutionContext} = require('./ExecutionContext');
-// require('./FrameManager') // Frame,
-// require('./FrameManager') // const {FrameManager} = require('./FrameManager');
-// require('./Input') // Mouse,
-// require('./Input') // Touchscreen,
-// require('./Launcher') // const Launcher = require('./Launcher');
-// require('./LifecycleWatcher') // const {LifecycleWatcher} = require('./LifecycleWatcher');
-// require('./NetworkManager') // Request,
-// require('./NetworkManager') // Response,
-// require('./NetworkManager') // SecurityDetails,
-// require('./NetworkManager') // const {NetworkManager} = require('./NetworkManager');
-// require('./Page') // ConsoleMessage,
-// require('./Page') // FileChooser,
-// require('./Page') // Page,
-// require('./Page') // const {Page} = require('./Page');
-// require('./PipeTransport') // const PipeTransport = require('./PipeTransport');
-// require('./Puppeteer') // Puppeteer,
-// require('./Target') // Target,
-// require('./Target') // const {Target} = require('./Target');
-// require('./TaskQueue') // const {TaskQueue} = require('./TaskQueue');
-// require('./Tracing') // Tracing,
-// require('./Tracing') // const Tracing = require('./Tracing');
-// require('./WebSocketTransport') // const WebSocketTransport = require('./WebSocketTransport');
-// require('./Worker') // Worker,
-// require('./Worker') // const {Worker} = require('./Worker');
-// require('./helper') // const { helper, assert } = require('./helper');
-// require('./helper') // const {assert} = require('./helper');
-// require('./helper') // const {debugError} = require('./helper');
-// require('./helper') // const {helper, assert, debugError} = require('./helper');
-// require('./helper') // const {helper, assert} = require('./helper');
-// require('./helper') // const {helper, debugError, assert} = require('./helper');
-// require('./helper') // const {helper, debugError} = require('./helper');
-// require('./lib/Puppeteer') // const Puppeteer = asyncawait ? require('./lib/Puppeteer') : require('./node6/lib/Puppeteer');
-// require('./lib/api') // const api = require('./lib/api');
-// require('./lib/helper') // const {helper} = require('./lib/helper');
-// require('./package.json') // const packageJson = require('./package.json');
-// require('child_process') // const childProcess = require('child_process');
-// require('debug') // const debugError = require('debug')(`puppeteer:error`);
-// require('debug') // const debugProtocol = require('debug')('puppeteer:protocol');
-// require('events') // const EventEmitter = require('events');
-// require('extract-zip') // const extract = require('extract-zip');
-// require('fs') // const fs = require('fs');
-// require('http') // const http = require('http');
-// require('http') // require('http').request(options, requestCallback);
-// require('https') // const https = require('https');
-// require('https') // require('https').request(options, requestCallback) :
-// require('https-proxy-agent') // const ProxyAgent = require('https-proxy-agent');
-// require('mime') // const mime = require('mime');
-// require('os') // const os = require('os');
-// require('path') // const path = require('path');
-// require('proxy-from-env') // const getProxyForUrl = require('proxy-from-env').getProxyForUrl;
-// require('readline') // const readline = require('readline');
-// require('rimraf') // const removeRecursive = require('rimraf');
-// require('url') // const URL = require('url');
-// require('util') // const util = require('util');
-// require('ws') // const WebSocket = require('ws');
 
 
 
@@ -1589,31 +1517,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/helper.js
 
 class Helper {
     /**
-      * @param {!Protocol.Runtime.RemoteObject} remoteObject
-      * @return {*}
-      */
-    static valueFromRemoteObject(remoteObject) {
-        assert(!remoteObject.objectId, 'Cannot extract value when objectId is given');
-        if (remoteObject.unserializableValue) {
-            if (remoteObject.type === 'bigint' && typeof BigInt !== 'undefined')
-                return BigInt(remoteObject.unserializableValue.replace('n', ''));
-            switch (remoteObject.unserializableValue) {
-                case '-0':
-                    return -0;
-                case 'NaN':
-                    return NaN;
-                case 'Infinity':
-                    return Infinity;
-                case '-Infinity':
-                    return -Infinity;
-                default:
-                    throw new Error('Unsupported unserializable value: ' + remoteObject.unserializableValue);
-            }
-        }
-        return remoteObject.value;
-    }
-
-    /**
       * @param {!NodeJS.EventEmitter} emitter
       * @param {(string|symbol)} eventName
       * @param {function(?):void} handler
@@ -1639,14 +1542,6 @@ class Helper {
       */
     static isString(obj) {
         return typeof obj === 'string' || obj instanceof String;
-    }
-
-    /**
-      * @param {!Object} obj
-      * @return {boolean}
-      */
-    static isNumber(obj) {
-        return typeof obj === 'number' || obj instanceof Number;
     }
 
     static promisify(nodeFunction) {
@@ -1759,45 +1654,6 @@ class Browser extends EventEmitter {
         this._connection.on('Target.targetCreated', this._targetCreated.bind(this));
         this._connection.on('Target.targetDestroyed', this._targetDestroyed.bind(this));
         this._connection.on('Target.targetInfoChanged', this._targetInfoChanged.bind(this));
-    }
-
-    /**
-      * @return {?Puppeteer.ChildProcess}
-      */
-    process() {
-        return this._process;
-    }
-
-    /**
-      * @return {!Promise<!BrowserContext>}
-      */
-    async createIncognitoBrowserContext() {
-        const {browserContextId} = await this._connection.send('Target.createBrowserContext');
-        const context = new BrowserContext(this._connection, this, browserContextId);
-        this._contexts.set(browserContextId, context);
-        return context;
-    }
-
-    /**
-      * @return {!Array<!BrowserContext>}
-      */
-    browserContexts() {
-        return [this._defaultContext, ...Array.from(this._contexts.values())];
-    }
-
-    /**
-      * @return {!BrowserContext}
-      */
-    defaultBrowserContext() {
-        return this._defaultContext;
-    }
-
-    /**
-      * @param {?string} contextId
-      */
-    async _disposeContext(contextId) {
-        await this._connection.send('Target.disposeBrowserContext', {browserContextId: contextId || undefined});
-        this._contexts.delete(contextId);
     }
 
     /**
@@ -2487,7 +2343,7 @@ class ExecutionContext {
             }).catch(rewriteError);
             if (exceptionDetails)
                 throw new Error('Evaluation failed: ' + helper.getExceptionMessage(exceptionDetails));
-            return returnByValue ? helper.valueFromRemoteObject(remoteObject) : createJSHandle(this, remoteObject);
+            return returnByValue ? remoteObject.value : createJSHandle(this, remoteObject);
         }
 
         if (typeof pageFunction !== 'function')
@@ -2528,7 +2384,7 @@ class ExecutionContext {
         const { exceptionDetails, result: remoteObject } = await callFunctionOnPromise.catch(rewriteError);
         if (exceptionDetails)
             throw new Error('Evaluation failed: ' + helper.getExceptionMessage(exceptionDetails));
-        return returnByValue ? helper.valueFromRemoteObject(remoteObject) : createJSHandle(this, remoteObject);
+        return returnByValue ? remoteObject.value : createJSHandle(this, remoteObject);
 
         /**
           * @param {*} arg
