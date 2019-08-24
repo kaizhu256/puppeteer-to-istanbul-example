@@ -954,60 +954,6 @@ class WebSocket extends EventEmitter {
         }
     }
 
-    get CONNECTING() {
-        return WebSocket.CONNECTING;
-    }
-    get CLOSING() {
-        return WebSocket.CLOSING;
-    }
-    get CLOSED() {
-        return WebSocket.CLOSED;
-    }
-    get OPEN() {
-        return WebSocket.OPEN;
-    }
-
-    /**
-      * This deviates from the WHATWG interface since ws doesn't support the
-      * required default "blob" type (instead we define a custom "nodebuffer"
-      * type).
-      *
-      * @type {String}
-      */
-    get binaryType() {
-        return this._binaryType;
-    }
-
-    set binaryType(type) {
-        if (!BINARY_TYPES.includes(type)) return;
-
-        this._binaryType = type;
-
-        //
-        // Allow to change `binaryType` on the fly.
-        //
-        if (this._receiver) this._receiver._binaryType = type;
-    }
-
-    /**
-      * @type {Number}
-      */
-    get bufferedAmount() {
-        if (!this._socket) return 0;
-
-        //
-        // `socket.bufferSize` is `undefined` if the socket is closed.
-        //
-        return (this._socket.bufferSize || 0) + this._sender._bufferedBytes;
-    }
-
-    /**
-      * @type {String}
-      */
-    get extensions() {
-        return Object.keys(this._extensions).join();
-    }
-
     /**
       * Set up the socket and the internal resources.
       *
@@ -1114,70 +1060,6 @@ class WebSocket extends EventEmitter {
             this._socket.destroy.bind(this._socket),
             timeout
         );
-    }
-
-    /**
-      * Send a ping.
-      *
-      * @param {*} data The data to send
-      * @param {Boolean} mask Indicates whether or not to mask `data`
-      * @param {Function} cb Callback which is executed when the ping is sent
-      * @public
-      */
-    ping(data, mask, cb) {
-        if (typeof data === 'function') {
-            cb = data;
-            data = mask = undefined;
-        } else if (typeof mask === 'function') {
-            cb = mask;
-            mask = undefined;
-        }
-
-        if (this.readyState !== WebSocket.OPEN) {
-            const err = new Error(
-                `WebSocket is not open: readyState ${this.readyState} ` +
-                    `(${readyStates[this.readyState]})`
-            );
-
-            if (cb) return cb(err);
-            throw err;
-        }
-
-        if (typeof data === 'number') data = data.toString();
-        if (mask === undefined) mask = !this._isServer;
-        this._sender.ping(data || EMPTY_BUFFER, mask, cb);
-    }
-
-    /**
-      * Send a pong.
-      *
-      * @param {*} data The data to send
-      * @param {Boolean} mask Indicates whether or not to mask `data`
-      * @param {Function} cb Callback which is executed when the pong is sent
-      * @public
-      */
-    pong(data, mask, cb) {
-        if (typeof data === 'function') {
-            cb = data;
-            data = mask = undefined;
-        } else if (typeof mask === 'function') {
-            cb = mask;
-            mask = undefined;
-        }
-
-        if (this.readyState !== WebSocket.OPEN) {
-            const err = new Error(
-                `WebSocket is not open: readyState ${this.readyState} ` +
-                    `(${readyStates[this.readyState]})`
-            );
-
-            if (cb) return cb(err);
-            throw err;
-        }
-
-        if (typeof data === 'number') data = data.toString();
-        if (mask === undefined) mask = !this._isServer;
-        this._sender.pong(data || EMPTY_BUFFER, mask, cb);
     }
 
     /**
