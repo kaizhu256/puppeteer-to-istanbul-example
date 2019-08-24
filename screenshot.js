@@ -155,6 +155,7 @@ var listenersAdd;
 var listenersProcess;
 var listenersRemove;
 var page;
+var path;
 var readline;
 var timeout;
 var waitForChromeToClose;
@@ -168,7 +169,7 @@ fs = require("fs");
 //!! const https = require("https");
 //!! const net = require("net");
 //!! const os = require("os");
-//!! const path = require("path");
+path = require("path");
 readline = require("readline");
 //!! const tls = require("tls");
 //!! const url = require("url");
@@ -400,6 +401,16 @@ if (!local.nop()) {
 var basename;
 var covPuppeteer;
 var iiInline;
+var storagePath;
+// mkdir -p storagePath
+storagePath = "./.nyc_output/js";
+child_process.spawnSync("mkdir", [
+    "-p", storagePath
+], {
+    stdio: [
+        "ignore", 1, 2
+    ]
+});
 // Disable JavaScript coverage
 covPuppeteer = await page.coverage.stopJSCoverage();
 // init covPuppeteer
@@ -414,13 +425,13 @@ covPuppeteer.forEach(function (file) {
     // generate a new path relative to ./coverage/js.
     // this would be around where you'd use mkdirp.
     // Get the last element in the path name
-    basename = pathLib.basename(file.url);
+    basename = path.basename(file.url);
     // Special case: when html present, strip and return specialized string
     if (basename.includes(".html")) {
-        basename = pathLib.resolve(storagePath, basename) + "puppeteerTemp-inline";
+        basename = path.resolve(storagePath, basename) + "puppeteerTemp-inline";
     } else {
         basename = basename.split(".js")[0];
-        basename = pathLib.resolve(storagePath, basename);
+        basename = path.resolve(storagePath, basename);
     }
     if (fs.existsSync(basename + ".js")) {
         iiInline += 1;
@@ -432,17 +443,18 @@ covPuppeteer.forEach(function (file) {
 });
 // init cov8
 // Iterate through coverage info and create IDs
-let id = 0;
-var covV8;
-covV8 = covPuppeteer.map(function (file) {
+// init covIstanbul
+var covIstanbul = {};
+covPuppeteer.map(function (file, ii) {
     return {
-        scriptId: id++,
+        scriptId: ii,
         url: "file://" + file.url,
         functions: [
             {
                 ranges: file.ranges.map(function (range) {
-                    // Takes in a Puppeteer range object with start and end properties and
-                    // converts it to a V8 range with startOffset, endOffset, and count properties
+                    // Takes in a Puppeteer range object with start and end
+                    // properties and converts it to a V8 range
+                    // with startOffset, endOffset, and count properties
                     return {
                         startOffset: range.start,
                         endOffset: range.end,
@@ -453,17 +465,18 @@ covV8 = covPuppeteer.map(function (file) {
             }
         ]
     };
-});
-// init covIstanbul
-var covIstanbul = {};
-covV8.forEach(function (jsFile) {
+}).forEach(function (jsFile) {
     const script = new CovScript(jsFile.url);
     script.applyCoverage(jsFile.functions);
     let istanbulCoverage = script.toIstanbul();
     var key = Object.keys(istanbulCoverage)[0];
     covIstanbul[key] = istanbulCoverage[key];
 });
-fs.writeFileSync("./.nyc_output/out.json", JSON.stringify(covIstanbul, null, 4), "utf8");
+fs.writeFileSync(
+    "./.nyc_output/out.json",
+    JSON.stringify(covIstanbul, null, 4),
+    "utf8"
+);
 }());
 
 await browser.close();
