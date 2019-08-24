@@ -229,7 +229,7 @@ readline = require("readline");
 //!! { Writable} = require("stream");
 //!! { randomBytes} = require("crypto");
 
-module.exports = require("./.a00.js");
+module.exports = require("./lib.puppeteer.screenshot.js");
 
 preferredRevision = 674921;
 timeout = 30000;
