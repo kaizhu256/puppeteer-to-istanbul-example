@@ -987,7 +987,7 @@ class WebSocket extends EventEmitter {
         socket.on('close', socketOnClose);
         socket.on('data', socketOnData);
         socket.on('end', socketOnEnd);
-        socket.on('error', socketOnError);
+        socket.on('error', console.error);
 
         this.readyState = WebSocket.OPEN;
         this.emit('open');
