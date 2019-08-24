@@ -909,58 +909,6 @@ class WebSocket extends EventEmitter {
     }
 
     /**
-      * Start a closing handshake.
-      *
-      *          +----------+   +-----------+   +----------+
-      *     - - -|ws.close()|-->|close frame|-->|ws.close()|- - -
-      *    |     +----------+   +-----------+   +----------+     |
-      *          +----------+   +-----------+         |
-      * CLOSING  |ws.close()|<--|close frame|<--+-----+       CLOSING
-      *          +----------+   +-----------+   |
-      *    |           |                        |   +---+        |
-      *                +------------------------+-->|fin| - - - -
-      *    |         +---+                      |   +---+
-      *     - - - - -|fin|<---------------------+
-      *              +---+
-      *
-      * @param {Number} code Status code explaining why the connection is closing
-      * @param {String} data A string explaining why the connection is closing
-      * @public
-      */
-    close(code, data) {
-        if (this.readyState === WebSocket.CLOSED) return;
-        if (this.readyState === WebSocket.CONNECTING) {
-            const msg = 'WebSocket was closed before the connection was established';
-            return abortHandshake(this, this._req, msg);
-        }
-
-        if (this.readyState === WebSocket.CLOSING) {
-            if (this._closeFrameSent && this._closeFrameReceived) this._socket.end();
-            return;
-        }
-
-        this.readyState = WebSocket.CLOSING;
-        this._sender.close(code, data, !this._isServer, (err) => {
-            //
-            // This error is handled by the `'error'` listener on the socket. We only
-            // want to know if the close frame has been sent here.
-            //
-            if (err) return;
-
-            this._closeFrameSent = true;
-            if (this._closeFrameReceived) this._socket.end();
-        });
-
-        //
-        // Specify a timeout for the closing handshake to complete.
-        //
-        this._closeTimer = setTimeout(
-            this._socket.destroy.bind(this._socket),
-            timeout
-        );
-    }
-
-    /**
       * Send a data message.
       *
       * @param {*} data The message to send
@@ -1108,38 +1056,7 @@ function initAsClient(websocket, address, protocols, options) {
     );
     opts.path = path;
     opts.timeout = opts.handshakeTimeout;
-
-    if (protocols) {
-        opts.headers['Sec-WebSocket-Protocol'] = protocols;
-    }
-    if (opts.origin) {
-        if (opts.protocolVersion < 13) {
-            opts.headers['Sec-WebSocket-Origin'] = opts.origin;
-        } else {
-            opts.headers.Origin = opts.origin;
-        }
-    }
-    if (parsedUrl.auth) {
-        opts.auth = parsedUrl.auth;
-    } else if (parsedUrl.username || parsedUrl.password) {
-        opts.auth = `${parsedUrl.username}:${parsedUrl.password}`;
-    }
-
-    if (isUnixSocket) {
-        const parts = path.split(':');
-
-        opts.socketPath = parts[0];
-        opts.path = parts[1];
-    }
-
     var req = (websocket._req = get(opts));
-
-    if (opts.timeout) {
-        req.on('timeout', () => {
-            abortHandshake(websocket, req, 'Opening handshake has timed out');
-        });
-    }
-
     req.on('upgrade', (res, socket, head) => {
         websocket.emit('upgrade', res);
 
@@ -1147,8 +1064,6 @@ function initAsClient(websocket, address, protocols, options) {
         // The user may have closed the connection from a listener of the `upgrade`
         // event.
         //
-        if (websocket.readyState !== WebSocket.CONNECTING) return;
-
         req = websocket._req = null;
 
         const digest = crypto
@@ -1156,30 +1071,9 @@ function initAsClient(websocket, address, protocols, options) {
             .update(key + GUID)
             .digest('base64');
 
-        if (res.headers['sec-websocket-accept'] !== digest) {
-            abortHandshake(websocket, socket, 'Invalid Sec-WebSocket-Accept header');
-            return;
-        }
-
         const serverProt = res.headers['sec-websocket-protocol'];
         const protList = (protocols || '').split(/, */);
         var protError;
-
-        if (!protocols && serverProt) {
-            protError = 'Server sent a subprotocol but none was requested';
-        } else if (protocols && !serverProt) {
-            protError = 'Server sent no subprotocol';
-        } else if (serverProt && !protList.includes(serverProt)) {
-            protError = 'Server sent an invalid subprotocol';
-        }
-
-        if (protError) {
-            abortHandshake(websocket, socket, protError);
-            return;
-        }
-
-        if (serverProt) websocket.protocol = serverProt;
-
         websocket.setSocket(socket, head, opts.maxPayload);
     });
 }
@@ -1847,7 +1741,6 @@ class Connection extends EventEmitter {
 
     dispose() {
         this._onClose();
-        this._transport.close();
     }
 
     /**
@@ -3656,10 +3549,6 @@ class WebSocketTransport {
       */
     send(message) {
         this._ws.send(message);
-    }
-
-    close() {
-        this._ws.close();
     }
 }
 
