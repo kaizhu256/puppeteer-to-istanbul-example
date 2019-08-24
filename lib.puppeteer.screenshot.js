@@ -1467,12 +1467,8 @@ class WebSocket extends EventEmitter {
         receiver[kWebSocket] = this;
         socket[kWebSocket] = this;
 
-        receiver.on('conclude', receiverOnConclude);
         receiver.on('drain', receiverOnDrain);
-        receiver.on('error', receiverOnError);
         receiver.on('message', receiverOnMessage);
-        receiver.on('ping', receiverOnPing);
-        receiver.on('pong', receiverOnPong);
 
         socket.setTimeout(0);
         socket.setNoDelay();
@@ -1961,98 +1957,12 @@ function netConnect(options) {
 }
 
 /**
-  * Create a `tls.TLSSocket` and initiate a connection.
-  *
-  * @param {Object} options Connection options
-  * @return {tls.TLSSocket} The newly created socket used to start the connection
-  * @private
-  */
-function tlsConnect(options) {
-    options.path = undefined;
-    options.servername = options.servername || options.host;
-    return tls.connect(options);
-}
-
-/**
-  * Abort the handshake and emit an error.
-  *
-  * @param {WebSocket} websocket The WebSocket instance
-  * @param {(http.ClientRequest|net.Socket)} stream The request to abort or the
-  *     socket to destroy
-  * @param {String} message The error message
-  * @private
-  */
-function abortHandshake(websocket, stream, message) {
-    websocket.readyState = WebSocket.CLOSING;
-
-    const err = new Error(message);
-    Error.captureStackTrace(err, abortHandshake);
-
-    if (stream.setHeader) {
-        stream.abort();
-        stream.once('abort', websocket.emitClose.bind(websocket));
-        websocket.emit('error', err);
-    } else {
-        stream.destroy(err);
-        stream.once('error', websocket.emit.bind(websocket, 'error'));
-        stream.once('close', websocket.emitClose.bind(websocket));
-    }
-}
-
-/**
-  * The listener of the `Receiver` `'conclude'` event.
-  *
-  * @param {Number} code The status code
-  * @param {String} reason The reason for closing
-  * @private
-  */
-function receiverOnConclude(code, reason) {
-    const websocket = this[kWebSocket];
-
-    websocket._socket.removeListener('data', socketOnData);
-    websocket._socket.resume();
-
-    websocket._closeFrameReceived = true;
-    websocket._closeMessage = reason;
-    websocket._closeCode = code;
-
-    if (code === 1005) websocket.close();
-    else websocket.close(code, reason);
-}
-
-/**
   * The listener of the `Receiver` `'drain'` event.
   *
   * @private
   */
 function receiverOnDrain() {
     this[kWebSocket]._socket.resume();
-}
-
-/**
-  * The listener of the `Receiver` `'error'` event.
-  *
-  * @param {(RangeError|Error)} err The emitted error
-  * @private
-  */
-function receiverOnError(err) {
-    const websocket = this[kWebSocket];
-
-    websocket._socket.removeListener('data', socketOnData);
-
-    websocket.readyState = WebSocket.CLOSING;
-    websocket._closeCode = err[kStatusCode];
-    websocket.emit('error', err);
-    websocket._socket.destroy();
-}
-
-/**
-  * The listener of the `Receiver` `'finish'` event.
-  *
-  * @private
-  */
-function receiverOnFinish() {
-    this[kWebSocket].emitClose();
 }
 
 /**
@@ -2063,29 +1973,6 @@ function receiverOnFinish() {
   */
 function receiverOnMessage(data) {
     this[kWebSocket].emit('message', data);
-}
-
-/**
-  * The listener of the `Receiver` `'ping'` event.
-  *
-  * @param {Buffer} data The data included in the ping frame
-  * @private
-  */
-function receiverOnPing(data) {
-    const websocket = this[kWebSocket];
-
-    websocket.pong(data, !websocket._isServer, NOOP);
-    websocket.emit('ping', data);
-}
-
-/**
-  * The listener of the `Receiver` `'pong'` event.
-  *
-  * @param {Buffer} data The data included in the pong frame
-  * @private
-  */
-function receiverOnPong(data) {
-    this[kWebSocket].emit('pong', data);
 }
 
 /**
@@ -2386,47 +2273,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/helper.js
 
 class Helper {
     /**
-      * @param {Function|string} fun
-      * @param {!Array<*>} args
-      * @return {string}
-      */
-    static evaluationString(fun, ...args) {
-        if (Helper.isString(fun)) {
-            assert(args.length === 0, 'Cannot evaluate a string with arguments');
-            return /** @type {string} */ (fun);
-        }
-        return `(${fun})(${args.map(serializeArgument).join(',')})`;
-
-        /**
-          * @param {*} arg
-          * @return {string}
-          */
-        function serializeArgument(arg) {
-            if (Object.is(arg, undefined))
-                return 'undefined';
-            return JSON.stringify(arg);
-        }
-    }
-
-    /**
-      * @param {!Protocol.Runtime.ExceptionDetails} exceptionDetails
-      * @return {string}
-      */
-    static getExceptionMessage(exceptionDetails) {
-        if (exceptionDetails.exception)
-            return exceptionDetails.exception.description || exceptionDetails.exception.value;
-        let message = exceptionDetails.text;
-        if (exceptionDetails.stackTrace) {
-            for (const callframe of exceptionDetails.stackTrace.callFrames) {
-                const location = callframe.url + ':' + callframe.lineNumber + ':' + callframe.columnNumber;
-                const functionName = callframe.functionName || '<anonymous>';
-                message += `\n    at ${functionName} (${location})`;
-            }
-        }
-        return message;
-    }
-
-    /**
       * @param {!Protocol.Runtime.RemoteObject} remoteObject
       * @return {*}
       */
@@ -2449,42 +2295,6 @@ class Helper {
             }
         }
         return remoteObject.value;
-    }
-
-    /**
-      * @param {!Puppeteer.CDPSession} client
-      * @param {!Protocol.Runtime.RemoteObject} remoteObject
-      */
-    static async releaseObject(client, remoteObject) {
-        if (!remoteObject.objectId)
-            return;
-        await client.send('Runtime.releaseObject', {objectId: remoteObject.objectId}).catch(error => {
-            // Exceptions might happen in case of a page been navigated or closed.
-            // Swallow these since they are harmless and we don't leak anything in this case.
-            debugError(error);
-        });
-    }
-
-    /**
-      * @param {!Object} classType
-      */
-    static installAsyncStackHooks(classType) {
-        for (const methodName of Reflect.ownKeys(classType.prototype)) {
-            const method = Reflect.get(classType.prototype, methodName);
-            if (methodName === 'constructor' || typeof methodName !== 'string' || methodName.startsWith('_') || typeof method !== 'function' || method.constructor.name !== 'AsyncFunction')
-                continue;
-            Reflect.set(classType.prototype, methodName, function(...args) {
-                const syncStack = {};
-                Error.captureStackTrace(syncStack);
-                return method.call(this, ...args).catch(e => {
-                    const stack = syncStack.stack.substring(syncStack.stack.indexOf('\n') + 1);
-                    const clientStack = stack.substring(stack.indexOf('\n'));
-                    if (e instanceof Error && e.stack && !e.stack.includes(clientStack))
-                        e.stack += '\n  -- ASYNC --\n' + stack;
-                    throw e;
-                });
-            });
-        }
     }
 
     /**
@@ -2539,89 +2349,6 @@ class Helper {
         return promisified;
     }
 
-    /**
-      * @param {!NodeJS.EventEmitter} emitter
-      * @param {(string|symbol)} eventName
-      * @param {function} predicate
-      * @return {!Promise}
-      */
-    static waitForEvent(emitter, eventName, predicate, timeout) {
-        let eventTimeout, resolveCallback, rejectCallback;
-        const promise = new Promise((resolve, reject) => {
-            resolveCallback = resolve;
-            rejectCallback = reject;
-        });
-        const listener = Helper.addEventListener(emitter, eventName, event => {
-            if (!predicate(event))
-                return;
-            cleanup();
-            resolveCallback(event);
-        });
-        if (timeout) {
-            eventTimeout = setTimeout(() => {
-                cleanup();
-                rejectCallback(new Error('Timeout exceeded while waiting for event'));
-            }, timeout);
-        }
-        function cleanup() {
-            Helper.removeEventListeners([listener]);
-            clearTimeout(eventTimeout);
-        }
-        return promise;
-    }
-
-    /**
-      * @template T
-      * @param {!Promise<T>} promise
-      * @param {string} taskName
-      * @param {number} timeout
-      * @return {!Promise<T>}
-      */
-    static async waitWithTimeout(promise, taskName, timeout) {
-        let reject;
-        const timeoutError = new Error(`waiting for ${taskName} failed: timeout ${timeout}ms exceeded`);
-        const timeoutPromise = new Promise((resolve, x) => reject = x);
-        let timeoutTimer = null;
-        if (timeout)
-            timeoutTimer = setTimeout(() => reject(timeoutError), timeout);
-        try {
-            return await Promise.race([promise, timeoutPromise]);
-        } finally {
-            if (timeoutTimer)
-                clearTimeout(timeoutTimer);
-        }
-    }
-
-    /**
-      * @param {!Puppeteer.CDPSession} client
-      * @param {string} handle
-      * @param {?string} path
-      * @return {!Promise<!Buffer>}
-      */
-    static async readProtocolStream(client, handle, path) {
-        let eof = false;
-        let file;
-        if (path)
-            file = await openAsync(path, 'w');
-        const bufs = [];
-        while (!eof) {
-            const response = await client.send('IO.read', {handle});
-            eof = response.eof;
-            const buf = Buffer.from(response.data, response.base64Encoded ? 'base64' : undefined);
-            bufs.push(buf);
-            if (path)
-                await writeAsync(file, buf);
-        }
-        if (path)
-            await closeAsync(file);
-        await client.send('IO.close', {handle});
-        let resultBuffer = null;
-        try {
-            resultBuffer = Buffer.concat(bufs);
-        } finally {
-            return resultBuffer;
-        }
-    }
 }
 
 const openAsync = Helper.promisify(fs.open);
