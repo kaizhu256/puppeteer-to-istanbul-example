@@ -7,7 +7,7 @@
 //!! const URL = require("url");
 const child_process = require("child_process");
 //!! const crypto = require("crypto");
-//!! const fs = require("fs");
+const fs = require("fs");
 //!! const http = require("http");
 //!! const https = require("https");
 //!! const net = require("net");
@@ -25,8 +25,9 @@ module.exports = require("./.a00.js");
 local = {};
 
 var browser;
+var chromeClosed;
 var chromeProcess;
-//!! var temporaryUserDataDir;
+var waitForChromeToClose;
 local.gracefullyCloseChrome = function () {
 /**
   * @return {Promise}
@@ -35,15 +36,11 @@ local.gracefullyCloseChrome = function () {
     process.removeListener("SIGINT", local.killChrome130);
     process.removeListener("SIGTERM", local.gracefullyCloseChrome);
     process.removeListener("SIGHUP", local.gracefullyCloseChrome);
-    //!! if (temporaryUserDataDir) {
-        //!! local.killChrome();
-    //!! } else if (connection) {
     // Attempt to close chrome gracefully
     connection.send("Browser.close").catch(function (err) {
         console.error(err);
         local.killChrome();
     });
-    //!! }
     return waitForChromeToClose;
 };
 
@@ -68,14 +65,6 @@ local.killChrome = function () {
         // the process might have already stopped
         } catch (ignore) {}
     }
-    //!! // Attempt to remove temporary profile directory to avoid littering.
-    //!! child_process.spawnSync("rm", [
-        //!! "-fr", temporaryUserDataDir
-    //!! ], {
-        //!! stdio: [
-            //!! "ignore", 1, 2
-        //!! ]
-    //!! });
 };
 
 local.killChrome130 = function () {
@@ -83,18 +72,6 @@ local.killChrome130 = function () {
     process.exit(130);
 };
 
-//!! temporaryUserDataDir = await new Promise(function (resolve, reject) {
-    //!! fs.mkdtemp(path.join(
-        //!! os.tmpdir(),
-        //!! "puppeteer_dev_profile-"
-    //!! ), function (err, data) {
-        //!! if (err) {
-            //!! reject(err);
-            //!! return;
-        //!! }
-        //!! resolve(data);
-    //!! });
-//!! });
 chromeProcess = child_process.spawn((
     "node_modules/puppeteer/.local-chromium"
     + "/linux-674921/chrome-linux/chrome"
@@ -122,20 +99,9 @@ chromeProcess = child_process.spawn((
 chromeProcess.stderr.pipe(process.stderr);
 chromeProcess.stdout.pipe(process.stdout);
 
-let chromeClosed = false;
-const waitForChromeToClose = new Promise(function (fulfill) {
+waitForChromeToClose = new Promise(function (fulfill) {
     chromeProcess.once("exit", function () {
         chromeClosed = true;
-        //!! // Cleanup as processes exit.
-        //!! if (temporaryUserDataDir) {
-            //!! child_process.spawnSync("rm", [
-                //!! "-fr", temporaryUserDataDir
-            //!! ], {
-                //!! stdio: [
-                    //!! "ignore", 1, 2
-                //!! ]
-            //!! });
-        //!! }
         fulfill();
     });
 });
@@ -170,18 +136,16 @@ try {
     await browser.waitForTarget(function (t) {
         return t.type() === "page";
     });
-    //!! return browser;
 } catch (errCaught) {
     local.killChrome();
     console.error(errCaught);
 }
-
-//!! var browser = await new module.exports.Launcher().launch();
 
 var page = await browser.newPage();
 await page.goto("https://www.example.com");
 await page.screenshot({
     path: "tmp/aa.png"
 });
+fs.writeFileSync("tmp/aa.html", await page.content());
 await browser.close();
 }());
