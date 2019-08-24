@@ -151,8 +151,11 @@ var chromeProcess;
 var fs;
 var gracefullyCloseChrome;
 var killChrome;
-var listenerListAddRemove;
-var listenerListProcess;
+var listenersAdd;
+var listenersProcess;
+var listenersRemove;
+var listenersWebsocket;
+var readline;
 var timeout;
 var waitForChromeToClose;
 var waitForWSEndpoint;
@@ -167,7 +170,7 @@ fs = require("fs");
 //!! const net = require("net");
 //!! const os = require("os");
 //!! const path = require("path");
-//!! const readline = require("readline");
+readline = require("readline");
 //!! const tls = require("tls");
 //!! const url = require("url");
 //!! const util = require("util");
@@ -176,22 +179,24 @@ fs = require("fs");
 
 module.exports = require("./.a00.js");
 
-listenerListAddRemove = function (list) {
+listenersAdd = function (list) {
     list.forEach(function (elem) {
         elem[0].on(elem[1], elem[2]);
     });
-    return function () {
-        list.forEach(function (elem) {
-            elem[0].removeListener(elem[1], elem[2]);
-        });
-    };
+    return list;
+};
+
+listenersRemove = function (list) {
+    list.forEach(function (elem) {
+        elem[0].removeListener(elem[1], elem[2]);
+    });
 };
 
 gracefullyCloseChrome = function () {
 /**
   * @return {Promise}
   */
-    listenerListProcess();
+    listenersRemove(listenersProcess);
     // Attempt to close chrome gracefully
     connection.send("Browser.close").catch(function (err) {
         console.error(err);
@@ -204,7 +209,7 @@ killChrome = function () {
 /*
  * This method has to be sync to be used as 'exit' event handler.
  */
-    listenerListProcess();
+    listenersRemove(listenersProcess);
     if (chromeProcess.pid && !chromeProcess.killed && !chromeClosed) {
         // Force kill chrome.
         try {
@@ -220,23 +225,31 @@ killChrome = function () {
     }
 };
 
+waitForWSEndpoint = function (chromeProcess) {
 /**
   * @param {!Puppeteer.ChildProcess} chromeProcess
   * @param {number} timeout
   * @return {!Promise<string>}
   */
-waitForWSEndpoint = function (chromeProcess) {
     return new Promise(function (resolve, reject) {
         const rl = readline.createInterface({
             input: chromeProcess.stderr
         });
         let stderr = "";
-        const listeners = [
-            helper.addEventListener(rl, "line", onLine),
-            helper.addEventListener(rl, "close", onClose),
-            helper.addEventListener(chromeProcess, "exit", onClose),
-            helper.addEventListener(chromeProcess, "error", onClose)
-        ];
+        listenersWebsocket = listenersAdd([
+            [
+                rl, "line", onLine
+            ],
+            [
+                rl, "close", onClose
+            ],
+            [
+                chromeProcess, "exit", onClose
+            ],
+            [
+                chromeProcess, "error", onClose
+            ]
+        ]);
         const timeoutId = setTimeout(onTimeout, timeout);
 
         /**
@@ -278,7 +291,7 @@ waitForWSEndpoint = function (chromeProcess) {
             if (timeoutId) {
                 clearTimeout(timeoutId);
             }
-            helper.removeEventListeners(listeners);
+            listenersRemove(listenersWebsocket);
         }
     });
 }
@@ -318,7 +331,7 @@ waitForChromeToClose = new Promise(function (fulfill) {
     });
 });
 
-listenerListProcess = listenerListAddRemove([
+listenersProcess = listenersAdd([
     [
         process, "exit", killChrome
     ],
