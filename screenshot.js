@@ -141,14 +141,23 @@
 
 
 
-(async function (local) {
+(async function () {
 "use strict";
+var browser;
+var child_process;
+var chromeClosed;
+var chromeProcess;
+var fs;
+var gracefullyCloseChrome;
+var killChrome130;
+var killChrome;
+var waitForChromeToClose;
 //!! // hack-puppeteer - module.exports
 //!! const EventEmitter = require("events");
 //!! const URL = require("url");
-local.child_process = require("child_process");
+child_process = require("child_process");
 //!! const crypto = require("crypto");
-local.fs = require("fs");
+fs = require("fs");
 //!! const http = require("http");
 //!! const https = require("https");
 //!! const net = require("net");
@@ -163,39 +172,35 @@ local.fs = require("fs");
 
 module.exports = require("./.a00.js");
 
-var browser;
-var chromeClosed;
-var chromeProcess;
-var waitForChromeToClose;
-local.gracefullyCloseChrome = function () {
+gracefullyCloseChrome = function () {
 /**
   * @return {Promise}
   */
-    process.removeListener("exit", local.killChrome);
-    process.removeListener("SIGINT", local.killChrome130);
-    process.removeListener("SIGTERM", local.gracefullyCloseChrome);
-    process.removeListener("SIGHUP", local.gracefullyCloseChrome);
+    process.removeListener("exit", killChrome);
+    process.removeListener("SIGINT", killChrome130);
+    process.removeListener("SIGTERM", gracefullyCloseChrome);
+    process.removeListener("SIGHUP", gracefullyCloseChrome);
     // Attempt to close chrome gracefully
     connection.send("Browser.close").catch(function (err) {
         console.error(err);
-        local.killChrome();
+        killChrome();
     });
     return waitForChromeToClose;
 };
 
-local.killChrome = function () {
+killChrome = function () {
 /*
  * This method has to be sync to be used as 'exit' event handler.
  */
-    process.removeListener("exit", local.killChrome);
-    process.removeListener("SIGINT", local.killChrome130);
-    process.removeListener("SIGTERM", local.gracefullyCloseChrome);
-    process.removeListener("SIGHUP", local.gracefullyCloseChrome);
+    process.removeListener("exit", killChrome);
+    process.removeListener("SIGINT", killChrome130);
+    process.removeListener("SIGTERM", gracefullyCloseChrome);
+    process.removeListener("SIGHUP", gracefullyCloseChrome);
     if (chromeProcess.pid && !chromeProcess.killed && !chromeClosed) {
         // Force kill chrome.
         try {
             if (process.platform === "win32") {
-                local.child_process.execSync(
+                child_process.execSync(
                     `taskkill /pid ${chromeProcess.pid} /T /F`
                 );
             } else {
@@ -206,12 +211,12 @@ local.killChrome = function () {
     }
 };
 
-local.killChrome130 = function () {
-    local.killChrome();
+killChrome130 = function () {
+    killChrome();
     process.exit(130);
 };
 
-chromeProcess = local.child_process.spawn((
+chromeProcess = child_process.spawn((
     "node_modules/puppeteer/.local-chromium"
     + "/linux-674921/chrome-linux/chrome"
 ), [
@@ -244,10 +249,10 @@ waitForChromeToClose = new Promise(function (fulfill) {
     });
 });
 
-process.addListener("exit", local.killChrome);
-process.addListener("SIGINT", local.killChrome130);
-process.addListener("SIGTERM", local.gracefullyCloseChrome);
-process.addListener("SIGHUP", local.gracefullyCloseChrome);
+process.addListener("exit", killChrome);
+process.addListener("SIGINT", killChrome130);
+process.addListener("SIGTERM", gracefullyCloseChrome);
+process.addListener("SIGHUP", gracefullyCloseChrome);
 /** @type {?Connection} */
 let connection = null;
 try {
@@ -269,13 +274,13 @@ try {
             height: 600
         },
         chromeProcess,
-        local.gracefullyCloseChrome
+        gracefullyCloseChrome
     );
     await browser.waitForTarget(function (t) {
         return t.type() === "page";
     });
 } catch (errCaught) {
-    local.killChrome();
+    killChrome();
     console.error(errCaught);
 }
 
@@ -284,6 +289,6 @@ await page.goto("https://www.example.com");
 await page.screenshot({
     path: "tmp/aa.png"
 });
-local.fs.writeFileSync("tmp/aa.html", await page.content());
+fs.writeFileSync("tmp/aa.html", await page.content());
 await browser.close();
 }(globalThis.globalLocal));
