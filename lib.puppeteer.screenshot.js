@@ -2629,28 +2629,6 @@ class FrameManager extends EventEmitter {
         }).catch(debugError))); // frames might be removed before we send this
     }
 
-    /**
-      * @param {string} frameId
-      * @param {string} url
-      */
-    _onFrameNavigatedWithinDocument(frameId, url) {
-        const frame = this._frames.get(frameId);
-        if (!frame)
-            return;
-        frame._navigatedWithinDocument(url);
-        this.emit(Events.FrameManager.FrameNavigatedWithinDocument, frame);
-        this.emit(Events.FrameManager.FrameNavigated, frame);
-    }
-
-    /**
-      * @param {string} frameId
-      */
-    _onFrameDetached(frameId) {
-        const frame = this._frames.get(frameId);
-        if (frame)
-            this._removeFramesRecursively(frame);
-    }
-
     _onExecutionContextCreated(contextPayload) {
         const frameId = contextPayload.auxData ? contextPayload.auxData.frameId : null;
         const frame = this._frames.get(frameId) || null;
@@ -2684,35 +2662,6 @@ class FrameManager extends EventEmitter {
         this._contextIdToContext.delete(executionContextId);
         if (context._world)
             context._world._setContext(null);
-    }
-
-    _onExecutionContextsCleared() {
-        for (const context of this._contextIdToContext.values()) {
-            if (context._world)
-                context._world._setContext(null);
-        }
-        this._contextIdToContext.clear();
-    }
-
-    /**
-      * @param {number} contextId
-      * @return {!ExecutionContext}
-      */
-    executionContextById(contextId) {
-        const context = this._contextIdToContext.get(contextId);
-        assert(context, 'INTERNAL ERROR: missing context with id = ' + contextId);
-        return context;
-    }
-
-    /**
-      * @param {!Frame} frame
-      */
-    _removeFramesRecursively(frame) {
-        for (const child of frame.childFrames())
-            this._removeFramesRecursively(child);
-        frame._detach();
-        this._frames.delete(frame._id);
-        this.emit(Events.FrameManager.FrameDetached, frame);
     }
 }
 
