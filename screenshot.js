@@ -390,11 +390,30 @@ await page._screenshotTaskQueue._chain.then(
         path: "tmp/aa.png"
     })
 );
-//!! page._screenshotTaskQueue._chain = result.catch(local.nop);
-console.error(page._frameManager.mainFrame().content.toString());
+
+console.error(
+    page._frameManager._mainFrame._secondaryWorld.evaluate.toString()
+);
 
 // screenshot - html
-tmp = await page._frameManager.mainFrame().content();
+tmp = page._frameManager._mainFrame._secondaryWorld;
+//!! async evaluate(pageFunction, ...args) {
+tmp = await tmp.executionContext();
+tmp = tmp.evaluate(
+    Function( // jslint ignore:line
+        `var html = "";
+if (document.doctype) {
+    html = new XMLSerializer().serializeToString(document.doctype);
+}
+if (document.documentElement) {
+    html += document.documentElement.outerHTML;
+}
+return html;`
+    )
+);
+//!! }
+//!! tmp = await page._frameManager._mainFrame._secondaryWorld.evaluate(
+//!! );
 fs.writeFileSync("tmp/aa.html", tmp);
 
 
