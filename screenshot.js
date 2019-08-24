@@ -385,11 +385,11 @@ page = await browser.newPage();
 await page.goto("https://www.example.com");
 
 // screenshot - png
-await page._screenshotTaskQueue._chain.then(
-    page._screenshotTask.bind(page, "png", {
+await page._screenshotTaskQueue._chain.then(function () {
+    return page._screenshotTask("png", {
         path: "tmp/aa.png"
-    })
-);
+    });
+});
 
 // screenshot - html
 tmp = page._frameManager._mainFrame._secondaryWorld._contextPromise;
