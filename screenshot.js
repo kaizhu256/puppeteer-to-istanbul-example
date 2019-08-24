@@ -370,7 +370,7 @@ try {
         chromeProcess,
         gracefullyCloseChrome
     );
-    await browser.targets().find(function (t) {
+    await browser.waitForTarget(function (t) {
         return t.type() === "page";
     });
 } catch (errCaught) {

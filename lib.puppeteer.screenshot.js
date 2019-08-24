@@ -1723,10 +1723,48 @@ class Browser extends EventEmitter {
     }
 
     /**
+      * @return {!Array<!Target>}
+      */
+    targets() {
+        return Array.from(this._targets.values()).filter(target => target._isInitialized);
+    }
+
+    /**
       * @return {!Target}
       */
     target() {
         return this.targets().find(target => target.type() === 'browser');
+    }
+
+    /**
+      * @param {function(!Target):boolean} predicate
+      * @param {{timeout?: number}=} options
+      * @return {!Promise<!Target>}
+      */
+    async waitForTarget(predicate, options = {}) {
+        const existingTarget = this.targets().find(predicate);
+        if (existingTarget)
+            return existingTarget;
+        let resolve;
+        const targetPromise = new Promise(x => resolve = x);
+        this.on(Events.Browser.TargetCreated, check);
+        this.on(Events.Browser.TargetChanged, check);
+        try {
+            if (!timeout)
+                return await targetPromise;
+            return await helper.waitWithTimeout(targetPromise, 'target', timeout);
+        } finally {
+            this.removeListener(Events.Browser.TargetCreated, check);
+            this.removeListener(Events.Browser.TargetChanged, check);
+        }
+
+        /**
+          * @param {!Target} target
+          */
+        function check(target) {
+            if (predicate(target))
+                resolve(target);
+        }
     }
 
     async close() {
