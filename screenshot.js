@@ -396,12 +396,13 @@ fs.writeFileSync("tmp/aa.html", await page.content());
 
 
 
-(async function () {
+async function coverageCreate() {
 if (!local.nop()) {
     return;
 }
 var basename;
 var covPuppeteer;
+var CovScript = null;
 var iiInline;
 var storagePath;
 // mkdir -p storagePath
@@ -479,7 +480,10 @@ fs.writeFileSync(
     JSON.stringify(covIstanbul, null, 4),
     "utf8"
 );
-}());
+}
+await coverageCreate();
+
+
 
 await browser.close();
 }(globalThis.globalLocal));

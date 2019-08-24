@@ -35,18 +35,6 @@ require puppeteer-to-istanbul/lib/output-files.js
 
 const pathLib = path
 
-const storagePath = './.nyc_output/js'
-// mkdir -p
-child_process.spawnSync("mkdir", [
-        "-p", storagePath
-], {
-        stdio: [
-                "ignore", 1, 2
-        ]
-});
-
-
-
 /*
 require v8-to-istanbul/lib/branch.js
 */
@@ -295,32 +283,45 @@ await Promise.all([
 let url = 'file:///' + path.resolve('./index.html')
 await page.goto(url)
 
-// Disable JavaScript coverage
-var covPuppeteer = await page.coverage.stopJSCoverage()
 
+
+async function coverageCreate () {
+var basename;
+var covPuppeteer;
+var iiInline;
+var storagePath;
+// mkdir -p storagePath
+storagePath = "./.nyc_output/js";
+child_process.spawnSync("mkdir", [
+    "-p", storagePath
+], {
+    stdio: [
+        "ignore", 1, 2
+    ]
+});
+// Disable JavaScript coverage
+covPuppeteer = await page.coverage.stopJSCoverage();
 // init covPuppeteer
 // output JavaScript bundled in puppeteer output to format
 // that can be eaten by Istanbul.
 // Clone covPuppeteer to prevent mutating the passed in data
 covPuppeteer = JSON.parse(JSON.stringify(covPuppeteer));
-
 // debug
 fs.writeFileSync("tmp/aa.json", JSON.stringify(covPuppeteer, null, 4));
-
-let iiInline = 0;
+iiInline = 0;
 covPuppeteer.forEach(function (file) {
     // generate a new path relative to ./coverage/js.
     // this would be around where you'd use mkdirp.
     // Get the last element in the path name
-    let basename = pathLib.basename(file.url)
+    basename = path.basename(file.url);
     // Special case: when html present, strip and return specialized string
-    if (basename.includes('.html')) {
-        basename = pathLib.resolve(storagePath, basename) + 'puppeteerTemp-inline'
+    if (basename.includes(".html")) {
+        basename = path.resolve(storagePath, basename) + "puppeteerTemp-inline";
     } else {
-        basename = basename.split('.js')[0]
-        basename = pathLib.resolve(storagePath, basename)
+        basename = basename.split(".js")[0];
+        basename = path.resolve(storagePath, basename);
     }
-    if (fs.existsSync(basename + '.js')) {
+    if (fs.existsSync(basename + ".js")) {
         iiInline += 1;
         file.url = basename + "-" + iiInline + ".js";
     } else {
@@ -328,40 +329,46 @@ covPuppeteer.forEach(function (file) {
     }
     fs.writeFileSync(file.url, file.text);
 });
-
 // init cov8
 // Iterate through coverage info and create IDs
-let id = 0
-var covV8;
-covV8 = covPuppeteer.map(function (file) {
-    return {
-        scriptId: id++,
-        url: 'file://' + file.url,
-        functions: [{
-            ranges: file.ranges.map(function (range) {
-                // Takes in a Puppeteer range object with start and end properties and
-                // converts it to a V8 range with startOffset, endOffset, and count properties
-                return {
-                    startOffset: range.start,
-                    endOffset: range.end,
-                    count: 1
-                }
-            }),
-            isBlockCoverage: true
-        }]
-    }
-});
-
 // init covIstanbul
 var covIstanbul = {};
-covV8.forEach(function (jsFile) {
-    const script = new CovScript(jsFile.url)
-    script.applyCoverage(jsFile.functions)
-    let istanbulCoverage = script.toIstanbul()
+covPuppeteer.map(function (file, ii) {
+    return {
+        scriptId: ii,
+        url: "file://" + file.url,
+        functions: [
+            {
+                ranges: file.ranges.map(function (range) {
+                    // Takes in a Puppeteer range object with start and end
+                    // properties and converts it to a V8 range
+                    // with startOffset, endOffset, and count properties
+                    return {
+                        startOffset: range.start,
+                        endOffset: range.end,
+                        count: 1
+                    };
+                }),
+                isBlockCoverage: true
+            }
+        ]
+    };
+}).forEach(function (jsFile) {
+    const script = new CovScript(jsFile.url);
+    script.applyCoverage(jsFile.functions);
+    let istanbulCoverage = script.toIstanbul();
     var key = Object.keys(istanbulCoverage)[0];
     covIstanbul[key] = istanbulCoverage[key];
-})
-fs.writeFileSync('./.nyc_output/out.json', JSON.stringify(covIstanbul, null, 4), 'utf8')
+});
+fs.writeFileSync(
+    "./.nyc_output/out.json",
+    JSON.stringify(covIstanbul, null, 4),
+    "utf8"
+);
+}
+await coverageCreate();
+
+
 
 await browser.close()
 })();
