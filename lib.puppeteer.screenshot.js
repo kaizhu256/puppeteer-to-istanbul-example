@@ -7278,8 +7278,6 @@ class NetworkManager extends EventEmitter {
         /** @type {!Map<string, string>} */
         this._requestIdToInterceptionId = new Map();
 
-        this._client.on('Fetch.requestPaused', this._onRequestPaused.bind(this));
-        this._client.on('Fetch.authRequired', this._onAuthRequired.bind(this));
         this._client.on('Network.requestWillBeSent', this._onRequestWillBeSent.bind(this));
         this._client.on('Network.requestServedFromCache', this._onRequestServedFromCache.bind(this));
         this._client.on('Network.responseReceived', this._onResponseReceived.bind(this));
@@ -7329,72 +7327,6 @@ class NetworkManager extends EventEmitter {
     }
 
     /**
-      * @param {boolean} value
-      */
-    async setOfflineMode(value) {
-        if (this._offline === value)
-            return;
-        this._offline = value;
-        await this._client.send('Network.emulateNetworkConditions', {
-            offline: this._offline,
-            // values of 0 remove any active throttling. crbug.com/456324#c9
-            latency: 0,
-            downloadThroughput: -1,
-            uploadThroughput: -1
-        });
-    }
-
-    /**
-      * @param {string} userAgent
-      */
-    async setUserAgent(userAgent) {
-        await this._client.send('Network.setUserAgentOverride', { userAgent });
-    }
-
-    /**
-      * @param {boolean} enabled
-      */
-    async setCacheEnabled(enabled) {
-        this._userCacheDisabled = !enabled;
-        await this._updateProtocolCacheDisabled();
-    }
-
-    /**
-      * @param {boolean} value
-      */
-    async setRequestInterception(value) {
-        this._userRequestInterceptionEnabled = value;
-        await this._updateProtocolRequestInterception();
-    }
-
-    async _updateProtocolRequestInterception() {
-        const enabled = this._userRequestInterceptionEnabled || !!this._credentials;
-        if (enabled === this._protocolRequestInterceptionEnabled)
-            return;
-        this._protocolRequestInterceptionEnabled = enabled;
-        if (enabled) {
-            await Promise.all([
-                this._updateProtocolCacheDisabled(),
-                this._client.send('Fetch.enable', {
-                    handleAuthRequests: true,
-                    patterns: [{urlPattern: '*'}],
-                }),
-            ]);
-        } else {
-            await Promise.all([
-                this._updateProtocolCacheDisabled(),
-                this._client.send('Fetch.disable')
-            ]);
-        }
-    }
-
-    async _updateProtocolCacheDisabled() {
-        await this._client.send('Network.setCacheDisabled', {
-            cacheDisabled: this._userCacheDisabled || this._protocolRequestInterceptionEnabled
-        });
-    }
-
-    /**
       * @param {!Protocol.Network.requestWillBeSentPayload} event
       */
     _onRequestWillBeSent(event) {
@@ -7411,46 +7343,6 @@ class NetworkManager extends EventEmitter {
             return;
         }
         this._onRequest(event, null);
-    }
-
-    /**
-      * @param {!Protocol.Fetch.authRequiredPayload} event
-      */
-    _onAuthRequired(event) {
-        /** @type {"Default"|"CancelAuth"|"ProvideCredentials"} */
-        let response = 'Default';
-        if (this._attemptedAuthentications.has(event.requestId)) {
-            response = 'CancelAuth';
-        } else if (this._credentials) {
-            response = 'ProvideCredentials';
-            this._attemptedAuthentications.add(event.requestId);
-        }
-        const {username, password} = this._credentials || {username: undefined, password: undefined};
-        this._client.send('Fetch.continueWithAuth', {
-            requestId: event.requestId,
-            authChallengeResponse: { response, username, password },
-        }).catch(debugError);
-    }
-
-    /**
-      * @param {!Protocol.Fetch.requestPausedPayload} event
-      */
-    _onRequestPaused(event) {
-        if (!this._userRequestInterceptionEnabled && this._protocolRequestInterceptionEnabled) {
-            this._client.send('Fetch.continueRequest', {
-                requestId: event.requestId
-            }).catch(debugError);
-        }
-
-        const requestId = event.networkId;
-        const interceptionId = event.requestId;
-        if (requestId && this._requestIdToRequestWillBeSentEvent.has(requestId)) {
-            const requestWillBeSentEvent = this._requestIdToRequestWillBeSentEvent.get(requestId);
-            this._onRequest(requestWillBeSentEvent, interceptionId);
-            this._requestIdToRequestWillBeSentEvent.delete(requestId);
-        } else {
-            this._requestIdToInterceptionId.set(requestId, interceptionId);
-        }
     }
 
     /**
