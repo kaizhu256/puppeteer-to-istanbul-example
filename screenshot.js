@@ -391,7 +391,7 @@ await page._screenshotTaskQueue._chain.then(
     })
 );
 //!! page._screenshotTaskQueue._chain = result.catch(local.nop);
-console.error(page.content.toString());
+console.error(page._frameManager.mainFrame().content.toString());
 
 // screenshot - html
 tmp = await page._frameManager.mainFrame().content();
