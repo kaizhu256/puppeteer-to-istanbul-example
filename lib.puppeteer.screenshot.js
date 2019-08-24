@@ -1104,67 +1104,10 @@ class WebSocket extends EventEmitter {
 
         this._sender.send(data || EMPTY_BUFFER, opts, cb);
     }
-
-    /**
-      * Forcibly close the connection.
-      *
-      * @public
-      */
-    terminate() {
-        if (this.readyState === WebSocket.CLOSED) return;
-        if (this.readyState === WebSocket.CONNECTING) {
-            const msg = 'WebSocket was closed before the connection was established';
-            return abortHandshake(this, this._req, msg);
-        }
-
-        if (this._socket) {
-            this.readyState = WebSocket.CLOSING;
-            this._socket.destroy();
-        }
-    }
 }
 
 readyStates.forEach((readyState, i) => {
     WebSocket[readyState] = i;
-});
-
-//
-// Add the `onopen`, `onerror`, `onclose`, and `onmessage` attributes.
-// See https://html.spec.whatwg.org/multipage/comms.html#the-websocket-interface
-//
-['open', 'error', 'close', 'message'].forEach((method) => {
-    Object.defineProperty(WebSocket.prototype, `on${method}`, {
-        /**
-          * Return the listener of the event.
-          *
-          * @return {(Function|undefined)} The event listener or `undefined`
-          * @public
-          */
-        get() {
-            const listeners = this.listeners(method);
-            for (var i = 0; i < listeners.length; i++) {
-                if (listeners[i]._listener) return listeners[i]._listener;
-            }
-
-            return undefined;
-        },
-        /**
-          * Add a listener for the event.
-          *
-          * @param {Function} listener The listener to add
-          * @public
-          */
-        set(listener) {
-            const listeners = this.listeners(method);
-            for (var i = 0; i < listeners.length; i++) {
-                //
-                // Remove only the listeners added via `addEventListener`.
-                //
-                if (listeners[i]._listener) this.removeListener(method, listeners[i]);
-            }
-            this.addEventListener(method, listener);
-        }
-    });
 });
 
 WebSocket.prototype.addEventListener = EventTarget.addEventListener;
