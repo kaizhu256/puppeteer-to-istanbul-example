@@ -143,6 +143,7 @@
 
 (async function () {
 "use strict";
+var addListener;
 var browser;
 var browserWSEndpoint;
 var child_process;
@@ -174,6 +175,13 @@ fs = require("fs");
 //!! const { randomBytes} = require("crypto");
 
 module.exports = require("./.a00.js");
+
+addListener = function (target, type, listener) {
+    target.on(type, listener);
+    return function () {
+        target.removeLister(type, listener);
+    };
+};
 
 gracefullyCloseChrome = function () {
 /**
@@ -282,6 +290,7 @@ waitForWSEndpoint = function (chromeProcess) {
     });
 }
 
+// init
 timeout = 30000;
 chromeProcess = child_process.spawn((
     "node_modules/puppeteer/.local-chromium"
