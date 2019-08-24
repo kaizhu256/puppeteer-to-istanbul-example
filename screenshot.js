@@ -391,15 +391,14 @@ await page._screenshotTaskQueue._chain.then(
     })
 );
 
-console.error(
-    page._frameManager._mainFrame._secondaryWorld.evaluate.toString()
-);
-
 // screenshot - html
-tmp = page._frameManager._mainFrame._secondaryWorld;
-//!! async evaluate(pageFunction, ...args) {
-tmp = await tmp.executionContext();
-tmp = tmp.evaluate(
+tmp = page._frameManager._mainFrame._secondaryWorld._contextPromise;
+tmp = await local.identity(tmp);
+console.error(
+    tmp.evaluate.toString()
+);
+tmp = await tmp._evaluateInternal(
+    true,
     Function( // jslint ignore:line
         `var html = "";
 if (document.doctype) {
