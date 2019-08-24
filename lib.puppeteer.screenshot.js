@@ -2440,7 +2440,7 @@ class FrameManager extends EventEmitter {
         this._client.on('Page.frameStoppedLoading', event => this._onFrameStoppedLoading(event.frameId));
         this._client.on('Runtime.executionContextCreated', event => this._onExecutionContextCreated(event.context));
         this._client.on('Runtime.executionContextDestroyed', event => this._onExecutionContextDestroyed(event.executionContextId));
-        this._client.on('Runtime.executionContextsCleared', event => this._onExecutionContextsCleared());
+        //!! this._client.on('Runtime.executionContextsCleared', event => this._onExecutionContextsCleared());
         this._client.on('Page.lifecycleEvent', event => this._onLifecycleEvent(event));
     }
 
@@ -2724,13 +2724,6 @@ class Frame {
     }
 
     /**
-      * @param {string} url
-      */
-    _navigatedWithinDocument(url) {
-        this._url = url;
-    }
-
-    /**
       * @param {string} loaderId
       * @param {string} name
       */
@@ -2745,15 +2738,6 @@ class Frame {
     _onLoadingStopped() {
         this._lifecycleEvents.add('DOMContentLoaded');
         this._lifecycleEvents.add('load');
-    }
-
-    _detach() {
-        this._detached = true;
-        this._mainWorld._detach();
-        this._secondaryWorld._detach();
-        if (this._parentFrame)
-            this._parentFrame._childFrames.delete(this);
-        this._parentFrame = null;
     }
 }
 
