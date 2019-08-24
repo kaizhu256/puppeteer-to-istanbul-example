@@ -160,6 +160,8 @@ var preferredRevision;
 var readline;
 var timeout;
 var waitForChromeToClose;
+local.nop(path);
+
 listenersAdd = function (list) {
     list.forEach(function (elem) {
         elem[0].on(elem[1], elem[2]);
@@ -377,111 +379,11 @@ page = await browser.newPage();
 
 
 
-(async function () {
-if (!local.nop()) {
-    return;
-}
-// Enable both JavaScript and CSS coverage
-await Promise.all([
-    page.coverage.startJSCoverage(),
-    page.coverage.startCSSCoverage()
-]);
-}());
-
 await page.goto("https://www.example.com");
 await page.screenshot({
     path: "tmp/aa.png"
 });
 fs.writeFileSync("tmp/aa.html", await page.content());
-
-
-
-async function coverageCreate() {
-if (!local.nop()) {
-    return;
-}
-var basename;
-var covPuppeteer;
-var CovScript = null;
-var iiInline;
-var storagePath;
-// mkdir -p storagePath
-storagePath = "./.nyc_output/js";
-child_process.spawnSync("mkdir", [
-    "-p", storagePath
-], {
-    stdio: [
-        "ignore", 1, 2
-    ]
-});
-// Disable JavaScript coverage
-covPuppeteer = await page.coverage.stopJSCoverage();
-// init covPuppeteer
-// output JavaScript bundled in puppeteer output to format
-// that can be eaten by Istanbul.
-// Clone covPuppeteer to prevent mutating the passed in data
-covPuppeteer = JSON.parse(JSON.stringify(covPuppeteer));
-// debug
-fs.writeFileSync("tmp/aa.json", JSON.stringify(covPuppeteer, null, 4));
-iiInline = 0;
-covPuppeteer.forEach(function (file) {
-    // generate a new path relative to ./coverage/js.
-    // this would be around where you'd use mkdirp.
-    // Get the last element in the path name
-    basename = path.basename(file.url);
-    // Special case: when html present, strip and return specialized string
-    if (basename.includes(".html")) {
-        basename = path.resolve(storagePath, basename) + "puppeteerTemp-inline";
-    } else {
-        basename = basename.split(".js")[0];
-        basename = path.resolve(storagePath, basename);
-    }
-    if (fs.existsSync(basename + ".js")) {
-        iiInline += 1;
-        file.url = basename + "-" + iiInline + ".js";
-    } else {
-        file.url = basename + ".js";
-    }
-    fs.writeFileSync(file.url, file.text);
-});
-// init cov8
-// Iterate through coverage info and create IDs
-// init covIstanbul
-var covIstanbul = {};
-covPuppeteer.map(function (file, ii) {
-    return {
-        scriptId: ii,
-        url: "file://" + file.url,
-        functions: [
-            {
-                ranges: file.ranges.map(function (range) {
-                    // Takes in a Puppeteer range object with start and end
-                    // properties and converts it to a V8 range
-                    // with startOffset, endOffset, and count properties
-                    return {
-                        startOffset: range.start,
-                        endOffset: range.end,
-                        count: 1
-                    };
-                }),
-                isBlockCoverage: true
-            }
-        ]
-    };
-}).forEach(function (jsFile) {
-    const script = new CovScript(jsFile.url);
-    script.applyCoverage(jsFile.functions);
-    let istanbulCoverage = script.toIstanbul();
-    var key = Object.keys(istanbulCoverage)[0];
-    covIstanbul[key] = istanbulCoverage[key];
-});
-fs.writeFileSync(
-    "./.nyc_output/out.json",
-    JSON.stringify(covIstanbul, null, 4),
-    "utf8"
-);
-}
-await coverageCreate();
 
 
 

@@ -13442,6 +13442,9 @@ const preferredRevision = packageJson.puppeteer.chromium_revision;
 const isPuppeteerCore = packageJson.name === 'puppeteer-core';
 
 module.exports = new Puppeteer(__dirname, preferredRevision, isPuppeteerCore);
+module.exports.WebSocketTransport = WebSocketTransport;
+module.exports.Connection = Connection;
+module.exports.Browser = Browser;
 
 
 
