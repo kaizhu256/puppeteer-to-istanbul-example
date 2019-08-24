@@ -1,5 +1,5 @@
 /* jslint utility2:true */
-(function () {
+(async function () {
     "use strict";
     const puppeteer = require("./lib.puppeteer.js");
     const browser = await puppeteer.launch({
