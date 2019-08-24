@@ -1,3 +1,7 @@
+/* jslint utility2:true */
+
+/* jslint ignore:start */
+(function () {
 "use strict";
 // require builtin
 const EventEmitter = require ('events');
@@ -360,4 +364,6 @@ const puppeteer = require("./lib.puppeteer.js");
   fs.writeFileSync('./.nyc_output/out.json', JSON.stringify(covIstanbul, null, 4), 'utf8')
 
   await browser.close()
-})()
+})();
+}());
+/* jslint ignore:end */
