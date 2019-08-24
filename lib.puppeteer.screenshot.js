@@ -562,514 +562,6 @@ const removeEventListener = EventTarget.removeEventListener;
 
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/permessage-deflate.js
-*/
-'use strict';
-
-// const Limiter = require('async-limiter');
-// const zlib = require('zlib');
-
-// const bufferUtil = require('./buffer-util');
-// const { kStatusCode, NOOP } = require('./constants');
-
-const TRAILER = Buffer.from([0x00, 0x00, 0xff, 0xff]);
-const EMPTY_BLOCK = Buffer.from([0x00]);
-
-const kPerMessageDeflate = Symbol('permessage-deflate');
-const kTotalLength = Symbol('total-length');
-const kCallback = Symbol('callback');
-const kBuffers = Symbol('buffers');
-const kError = Symbol('error');
-
-//
-// We limit zlib concurrency, which prevents severe memory fragmentation
-// as documented in https://github.com/nodejs/node/issues/8871#issuecomment-250915913
-// and https://github.com/websockets/ws/issues/1202
-//
-// Intentionally global; it's the global thread pool that's an issue.
-//
-let zlibLimiter;
-
-/**
-  * permessage-deflate implementation.
-  */
-class PerMessageDeflate {
-    /**
-      * Creates a PerMessageDeflate instance.
-      *
-      * @param {Object} options Configuration options
-      * @param {Boolean} options.serverNoContextTakeover Request/accept disabling
-      *     of server context takeover
-      * @param {Boolean} options.clientNoContextTakeover Advertise/acknowledge
-      *     disabling of client context takeover
-      * @param {(Boolean|Number)} options.serverMaxWindowBits Request/confirm the
-      *     use of a custom server window size
-      * @param {(Boolean|Number)} options.clientMaxWindowBits Advertise support
-      *     for, or request, a custom client window size
-      * @param {Object} options.zlibDeflateOptions Options to pass to zlib on deflate
-      * @param {Object} options.zlibInflateOptions Options to pass to zlib on inflate
-      * @param {Number} options.threshold Size (in bytes) below which messages
-      *     should not be compressed
-      * @param {Number} options.concurrencyLimit The number of concurrent calls to
-      *     zlib
-      * @param {Boolean} isServer Create the instance in either server or client
-      *     mode
-      * @param {Number} maxPayload The maximum allowed message length
-      */
-    constructor(options, isServer, maxPayload) {
-        this._maxPayload = maxPayload | 0;
-        this._options = options || {};
-        this._threshold =
-            this._options.threshold !== undefined ? this._options.threshold : 1024;
-        this._isServer = !!isServer;
-        this._deflate = null;
-        this._inflate = null;
-
-        this.params = null;
-
-        if (!zlibLimiter) {
-            const concurrency =
-                this._options.concurrencyLimit !== undefined
-                    ? this._options.concurrencyLimit
-                    : 10;
-            zlibLimiter = new Limiter({ concurrency });
-        }
-    }
-
-    /**
-      * @type {String}
-      */
-    static get extensionName() {
-        return 'permessage-deflate';
-    }
-
-    /**
-      * Create an extension negotiation offer.
-      *
-      * @return {Object} Extension parameters
-      * @public
-      */
-    offer() {
-        const params = {};
-
-        if (this._options.serverNoContextTakeover) {
-            params.server_no_context_takeover = true;
-        }
-        if (this._options.clientNoContextTakeover) {
-            params.client_no_context_takeover = true;
-        }
-        if (this._options.serverMaxWindowBits) {
-            params.server_max_window_bits = this._options.serverMaxWindowBits;
-        }
-        if (this._options.clientMaxWindowBits) {
-            params.client_max_window_bits = this._options.clientMaxWindowBits;
-        } else if (this._options.clientMaxWindowBits == null) {
-            params.client_max_window_bits = true;
-        }
-
-        return params;
-    }
-
-    /**
-      * Accept an extension negotiation offer/response.
-      *
-      * @param {Array} configurations The extension negotiation offers/reponse
-      * @return {Object} Accepted configuration
-      * @public
-      */
-    accept(configurations) {
-        configurations = this.normalizeParams(configurations);
-
-        this.params = this._isServer
-            ? this.acceptAsServer(configurations)
-            : this.acceptAsClient(configurations);
-
-        return this.params;
-    }
-
-    /**
-      * Releases all resources used by the extension.
-      *
-      * @public
-      */
-    cleanup() {
-        if (this._inflate) {
-            this._inflate.close();
-            this._inflate = null;
-        }
-
-        if (this._deflate) {
-            this._deflate.close();
-            this._deflate = null;
-        }
-    }
-
-    /**
-      *  Accept an extension negotiation offer.
-      *
-      * @param {Array} offers The extension negotiation offers
-      * @return {Object} Accepted configuration
-      * @private
-      */
-    acceptAsServer(offers) {
-        const opts = this._options;
-        const accepted = offers.find((params) => {
-            if (
-                (opts.serverNoContextTakeover === false &&
-                    params.server_no_context_takeover) ||
-                (params.server_max_window_bits &&
-                    (opts.serverMaxWindowBits === false ||
-                        (typeof opts.serverMaxWindowBits === 'number' &&
-                            opts.serverMaxWindowBits > params.server_max_window_bits))) ||
-                (typeof opts.clientMaxWindowBits === 'number' &&
-                    !params.client_max_window_bits)
-            ) {
-                return false;
-            }
-
-            return true;
-        });
-
-        if (!accepted) {
-            throw new Error('None of the extension offers can be accepted');
-        }
-
-        if (opts.serverNoContextTakeover) {
-            accepted.server_no_context_takeover = true;
-        }
-        if (opts.clientNoContextTakeover) {
-            accepted.client_no_context_takeover = true;
-        }
-        if (typeof opts.serverMaxWindowBits === 'number') {
-            accepted.server_max_window_bits = opts.serverMaxWindowBits;
-        }
-        if (typeof opts.clientMaxWindowBits === 'number') {
-            accepted.client_max_window_bits = opts.clientMaxWindowBits;
-        } else if (
-            accepted.client_max_window_bits === true ||
-            opts.clientMaxWindowBits === false
-        ) {
-            delete accepted.client_max_window_bits;
-        }
-
-        return accepted;
-    }
-
-    /**
-      * Accept the extension negotiation response.
-      *
-      * @param {Array} response The extension negotiation response
-      * @return {Object} Accepted configuration
-      * @private
-      */
-    acceptAsClient(response) {
-        const params = response[0];
-
-        if (
-            this._options.clientNoContextTakeover === false &&
-            params.client_no_context_takeover
-        ) {
-            throw new Error('Unexpected parameter "client_no_context_takeover"');
-        }
-
-        if (!params.client_max_window_bits) {
-            if (typeof this._options.clientMaxWindowBits === 'number') {
-                params.client_max_window_bits = this._options.clientMaxWindowBits;
-            }
-        } else if (
-            this._options.clientMaxWindowBits === false ||
-            (typeof this._options.clientMaxWindowBits === 'number' &&
-                params.client_max_window_bits > this._options.clientMaxWindowBits)
-        ) {
-            throw new Error(
-                'Unexpected or invalid parameter "client_max_window_bits"'
-            );
-        }
-
-        return params;
-    }
-
-    /**
-      * Normalize parameters.
-      *
-      * @param {Array} configurations The extension negotiation offers/reponse
-      * @return {Array} The offers/response with normalized parameters
-      * @private
-      */
-    normalizeParams(configurations) {
-        configurations.forEach((params) => {
-            Object.keys(params).forEach((key) => {
-                var value = params[key];
-
-                if (value.length > 1) {
-                    throw new Error(`Parameter "${key}" must have only a single value`);
-                }
-
-                value = value[0];
-
-                if (key === 'client_max_window_bits') {
-                    if (value !== true) {
-                        const num = +value;
-                        if (!Number.isInteger(num) || num < 8 || num > 15) {
-                            throw new TypeError(
-                                `Invalid value for parameter "${key}": ${value}`
-                            );
-                        }
-                        value = num;
-                    } else if (!this._isServer) {
-                        throw new TypeError(
-                            `Invalid value for parameter "${key}": ${value}`
-                        );
-                    }
-                } else if (key === 'server_max_window_bits') {
-                    const num = +value;
-                    if (!Number.isInteger(num) || num < 8 || num > 15) {
-                        throw new TypeError(
-                            `Invalid value for parameter "${key}": ${value}`
-                        );
-                    }
-                    value = num;
-                } else if (
-                    key === 'client_no_context_takeover' ||
-                    key === 'server_no_context_takeover'
-                ) {
-                    if (value !== true) {
-                        throw new TypeError(
-                            `Invalid value for parameter "${key}": ${value}`
-                        );
-                    }
-                } else {
-                    throw new Error(`Unknown parameter "${key}"`);
-                }
-
-                params[key] = value;
-            });
-        });
-
-        return configurations;
-    }
-
-    /**
-      * Decompress data. Concurrency limited by async-limiter.
-      *
-      * @param {Buffer} data Compressed data
-      * @param {Boolean} fin Specifies whether or not this is the last fragment
-      * @param {Function} callback Callback
-      * @public
-      */
-    decompress(data, fin, callback) {
-        zlibLimiter.push((done) => {
-            this._decompress(data, fin, (err, result) => {
-                done();
-                callback(err, result);
-            });
-        });
-    }
-
-    /**
-      * Compress data. Concurrency limited by async-limiter.
-      *
-      * @param {Buffer} data Data to compress
-      * @param {Boolean} fin Specifies whether or not this is the last fragment
-      * @param {Function} callback Callback
-      * @public
-      */
-    compress(data, fin, callback) {
-        zlibLimiter.push((done) => {
-            this._compress(data, fin, (err, result) => {
-                done();
-                callback(err, result);
-            });
-        });
-    }
-
-    /**
-      * Decompress data.
-      *
-      * @param {Buffer} data Compressed data
-      * @param {Boolean} fin Specifies whether or not this is the last fragment
-      * @param {Function} callback Callback
-      * @private
-      */
-    _decompress(data, fin, callback) {
-        const endpoint = this._isServer ? 'client' : 'server';
-
-        if (!this._inflate) {
-            const key = `${endpoint}_max_window_bits`;
-            const windowBits =
-                typeof this.params[key] !== 'number'
-                    ? zlib.Z_DEFAULT_WINDOWBITS
-                    : this.params[key];
-
-            this._inflate = zlib.createInflateRaw(
-                Object.assign({}, this._options.zlibInflateOptions, { windowBits })
-            );
-            this._inflate[kPerMessageDeflate] = this;
-            this._inflate[kTotalLength] = 0;
-            this._inflate[kBuffers] = [];
-            this._inflate.on('error', inflateOnError);
-            this._inflate.on('data', inflateOnData);
-        }
-
-        this._inflate[kCallback] = callback;
-
-        this._inflate.write(data);
-        if (fin) this._inflate.write(TRAILER);
-
-        this._inflate.flush(() => {
-            const err = this._inflate[kError];
-
-            if (err) {
-                this._inflate.close();
-                this._inflate = null;
-                callback(err);
-                return;
-            }
-
-            const data = bufferUtil.concat(
-                this._inflate[kBuffers],
-                this._inflate[kTotalLength]
-            );
-
-            if (fin && this.params[`${endpoint}_no_context_takeover`]) {
-                this._inflate.close();
-                this._inflate = null;
-            } else {
-                this._inflate[kTotalLength] = 0;
-                this._inflate[kBuffers] = [];
-            }
-
-            callback(null, data);
-        });
-    }
-
-    /**
-      * Compress data.
-      *
-      * @param {Buffer} data Data to compress
-      * @param {Boolean} fin Specifies whether or not this is the last fragment
-      * @param {Function} callback Callback
-      * @private
-      */
-    _compress(data, fin, callback) {
-        if (!data || data.length === 0) {
-            process.nextTick(callback, null, EMPTY_BLOCK);
-            return;
-        }
-
-        const endpoint = this._isServer ? 'server' : 'client';
-
-        if (!this._deflate) {
-            const key = `${endpoint}_max_window_bits`;
-            const windowBits =
-                typeof this.params[key] !== 'number'
-                    ? zlib.Z_DEFAULT_WINDOWBITS
-                    : this.params[key];
-
-            this._deflate = zlib.createDeflateRaw(
-                Object.assign({}, this._options.zlibDeflateOptions, { windowBits })
-            );
-
-            this._deflate[kTotalLength] = 0;
-            this._deflate[kBuffers] = [];
-
-            //
-            // An `'error'` event is emitted, only on Node.js < 10.0.0, if the
-            // `zlib.DeflateRaw` instance is closed while data is being processed.
-            // This can happen if `PerMessageDeflate#cleanup()` is called at the wrong
-            // time due to an abnormal WebSocket closure.
-            //
-            this._deflate.on('error', NOOP);
-            this._deflate.on('data', deflateOnData);
-        }
-
-        this._deflate.write(data);
-        this._deflate.flush(zlib.Z_SYNC_FLUSH, () => {
-            if (!this._deflate) {
-                //
-                // This `if` statement is only needed for Node.js < 10.0.0 because as of
-                // commit https://github.com/nodejs/node/commit/5e3f5164, the flush
-                // callback is no longer called if the deflate stream is closed while
-                // data is being processed.
-                //
-                return;
-            }
-
-            var data = bufferUtil.concat(
-                this._deflate[kBuffers],
-                this._deflate[kTotalLength]
-            );
-
-            if (fin) data = data.slice(0, data.length - 4);
-
-            if (fin && this.params[`${endpoint}_no_context_takeover`]) {
-                this._deflate.close();
-                this._deflate = null;
-            } else {
-                this._deflate[kTotalLength] = 0;
-                this._deflate[kBuffers] = [];
-            }
-
-            callback(null, data);
-        });
-    }
-}
-
-module.exports = PerMessageDeflate;
-
-/**
-  * The listener of the `zlib.DeflateRaw` stream `'data'` event.
-  *
-  * @param {Buffer} chunk A chunk of data
-  * @private
-  */
-function deflateOnData(chunk) {
-    this[kBuffers].push(chunk);
-    this[kTotalLength] += chunk.length;
-}
-
-/**
-  * The listener of the `zlib.InflateRaw` stream `'data'` event.
-  *
-  * @param {Buffer} chunk A chunk of data
-  * @private
-  */
-function inflateOnData(chunk) {
-    this[kTotalLength] += chunk.length;
-
-    if (
-        this[kPerMessageDeflate]._maxPayload < 1 ||
-        this[kTotalLength] <= this[kPerMessageDeflate]._maxPayload
-    ) {
-        this[kBuffers].push(chunk);
-        return;
-    }
-
-    this[kError] = new RangeError('Max payload size exceeded');
-    this[kError][kStatusCode] = 1009;
-    this.removeListener('data', inflateOnData);
-    this.reset();
-}
-
-/**
-  * The listener of the `zlib.InflateRaw` stream `'error'` event.
-  *
-  * @param {Error} err The emitted error
-  * @private
-  */
-function inflateOnError(err) {
-    //
-    // There is no need to call `Zlib#close()` as the handle is automatically
-    // closed when an error is emitted.
-    //
-    this[kPerMessageDeflate]._inflate = null;
-    err[kStatusCode] = 1007;
-    this[kCallback](err);
-}
-
-
-
-/*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
 */
 'use strict';
@@ -1242,11 +734,6 @@ class Receiver extends Writable {
         }
 
         const compressed = (buf[0] & 0x40) === 0x40;
-
-        if (compressed && !this._extensions[PerMessageDeflate.extensionName]) {
-            this._loop = false;
-            return error(RangeError, 'RSV1 must be clear', true, 1002);
-        }
 
         this._fin = (buf[0] & 0x80) === 0x80;
         this._opcode = buf[0] & 0x0f;
@@ -1425,37 +912,6 @@ class Receiver extends Writable {
         }
 
         return this.dataMessage();
-    }
-
-    /**
-      * Decompresses data.
-      *
-      * @param {Buffer} data Compressed data
-      * @param {Function} cb Callback
-      * @private
-      */
-    decompress(data, cb) {
-        const perMessageDeflate = this._extensions[PerMessageDeflate.extensionName];
-
-        perMessageDeflate.decompress(data, this._fin, (err, buf) => {
-            if (err) return cb(err);
-
-            if (buf.length) {
-                this._messageLength += buf.length;
-                if (this._messageLength > this._maxPayload && this._maxPayload > 0) {
-                    return cb(
-                        error(RangeError, 'Max payload size exceeded', false, 1009)
-                    );
-                }
-
-                this._fragments.push(buf);
-            }
-
-            const er = this.dataMessage();
-            if (er) return cb(er);
-
-            this.startLoop(cb);
-        });
     }
 
     /**
@@ -1808,15 +1264,11 @@ class Sender {
       */
     send(data, options, cb) {
         const buf = toBuffer(data);
-        const perMessageDeflate = this._extensions[PerMessageDeflate.extensionName];
         var opcode = options.binary ? 2 : 1;
         var rsv1 = options.compress;
 
         if (this._firstFragment) {
             this._firstFragment = false;
-            if (rsv1 && perMessageDeflate) {
-                rsv1 = buf.length >= perMessageDeflate._threshold;
-            }
             this._compress = rsv1;
         } else {
             rsv1 = false;
@@ -1825,63 +1277,16 @@ class Sender {
 
         if (options.fin) this._firstFragment = true;
 
-        if (perMessageDeflate) {
-            const opts = {
+        this.sendFrame(
+            Sender.frame(buf, {
                 fin: options.fin,
-                rsv1,
+                rsv1: false,
                 opcode,
                 mask: options.mask,
                 readOnly: toBuffer.readOnly
-            };
-
-            if (this._deflating) {
-                this.enqueue([this.dispatch, buf, this._compress, opts, cb]);
-            } else {
-                this.dispatch(buf, this._compress, opts, cb);
-            }
-        } else {
-            this.sendFrame(
-                Sender.frame(buf, {
-                    fin: options.fin,
-                    rsv1: false,
-                    opcode,
-                    mask: options.mask,
-                    readOnly: toBuffer.readOnly
-                }),
-                cb
-            );
-        }
-    }
-
-    /**
-      * Dispatches a data message.
-      *
-      * @param {Buffer} data The message to send
-      * @param {Boolean} compress Specifies whether or not to compress `data`
-      * @param {Object} options Options object
-      * @param {Number} options.opcode The opcode
-      * @param {Boolean} options.readOnly Specifies whether `data` can be modified
-      * @param {Boolean} options.fin Specifies whether or not to set the FIN bit
-      * @param {Boolean} options.mask Specifies whether or not to mask `data`
-      * @param {Boolean} options.rsv1 Specifies whether or not to set the RSV1 bit
-      * @param {Function} cb Callback
-      * @private
-      */
-    dispatch(data, compress, options, cb) {
-        if (!compress) {
-            this.sendFrame(Sender.frame(data, options), cb);
-            return;
-        }
-
-        const perMessageDeflate = this._extensions[PerMessageDeflate.extensionName];
-
-        this._deflating = true;
-        perMessageDeflate.compress(data, options.fin, (_, buf) => {
-            this._deflating = false;
-            options.readOnly = false;
-            this.sendFrame(Sender.frame(buf, options), cb);
-            this.dequeue();
-        });
+            }),
+            cb
+        );
     }
 
     /**
@@ -1980,7 +1385,6 @@ class WebSocketServer extends EventEmitter {
         options = Object.assign(
             {
                 maxPayload: 100 * 1024 * 1024,
-                perMessageDeflate: false,
                 handleProtocols: null,
                 clientTracking: true,
                 verifyClient: null,
@@ -2032,7 +1436,6 @@ class WebSocketServer extends EventEmitter {
             });
         }
 
-        if (options.perMessageDeflate === true) options.perMessageDeflate = {};
         if (options.clientTracking) this.clients = new Set();
         this.options = options;
     }
@@ -2137,25 +1540,6 @@ class WebSocketServer extends EventEmitter {
             return abortHandshake(socket, 400);
         }
 
-        if (this.options.perMessageDeflate) {
-            const perMessageDeflate = new PerMessageDeflate(
-                this.options.perMessageDeflate,
-                true,
-                this.options.maxPayload
-            );
-
-            try {
-                const offers = extension.parse(req.headers['sec-websocket-extensions']);
-
-                if (offers[PerMessageDeflate.extensionName]) {
-                    perMessageDeflate.accept(offers[PerMessageDeflate.extensionName]);
-                    extensions[PerMessageDeflate.extensionName] = perMessageDeflate;
-                }
-            } catch (err) {
-                return abortHandshake(socket, 400);
-            }
-        }
-
         //
         // Optionally call external client verification handler.
         //
@@ -2232,15 +1616,6 @@ class WebSocketServer extends EventEmitter {
                 headers.push(`Sec-WebSocket-Protocol: ${protocol}`);
                 ws.protocol = protocol;
             }
-        }
-
-        if (extensions[PerMessageDeflate.extensionName]) {
-            const params = extensions[PerMessageDeflate.extensionName].params;
-            const value = extension.format({
-                [PerMessageDeflate.extensionName]: [params]
-            });
-            headers.push(`Sec-WebSocket-Extensions: ${value}`);
-            ws._extensions = extensions;
         }
 
         //
@@ -2528,10 +1903,6 @@ class WebSocket extends EventEmitter {
             return;
         }
 
-        if (this._extensions[PerMessageDeflate.extensionName]) {
-            this._extensions[PerMessageDeflate.extensionName].cleanup();
-        }
-
         this._receiver.removeAllListeners();
         this.emit('close', this._closeCode, this._closeMessage);
     }
@@ -2692,10 +2063,6 @@ class WebSocket extends EventEmitter {
             options
         );
 
-        if (!this._extensions[PerMessageDeflate.extensionName]) {
-            opts.compress = false;
-        }
-
         this._sender.send(data || EMPTY_BUFFER, opts, cb);
     }
 
@@ -2791,7 +2158,6 @@ function initAsClient(websocket, address, protocols, options) {
         {
             protocolVersion: protocolVersions[1],
             maxPayload: 100 * 1024 * 1024,
-            perMessageDeflate: true,
             followRedirects: false,
             maxRedirects: 10
         },
@@ -2844,7 +2210,6 @@ function initAsClient(websocket, address, protocols, options) {
     const path = parsedUrl.search
         ? `${parsedUrl.pathname || '/'}${parsedUrl.search}`
         : parsedUrl.pathname || '/';
-    var perMessageDeflate;
 
     opts.createConnection = isSecure ? tlsConnect : netConnect;
     opts.defaultPort = opts.defaultPort || defaultPort;
@@ -2864,16 +2229,6 @@ function initAsClient(websocket, address, protocols, options) {
     opts.path = path;
     opts.timeout = opts.handshakeTimeout;
 
-    if (opts.perMessageDeflate) {
-        perMessageDeflate = new PerMessageDeflate(
-            opts.perMessageDeflate !== true ? opts.perMessageDeflate : {},
-            false,
-            opts.maxPayload
-        );
-        opts.headers['Sec-WebSocket-Extensions'] = extension.format({
-            [PerMessageDeflate.extensionName]: perMessageDeflate.offer()
-        });
-    }
     if (protocols) {
         opts.headers['Sec-WebSocket-Protocol'] = protocols;
     }
@@ -2984,28 +2339,6 @@ function initAsClient(websocket, address, protocols, options) {
         }
 
         if (serverProt) websocket.protocol = serverProt;
-
-        if (perMessageDeflate) {
-            try {
-                const extensions = extension.parse(
-                    res.headers['sec-websocket-extensions']
-                );
-
-                if (extensions[PerMessageDeflate.extensionName]) {
-                    perMessageDeflate.accept(extensions[PerMessageDeflate.extensionName]);
-                    websocket._extensions[
-                        PerMessageDeflate.extensionName
-                    ] = perMessageDeflate;
-                }
-            } catch (err) {
-                abortHandshake(
-                    websocket,
-                    socket,
-                    'Invalid Sec-WebSocket-Extensions header'
-                );
-                return;
-            }
-        }
 
         websocket.setSocket(socket, head, opts.maxPayload);
     });
@@ -12365,7 +11698,6 @@ class WebSocketTransport {
     static create(url) {
         return new Promise((resolve, reject) => {
             const ws = new WebSocket(url, [], {
-                perMessageDeflate: false,
                 maxPayload: 256 * 1024 * 1024, // 256Mb
             });
             ws.addEventListener('open', () => resolve(new WebSocketTransport(ws)));
