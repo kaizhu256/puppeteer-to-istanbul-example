@@ -2636,7 +2636,6 @@ class NetworkManager extends EventEmitter {
         this._client.on('Network.requestServedFromCache', this._onRequestServedFromCache.bind(this));
         this._client.on('Network.responseReceived', this._onResponseReceived.bind(this));
         this._client.on('Network.loadingFinished', this._onLoadingFinished.bind(this));
-        this._client.on('Network.loadingFailed', this._onLoadingFailed.bind(this));
     }
 
     async initialize() {
@@ -2650,27 +2649,6 @@ class NetworkManager extends EventEmitter {
       */
     setFrameManager(frameManager) {
         this._frameManager = frameManager;
-    }
-
-    /**
-      * @param {?{username: string, password: string}} credentials
-      */
-    async authenticate(credentials) {
-        this._credentials = credentials;
-        await this._updateProtocolRequestInterception();
-    }
-
-    /**
-      * @param {!Object<string, string>} extraHTTPHeaders
-      */
-    async setExtraHTTPHeaders(extraHTTPHeaders) {
-        this._extraHTTPHeaders = {};
-        for (const key of Object.keys(extraHTTPHeaders)) {
-            const value = extraHTTPHeaders[key];
-            assert(helper.isString(value), `Expected value of header "${key}" to be String, but "${typeof value}" is found.`);
-            this._extraHTTPHeaders[key.toLowerCase()] = value;
-        }
-        await this._client.send('Network.setExtraHTTPHeaders', { headers: this._extraHTTPHeaders });
     }
 
     /**
@@ -2774,24 +2752,6 @@ class NetworkManager extends EventEmitter {
         this._requestIdToRequest.delete(request._requestId);
         this._attemptedAuthentications.delete(request._interceptionId);
         this.emit(Events.NetworkManager.RequestFinished, request);
-    }
-
-    /**
-      * @param {!Protocol.Network.loadingFailedPayload} event
-      */
-    _onLoadingFailed(event) {
-        const request = this._requestIdToRequest.get(event.requestId);
-        // For certain requestIds we never receive requestWillBeSent event.
-        // @see https://crbug.com/750469
-        if (!request)
-            return;
-        request._failureText = event.errorText;
-        const response = request.response();
-        if (response)
-            response._bodyLoadedPromiseFulfill.call(null);
-        this._requestIdToRequest.delete(request._requestId);
-        this._attemptedAuthentications.delete(request._interceptionId);
-        this.emit(Events.NetworkManager.RequestFailed, request);
     }
 }
 
