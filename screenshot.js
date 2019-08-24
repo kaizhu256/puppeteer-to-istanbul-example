@@ -26,14 +26,35 @@ local = {};
 
 var browser;
 var chromeProcess;
-var gracefullyCloseChrome;
 var temporaryUserDataDir;
-// This method has to be sync to be used as 'exit' event handler.
-local.killChrome = function () {
+local.gracefullyCloseChrome = function () {
+/**
+  * @return {Promise}
+  */
     process.removeListener("exit", local.killChrome);
     process.removeListener("SIGINT", local.killChrome130);
-    process.removeListener("SIGTERM", gracefullyCloseChrome);
-    process.removeListener("SIGHUP", gracefullyCloseChrome);
+    process.removeListener("SIGTERM", local.gracefullyCloseChrome);
+    process.removeListener("SIGHUP", local.gracefullyCloseChrome);
+    if (temporaryUserDataDir) {
+        local.killChrome();
+    } else if (connection) {
+        // Attempt to close chrome gracefully
+        connection.send("Browser.close").catch(function (err) {
+            console.error(err);
+            local.killChrome();
+        });
+    }
+    return waitForChromeToClose;
+};
+
+local.killChrome = function () {
+/*
+ * This method has to be sync to be used as 'exit' event handler.
+ */
+    process.removeListener("exit", local.killChrome);
+    process.removeListener("SIGINT", local.killChrome130);
+    process.removeListener("SIGTERM", local.gracefullyCloseChrome);
+    process.removeListener("SIGHUP", local.gracefullyCloseChrome);
     if (chromeProcess.pid && !chromeProcess.killed && !chromeClosed) {
         // Force kill chrome.
         try {
@@ -55,26 +76,6 @@ local.killChrome = function () {
             "ignore", 1, 2
         ]
     });
-};
-
-/**
-  * @return {Promise}
-  */
-gracefullyCloseChrome = function () {
-    process.removeListener("exit", local.killChrome);
-    process.removeListener("SIGINT", local.killChrome130);
-    process.removeListener("SIGTERM", gracefullyCloseChrome);
-    process.removeListener("SIGHUP", gracefullyCloseChrome);
-    if (temporaryUserDataDir) {
-        local.killChrome();
-    } else if (connection) {
-        // Attempt to close chrome gracefully
-        connection.send("Browser.close").catch(function (err) {
-            console.error(err);
-            local.killChrome();
-        });
-    }
-    return waitForChromeToClose;
 };
 
 local.killChrome130 = function () {
@@ -141,8 +142,8 @@ const waitForChromeToClose = new Promise(function (fulfill) {
 
 process.addListener("exit", local.killChrome);
 process.addListener("SIGINT", local.killChrome130);
-process.addListener("SIGTERM", gracefullyCloseChrome);
-process.addListener("SIGHUP", gracefullyCloseChrome);
+process.addListener("SIGTERM", local.gracefullyCloseChrome);
+process.addListener("SIGHUP", local.gracefullyCloseChrome);
 /** @type {?Connection} */
 let connection = null;
 try {
@@ -164,7 +165,7 @@ try {
             height: 600
         },
         chromeProcess,
-        gracefullyCloseChrome
+        local.gracefullyCloseChrome
     );
     await browser.waitForTarget(function (t) {
         return t.type() === "page";
