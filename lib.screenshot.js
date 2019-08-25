@@ -63,42 +63,6 @@ local.nop(
 
 /* jslint ignore:start */
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/buffer-util.js
-*/
-/**
-  * Merges an array of buffers into a new buffer.
-  *
-  * @param {Buffer[]} list The array of buffers to concat
-  * @param {Number} totalLength The total length of buffers in the list
-  * @return {Buffer} The resulting buffer
-  * @public
-  */
-function concat(list, totalLength) {
-    return list[0];
-}
-
-/**
-  * Masks a buffer using the given mask.
-  *
-  * @param {Buffer} source The buffer to mask
-  * @param {Buffer} mask The mask to use
-  * @param {Buffer} output The buffer where to store the result
-  * @param {Number} offset The offset at which to start writing
-  * @param {Number} length The number of bytes to mask.
-  * @public
-  */
-function _mask(source, mask, output, offset, length) {
-    var ii;
-    ii = 0;
-    while (ii < length) {
-        output[offset + ii] = source[ii] ^ mask[ii & 3];
-        ii += 1;
-    }
-}
-
-
-
-/*
 lib https://github.com/websockets/ws/blob/6.2.1/event-target.js
 */
 "use strict";
@@ -383,7 +347,7 @@ class Receiver extends Writable {
         this._messageLength = 0;
         this._fragmented = 0;
         this._fragments = [];
-        const buf = concat(fragments, messageLength);
+        const buf = fragments[0];
         this.emit("message", buf.toString());
         this._state = GET_INFO;
     }
@@ -445,9 +409,16 @@ class Sender {
         target[offset - 3] = mask[1];
         target[offset - 2] = mask[2];
         target[offset - 1] = mask[3];
-        _mask(data, mask, data, 0, data.length);
+        // mask data
+        var ii;
+        ii = data.length;
+        while (ii > 0) {
+            ii -= 1;
+            data[ii] = data[ii] ^ mask[ii & 3];
+        }
         return [
-            target, data];
+            target, data
+        ];
     }
 
     /**
