@@ -2359,15 +2359,6 @@ class Page extends EventEmitter {
     }
 
     /**
-      * @param {string} url
-      * @param {!{referer?: string, timeout?: number, waitUntil?: string|!Array<string>}=} options
-      * @return {!Promise<?Puppeteer.Response>}
-      */
-    async goto(url, options) {
-        return await this._frameManager._mainFrame.goto(url, options);
-    }
-
-    /**
       * @param {!Puppeteer.Viewport} viewport
       */
     async setViewport(viewport) {

@@ -382,6 +382,9 @@ page = await browser.newPage();
 
 
 
+console.error(
+    page.goto.toString()
+);
 await page.goto("https://www.highcharts.com/stock/demo/stock-tools-gui");
 
 // screenshot - wait 2000 ms
@@ -405,9 +408,6 @@ fs.writeFileSync(".aa.png", Buffer.from(tmp.data, "base64"));
 // screenshot - html
 tmp = page._frameManager._mainFrame._secondaryWorld._contextPromise;
 tmp = await local.identity(tmp);
-//!! console.error(
-    //!! tmp.evaluate.toString()
-//!! );
 tmp = await tmp._evaluateInternal(
     true,
     Function( // jslint ignore:line
