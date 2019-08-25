@@ -1066,13 +1066,6 @@ class Browser extends EventEmitter {
     }
 
     /**
-      * @return {!Promise<!Puppeteer.Page>}
-      */
-    async newPage() {
-        return this._defaultContext.newPage();
-    }
-
-    /**
       * @param {?string} contextId
       * @return {!Promise<!Puppeteer.Page>}
       */
@@ -1121,13 +1114,6 @@ class BrowserContext extends EventEmitter {
         this._connection = connection;
         this._browser = browser;
         this._id = contextId;
-    }
-
-    /**
-      * @return {!Promise<!Puppeteer.Page>}
-      */
-    newPage() {
-        return this._browser._createPageInContext(this._id);
     }
 }
 
@@ -1879,13 +1865,6 @@ class LifecycleWatcher {
       */
     newDocumentNavigationPromise() {
         return this._newDocumentNavigationPromise;
-    }
-
-    /**
-      * @return {!Promise<?Error>}
-      */
-    timeoutOrTerminationPromise() {
-        return Promise.race([this._timeoutPromise, this._terminationPromise]);
     }
 
     /**

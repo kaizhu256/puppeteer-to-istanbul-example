@@ -366,7 +366,6 @@ try {
         ]);
         timeoutId = setTimeout(onTimeout, timeout);
     });
-
     const transport = await module.exports.WebSocketTransport.create(
         browserWSEndpoint
     );
@@ -389,15 +388,16 @@ try {
     killChrome();
     console.error(errCaught);
 }
-
-page = await browser.newPage();
-
-
-
 //!! console.error(
-    //!! page.goto.toString()
+    //!! browser.newPage.toString()
 //!! );
+page = await browser._defaultContext._browser._createPageInContext(
+    browser._defaultContext._id
+);
 
+
+
+// screenshot - load url
 const watcher = new module.exports.LifecycleWatcher(
     page._frameManager,
     page._frameManager._mainFrame,
