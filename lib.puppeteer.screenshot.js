@@ -14,26 +14,27 @@
 (function (local) {
 "use strict";
 // hack-puppeteer - module.exports
-const EventEmitter = require('events');
-const URL = require('url');
-const childProcess = require('child_process');
-const crypto = require('crypto');
-const fs = require('fs');
-const http = require('http');
-const https = require('https');
-const net = require('net');
-const os = require('os');
-const path = require('path');
-const readline = require('readline');
-const tls = require('tls');
-const url = require('url');
-const util = require('util');
-const { Writable } = require('stream');
-const { randomBytes } = require('crypto');
+const assert = require("assert");
+const EventEmitter = require("events");
+const URL = require("url");
+const childProcess = require("child_process");
+const crypto = require("crypto");
+const fs = require("fs");
+const http = require("http");
+const https = require("https");
+const net = require("net");
+const os = require("os");
+const path = require("path");
+const readline = require("readline");
+const tls = require("tls");
+const url = require("url");
+const util = require("util");
+const { Writable } = require("stream");
+const { randomBytes } = require("crypto");
 
 
 
-const child_process = require('child_process');
+const child_process = require("child_process");
 const debugError = console.error;
 const debugProtocol = function () {
         return;
@@ -42,7 +43,7 @@ const timeout = 30000;
 
 
 
-'use strict';
+"use strict";
 
 // hack-puppeteer - module.exports
 const isValidUTF8 = () => true;
@@ -52,9 +53,7 @@ const isValidUTF8 = () => true;
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/buffer-util.js
 */
-'use strict';
-
-// const { EMPTY_BUFFER } = require('./constants');
+"use strict";
 
 /**
   * Merges an array of buffers into a new buffer.
@@ -95,13 +94,13 @@ const unmask = _mask;
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/constants.js
 */
-'use strict';
+"use strict";
 
 module.exports = {
-    BINARY_TYPES: ['nodebuffer', 'arraybuffer', 'fragments'],
-    GUID: '258EAFA5-E914-47DA-95CA-C5AB0DC85B11',
-    kStatusCode: Symbol('status-code'),
-    kWebSocket: Symbol('websocket'),
+    BINARY_TYPES: ["nodebuffer", "arraybuffer", "fragments"],
+    GUID: "258EAFA5-E914-47DA-95CA-C5AB0DC85B11",
+    kStatusCode: Symbol("status-code"),
+    kWebSocket: Symbol("websocket"),
     EMPTY_BUFFER: Buffer.alloc(0),
     NOOP: () => {}
 };
@@ -120,7 +119,7 @@ const {
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/event-target.js
 */
-'use strict';
+"use strict";
 
 /**
   * Class representing a message event.
@@ -209,13 +208,13 @@ const EventTarget = {
             listener.call(this, new OpenEvent(this));
         }
 
-        if (method === 'message') {
+        if (method === "message") {
             onMessage._listener = listener;
             this.on(method, onMessage);
-        } else if (method === 'close') {
+        } else if (method === "close") {
             onClose._listener = listener;
             this.on(method, onClose);
-        } else if (method === 'open') {
+        } else if (method === "open") {
             onOpen._listener = listener;
             this.on(method, onOpen);
         }
@@ -232,19 +231,7 @@ const removeEventListener = EventTarget.removeEventListener;
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
 */
-'use strict';
-
-// const { Writable } = require('stream');
-
-// const PerMessageDeflate = require('./permessage-deflate');
-// hack-puppeteer - module.exports
-// const {
-    // BINARY_TYPES,
-    // EMPTY_BUFFER,
-    // kStatusCode,
-    // kWebSocket
-// } = require('./constants');
-// const { concat, toArrayBuffer, unmask } = require('./buffer-util');
+"use strict";
 
 const GET_INFO = 0;
 const GET_PAYLOAD_LENGTH_16 = 1;
@@ -462,7 +449,7 @@ class Receiver extends Writable {
         this._fragmented = 0;
         this._fragments = [];
         const buf = concat(fragments, messageLength);
-        this.emit('message', buf.toString());
+        this.emit("message", buf.toString());
         this._state = GET_INFO;
     }
 }
@@ -470,7 +457,7 @@ class Receiver extends Writable {
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/sender.js
 */
-'use strict';
+"use strict";
 
 /**
   * HyBi Sender implementation.
@@ -580,31 +567,9 @@ module.exports = Sender;
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
 */
-'use strict';
+"use strict";
 
-// const EventEmitter = require('events');
-// const crypto = require('crypto');
-// const https = require('https');
-// const http = require('http');
-// const net = require('net');
-// const tls = require('tls');
-// const url = require('url');
-
-// const PerMessageDeflate = require('./permessage-deflate');
-// const EventTarget = require('./event-target');
-// const extension = require('./extension');
-// const Sender = require('./sender');
-// hack-puppeteer - module.exports
-// const {
-//   BINARY_TYPES,
-//   EMPTY_BUFFER,
-//   GUID,
-//   kStatusCode,
-//   kWebSocket,
-//   NOOP
-// } = require('./constants');
-
-const readyStates = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
+const readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
 const protocolVersions = [8, 13];
 
 /**
@@ -624,12 +589,12 @@ class WebSocket extends EventEmitter {
         super();
 
         this.readyState = WebSocket.CONNECTING;
-        this.protocol = '';
+        this.protocol = "";
 
         this._binaryType = BINARY_TYPES[0];
         this._closeFrameReceived = false;
         this._closeFrameSent = false;
-        this._closeMessage = '';
+        this._closeMessage = "";
         this._closeTimer = null;
         this._closeCode = 1006;
         this._extensions = {};
@@ -638,7 +603,7 @@ class WebSocket extends EventEmitter {
         this._socket = null;
         this._isServer = false;
         this._redirects = 0;
-        protocols = protocols.join(', ');
+        protocols = protocols.join(", ");
         initAsClient(this, address, protocols, options);
     }
 
@@ -664,18 +629,18 @@ class WebSocket extends EventEmitter {
         receiver[kWebSocket] = this;
         socket[kWebSocket] = this;
 
-        receiver.on('drain', receiverOnDrain);
-        receiver.on('message', receiverOnMessage);
+        receiver.on("drain", receiverOnDrain);
+        receiver.on("message", receiverOnMessage);
 
         socket.setTimeout(0);
         socket.setNoDelay();
-        socket.on('close', socketOnClose);
-        socket.on('data', socketOnData);
-        socket.on('end', socketOnEnd);
-        socket.on('error', console.error);
+        socket.on("close", socketOnClose);
+        socket.on("data", socketOnData);
+        socket.on("end", socketOnEnd);
+        socket.on("error", console.error);
 
         this.readyState = WebSocket.OPEN;
-        this.emit('open');
+        this.emit("open");
     }
 
     /**
@@ -989,10 +954,6 @@ class Helper {
         function promisified(...args) {
             return new Promise((resolve, reject) => {
                 function callback(err, ...result) {
-                    if (err)
-                        return reject(err);
-                    if (result.length === 1)
-                        return resolve(result[0]);
                     return resolve(result);
                 }
                 nodeFunction.call(null, ...args, callback);
@@ -1006,15 +967,6 @@ class Helper {
 const openAsync = Helper.promisify(fs.open);
 const writeAsync = Helper.promisify(fs.write);
 const closeAsync = Helper.promisify(fs.close);
-
-/**
-  * @param {*} value
-  * @param {string=} message
-  */
-function assert(value, message) {
-    if (!value)
-        throw new Error(message);
-}
 
 module.exports = {
     helper: Helper,
