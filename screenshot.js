@@ -157,7 +157,7 @@ var fs;
 var fsWriteFile;
 var gotoNext;
 var gotoState;
-var onEvent;
+var onEventChrome;
 var onReject;
 var onResolve;
 var page;
@@ -278,13 +278,13 @@ gotoNext = function (err, data) {
         // init evt-handling - chromeProcess
         chromeProcess.stderr.pipe(process.stderr);
         chromeProcess.stdout.pipe(process.stdout);
-        onEvent = function (data) {
+        onEventChrome = function (data) {
             gotoState = 1;
             gotoNext(null, data);
         };
-        chromeProcess.on("error", onEvent);
-        chromeProcess.on("exit", onEvent);
-        chromeProcess.stderr.on("data", onEvent);
+        chromeProcess.on("error", onEventChrome);
+        chromeProcess.on("exit", onEventChrome);
+        chromeProcess.stderr.on("data", onEventChrome);
         break;
     // init urlInspect
     case 2:
@@ -298,9 +298,9 @@ gotoNext = function (err, data) {
         urlInspect = urlInspect && urlInspect[1];
         if (err || urlInspect) {
             // cleanup evt-handling - chromeProcess
-            chromeProcess.removeListener("error", onEvent);
-            chromeProcess.removeListener("exit", onEvent);
-            chromeProcess.stderr.removeListener("data", onEvent);
+            chromeProcess.removeListener("error", onEventChrome);
+            chromeProcess.removeListener("exit", onEventChrome);
+            chromeProcess.stderr.removeListener("data", onEventChrome);
             gotoNext(err);
         }
         break;
@@ -309,14 +309,16 @@ gotoNext = function (err, data) {
         websocket = new module.exports.WebSocket(urlInspect, [], {
             maxPayload: 256 * 1024 * 1024 // 256Mb
         });
-        websocket.on("message", function (evt) {
+        websocket.addEventListener("message", function (evt) {
             websocket.onmessage(evt.data);
         });
-        websocket.once("close", function () {
+        websocket.addEventListener("close", function () {
             websocket.onclose();
         });
-        websocket.once("open", gotoNext);
-        websocket.once("error", gotoNext);
+        websocket.addEventListener("open", function () {
+            gotoNext();
+        });
+        websocket.addEventListener("error", gotoNext);
         break;
     default:
         onResolve(data);
