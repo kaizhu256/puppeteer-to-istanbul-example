@@ -394,10 +394,10 @@ const watcher = new module.exports.LifecycleWatcher(
     ],
     timeout
 );
-await new Promise(function (resolve, reject) {
+await new Promise(function (resolve) {
     page._frameManager._client.send("Page.navigate", {
         url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
-        page._frameManager._networkManager.extraHTTPHeaders().referer,
+        referer: page._frameManager._networkManager.extraHTTPHeaders().referer,
         frameId: page._frameManager._mainFrame._id
     }).then(resolve);
 });
