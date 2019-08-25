@@ -636,22 +636,10 @@ class WebSocket extends EventEmitter {
         this._receiver = null;
         this._sender = null;
         this._socket = null;
-
-        if (address !== null) {
-            this._isServer = false;
-            this._redirects = 0;
-
-            if (Array.isArray(protocols)) {
-                protocols = protocols.join(', ');
-            } else if (typeof protocols === 'object' && protocols !== null) {
-                options = protocols;
-                protocols = undefined;
-            }
-
-            initAsClient(this, address, protocols, options);
-        } else {
-            this._isServer = true;
-        }
+        this._isServer = false;
+        this._redirects = 0;
+        protocols = protocols.join(', ');
+        initAsClient(this, address, protocols, options);
     }
 
     /**
@@ -681,9 +669,6 @@ class WebSocket extends EventEmitter {
 
         socket.setTimeout(0);
         socket.setNoDelay();
-
-        if (head.length > 0) socket.unshift(head);
-
         socket.on('close', socketOnClose);
         socket.on('data', socketOnData);
         socket.on('end', socketOnEnd);
@@ -700,12 +685,6 @@ class WebSocket extends EventEmitter {
       */
     emitClose() {
         this.readyState = WebSocket.CLOSED;
-
-        if (!this._socket) {
-            this.emit('close', this._closeCode, this._closeMessage);
-            return;
-        }
-
         this._receiver.removeAllListeners();
         this.emit('close', this._closeCode, this._closeMessage);
     }
@@ -723,23 +702,6 @@ class WebSocket extends EventEmitter {
       * @public
       */
     send(data, options, cb) {
-        if (typeof options === 'function') {
-            cb = options;
-            options = {};
-        }
-
-        if (this.readyState !== WebSocket.OPEN) {
-            const err = new Error(
-                `WebSocket is not open: readyState ${this.readyState} ` +
-                    `(${readyStates[this.readyState]})`
-            );
-
-            if (cb) return cb(err);
-            throw err;
-        }
-
-        if (typeof data === 'number') data = data.toString();
-
         const opts = Object.assign(
             {
                 binary: typeof data !== 'string',
@@ -749,8 +711,7 @@ class WebSocket extends EventEmitter {
             },
             options
         );
-
-        this._sender.send(data || EMPTY_BUFFER, opts, cb);
+        this._sender.send(data, opts, cb);
     }
 }
 
