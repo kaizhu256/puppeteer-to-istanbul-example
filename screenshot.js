@@ -156,8 +156,9 @@ var chromeProcess;
 var fs;
 var fsWriteFile;
 var gotoNext;
+var gotoNextData;
 var gotoState;
-var onEventChrome;
+var onDataUrlInspect;
 var onReject;
 var onResolve;
 var page;
@@ -231,6 +232,19 @@ fsWriteFile = function (file, data) {
         });
     });
 };
+gotoNextData = function (data) {
+    gotoNext(null, data);
+};
+onDataUrlInspect = function (data) {
+    urlInspect += String(data);
+    urlInspect.replace((
+        /\nDevTools\u0020listening\u0020on\u0020(ws:\/\/.+?)\n/
+    ), function (ignore, match1) {
+        urlInspect = match1;
+        chromeProcess.stderr.removeListener("data", onDataUrlInspect);
+        gotoNext();
+    });
+};
 
 
 
@@ -278,33 +292,10 @@ gotoNext = function (err, data) {
         // init evt-handling - chromeProcess
         chromeProcess.stderr.pipe(process.stderr);
         chromeProcess.stdout.pipe(process.stdout);
-        onEventChrome = function (data) {
-            gotoState = 1;
-            gotoNext(null, data);
-        };
-        chromeProcess.on("error", onEventChrome);
-        chromeProcess.on("exit", onEventChrome);
-        chromeProcess.stderr.on("data", onEventChrome);
+        urlInspect = "";
+        chromeProcess.stderr.on("data", onDataUrlInspect);
         break;
-    // init urlInspect
     case 2:
-        // data is err
-        if (!Buffer.isBuffer(data)) {
-            err = data;
-        }
-        urlInspect = !err && (
-            /\nDevTools\u0020listening\u0020on\u0020(ws:\/\/.+?)\n/
-        ).exec(String(data));
-        urlInspect = urlInspect && urlInspect[1];
-        if (err || urlInspect) {
-            // cleanup evt-handling - chromeProcess
-            chromeProcess.removeListener("error", onEventChrome);
-            chromeProcess.removeListener("exit", onEventChrome);
-            chromeProcess.stderr.removeListener("data", onEventChrome);
-            gotoNext(err);
-        }
-        break;
-    case 3:
         // init websocket
         websocket = new module.exports.WebSocket(urlInspect, [], {
             maxPayload: 256 * 1024 * 1024 // 256Mb
@@ -315,9 +306,7 @@ gotoNext = function (err, data) {
         websocket.addEventListener("close", function () {
             websocket.onclose();
         });
-        websocket.addEventListener("open", function () {
-            gotoNext();
-        });
+        websocket.addEventListener("open", gotoNextData);
         websocket.addEventListener("error", gotoNext);
         break;
     default:
