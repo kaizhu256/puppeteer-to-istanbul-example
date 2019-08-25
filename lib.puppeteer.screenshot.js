@@ -119,48 +119,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/event-target.js
 "use strict";
 
 /**
-  * Class representing a message event.
-  *
-  * @extends Event
-  * @private
-  */
-class MessageEvent {
-    /**
-      * Create a new `MessageEvent`.
-      *
-      * @param {(String|Buffer|ArrayBuffer|Buffer[])} data The received data
-      * @param {WebSocket} target A reference to the target to which the event was dispatched
-      */
-    constructor(data, target) {
-        this.type = "message";
-        this.target = target;
-        this.data = data;
-    }
-}
-
-/**
-  * Class representing a close event.
-  *
-  * @extends Event
-  * @private
-  */
-class CloseEvent {
-    /**
-      * Create a new `CloseEvent`.
-      *
-      * @param {Number} code The status code explaining why the connection is being closed
-      * @param {String} reason A human-readable string explaining why the connection is closing
-      * @param {WebSocket} target A reference to the target to which the event was dispatched
-      */
-    constructor(code, reason, target) {
-        this.type = "close";
-        this.target = target;
-        this.reason = reason;
-        this.code = code;
-    }
-}
-
-/**
   * Class representing an open event.
   *
   * @extends Event
@@ -194,11 +152,20 @@ const EventTarget = {
       */
     addEventListener(method, listener) {
         function onMessage(data) {
-            listener.call(this, new MessageEvent(data, this));
+            listener.call(this, {
+                data: data,
+                target: this,
+                type: "message"
+            });
         }
 
         function onClose(code, message) {
-            listener.call(this, new CloseEvent(code, message, this));
+            listener.call(this, {
+                code: code,
+                reason: message,
+                target: this,
+                type: "close"
+            });
         }
 
         function onOpen() {
