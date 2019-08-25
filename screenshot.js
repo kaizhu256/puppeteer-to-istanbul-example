@@ -386,7 +386,6 @@ page = await browser.newPage();
     //!! page.goto.toString()
 //!! );
 
-const referer = page._frameManager._networkManager.extraHTTPHeaders().referer;
 const watcher = new module.exports.LifecycleWatcher(
     page._frameManager,
     page._frameManager._mainFrame,
@@ -395,20 +394,14 @@ const watcher = new module.exports.LifecycleWatcher(
     ],
     timeout
 );
-await Promise.race([
-    new Promise(function (resolve, reject) {
-        page._frameManager._client.send("Page.navigate", {
-            url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
-            referer,
-            frameId: page._frameManager._mainFrame._id
-        }).then(resolve).catch(reject);
-    }),
-    watcher.timeoutOrTerminationPromise()
-]);
-await Promise.race([
-    watcher.timeoutOrTerminationPromise(),
-    watcher.newDocumentNavigationPromise()
-]);
+await new Promise(function (resolve, reject) {
+    page._frameManager._client.send("Page.navigate", {
+        url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
+        page._frameManager._networkManager.extraHTTPHeaders().referer,
+        frameId: page._frameManager._mainFrame._id
+    }).then(resolve);
+});
+await watcher.newDocumentNavigationPromise();
 watcher.dispose();
 await watcher.navigationResponse();
 
