@@ -316,10 +316,6 @@ connection = new module.exports.Connection(browserWSEndpoint, connection, 0);
 browser = await module.exports.Browser.create(
     connection,
     [],
-    {
-        width: 800,
-        height: 600
-    },
     chromeProcess,
     chromeCloseGracefully
 );
@@ -335,8 +331,7 @@ assert(await page._initializedPromise, "Failed to create target for page");
 page._pagePromise = page._sessionFactory().then(function (client) {
     return module.exports.Page.create(
         client,
-        page,
-        page._defaultViewport
+        page
     );
 });
 page = await local.identity(page._pagePromise);
