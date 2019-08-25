@@ -1585,7 +1585,6 @@ class FrameManager extends EventEmitter {
         /** @type {!Set<string>} */
         this._isolatedWorlds = new Set();
 
-        this._client.on('Page.frameAttached', event => this._onFrameAttached(event.frameId, event.parentFrameId));
         this._client.on('Page.frameNavigated', event => this._onFrameNavigated(event.frame));
         this._client.on('Page.frameStoppedLoading', event => this._onFrameStoppedLoading(event.frameId));
         this._client.on('Runtime.executionContextCreated', event => this._onExecutionContextCreated(event.context));
@@ -1633,15 +1632,11 @@ class FrameManager extends EventEmitter {
             navigate(this._client, url, referer, frame._id),
             watcher.timeoutOrTerminationPromise(),
         ]);
-        if (!error) {
-            error = await Promise.race([
-                watcher.timeoutOrTerminationPromise(),
-                ensureNewDocumentNavigation ? watcher.newDocumentNavigationPromise() : watcher.sameDocumentNavigationPromise(),
-            ]);
-        }
+        error = await Promise.race([
+            watcher.timeoutOrTerminationPromise(),
+            ensureNewDocumentNavigation ? watcher.newDocumentNavigationPromise() : watcher.sameDocumentNavigationPromise(),
+        ]);
         watcher.dispose();
-        if (error)
-            throw error;
         return watcher.navigationResponse();
 
         /**
@@ -1652,13 +1647,9 @@ class FrameManager extends EventEmitter {
           * @return {!Promise<?Error>}
           */
         async function navigate(client, url, referrer, frameId) {
-            try {
-                const response = await client.send('Page.navigate', {url, referrer, frameId});
-                ensureNewDocumentNavigation = !!response.loaderId;
-                return response.errorText ? new Error(`${response.errorText} at ${url}`) : null;
-            } catch (error) {
-                return error;
-            }
+            const response = await client.send('Page.navigate', {url, referrer, frameId});
+            ensureNewDocumentNavigation = !!response.loaderId;
+            return null;
         }
     }
 
@@ -1667,8 +1658,6 @@ class FrameManager extends EventEmitter {
       */
     _onLifecycleEvent(event) {
         const frame = this._frames.get(event.frameId);
-        if (!frame)
-            return;
         frame._onLifecycleEvent(event.loaderId, event.name);
         this.emit(Events.FrameManager.LifecycleEvent, frame);
     }
@@ -1678,8 +1667,6 @@ class FrameManager extends EventEmitter {
       */
     _onFrameStoppedLoading(frameId) {
         const frame = this._frames.get(frameId);
-        if (!frame)
-            return;
         frame._onLoadingStopped();
         this.emit(Events.FrameManager.LifecycleEvent, frame);
     }
@@ -1688,21 +1675,7 @@ class FrameManager extends EventEmitter {
       * @param {!Protocol.Page.FrameTree} frameTree
       */
     _handleFrameTree(frameTree) {
-        if (frameTree.frame.parentId)
-            this._onFrameAttached(frameTree.frame.id, frameTree.frame.parentId);
         this._onFrameNavigated(frameTree.frame);
-        if (!frameTree.childFrames)
-            return;
-
-        for (const child of frameTree.childFrames)
-            this._handleFrameTree(child);
-    }
-
-    /**
-      * @return {!Puppeteer.Page}
-      */
-    page() {
-        return this._page;
     }
 
     /**
