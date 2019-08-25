@@ -42,45 +42,6 @@ const timeout = 30000;
 
 
 
-/*
-file https://github.com/websockets/ws/tree/6.2.1
-*/
-// require('./buffer-util') // const bufferUtil = require('./buffer-util');
-// require('./buffer-util') // const { concat, toArrayBuffer, unmask } = require('./buffer-util');
-// require('./buffer-util') // const { mask: applyMask, toBuffer } = require('./buffer-util');
-// require('./constants') // const { EMPTY_BUFFER } = require('./constants');
-// require('./constants') // const { GUID } = require('./constants');
-// require('./constants') // const { kStatusCode, NOOP } = require('./constants');
-// require('./constants') // } = require('./constants');
-// require('./event-target') // const EventTarget = require('./event-target');
-// require('./extension') // const extension = require('./extension');
-// require('./lib/receiver') // WebSocket.Receiver = require('./lib/receiver');
-// require('./lib/sender') // WebSocket.Sender = require('./lib/sender');
-// require('./lib/websocket') // const WebSocket = require('./lib/websocket');
-// require('./lib/websocket-server') // WebSocket.Server = require('./lib/websocket-server');
-// require('./permessage-deflate') // const PerMessageDeflate = require('./permessage-deflate');
-// require('./receiver') // const Receiver = require('./receiver');
-// require('./sender') // const Sender = require('./sender');
-// require('./websocket') // const WebSocket = require('./websocket');
-// require('async-limiter') // const Limiter = require('async-limiter');
-// require('bufferutil') // const bufferUtil = require('bufferutil');
-// require('crypto') // const crypto = require('crypto');
-// require('crypto') // const { randomBytes } = require('crypto');
-// require('events') // const EventEmitter = require('events');
-// require('http') // const http = require('http');
-// require('https') // const https = require('https');
-// require('net') // const net = require('net');
-// require('stream') // const { Writable } = require('stream');
-// require('tls') // const tls = require('tls');
-// require('url') // const url = require('url');
-// require('utf-8-validate') // const isValidUTF8 = require('utf-8-validate');
-// require('zlib') // const zlib = require('zlib');
-
-
-
-/*
-lib https://github.com/websockets/ws/blob/6.2.1/validation.js
-*/
 'use strict';
 
 // hack-puppeteer - module.exports
@@ -121,33 +82,6 @@ function _mask(source, mask, output, offset, length) {
     for (var i = 0; i < length; i++) {
         output[offset + i] = source[i] ^ mask[i & 3];
     }
-}
-
-/**
-  * Converts `data` to a `Buffer`.
-  *
-  * @param {*} data The data to convert
-  * @return {Buffer} The buffer
-  * @throws {TypeError}
-  * @public
-  */
-function toBuffer(data) {
-    toBuffer.readOnly = true;
-
-    if (Buffer.isBuffer(data)) return data;
-
-    var buf;
-
-    if (data instanceof ArrayBuffer) {
-        buf = Buffer.from(data);
-    } else if (ArrayBuffer.isView(data)) {
-        buf = viewToBuffer(data);
-    } else {
-        buf = Buffer.from(data);
-        toBuffer.readOnly = false;
-    }
-
-    return buf;
 }
 
 // hack-puppeteer - module.exports
@@ -629,7 +563,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/sender.js
 // const PerMessageDeflate = require('./permessage-deflate');
 // const { EMPTY_BUFFER } = require('./constants');
 // const { isValidStatusCode } = require('./validation');
-// const { mask: applyMask, toBuffer } = require('./buffer-util');
 
 /**
   * HyBi Sender implementation.
@@ -725,7 +658,7 @@ class Sender {
       * @public
       */
     send(data, options, cb) {
-        const buf = toBuffer(data);
+        const buf = Buffer.from(data);
         var opcode = options.binary ? 2 : 1;
         var rsv1 = options.compress;
 
@@ -745,7 +678,7 @@ class Sender {
                 rsv1: false,
                 opcode,
                 mask: options.mask,
-                readOnly: toBuffer.readOnly
+                readOnly: false
             }),
             cb
         );
