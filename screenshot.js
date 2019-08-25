@@ -327,9 +327,24 @@ page = await connection.send("Target.createTarget", {
 });
 page = await browser._defaultContext._browser._targets.get(page.targetId);
 assert(await page._initializedPromise, "Failed to create target for page");
-page = await page._sessionFactory().then(function (client) {
+page = await connection.createSession(page._targetInfo).then(function (client) {
     return module.exports.Page.create(client, page);
 });
+
+    //!! /**
+      //!! * @param {Protocol.Target.TargetInfo} targetInfo
+      //!! * @return {!Promise<!CDPSession>}
+      //!! */
+    //!! async createSession(targetInfo) {
+        //!! const {
+            //!! sessionIdi
+        //!! }
+        //!! page = await connection.send("Target.attachToTarget", {
+            //!! targetId: page._targetInfo.targetId,
+            //!! flatten: true
+        //!! });
+        //!! page = await connection._sessions.get(page.sessionId);
+    //!! }
 
 
 

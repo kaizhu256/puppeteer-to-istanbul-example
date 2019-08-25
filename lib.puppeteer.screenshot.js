@@ -907,15 +907,10 @@ class Browser extends EventEmitter {
         const {
             browserContextId} = targetInfo;
         const context = this._defaultContext;
-        var that;
-        that = this;
         const target = {};
         target._targetInfo = targetInfo;
         target._browserContext = context;
         target._targetId = targetInfo.targetId;
-        target._sessionFactory = function () {
-            return that._connection.createSession(targetInfo);
-        },
         /** @type {?Promise<!Puppeteer.Page>} */
         target._pagePromise = null;
         /** @type {?Promise<!Worker>} */
