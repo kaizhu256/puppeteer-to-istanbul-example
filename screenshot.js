@@ -160,6 +160,7 @@ var fsWriteFile;
 var page;
 var path;
 var readline;
+var tmp;
 local.nop(assert, path);
 
 
@@ -322,13 +323,12 @@ browser = await module.exports.Browser.create(
     chromeProcess,
     chromeCloseGracefully
 );
-var target;
-target = await connection.send("Target.createTarget", {
+tmp = await connection.send("Target.createTarget", {
     url: "about:blank"
 });
-target = await browser._targets.get(target.targetId);
-page = await connection.createSession(target._targetInfo);
-page = await module.exports.Page.create(page, target);
+tmp = await browser._targets.get(tmp.targetId);
+page = await connection.createSession(tmp._targetInfo);
+page = await module.exports.Page.create(page, tmp);
 //!! page.then(function (client) {
     //!! return module.exports.Page.create(debugInline(client), target);
 //!! });
