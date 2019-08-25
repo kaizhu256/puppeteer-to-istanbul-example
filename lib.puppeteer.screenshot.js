@@ -2386,19 +2386,6 @@ class Page extends EventEmitter {
     async setViewport(viewport) {
         this._viewport = viewport;
     }
-
-    /**
-      * @param {"png"|"jpeg"} format
-      * @param {!ScreenshotOptions=} options
-      * @return {!Promise<!Buffer|!String>}
-      */
-    async _screenshotTask(format, options) {
-        await this._client.send('Target.activateTarget', {targetId: this._target._targetId});
-        const shouldSetDefaultBackground = options.omitBackground && format === 'png';
-        const result = await this._client.send('Page.captureScreenshot', { format, quality: options.quality });
-        const buffer = Buffer.from(result.data, 'base64');
-        await writeFileAsync(options.path, buffer);
-    }
 }
 module.exports = {Page};
 
