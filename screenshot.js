@@ -439,34 +439,27 @@ await Promise.all([
                 format: "png"
             })).data, "base64")
         );
-    //!! }()),
-    //!! (async function () {
-        //!! return new Promise();
+    }()),
+    (async function () {
+        // screenshot - html
+        tmp = page._frameManager._mainFrame._secondaryWorld._contextPromise;
+        tmp = await local.identity(tmp);
+        tmp = await tmp._evaluateInternal(
+            true,
+            Function( // jslint ignore:line
+                `var html = "";
+        if (document.doctype) {
+            html = new XMLSerializer().serializeToString(document.doctype);
+        }
+        if (document.documentElement) {
+            html += document.documentElement.outerHTML;
+        }
+        return html;`
+            )
+        );
+        await fsWriteFile(".aa.html", tmp.trim() + "\n");
     }())
 ]);
-
-
-
-// screenshot - html
-tmp = page._frameManager._mainFrame._secondaryWorld._contextPromise;
-tmp = await local.identity(tmp);
-tmp = await tmp._evaluateInternal(
-    true,
-    Function( // jslint ignore:line
-        `var html = "";
-if (document.doctype) {
-    html = new XMLSerializer().serializeToString(document.doctype);
-}
-if (document.documentElement) {
-    html += document.documentElement.outerHTML;
-}
-return html;`
-    )
-);
-//!! }
-//!! tmp = await page._frameManager._mainFrame._secondaryWorld.evaluate(
-//!! );
-fs.writeFileSync(".aa.html", tmp.trim() + "\n");
 
 
 
