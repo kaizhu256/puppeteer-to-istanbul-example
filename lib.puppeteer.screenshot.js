@@ -197,8 +197,6 @@ const EventTarget = {
       * @public
       */
     addEventListener(method, listener) {
-        if (typeof listener !== 'function') return;
-
         function onMessage(data) {
             listener.call(this, new MessageEvent(data, this));
         }
@@ -303,8 +301,6 @@ class Receiver extends Writable {
       * @param {Function} cb Callback
       */
     _write(chunk, encoding, cb) {
-        if (this._opcode === 0x08 && this._state == GET_INFO) return cb();
-
         this._bufferedBytes += chunk.length;
         this._buffers.push(chunk);
         this.startLoop(cb);
@@ -522,10 +518,6 @@ class Receiver extends Writable {
     }
 }
 
-module.exports = Receiver;
-
-
-
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/sender.js
 */
@@ -696,7 +688,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
 // const PerMessageDeflate = require('./permessage-deflate');
 // const EventTarget = require('./event-target');
 // const extension = require('./extension');
-// const Receiver = require('./receiver');
 // const Sender = require('./sender');
 // hack-puppeteer - module.exports
 // const {
@@ -1098,9 +1089,7 @@ lib https://github.com/websockets/ws/blob/6.2.1/index.js
 // const WebSocket = require('./lib/websocket');
 
 // hack-puppeteer - module.exports
-WebSocket.Receiver = Receiver;
 WebSocket.Sender = Sender.js;
-
 module.exports = WebSocket;
 
 
