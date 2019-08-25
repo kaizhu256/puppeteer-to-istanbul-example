@@ -798,7 +798,7 @@ class Connection extends EventEmitter {
         this._url = url;
         this._lastId = 0;
         /** @type {!Map<number, {resolve: function, reject: function, error: !Error, method: string}>}*/
-        this._callbacks = new Map();
+        this._callbacks = {};
         this._delay = delay;
 
         websocket1.on("message", this._onMessage.bind(this));
@@ -817,8 +817,9 @@ class Connection extends EventEmitter {
         const id = that._rawSend({
             method, params});
         return new Promise(function (resolve, reject) {
-            that._callbacks.set(id, {
-                resolve, reject, error: new Error(), method});
+            that._callbacks[id] = {
+                resolve, reject, error: new Error(), method
+            };
         });
     }
 
@@ -843,18 +844,18 @@ class Connection extends EventEmitter {
             session1 = new CDPSession(this, object.params.targetInfo.type, object.params.sessionId);
         }
         if (object.sessionId) {
-            if (object.id && session1._callbacks.has(object.id)) {
-                const callback = session1._callbacks.get(object.id);
-                session1._callbacks.delete(object.id);
+            if (object.id && session1._callbacks[object.id]) {
+                const callback = session1._callbacks[object.id];
+                delete session1._callbacks[object.id];
                 callback.resolve(object.result);
             } else {
                 assert(!object.id);
                 session1.emit(object.method, object.params);
             }
         } else if (object.id) {
-            const callback = this._callbacks.get(object.id);
+            const callback = this._callbacks[object.id];
             // Callbacks could be all rejected if someone has called `.dispose()`.
-            this._callbacks.delete(object.id);
+            delete this._callbacks[object.id];
             callback.resolve(object.result);
         } else {
             this.emit(object.method, object.params);
@@ -862,10 +863,8 @@ class Connection extends EventEmitter {
     }
 
     _onClose() {
-        if (this._closed)
-            return;
         this._closed = true;
-        this._callbacks.clear();
+        this._callbacks = {};
         this.emit(Events.Connection.Disconnected);
     }
 
@@ -898,11 +897,14 @@ class CDPSession extends EventEmitter {
     constructor(connection, targetType, sessionId) {
         super();
         /** @type {!Map<number, {resolve: function, reject: function, error: !Error, method: string}>}*/
-        this._callbacks = new Map();
+        this._callbacks = {};
         this._connection = connection;
         this._targetType = targetType;
         this._sessionId = sessionId;
     }
+
+    //!! session1 = new EventEmitter();
+    //!! session1._callbacks = {};
 
     /**
       * @param {string} method
@@ -911,19 +913,20 @@ class CDPSession extends EventEmitter {
       */
     send(method, params = {}) {
         var that;
-        that = this;
+        that = session1;
         const id = that._connection._rawSend({
             sessionId: that._sessionId, method, params});
         return new Promise(function (resolve, reject) {
-            that._callbacks.set(id, {
-                resolve, reject, error: new Error(), method});
+            that._callbacks[id] = {
+                resolve, reject, error: new Error(), method
+            };
         });
     }
 
     _onClosed() {
-        this._callbacks.clear();
-        this._connection = null;
-        this.emit(Events.CDPSession.Disconnected);
+        session1._callbacks = {};
+        session1._connection = null;
+        session1.emit(Events.CDPSession.Disconnected);
     }
 }
 
