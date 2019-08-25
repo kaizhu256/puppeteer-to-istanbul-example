@@ -62,6 +62,8 @@ local.nop(
 
 
 /* jslint ignore:start */
+var websocket1;
+var session1;
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
 */
@@ -415,7 +417,7 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
 
 const readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
 
-    const websocket1 = new EventEmitter();
+    websocket1 = new EventEmitter();
     websocket1.protocol = "";
 
     websocket1._binaryType = "nodebuffer";
@@ -801,7 +803,6 @@ class Connection extends EventEmitter {
 
         websocket1.on("message", this._onMessage.bind(this));
         /** @type {!Map<string, !CDPSession>}*/
-        this._sessions = new Map();
         this._closed = false;
     }
 
@@ -840,22 +841,16 @@ class Connection extends EventEmitter {
         const object = JSON.parse(message);
         if (object.method === "Target.attachedToTarget") {
             const sessionId = object.params.sessionId;
-            const session = new CDPSession(this, object.params.targetInfo.type, sessionId);
-            this._sessions.set(sessionId, session);
-        } else if (object.method === "Target.detachedFromTarget") {
-            const session = this._sessions.get(object.params.sessionId);
-            session._onClosed();
-            this._sessions.delete(object.params.sessionId);
+            session1 = new CDPSession(this, object.params.targetInfo.type, sessionId);
         }
         if (object.sessionId) {
-            const session = this._sessions.get(object.sessionId);
-            if (object.id && session._callbacks.has(object.id)) {
-                const callback = session._callbacks.get(object.id);
-                session._callbacks.delete(object.id);
+            if (object.id && session1._callbacks.has(object.id)) {
+                const callback = session1._callbacks.get(object.id);
+                session1._callbacks.delete(object.id);
                 callback.resolve(object.result);
             } else {
                 assert(!object.id);
-                session.emit(object.method, object.params);
+                session1.emit(object.method, object.params);
             }
         } else if (object.id) {
             const callback = this._callbacks.get(object.id);
@@ -872,7 +867,6 @@ class Connection extends EventEmitter {
             return;
         this._closed = true;
         this._callbacks.clear();
-        this._sessions.clear();
         this.emit(Events.Connection.Disconnected);
     }
 
@@ -892,7 +886,7 @@ class Connection extends EventEmitter {
             targetId: targetInfo.targetId,
             flatten: true
         });
-        return that._sessions.get(tmp.sessionId);
+        return session1
     }
 }
 
