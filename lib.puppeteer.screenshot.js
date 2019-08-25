@@ -323,19 +323,10 @@ class Receiver extends Writable {
             this._buffers[0] = buf.slice(n);
             return buf.slice(0, n);
         }
-
         const dst = Buffer.allocUnsafe(n);
-
         do {
             const buf = this._buffers[0];
-
-            if (n >= buf.length) {
-                this._buffers.shift().copy(dst, dst.length - n);
-            } else {
-                buf.copy(dst, dst.length - n, 0, n);
-                this._buffers[0] = buf.slice(n);
-            }
-
+            this._buffers.shift().copy(dst, dst.length - n);
             n -= buf.length;
         } while (n > 0);
 
@@ -354,25 +345,18 @@ class Receiver extends Writable {
 
         do {
             switch (this._state) {
-                case GET_INFO:
-                    err = this.getInfo();
-                    break;
-                case GET_PAYLOAD_LENGTH_16:
-                    err = this.getPayloadLength16();
-                    break;
-                case GET_PAYLOAD_LENGTH_64:
-                    err = this.getPayloadLength64();
-                    break;
-                case GET_MASK:
-                    this.getMask();
-                    break;
-                case GET_DATA:
-                    err = this.getData(cb);
-                    break;
-                default:
-                    // `INFLATING`
-                    this._loop = false;
-                    return;
+            case GET_INFO:
+                err = this.getInfo();
+                break;
+            case GET_PAYLOAD_LENGTH_16:
+                err = this.getPayloadLength16();
+                break;
+            case GET_PAYLOAD_LENGTH_64:
+                err = this.getPayloadLength64();
+                break;
+            case GET_DATA:
+                err = this.getData(cb);
+                break;
             }
         } while (this._loop);
 
@@ -424,14 +408,8 @@ class Receiver extends Writable {
       * @private
       */
     getPayloadLength64() {
-        if (this._bufferedBytes < 8) {
-            this._loop = false;
-            return;
-        }
-
         const buf = this.consume(8);
         const num = buf.readUInt32BE(0);
-
         this._payloadLength = num * Math.pow(2, 32) + buf.readUInt32BE(4);
         return this.haveLength();
     }
