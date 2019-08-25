@@ -207,10 +207,6 @@ const EventTarget = {
             listener.call(this, new CloseEvent(code, message, this));
         }
 
-        function onError(error) {
-            listener.call(this, new ErrorEvent(error, this));
-        }
-
         function onOpen() {
             listener.call(this, new OpenEvent(this));
         }
@@ -224,11 +220,9 @@ const EventTarget = {
         } else if (method === 'error') {
             onError._listener = listener;
             this.on(method, onError);
-        } else if (method === 'open') {
+        } else {
             onOpen._listener = listener;
             this.on(method, onOpen);
-        } else {
-            this.on(method, listener);
         }
     },
 };
