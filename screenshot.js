@@ -307,7 +307,9 @@ connection = await new Promise(function (resolve, reject) {
     ws.addEventListener("message", function (evt) {
         ws.onmessage(evt.data);
     });
-    ws.addEventListener("close", ws.onclose);
+    ws.addEventListener("close", function () {
+        ws.onclose();
+    });
     ws.addEventListener("open", function () {
         resolve(ws);
     });
