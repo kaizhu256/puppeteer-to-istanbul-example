@@ -977,10 +977,6 @@ class Browser extends EventEmitter {
         const previousURL = target._url;
         const wasInitialized = target._isInitialized;
         target._targetInfoChanged(event.targetInfo);
-        if (wasInitialized && previousURL !== target._url) {
-            this.emit(Events.Browser.TargetChanged, target);
-            target.browserContext().emit(Events.BrowserContext.TargetChanged, target);
-        }
     }
 
     /**
