@@ -299,20 +299,17 @@ await new Promise(function (resolve, reject) {
     rl.on("close", onClose);
     rl.on("line", onLine);
 });
-connection = await new Promise(function (resolve, reject) {
-    const ws = new module.exports.WebSocket(browserWSEndpoint, [], {
+await new Promise(function (resolve, reject) {
+    connection = new module.exports.WebSocket(browserWSEndpoint, [], {
         maxPayload: 256 * 1024 * 1024 // 256Mb
     });
-    ws.addEventListener("message", function (event) {
-        ws.onmessage(event.data);
+    connection.addEventListener("message", function (evt) {
+        connection.onmessage(evt.data);
     });
-    ws.addEventListener("close", function () {
-        ws.onclose();
+    connection.addEventListener("close", connection.onclose);
     });
-    ws.addEventListener("open", function () {
-        resolve(ws);
-    });
-    ws.addEventListener("error", reject);
+    connection.addEventListener("open", resolve);
+    connection.addEventListener("error", reject);
 });
 connection = new module.exports.Connection(browserWSEndpoint, connection, 0);
 browser = await module.exports.Browser.create(
@@ -321,11 +318,10 @@ browser = await module.exports.Browser.create(
     chromeProcess,
     chromeCloseGracefully
 );
-var target;
-target = await connection.send("Target.createTarget", {
+page = await connection.send("Target.createTarget", {
     url: "about:blank"
 });
-target = await browser._defaultContext._browser._targets.get(target.targetId);
+page = await browser._defaultContext._browser._targets.get(page.targetId);
 page = await connection.createSession(target._targetInfo);
 page = await module.exports.Page.create(page, target);
 //!! page.then(function (client) {
