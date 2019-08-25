@@ -188,7 +188,7 @@ path = require("path");
 util = require("util");
 //!! { Writable} = require("stream");
 //!! { randomBytes} = require("crypto");
-module.exports = require("./lib.puppeteer.screenshot.js");
+module.exports = require("./lib.screenshot.js");
 
 
 
