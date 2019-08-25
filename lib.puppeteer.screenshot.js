@@ -2317,8 +2317,7 @@ class Page extends EventEmitter {
     static async create(client, target, ignoreHTTPSErrors, defaultViewport, screenshotTaskQueue) {
         const page = new Page(client, target, ignoreHTTPSErrors, screenshotTaskQueue);
         await page._initialize();
-        if (defaultViewport)
-            await page.setViewport(defaultViewport);
+        await page.setViewport(defaultViewport);
         return page;
     }
 
@@ -2346,14 +2345,11 @@ class Page extends EventEmitter {
         /** @type {!Map<string, Worker>} */
         this._workers = new Map();
 
-        this._frameManager.on(Events.FrameManager.FrameAttached, event => this.emit(Events.Page.FrameAttached, event));
-        this._frameManager.on(Events.FrameManager.FrameDetached, event => this.emit(Events.Page.FrameDetached, event));
         this._frameManager.on(Events.FrameManager.FrameNavigated, event => this.emit(Events.Page.FrameNavigated, event));
 
         const networkManager = this._frameManager.networkManager();
         networkManager.on(Events.NetworkManager.Request, event => this.emit(Events.Page.Request, event));
         networkManager.on(Events.NetworkManager.Response, event => this.emit(Events.Page.Response, event));
-        networkManager.on(Events.NetworkManager.RequestFailed, event => this.emit(Events.Page.RequestFailed, event));
         networkManager.on(Events.NetworkManager.RequestFinished, event => this.emit(Events.Page.RequestFinished, event));
         this._fileChooserInterceptionIsDisabled = false;
         this._fileChooserInterceptors = new Set();
@@ -2398,10 +2394,9 @@ class Page extends EventEmitter {
       */
     async _screenshotTask(format, options) {
         await this._client.send('Target.activateTarget', {targetId: this._target._targetId});
-        let clip = options.clip ? processClip(options.clip) : undefined;
         const shouldSetDefaultBackground = options.omitBackground && format === 'png';
-        const result = await this._client.send('Page.captureScreenshot', { format, quality: options.quality, clip });
-        const buffer = options.encoding === 'base64' ? result.data : Buffer.from(result.data, 'base64');
+        const result = await this._client.send('Page.captureScreenshot', { format, quality: options.quality });
+        const buffer = Buffer.from(result.data, 'base64');
         await writeFileAsync(options.path, buffer);
     }
 }
