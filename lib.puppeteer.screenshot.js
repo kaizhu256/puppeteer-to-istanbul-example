@@ -1011,7 +1011,6 @@ class Browser extends EventEmitter {
         this._ignoreHTTPSErrors = ignoreHTTPSErrors;
         this._defaultViewport = defaultViewport;
         this._process = process;
-        this._screenshotTaskQueue = new TaskQueue();
         this._connection = connection;
         this._closeCallback = closeCallback;
         this._defaultContext = new BrowserContext(this._connection, this, null);
@@ -1033,7 +1032,7 @@ class Browser extends EventEmitter {
         const {browserContextId} = targetInfo;
         const context = this._defaultContext;
 
-        const target = new Target(targetInfo, context, () => this._connection.createSession(targetInfo), this._ignoreHTTPSErrors, this._defaultViewport, this._screenshotTaskQueue);
+        const target = new Target(targetInfo, context, () => this._connection.createSession(targetInfo), this._ignoreHTTPSErrors, this._defaultViewport);
         assert(!this._targets.has(event.targetInfo.targetId), 'Target should not exist before targetCreated');
         this._targets.set(event.targetInfo.targetId, target);
         this.emit(Events.Browser.TargetCreated, target);
@@ -2311,11 +2310,10 @@ class Page extends EventEmitter {
       * @param {!Puppeteer.Target} target
       * @param {boolean} ignoreHTTPSErrors
       * @param {?Puppeteer.Viewport} defaultViewport
-      * @param {!Puppeteer.TaskQueue} screenshotTaskQueue
       * @return {!Promise<!Page>}
       */
-    static async create(client, target, ignoreHTTPSErrors, defaultViewport, screenshotTaskQueue) {
-        const page = new Page(client, target, ignoreHTTPSErrors, screenshotTaskQueue);
+    static async create(client, target, ignoreHTTPSErrors, defaultViewport) {
+        const page = new Page(client, target, ignoreHTTPSErrors);
         await page._initialize();
         await page.setViewport(defaultViewport);
         return page;
@@ -2325,9 +2323,8 @@ class Page extends EventEmitter {
       * @param {!Puppeteer.CDPSession} client
       * @param {!Puppeteer.Target} target
       * @param {boolean} ignoreHTTPSErrors
-      * @param {!Puppeteer.TaskQueue} screenshotTaskQueue
       */
-    constructor(client, target, ignoreHTTPSErrors, screenshotTaskQueue) {
+    constructor(client, target, ignoreHTTPSErrors) {
         super();
         this._closed = false;
         this._client = client;
@@ -2339,8 +2336,6 @@ class Page extends EventEmitter {
         this._javascriptEnabled = true;
         /** @type {?Puppeteer.Viewport} */
         this._viewport = null;
-
-        this._screenshotTaskQueue = screenshotTaskQueue;
 
         /** @type {!Map<string, Worker>} */
         this._workers = new Map();
@@ -2422,16 +2417,14 @@ class Target {
       * @param {!function():!Promise<!Puppeteer.CDPSession>} sessionFactory
       * @param {boolean} ignoreHTTPSErrors
       * @param {?Puppeteer.Viewport} defaultViewport
-      * @param {!Puppeteer.TaskQueue} screenshotTaskQueue
       */
-    constructor(targetInfo, browserContext, sessionFactory, ignoreHTTPSErrors, defaultViewport, screenshotTaskQueue) {
+    constructor(targetInfo, browserContext, sessionFactory, ignoreHTTPSErrors, defaultViewport) {
         this._targetInfo = targetInfo;
         this._browserContext = browserContext;
         this._targetId = targetInfo.targetId;
         this._sessionFactory = sessionFactory;
         this._ignoreHTTPSErrors = ignoreHTTPSErrors;
         this._defaultViewport = defaultViewport;
-        this._screenshotTaskQueue = screenshotTaskQueue;
         /** @type {?Promise<!Puppeteer.Page>} */
         this._pagePromise = null;
         /** @type {?Promise<!Worker>} */
@@ -2450,7 +2443,7 @@ class Target {
       */
     async page() {
         this._pagePromise = this._sessionFactory()
-                .then(client => Page.create(client, this, this._ignoreHTTPSErrors, this._defaultViewport, this._screenshotTaskQueue));
+                .then(client => Page.create(client, this, this._ignoreHTTPSErrors, this._defaultViewport));
         return this._pagePromise;
     }
 

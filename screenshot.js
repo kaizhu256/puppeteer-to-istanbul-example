@@ -389,12 +389,9 @@ await new Promise(function (resolve) {
     setTimeout(resolve, 2000);
 });
 
+
+
 // screenshot - png
-//!! await page._screenshotTaskQueue._chain.then(function () {
-    //!! return page._screenshotTask("png", {
-        //!! path: ".aa.png"
-    //!! });
-//!! });
 await page._client.send("Target.activateTarget", {
     targetId: page._target._targetId
 });
@@ -402,6 +399,8 @@ tmp = await page._client.send('Page.captureScreenshot', {
     format: "png",
 });
 fs.writeFileSync(".aa.png", Buffer.from(tmp.data, "base64"));
+
+
 
 // screenshot - html
 tmp = page._frameManager._mainFrame._secondaryWorld._contextPromise;
