@@ -160,7 +160,7 @@ var fsWriteFile;
 var page;
 var path;
 var readline;
-local.nop(path);
+local.nop(assert, path);
 
 
 
@@ -299,16 +299,19 @@ await new Promise(function (resolve, reject) {
     rl.on("close", onClose);
     rl.on("line", onLine);
 });
-await new Promise(function (resolve, reject) {
-    connection = new module.exports.WebSocket(browserWSEndpoint, [], {
+connection = await new Promise(function (resolve, reject) {
+    var ws;
+    ws = new module.exports.WebSocket(browserWSEndpoint, [], {
         maxPayload: 256 * 1024 * 1024 // 256Mb
     });
-    connection.addEventListener("message", function (evt) {
-        connection.onmessage(evt.data);
+    ws.addEventListener("message", function (evt) {
+        ws.onmessage(evt.data);
     });
-    connection.addEventListener("close", connection.onclose);
-    connection.addEventListener("open", resolve);
-    connection.addEventListener("error", reject);
+    ws.addEventListener("close", ws.onclose);
+    ws.addEventListener("open", function () {
+        resolve(ws);
+    });
+    ws.addEventListener("error", reject);
 });
 connection = new module.exports.Connection(browserWSEndpoint, connection, 0);
 browser = await module.exports.Browser.create(
@@ -317,10 +320,11 @@ browser = await module.exports.Browser.create(
     chromeProcess,
     chromeCloseGracefully
 );
-page = await connection.send("Target.createTarget", {
+var target;
+target = await connection.send("Target.createTarget", {
     url: "about:blank"
 });
-page = await browser._defaultContext._browser._targets.get(page.targetId);
+target = await browser._defaultContext._browser._targets.get(target.targetId);
 page = await connection.createSession(target._targetInfo);
 page = await module.exports.Page.create(page, target);
 //!! page.then(function (client) {
