@@ -922,31 +922,7 @@ class Helper {
         listeners.splice(0, listeners.length);
     }
 
-    /**
-      * @param {!Object} obj
-      * @return {boolean}
-      */
-    static isString(obj) {
-        return typeof obj === 'string' || obj instanceof String;
-    }
-
-    static promisify(nodeFunction) {
-        function promisified(...args) {
-            return new Promise((resolve, reject) => {
-                function callback(err, ...result) {
-                    return resolve(result);
-                }
-                nodeFunction.call(null, ...args, callback);
-            });
-        }
-        return promisified;
-    }
-
 }
-
-const openAsync = Helper.promisify(fs.open);
-const writeAsync = Helper.promisify(fs.write);
-const closeAsync = Helper.promisify(fs.close);
 
 module.exports = {
     helper: Helper,
@@ -1063,19 +1039,6 @@ class Browser extends EventEmitter {
             this.emit(Events.Browser.TargetChanged, target);
             target.browserContext().emit(Events.BrowserContext.TargetChanged, target);
         }
-    }
-
-    /**
-      * @param {?string} contextId
-      * @return {!Promise<!Puppeteer.Page>}
-      */
-    async _createPageInContext() {
-        var page;
-        page = await this._connection.send('Target.createTarget', {url: 'about:blank'});
-        page = await this._targets.get(page.targetId);
-        assert(await page._initializedPromise, 'Failed to create target for page');
-        page = await page.page();
-        return page;
     }
 
     /**
@@ -1314,12 +1277,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DOMWorld.js
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-
-// const fs = require('fs');
-// const {helper, assert} = require('./helper');
-// const {LifecycleWatcher} = require('./LifecycleWatcher');
-// const {TimeoutError} = require('./Errors');
-const readFileAsync = helper.promisify(fs.readFile);
 
 /**
   * @unrestricted
@@ -2207,19 +2164,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Page.js
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-
-// const fs = require('fs');
-// const path = require('path');
-// const EventEmitter = require('events');
-// const mime = require('mime');
-// const {Events} = require('./Events');
-// const {Connection} = require('./Connection');
-// const {FrameManager} = require('./FrameManager');
-// const Tracing = require('./Tracing');
-// const {helper, debugError, assert} = require('./helper');
-// const {Worker} = require('./Worker');
-// const {createJSHandle} = require('./JSHandle');
-const writeFileAsync = helper.promisify(fs.writeFile);
 
 class Page extends EventEmitter {
     /**
