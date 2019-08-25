@@ -147,23 +147,35 @@ var assert;
 var browser;
 var browserWSEndpoint;
 var child_process;
-var chromeClosed;
+var chromeCloseGracefully;
+var chromeKillSync;
 var chromeProcess;
 var connection;
 var fs;
 var fsWriteFile;
-var gracefullyCloseChrome;
-var killChrome;
-var listenersAdd;
-var listenersProcess;
-var listenersRemove;
 var page;
 var path;
 var preferredRevision;
 var readline;
 var timeout;
-var waitForChromeToClose;
-local.nop(assert, path);
+local.nop(path);
+
+chromeKillSync = function () {
+/*
+ * This method has to be sync to be used as 'exit' event handler.
+ */
+    // Force kill chrome.
+    try {
+        if (process.platform === "win32") {
+            child_process.execSync(
+                `taskkill /pid ${chromeProcess.pid} /T /F`
+            );
+        } else {
+            process.kill(-chromeProcess.pid, "SIGKILL");
+        }
+    // the process might have already stopped
+    } catch (ignore) {}
+};
 
 fsWriteFile = function (file, data) {
     return new Promise(function (resolve, reject) {
@@ -177,53 +189,26 @@ fsWriteFile = function (file, data) {
     });
 };
 
-gracefullyCloseChrome = function () {
+chromeCloseGracefully = function () {
 /**
   * @return {Promise}
   */
-    listenersRemove(listenersProcess);
     // Attempt to close chrome gracefully
     connection.send("Browser.close").catch(function (err) {
         console.error(err);
-        killChrome();
+        chromeKillSync();
     });
-    return waitForChromeToClose;
-};
-
-killChrome = function () {
-/*
- * This method has to be sync to be used as 'exit' event handler.
- */
-    listenersRemove(listenersProcess);
-    if (chromeProcess.pid && !chromeProcess.killed && !chromeClosed) {
-        // Force kill chrome.
-        try {
-            if (process.platform === "win32") {
-                child_process.execSync(
-                    `taskkill /pid ${chromeProcess.pid} /T /F`
-                );
-            } else {
-                process.kill(-chromeProcess.pid, "SIGKILL");
-            }
-        // the process might have already stopped
-        } catch (ignore) {}
-    }
-};
-
-listenersAdd = function (list) {
-    list.forEach(function (elem) {
-        elem[0].on(elem[1], elem[2]);
-    });
-    return list;
-};
-
-listenersRemove = function (list) {
-    list.forEach(function (elem) {
-        elem[0].removeListener(elem[1], elem[2]);
+    return new Promise(function (resolve) {
+        chromeProcess.once("exit", resolve);
     });
 };
 
 // init
+process.on("exit", chromeKillSync);
+process.on("SIGINT", chromeKillSync);
+process.on("SIGTERM", chromeKillSync);
+process.on("SIGHUP", chromeKillSync);
+
 assert = require("assert");
 //!! EventEmitter = require("events");
 //!! URL = require("url");
@@ -272,33 +257,8 @@ chromeProcess = child_process.spawn((
 chromeProcess.stderr.pipe(process.stderr);
 chromeProcess.stdout.pipe(process.stdout);
 
-waitForChromeToClose = new Promise(function (fulfill) {
-    chromeProcess.once("exit", function () {
-        chromeClosed = true;
-        fulfill();
-    });
-});
-
-listenersProcess = listenersAdd([
-    [
-        process, "exit", killChrome
-    ],
-    [
-        process, "SIGINT", function () {
-            killChrome();
-            process.exit(130);
-        }
-    ],
-    [
-        process, "SIGTERM", gracefullyCloseChrome
-    ],
-    [
-        process, "SIGHUP", gracefullyCloseChrome
-    ]
-]);
 browserWSEndpoint = await new Promise(function (resolve, reject) {
     var cleanup;
-    var listeners;
     var onClose;
     var onLine;
     var onTimeout;
@@ -307,7 +267,6 @@ browserWSEndpoint = await new Promise(function (resolve, reject) {
     var timeoutId;
     cleanup = function () {
         clearTimeout(timeoutId);
-        listenersRemove(listeners);
     };
     onClose = function (error) {
     /**
@@ -348,20 +307,10 @@ browserWSEndpoint = await new Promise(function (resolve, reject) {
         input: chromeProcess.stderr
     });
     stderr = "";
-    listeners = listenersAdd([
-        [
-            rl, "line", onLine
-        ],
-        [
-            rl, "close", onClose
-        ],
-        [
-            chromeProcess, "exit", onClose
-        ],
-        [
-            chromeProcess, "error", onClose
-        ]
-    ]);
+    rl.on("line", onLine);
+    rl.on("close", onClose);
+    chromeProcess.on("exit", onClose);
+    chromeProcess.on("error", onClose);
     timeoutId = setTimeout(onTimeout, timeout);
 });
 
@@ -394,7 +343,7 @@ browser = await module.exports.Browser.create(
         height: 600
     },
     chromeProcess,
-    gracefullyCloseChrome
+    chromeCloseGracefully
 );
 await browser.waitForTarget(function (t) {
     return t._targetInfo.type === "page";
@@ -431,8 +380,6 @@ await new Promise(function (resolve) {
     }).then(resolve);
 });
 await local.identity(watcher._newDocumentNavigationPromise);
-module.exports.helper.removeEventListeners(watcher._eventListeners);
-clearTimeout(watcher._maximumTimer);
 await local.identity(watcher._navigationRequest._response);
 
 
