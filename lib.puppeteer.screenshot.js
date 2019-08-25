@@ -217,10 +217,7 @@ const EventTarget = {
         } else if (method === 'close') {
             onClose._listener = listener;
             this.on(method, onClose);
-        } else if (method === 'error') {
-            onError._listener = listener;
-            this.on(method, onError);
-        } else {
+        } else if (method === 'open') {
             onOpen._listener = listener;
             this.on(method, onOpen);
         }
