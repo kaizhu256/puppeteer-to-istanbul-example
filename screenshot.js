@@ -386,38 +386,33 @@ page = await browser.newPage();
     //!! page.goto.toString()
 //!! );
 
-async function navigateFrame(frame, url) {
-    var that;
-    that = page._frameManager._mainFrame._frameManager;
-    const referer = that._networkManager.extraHTTPHeaders().referer;
-    const watcher = new module.exports.LifecycleWatcher(that, frame, [
-        "load"
-    ], timeout);
-    await Promise.race([
-        //!! navigate(that._client, url, referer, frame._id),
-        new Promise(function (resolve, reject) {
-            that._client.send("Page.navigate", {
-                url,
-                referer,
-                frameId: frame._id
-            }).then(resolve).catch(reject);
-        }),
-        watcher.timeoutOrTerminationPromise()
-    ]);
-    await Promise.race([
-        watcher.timeoutOrTerminationPromise(),
-        watcher.newDocumentNavigationPromise()
-    ]);
-    watcher.dispose();
-    return watcher.navigationResponse();
-}
-
-
-
-await navigateFrame(
+const referer = page._frameManager._networkManager.extraHTTPHeaders().referer;
+const watcher = new module.exports.LifecycleWatcher(
+    page._frameManager,
     page._frameManager._mainFrame,
-    "https://www.highcharts.com/stock/demo/stock-tools-gui"
+    [
+        "load"
+    ],
+    timeout
 );
+await Promise.race([
+    new Promise(function (resolve, reject) {
+        page._frameManager._client.send("Page.navigate", {
+            url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
+            referer,
+            frameId: page._frameManager._mainFrame._id
+        }).then(resolve).catch(reject);
+    }),
+    watcher.timeoutOrTerminationPromise()
+]);
+await Promise.race([
+    watcher.timeoutOrTerminationPromise(),
+    watcher.newDocumentNavigationPromise()
+]);
+watcher.dispose();
+await watcher.navigationResponse();
+
+
 
 // screenshot - wait 2000 ms
 await new Promise(function (resolve) {
