@@ -332,7 +332,16 @@ page = await connection.send("Target.createTarget", {
 });
 page = await browser._defaultContext._browser._targets.get(page.targetId);
 assert(await page._initializedPromise, "Failed to create target for page");
-page = await page.page();
+//!! page = await page.page();
+page._pagePromise = page._sessionFactory().then(function (client) {
+    return module.exports.Page.create(
+        client,
+        page,
+        page._ignoreHTTPSErrors,
+        page._defaultViewport
+    );
+});
+page = await local.identity(page._pagePromise);
 
 
 

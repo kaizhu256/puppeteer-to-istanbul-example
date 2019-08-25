@@ -1922,15 +1922,6 @@ class Target {
         if (this._isInitialized)
             this._initializedCallback(true);
     }
-
-    /**
-      * @return {!Promise<?Page>}
-      */
-    async page() {
-        this._pagePromise = this._sessionFactory()
-        .then(client => Page.create(client, this, this._ignoreHTTPSErrors, this._defaultViewport));
-        return this._pagePromise;
-    }
 }
 
 
