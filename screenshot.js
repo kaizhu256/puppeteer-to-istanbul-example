@@ -319,14 +319,11 @@ browser = await module.exports.Browser.create(
     chromeProcess,
     chromeCloseGracefully
 );
-await browser.waitForTarget(function (target) {
-    return target._targetInfo.type === "page";
-});
 page = await connection.send("Target.createTarget", {
     url: "about:blank"
 });
 page = await browser._defaultContext._browser._targets.get(page.targetId);
-assert(await page._initializedPromise, "Failed to create target for page");
+//!! assert(await page._initializedPromise, "Failed to create target for page");
 page = await connection.createSession(page._targetInfo).then(function (client) {
     return module.exports.Page.create(client, page);
 });
