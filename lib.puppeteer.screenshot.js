@@ -1677,13 +1677,6 @@ class FrameManager extends EventEmitter {
     }
 
     /**
-      * @return {!Frame}
-      */
-    mainFrame() {
-        return this._mainFrame;
-    }
-
-    /**
       * @return {!Array<!Frame>}
       */
     frames() {
@@ -2371,7 +2364,7 @@ class Page extends EventEmitter {
       * @return {!Promise<?Puppeteer.Response>}
       */
     async goto(url, options) {
-        return await this._frameManager.mainFrame().goto(url, options);
+        return await this._frameManager._mainFrame.goto(url, options);
     }
 
     /**
