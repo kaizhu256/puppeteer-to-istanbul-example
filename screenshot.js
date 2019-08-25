@@ -297,114 +297,109 @@ listenersProcess = listenersAdd([
 ]);
 /** @type {?Connection} */
 let connection = null;
-try {
-    browserWSEndpoint = await new Promise(function (resolve, reject) {
-        var cleanup;
-        var listeners;
-        var onClose;
-        var onLine;
-        var onTimeout;
-        var rl;
-        var stderr;
-        var timeoutId;
-        cleanup = function () {
-            clearTimeout(timeoutId);
-            listenersRemove(listeners);
-        };
-        onClose = function (error) {
-        /**
-          * @param {!Error=} error
-          */
-            cleanup();
-            reject(new Error(
-                "Failed to launch chrome!" + error.message + "\n"
-                + stderr + "\n\n"
-                + "TROUBLESHOOTING: https://github.com/GoogleChrome/puppeteer"
-                + "/blob/master/docs/troubleshooting.md\n\n"
-            ));
-        };
-        onLine = function (line) {
-        /**
-          * @param {string} line
-          */
-            stderr += line + "\n";
-            const match = line.match(
-                /^DevTools\u0020listening\u0020on\u0020(ws:\/\/.*)$/
-            );
-            if (!match) {
-                return;
-            }
-            cleanup();
-            resolve(match[1]);
-        };
-        onTimeout = function () {
-            cleanup();
-            reject(new Error(
-                "Timed out after " + timeout
-                + " ms while trying to connect to Chrome!"
-                + " The only Chrome revision guaranteed to work is "
-                + preferredRevision
-            ));
-        };
-        rl = readline.createInterface({
-            input: chromeProcess.stderr
-        });
-        stderr = "";
-        listeners = listenersAdd([
-            [
-                rl, "line", onLine
-            ],
-            [
-                rl, "close", onClose
-            ],
-            [
-                chromeProcess, "exit", onClose
-            ],
-            [
-                chromeProcess, "error", onClose
-            ]
-        ]);
-        timeoutId = setTimeout(onTimeout, timeout);
+browserWSEndpoint = await new Promise(function (resolve, reject) {
+    var cleanup;
+    var listeners;
+    var onClose;
+    var onLine;
+    var onTimeout;
+    var rl;
+    var stderr;
+    var timeoutId;
+    cleanup = function () {
+        clearTimeout(timeoutId);
+        listenersRemove(listeners);
+    };
+    onClose = function (error) {
+    /**
+      * @param {!Error=} error
+      */
+        cleanup();
+        reject(new Error(
+            "Failed to launch chrome!" + error.message + "\n"
+            + stderr + "\n\n"
+            + "TROUBLESHOOTING: https://github.com/GoogleChrome/puppeteer"
+            + "/blob/master/docs/troubleshooting.md\n\n"
+        ));
+    };
+    onLine = function (line) {
+    /**
+      * @param {string} line
+      */
+        stderr += line + "\n";
+        const match = line.match(
+            /^DevTools\u0020listening\u0020on\u0020(ws:\/\/.*)$/
+        );
+        if (!match) {
+            return;
+        }
+        cleanup();
+        resolve(match[1]);
+    };
+    onTimeout = function () {
+        cleanup();
+        reject(new Error(
+            "Timed out after " + timeout
+            + " ms while trying to connect to Chrome!"
+            + " The only Chrome revision guaranteed to work is "
+            + preferredRevision
+        ));
+    };
+    rl = readline.createInterface({
+        input: chromeProcess.stderr
     });
+    stderr = "";
+    listeners = listenersAdd([
+        [
+            rl, "line", onLine
+        ],
+        [
+            rl, "close", onClose
+        ],
+        [
+            chromeProcess, "exit", onClose
+        ],
+        [
+            chromeProcess, "error", onClose
+        ]
+    ]);
+    timeoutId = setTimeout(onTimeout, timeout);
+});
 
-    connection = await new Promise(function (resolve, reject) {
-        const ws = new module.exports.WebSocket(browserWSEndpoint, [], {
-            maxPayload: 256 * 1024 * 1024 // 256Mb
-        });
-        ws.addEventListener("message", function (event) {
-            ws.onmessage(event.data);
-        });
-        ws.addEventListener("close", function () {
-            ws.onclose();
-        });
-        ws.addEventListener("open", function () {
-            resolve(ws);
-        });
-        ws.addEventListener("error", reject);
+connection = await new Promise(function (resolve, reject) {
+    const ws = new module.exports.WebSocket(browserWSEndpoint, [], {
+        maxPayload: 256 * 1024 * 1024 // 256Mb
     });
-    connection = new module.exports.Connection(
-        browserWSEndpoint,
-        connection,
-        0
-    );
-    browser = await module.exports.Browser.create(
-        connection,
-        [],
-        false,
-        {
-            width: 800,
-            height: 600
-        },
-        chromeProcess,
-        gracefullyCloseChrome
-    );
-    await browser.waitForTarget(function (t) {
-        return t._targetInfo.type === "page";
+    ws.addEventListener("message", function (event) {
+        ws.onmessage(event.data);
     });
-} catch (errCaught) {
-    killChrome();
-    console.error(errCaught);
-}
+    ws.addEventListener("close", function () {
+        ws.onclose();
+    });
+    ws.addEventListener("open", function () {
+        resolve(ws);
+    });
+    ws.addEventListener("error", reject);
+});
+connection = new module.exports.Connection(
+    browserWSEndpoint,
+    connection,
+    0
+);
+browser = await module.exports.Browser.create(
+    connection,
+    [],
+    false,
+    {
+        width: 800,
+        height: 600
+    },
+    chromeProcess,
+    gracefullyCloseChrome
+);
+await browser.waitForTarget(function (t) {
+    return t._targetInfo.type === "page";
+});
 //!! console.error(
     //!! browser._defaultContext._id
 //!! );
