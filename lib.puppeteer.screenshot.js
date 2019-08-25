@@ -434,34 +434,17 @@ class Receiver extends Writable {
       */
     getData(cb) {
         var data = EMPTY_BUFFER;
-
-        if (this._payloadLength) {
-            if (this._bufferedBytes < this._payloadLength) {
-                this._loop = false;
-                return;
-            }
-
-            data = this.consume(this._payloadLength);
-            if (this._masked) unmask(data, this._mask);
-        }
-
-        if (this._opcode > 0x07) return this.controlMessage(data);
-
-        if (this._compressed) {
-            this._state = INFLATING;
-            this.decompress(data, cb);
+        if (this._bufferedBytes < this._payloadLength) {
+            this._loop = false;
             return;
         }
-
-        if (data.length) {
-            //
-            // This message is not compressed so its lenght is the sum of the payload
-            // length of all fragments.
-            //
-            this._messageLength = this._totalPayloadLength;
-            this._fragments.push(data);
-        }
-
+        data = this.consume(this._payloadLength);
+        //
+        // This message is not compressed so its lenght is the sum of the payload
+        // length of all fragments.
+        //
+        this._messageLength = this._totalPayloadLength;
+        this._fragments.push(data);
         return this.dataMessage();
     }
 
