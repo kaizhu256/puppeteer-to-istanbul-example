@@ -1812,13 +1812,6 @@ class LifecycleWatcher {
     }
 
     /**
-      * @return {?Puppeteer.Response}
-      */
-    navigationResponse() {
-        return this._navigationRequest ? this._navigationRequest.response() : null;
-    }
-
-    /**
       * @return {!Promise<?Error>}
       */
     newDocumentNavigationPromise() {
