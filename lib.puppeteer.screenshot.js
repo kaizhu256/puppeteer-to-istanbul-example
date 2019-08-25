@@ -119,24 +119,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/event-target.js
 "use strict";
 
 /**
-  * Class representing an open event.
-  *
-  * @extends Event
-  * @private
-  */
-class OpenEvent {
-    /**
-      * Create a new `OpenEvent`.
-      *
-      * @param {WebSocket} target A reference to the target to which the event was dispatched
-      */
-    constructor(target) {
-        this.type = "open";
-        this.target = target;
-    }
-}
-
-/**
   * This provides methods for emulating the `EventTarget` interface. It's not
   * meant to be used directly.
   *
@@ -169,7 +151,10 @@ const EventTarget = {
         }
 
         function onOpen() {
-            listener.call(this, new OpenEvent(this));
+            listener.call(this, {
+                target: this,
+                type: "open"
+            });
         }
 
         if (method === "message") {
