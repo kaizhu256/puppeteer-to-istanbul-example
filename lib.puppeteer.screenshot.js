@@ -99,7 +99,9 @@ module.exports = {
     kStatusCode: Symbol("status-code"),
     kWebSocket: Symbol("websocket"),
     EMPTY_BUFFER: Buffer.alloc(0),
-    NOOP: function () {}
+    NOOP: function () {
+        return;
+    }
 };
 // hack-puppeteer - module.exports
 const {
@@ -125,13 +127,13 @@ lib https://github.com/websockets/ws/blob/6.2.1/event-target.js
   * @mixin
   */
 const EventTarget = {
-    /**
-      * Register an event listener.
-      *
-      * @param {String} method A string representing the event type to listen for
-      * @param {Function} listener The listener to add
-      * @public
-      */
+/**
+  * Register an event listener.
+  *
+  * @param {String} method A string representing the event type to listen for
+  * @param {Function} listener The listener to add
+  * @public
+  */
     addEventListener(method, listener) {
         function onMessage(data) {
             listener.call(this, {
