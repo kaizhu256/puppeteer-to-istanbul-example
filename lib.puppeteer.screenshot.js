@@ -2221,10 +2221,10 @@ WebSocketTransport.create = function (url) {
             maxPayload: 256 * 1024 * 1024, // 256Mb
         });
         ws.addEventListener("message", function (event) {
-            ws.onmessage.call(null, event.data);
+            ws.onmessage(event.data);
         });
         ws.addEventListener("close", function (event) {
-            ws.onclose.call(null);
+            ws.onclose();
         });
         ws.addEventListener("open", function () {
             resolve(ws);
