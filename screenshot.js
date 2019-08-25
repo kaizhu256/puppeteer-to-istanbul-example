@@ -149,6 +149,7 @@ var browserWSEndpoint;
 var child_process;
 var chromeClosed;
 var chromeProcess;
+var connection;
 var fs;
 var fsWriteFile;
 var gracefullyCloseChrome;
@@ -295,8 +296,6 @@ listenersProcess = listenersAdd([
         process, "SIGHUP", gracefullyCloseChrome
     ]
 ]);
-/** @type {?Connection} */
-let connection = null;
 browserWSEndpoint = await new Promise(function (resolve, reject) {
     var cleanup;
     var listeners;
@@ -403,7 +402,7 @@ await browser.waitForTarget(function (t) {
 //!! console.error(
     //!! browser._defaultContext._id
 //!! );
-page = await browser._defaultContext._browser._connection.send(
+page = await connection.send(
     "Target.createTarget",
     {
         url: "about:blank"
@@ -415,7 +414,7 @@ page = await page.page();
 
 
 
-// screenshot - load url
+// browser - load url
 const watcher = new module.exports.LifecycleWatcher(
     page._frameManager,
     page._frameManager._mainFrame,
@@ -438,7 +437,7 @@ await local.identity(watcher._navigationRequest._response);
 
 
 
-// screenshot - wait 2000 ms
+// browser - wait 2000 ms
 await new Promise(function (resolve) {
     setTimeout(resolve, 2000);
 });
@@ -481,5 +480,6 @@ return html.trim()` + " + \"\\n\""
 
 
 
+// close browser
 await browser.close();
 }(globalThis.globalLocal));
