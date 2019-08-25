@@ -416,8 +416,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
 */
 "use strict";
 
-const readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
-
     websocket1 = new EventEmitter();
     websocket1.protocol = "";
 
@@ -447,51 +445,22 @@ module.exports = websocket1;
   *     `Sec-WebSocket-Origin` header
   * @private
   */
-function initAsClient(websocket1, address) {
-    const opts = {};
-    var parsedUrl;
-    //
-    // The WHATWG URL constructor is not available on Node.js < 6.13.0
-    //
-    parsedUrl = new url.URL(address);
-    websocket1.url = address;
-    const isUnixSocket = parsedUrl.protocol === "ws+unix:";
-    const isSecure = (
-    parsedUrl.protocol === "wss:" || parsedUrl.protocol === "https:"
-);
-    const defaultPort = 80;
-    const key = crypto.randomBytes(16).toString("base64");
-    const get = http.get;
-    const path = parsedUrl.pathname || "/";
-    opts.defaultPort = opts.defaultPort || defaultPort;
-    opts.port = parsedUrl.port;
-    opts.host = parsedUrl.hostname;
-    opts.headers = Object.assign(
-        {
+function initAsClient(websocket1, url) {
+    url = new url.URL(url);
+    http.get(debugInline({
+        headers: {
             "Sec-WebSocket-Version": 13,
-            "Sec-WebSocket-Key": key,
-            Connection: "Upgrade",
-            Upgrade: "websocket"
+            "Sec-WebSocket-Key": crypto.randomBytes(16).toString("base64"),
+            "Connection": "Upgrade",
+            "Upgrade": "websocket"
         },
-        opts.headers
-    );
-    opts.path = path;
-    var req = (websocket1._req = get(opts));
-    req.on("upgrade", (res, socket, head) => {
+        pathname: url.pathname
+    })).on("upgrade", (res, socket, head) => {
         websocket1.emit("upgrade", res);
-
-        //
-        // The user may have closed the connection from a listener of the `upgrade`
-        // event.
-        //
-        req = websocket1._req = null;
-
         const digest = crypto
             .createHash("sha1")
             .update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
             .digest("base64");
-
-        const serverProt = res.headers["sec-websocket-protocol"];
         const receiver = new Receiver(
             websocket1._binaryType,
             websocket1._extensions
