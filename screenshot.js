@@ -435,13 +435,13 @@ await Promise.all([
         });
         await fsWriteFile(
             ".aa.png",
-            Buffer.from(await page._client.send("Page.captureScreenshot", {
+            Buffer.from((await page._client.send("Page.captureScreenshot", {
                 format: "png"
-            }).data, "base64")
+            })).data, "base64")
         );
-    }()),
-    (async function () {
-        return;
+    //!! }()),
+    //!! (async function () {
+        //!! return new Promise();
     }())
 ]);
 
