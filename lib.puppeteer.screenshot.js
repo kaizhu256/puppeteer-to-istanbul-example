@@ -730,7 +730,7 @@ function initAsClient(websocket, address, protocols, options) {
     //
     // The WHATWG URL constructor is not available on Node.js < 6.13.0
     //
-    parsedUrl = url.URL ? new url.URL(address) : url.parse(address);
+    parsedUrl = new url.URL(address);
     websocket.url = address;
     const isUnixSocket = parsedUrl.protocol === 'ws+unix:';
     const isSecure =
@@ -1517,62 +1517,19 @@ class ExecutionContext {
       */
     async _evaluateInternal(returnByValue, pageFunction, ...args) {
         const suffix = `//# sourceURL=${EVALUATION_SCRIPT_URL}`;
-
-        if (helper.isString(pageFunction)) {
-            const contextId = this._contextId;
-            const expression = /** @type {string} */ (pageFunction);
-            const expressionWithSourceUrl = SOURCE_URL_REGEX.test(expression) ? expression : expression + '\n' + suffix;
-            const {exceptionDetails, result: remoteObject} = await this._client.send('Runtime.evaluate', {
-                expression: expressionWithSourceUrl,
-                contextId,
-                returnByValue,
-                awaitPromise: true,
-                userGesture: true
-            }).catch(rewriteError);
-            if (exceptionDetails)
-                throw new Error('Evaluation failed: ' + helper.getExceptionMessage(exceptionDetails));
-            return returnByValue ? remoteObject.value : createJSHandle(this, remoteObject);
-        }
-
-        if (typeof pageFunction !== 'function')
-            throw new Error(`Expected to get |string| or |function| as the first argument, but got "${pageFunction}" instead.`);
-
         let functionText = pageFunction.toString();
-        try {
-            new Function('(' + functionText + ')');
-        } catch (e1) {
-            // This means we might have a function shorthand. Try another
-            // time prefixing 'function '.
-            if (functionText.startsWith('async '))
-                functionText = 'async function ' + functionText.substring('async '.length);
-            else
-                functionText = 'function ' + functionText;
-            try {
-                new Function('(' + functionText  + ')');
-            } catch (e2) {
-                // We tried hard to serialize, but there's a weird beast here.
-                throw new Error('Passed function is not well-serializable!');
-            }
-        }
+        new Function('(' + functionText + ')');
         let callFunctionOnPromise;
-        try {
-            callFunctionOnPromise = this._client.send('Runtime.callFunctionOn', {
-                functionDeclaration: functionText + '\n' + suffix + '\n',
-                executionContextId: this._contextId,
-                //!! arguments: args.map(convertArgument.bind(this)),
-                returnByValue,
-                awaitPromise: true,
-                userGesture: true
-            });
-        } catch (err) {
-            if (err instanceof TypeError && err.message.startsWith('Converting circular structure to JSON'))
-                err.message += ' Are you passing a nested JSHandle?';
-            throw err;
-        }
+        callFunctionOnPromise = this._client.send('Runtime.callFunctionOn', {
+            functionDeclaration: functionText + '\n' + suffix + '\n',
+            executionContextId: this._contextId,
+            //!! arguments: args.map(convertArgument.bind(this)),
+            returnByValue,
+            awaitPromise: true,
+            userGesture: true
+        });
         const { exceptionDetails, result: remoteObject } = await callFunctionOnPromise.catch(console.error);
-        if (exceptionDetails)
-            throw new Error('Evaluation failed: ' + helper.getExceptionMessage(exceptionDetails));
-        return returnByValue ? remoteObject.value : createJSHandle(this, remoteObject);
+        return remoteObject.value;
     }
 }
 
