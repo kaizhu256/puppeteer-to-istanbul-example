@@ -166,7 +166,7 @@ var path;
 var tmp;
 var urlInspect;
 var util;
-var websocket;
+var websocket1;
 local.nop(assert, path, util);
 
 
@@ -297,21 +297,22 @@ gotoNext = async function (err, data) {
         chromeProcess.stderr.on("data", onDataUrlInspect);
         break;
     case 2:
-        // init websocket
-        websocket = new module.exports.WebSocket(urlInspect, [], {
+        // init websocket1
+        websocket1 = module.exports.websocket1;
+        module.exports.initAsClient(websocket1, urlInspect, "", {
             maxPayload: 256 * 1024 * 1024 // 256Mb
         });
-        websocket.addEventListener("message", function (evt) {
-            websocket.onmessage(evt.data);
+        websocket1.addEventListener("message", function (evt) {
+            websocket1.onmessage(evt.data);
         });
-        websocket.addEventListener("close", function () {
-            websocket.onclose();
+        websocket1.addEventListener("close", function () {
+            websocket1.onclose();
         });
-        websocket.addEventListener("open", gotoNextData);
-        websocket.addEventListener("error", gotoNext);
+        websocket1.addEventListener("open", gotoNextData);
+        websocket1.addEventListener("error", gotoNext);
         break;
     case 3:
-        browser = new module.exports.Connection(urlInspect, websocket, 0);
+        browser = new module.exports.Connection(urlInspect, websocket1, 0);
         browser = await module.exports.Browser.create(
             browser,
             [],

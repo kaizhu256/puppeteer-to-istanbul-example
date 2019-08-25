@@ -551,7 +551,6 @@ const protocolVersions = [8, 13];
   *
   * @extends EventEmitter
   */
-class WebSocket extends EventEmitter {
     /**
       * Create a new `WebSocket`.
       *
@@ -559,27 +558,25 @@ class WebSocket extends EventEmitter {
       * @param {(String|String[])} protocols The subprotocols
       * @param {Object} options Connection options
       */
-    constructor(address, protocols, options) {
-        super();
+    const websocket1 = new EventEmitter();
+    //!! (address, protocols, options) {
+        //!! super();
 
-        this.readyState = WebSocket.CONNECTING;
-        this.protocol = "";
+        websocket1.readyState = websocket1.CONNECTING;
+        websocket1.protocol = "";
 
-        this._binaryType = BINARY_TYPES[0];
-        this._closeFrameReceived = false;
-        this._closeFrameSent = false;
-        this._closeMessage = "";
-        this._closeTimer = null;
-        this._closeCode = 1006;
-        this._extensions = {};
-        this._receiver = null;
-        this._sender = null;
-        this._socket = null;
-        this._isServer = false;
-        this._redirects = 0;
-        protocols = protocols.join(", ");
-        initAsClient(this, address, protocols, options);
-    }
+        websocket1._binaryType = BINARY_TYPES[0];
+        websocket1._closeFrameReceived = false;
+        websocket1._closeFrameSent = false;
+        websocket1._closeMessage = "";
+        websocket1._closeTimer = null;
+        websocket1._closeCode = 1006;
+        websocket1._extensions = {};
+        websocket1._receiver = null;
+        websocket1._sender = null;
+        websocket1._socket = null;
+        websocket1._isServer = false;
+        websocket1._redirects = 0;
 
     /**
       * Set up the socket and the internal resources.
@@ -589,19 +586,19 @@ class WebSocket extends EventEmitter {
       * @param {Number} maxPayload The maximum allowed message size
       * @private
       */
-    setSocket(socket, head, maxPayload) {
+    websocket1.setSocket = function (socket, head, maxPayload) {
         const receiver = new Receiver(
-            this._binaryType,
-            this._extensions,
+            websocket1._binaryType,
+            websocket1._extensions,
             maxPayload
         );
 
-        this._sender = new Sender(socket, this._extensions);
-        this._receiver = receiver;
-        this._socket = socket;
+        websocket1._sender = new Sender(socket, websocket1._extensions);
+        websocket1._receiver = receiver;
+        websocket1._socket = socket;
 
-        receiver[kWebSocket] = this;
-        socket[kWebSocket] = this;
+        receiver[kWebSocket] = websocket1;
+        socket[kWebSocket] = websocket1;
 
         receiver.on("drain", receiverOnDrain);
         receiver.on("message", receiverOnMessage);
@@ -613,8 +610,8 @@ class WebSocket extends EventEmitter {
         socket.on("end", socketOnEnd);
         socket.on("error", console.error);
 
-        this.readyState = WebSocket.OPEN;
-        this.emit("open");
+        websocket1.readyState = websocket1.OPEN;
+        websocket1.emit("open");
     }
 
     /**
@@ -622,10 +619,10 @@ class WebSocket extends EventEmitter {
       *
       * @private
       */
-    emitClose() {
-        this.readyState = WebSocket.CLOSED;
-        this._receiver.removeAllListeners();
-        this.emit("close", this._closeCode, this._closeMessage);
+    websocket1.emitClose = function () {
+        websocket1.readyState = websocket1.CLOSED;
+        websocket1._receiver.removeAllListeners();
+        websocket1.emit("close", websocket1._closeCode, websocket1._closeMessage);
     }
 
     /**
@@ -640,27 +637,26 @@ class WebSocket extends EventEmitter {
       * @param {Function} cb Callback which is executed when data is written out
       * @public
       */
-    send(data, options, cb) {
+    websocket1.send = function (data, options, cb) {
         const opts = Object.assign(
             {
                 binary: typeof data !== "string",
-                mask: !this._isServer,
+                mask: !websocket1._isServer,
                 compress: true,
                 fin: true
             },
             options
         );
-        this._sender.send(data, opts, cb);
+        websocket1._sender.send(data, opts, cb);
     }
-}
 
 readyStates.forEach((readyState, i) => {
-    WebSocket[readyState] = i;
+    websocket1[readyState] = i;
 });
 
-WebSocket.prototype.addEventListener = EventTarget.addEventListener;
+websocket1.addEventListener = EventTarget.addEventListener;
 
-module.exports = WebSocket;
+module.exports = websocket1;
 
 /**
   * Initialize a WebSocket client.
@@ -806,7 +802,7 @@ function socketOnClose() {
     this.removeListener("close", socketOnClose);
     this.removeListener("end", socketOnEnd);
 
-    websocket.readyState = WebSocket.CLOSING;
+    websocket.readyState = websocket1.CLOSING;
 
     //
     // The close frame might not have been received or the `'end'` event emitted,
@@ -847,7 +843,7 @@ function socketOnData(chunk) {
 function socketOnEnd() {
     const websocket = this[kWebSocket];
 
-    websocket.readyState = WebSocket.CLOSING;
+    websocket.readyState = websocket1.CLOSING;
     websocket._receiver.end();
     this.end();
 }
@@ -1880,7 +1876,8 @@ Browser,
 Connection,
 LifecycleWatcher,
 Page,
-WebSocket
+websocket1,
+initAsClient
 };
 /*
 file none
