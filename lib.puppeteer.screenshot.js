@@ -455,18 +455,14 @@ class Receiver extends Writable {
       * @private
       */
     dataMessage() {
-        if (this._fin) {
-            const messageLength = this._messageLength;
-            const fragments = this._fragments;
-
-            this._totalPayloadLength = 0;
-            this._messageLength = 0;
-            this._fragmented = 0;
-            this._fragments = [];
-            const buf = concat(fragments, messageLength);
-            this.emit('message', buf.toString());
-        }
-
+        const messageLength = this._messageLength;
+        const fragments = this._fragments;
+        this._totalPayloadLength = 0;
+        this._messageLength = 0;
+        this._fragmented = 0;
+        this._fragments = [];
+        const buf = concat(fragments, messageLength);
+        this.emit('message', buf.toString());
         this._state = GET_INFO;
     }
 }
