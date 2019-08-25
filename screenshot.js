@@ -373,7 +373,9 @@ try {
         ws.addEventListener("message", function (event) {
             ws.onmessage(event.data);
         });
-        ws.addEventListener("close", ws.onclose);
+        ws.addEventListener("close", function () {
+            ws.onclose();
+        });
         ws.addEventListener("open", function () {
             resolve(ws);
         });
