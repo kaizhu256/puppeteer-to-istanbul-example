@@ -156,11 +156,38 @@ var chromeKillSync;
 var chromeProcess;
 var fs;
 var fsWriteFile;
+var gotoNext;
+var gotoState;
+var onReject;
+var onResolve;
 var page;
 var path;
 var readline;
 var tmp;
 local.nop(assert, path);
+
+
+
+gotoNext = function (err, data) {
+    gotoState += 1;
+    if (err) {
+        onReject(err);
+        return;
+    }
+    switch (gotoState) {
+    case 1:
+        gotoNext();
+        break;
+    default:
+        onResolve(data);
+    }
+};
+await new Promise(function (resolve, reject) {
+    onReject = reject;
+    onResolve = resolve;
+    gotoState = 0;
+    gotoNext();
+});
 
 
 
@@ -294,9 +321,9 @@ await new Promise(function (resolve, reject) {
     rl = readline.createInterface({
         input: chromeProcess.stderr
     });
-    chromeProcess.on("error", onClose);
-    chromeProcess.on("exit", onClose);
-    rl.on("close", onClose);
+    chromeProcess.once("error", onClose);
+    chromeProcess.once("exit", onClose);
+    rl.once("close", onClose);
     rl.on("line", onLine);
 });
 browser = await new Promise(function (resolve, reject) {
