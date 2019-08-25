@@ -165,8 +165,9 @@ var page;
 var path;
 var tmp;
 var urlInspect;
+var util;
 var websocket;
-local.nop(assert, path);
+local.nop(assert, path, util);
 
 
 
@@ -184,7 +185,7 @@ fs = require("fs");
 path = require("path");
 //!! tls = require("tls");
 //!! url = require("url");
-//!! util = require("util");
+util = require("util");
 //!! { Writable} = require("stream");
 //!! { randomBytes} = require("crypto");
 module.exports = require("./lib.puppeteer.screenshot.js");
