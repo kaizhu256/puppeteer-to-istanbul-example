@@ -150,6 +150,7 @@ var child_process;
 var chromeClosed;
 var chromeProcess;
 var fs;
+var fsWriteFile;
 var gracefullyCloseChrome;
 var killChrome;
 var listenersAdd;
@@ -162,18 +163,17 @@ var readline;
 var timeout;
 var tmp;
 var waitForChromeToClose;
-local.nop(assert, fs, path);
+local.nop(assert, path);
 
-listenersAdd = function (list) {
-    list.forEach(function (elem) {
-        elem[0].on(elem[1], elem[2]);
-    });
-    return list;
-};
-
-listenersRemove = function (list) {
-    list.forEach(function (elem) {
-        elem[0].removeListener(elem[1], elem[2]);
+fsWriteFile = function (file, data) {
+    return new Promise(function (resolve, reject) {
+        fs.writeFile(file, data, function (err) {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve();
+        });
     });
 };
 
@@ -208,6 +208,19 @@ killChrome = function () {
         // the process might have already stopped
         } catch (ignore) {}
     }
+};
+
+listenersAdd = function (list) {
+    list.forEach(function (elem) {
+        elem[0].on(elem[1], elem[2]);
+    });
+    return list;
+};
+
+listenersRemove = function (list) {
+    list.forEach(function (elem) {
+        elem[0].removeListener(elem[1], elem[2]);
+    });
 };
 
 // init
@@ -414,14 +427,18 @@ await new Promise(function (resolve) {
 
 
 
-// screenshot - png
-await page._client.send("Target.activateTarget", {
-    targetId: page._target._targetId
-});
-tmp = await page._client.send("Page.captureScreenshot", {
-    format: "png"
-});
-fs.writeFileSync(".aa.png", Buffer.from(tmp.data, "base64"));
+await Promise.all([
+    // screenshot - png
+    (async function () {
+        await page._client.send("Target.activateTarget", {
+            targetId: page._target._targetId
+        });
+        tmp = await page._client.send("Page.captureScreenshot", {
+            format: "png"
+        });
+        await fsWriteFile(".aa.png", Buffer.from(tmp.data, "base64"));
+    }())
+]);
 
 
 
