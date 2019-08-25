@@ -841,7 +841,9 @@ class Connection extends EventEmitter {
     _onMessage(message) {
         const object = JSON.parse(message);
         if (object.method === "Target.attachedToTarget") {
-            session1 = new CDPSession(this, object.params.targetInfo.type, object.params.sessionId);
+            session1._connection = this;
+            session1._targetType = object.params.targetInfo.type;
+            session1._sessionId = object.params.sessionId;
         }
         if (object.sessionId) {
             if (object.id && session1._callbacks[object.id]) {
@@ -888,30 +890,15 @@ class Connection extends EventEmitter {
     }
 }
 
-class CDPSession extends EventEmitter {
-    /**
-      * @param {!Connection} connection
-      * @param {string} targetType
-      * @param {string} sessionId
-      */
-    constructor(connection, targetType, sessionId) {
-        super();
-        /** @type {!Map<number, {resolve: function, reject: function, error: !Error, method: string}>}*/
-        this._callbacks = {};
-        this._connection = connection;
-        this._targetType = targetType;
-        this._sessionId = sessionId;
-    }
-
-    //!! session1 = new EventEmitter();
-    //!! session1._callbacks = {};
+    session1 = new EventEmitter();
+    session1._callbacks = {};
 
     /**
       * @param {string} method
       * @param {!Object=} params
       * @return {!Promise<?Object>}
       */
-    send(method, params = {}) {
+    session1.send = function (method, params = {}) {
         var that;
         that = session1;
         const id = that._connection._rawSend({
@@ -923,14 +910,11 @@ class CDPSession extends EventEmitter {
         });
     }
 
-    _onClosed() {
+    session1._onClosed = function () {
         session1._callbacks = {};
         session1._connection = null;
         session1.emit(Events.CDPSession.Disconnected);
     }
-}
-
-module.exports = {Connection, CDPSession};
 
 
 
