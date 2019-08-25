@@ -385,6 +385,46 @@ page = await browser.newPage();
 //!! console.error(
     //!! page.goto.toString()
 //!! );
+
+async function navigateFrame(frame, url) {
+    assertNoLegacyNavigationOptions(options);
+    const referer = this._networkManager.extraHTTPHeaders()["referer"];
+    const waitUntil = [
+        "load"
+    ];
+    const watcher = new LifecycleWatcher(this, frame, waitUntil, timeout);
+    let ensureNewDocumentNavigation = false;
+    await Promise.race([
+        navigate(this._client, url, referer, frame._id),
+        watcher.timeoutOrTerminationPromise()
+    ]);
+    await Promise.race([
+        watcher.timeoutOrTerminationPromise(),
+        watcher.newDocumentNavigationPromise()
+    ]);
+    watcher.dispose();
+    return watcher.navigationResponse();
+
+    /**
+      * @param {!Puppeteer.CDPSession} client
+      * @param {string} url
+      * @param {string} referrer
+      * @param {string} frameId
+      * @return {!Promise<?Error>}
+      */
+    async function navigate(client, url, referrer, frameId) {
+        const response = await client.send("Page.navigate", {
+            url,
+            referrer,
+            frameId
+        });
+        ensureNewDocumentNavigation = !!response.loaderId;
+        return null;
+    }
+}
+
+
+
 await page._frameManager._mainFrame._frameManager.navigateFrame(
     page._frameManager._mainFrame,
     "https://www.highcharts.com/stock/demo/stock-tools-gui"
@@ -401,8 +441,8 @@ await new Promise(function (resolve) {
 await page._client.send("Target.activateTarget", {
     targetId: page._target._targetId
 });
-tmp = await page._client.send('Page.captureScreenshot', {
-    format: "png",
+tmp = await page._client.send("Page.captureScreenshot", {
+    format: "png"
 });
 fs.writeFileSync(".aa.png", Buffer.from(tmp.data, "base64"));
 
