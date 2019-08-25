@@ -1260,11 +1260,7 @@ class Connection extends EventEmitter {
         this._closed = true;
         this._transport.onmessage = null;
         this._transport.onclose = null;
-        for (const callback of this._callbacks.values())
-            callback.reject(rewriteError(callback.error, `Protocol error (${callback.method}): Target closed.`));
         this._callbacks.clear();
-        for (const session of this._sessions.values())
-            session._onClosed();
         this._sessions.clear();
         this.emit(Events.Connection.Disconnected);
     }
@@ -1304,8 +1300,6 @@ class CDPSession extends EventEmitter {
       * @return {!Promise<?Object>}
       */
     send(method, params = {}) {
-        if (!this._connection)
-            return Promise.reject(new Error(`Protocol error (${method}): Session closed. Most likely the ${this._targetType} has been closed.`));
         const id = this._connection._rawSend({sessionId: this._sessionId, method, params});
         return new Promise((resolve, reject) => {
             this._callbacks.set(id, {resolve, reject, error: new Error(), method});
@@ -1319,10 +1313,7 @@ class CDPSession extends EventEmitter {
         if (object.id && this._callbacks.has(object.id)) {
             const callback = this._callbacks.get(object.id);
             this._callbacks.delete(object.id);
-            if (object.error)
-                callback.reject(createProtocolError(callback.error, callback.method, object));
-            else
-                callback.resolve(object.result);
+            callback.resolve(object.result);
         } else {
             assert(!object.id);
             this.emit(object.method, object.params);
@@ -1330,8 +1321,6 @@ class CDPSession extends EventEmitter {
     }
 
     _onClosed() {
-        for (const callback of this._callbacks.values())
-            callback.reject(rewriteError(callback.error, `Protocol error (${callback.method}): Target closed.`));
         this._callbacks.clear();
         this._connection = null;
         this.emit(Events.CDPSession.Disconnected);
@@ -1398,8 +1387,6 @@ class DOMWorld {
         if (context) {
             this._contextResolveCallback.call(null, context);
             this._contextResolveCallback = null;
-            for (const waitTask of this._waitTasks)
-                waitTask.rerun();
         } else {
             this._documentPromise = null;
             this._contextPromise = new Promise(fulfill => {
