@@ -466,12 +466,6 @@ const readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
         websocket1._sender.send(data, opts, cb);
     }
 
-websocket1.addEventListener = function (method, listener) {
-    websocket1.on(method, function onMessage(data) {
-        listener.call(websocket1, data);
-    });
-};
-
 module.exports = websocket1;
 
 /**
@@ -799,17 +793,13 @@ class Connection extends EventEmitter {
       */
     constructor(url, transport, delay = 0) {
         super();
-        var that;
-        that = this;
         this._url = url;
         this._lastId = 0;
         /** @type {!Map<number, {resolve: function, reject: function, error: !Error, method: string}>}*/
         this._callbacks = new Map();
         this._delay = delay;
 
-        websocket1.addEventListener("message", function (data) {
-            that._onMessage(data);
-        });
+        websocket1.on("message", this._onMessage.bind(this));
         /** @type {!Map<string, !CDPSession>}*/
         this._sessions = new Map();
         this._closed = false;
