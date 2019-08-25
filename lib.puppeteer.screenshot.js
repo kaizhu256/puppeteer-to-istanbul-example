@@ -30,24 +30,41 @@ const readline = require("readline");
 const tls = require("tls");
 const url = require("url");
 const util = require("util");
-const { Writable } = require("stream");
-const { randomBytes } = require("crypto");
+const {Writable} = require("stream");
 
 
 
 const child_process = require("child_process");
 const debugError = console.error;
 const timeout = 30000;
+local.nop(
+    assert,
+    child_process,
+    debugError,
+    EventEmitter,
+    URL,
+    childProcess,
+    crypto,
+    fs,
+    http,
+    https,
+    net,
+    os,
+    path,
+    readline,
+    timeout,
+    tls,
+    url,
+    util,
+    Writable
+);
 
 
 
-"use strict";
-
+/* jslint ignore:start */
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/buffer-util.js
 */
-"use strict";
-
 /**
   * Merges an array of buffers into a new buffer.
   *
@@ -460,7 +477,7 @@ class Sender {
         target[0] = options.opcode | 0x80;
         target[1] = payloadLength;
         target.writeUInt16BE(data.length, 2);
-        const mask = randomBytes(4);
+        const mask = crypto.randomBytes(4);
         target[1] |= 0x80;
         target[offset - 4] = mask[0];
         target[offset - 3] = mask[1];
@@ -846,26 +863,6 @@ file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
 */
-/**
-  * Copyright 2017 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
-// const {Target} = require('./Target');
-// const EventEmitter = require('events');
-// const {Events} = require('./Events');
-
 class Browser extends EventEmitter {
     /**
       * @param {!Puppeteer.Connection} connection
@@ -994,24 +991,6 @@ module.exports = {Browser, BrowserContext};
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
 */
-/**
-  * Copyright 2017 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-// const {Events} = require('./Events');
-// const EventEmitter = require('events');
-
 class Connection extends EventEmitter {
     /**
       * @param {string} url
@@ -1175,25 +1154,6 @@ module.exports = {Connection, CDPSession};
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DOMWorld.js
 */
-/**
-  * Copyright 2019 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
-/**
-  * @unrestricted
-  */
 class DOMWorld {
     /**
       * @param {!Puppeteer.FrameManager} frameManager
@@ -1245,22 +1205,6 @@ module.exports = {DOMWorld};
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Events.js
 */
-/**
-  * Copyright 2019 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
 const Events = {
     Page: {
         Close: "close",
@@ -1330,24 +1274,6 @@ module.exports = { Events };
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/ExecutionContext.js
 */
-/**
-  * Copyright 2017 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
-// const {createJSHandle, JSHandle} = require('./JSHandle');
-
 const EVALUATION_SCRIPT_URL = "__puppeteer_evaluation_script__";
 const SOURCE_URL_REGEX = (
     /^[\040\t]*\/\/[@#]\u0020sourceURL=\s*(\S*?)\s*$/m
@@ -1397,29 +1323,6 @@ module.exports = {ExecutionContext, EVALUATION_SCRIPT_URL};
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/FrameManager.js
 */
-/**
-  * Copyright 2017 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
-// const EventEmitter = require('events');
-// const {Events} = require('./Events');
-// const {ExecutionContext, EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
-// const {LifecycleWatcher} = require('./LifecycleWatcher');
-// const {DOMWorld} = require('./DOMWorld');
-// const {NetworkManager} = require('./NetworkManager');
-
 const UTILITY_WORLD_NAME = "__puppeteer_utility_world__";
 
 class FrameManager extends EventEmitter {
@@ -1611,25 +1514,6 @@ module.exports = {FrameManager, Frame};
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/LifecycleWatcher.js
 */
-/**
-  * Copyright 2019 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
-// const {Events} = require('./Events');
-// const {TimeoutError} = require('./Errors');
-
 class LifecycleWatcher {
     /**
       * @param {!Puppeteer.FrameManager} frameManager
@@ -1717,24 +1601,6 @@ module.exports = {LifecycleWatcher};
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/NetworkManager.js
 */
-/**
-  * Copyright 2017 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-// const EventEmitter = require('events');
-// const {Events} = require('./Events');
-
 class NetworkManager extends EventEmitter {
     /**
       * @param {!Puppeteer.CDPSession} client
@@ -1944,22 +1810,6 @@ module.exports = {Request, Response, NetworkManager, SecurityDetails};
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Page.js
 */
-/**
-  * Copyright 2017 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
 class Page extends EventEmitter {
     /**
       * @param {!Puppeteer.CDPSession} client
@@ -2039,27 +1889,6 @@ module.exports = {Page};
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Target.js
 */
-/**
-  * Copyright 2019 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
-// const {Events} = require('./Events');
-// const {Page} = require('./Page');
-// const {Worker} = require('./Worker');
-// const {Connection} = require('./Connection');
-
 class Target {
     /**
       * @param {!Protocol.Target.TargetInfo} targetInfo
@@ -2121,12 +1950,13 @@ class Target {
 
 
 module.exports = {
-        Browser,
-        Connection,
-        LifecycleWatcher,
-        WebSocket
+Browser,
+Connection,
+LifecycleWatcher,
+WebSocket
 };
 /*
 file none
 */
+/* jslint ignore:end */
 }(globalThis.globalLocal));
