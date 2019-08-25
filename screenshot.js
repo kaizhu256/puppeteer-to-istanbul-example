@@ -461,7 +461,7 @@ return html;`
 //!! }
 //!! tmp = await page._frameManager._mainFrame._secondaryWorld.evaluate(
 //!! );
-fs.writeFileSync(".aa.html", tmp);
+fs.writeFileSync(".aa.html", tmp.trim() + "\n");
 
 
 
