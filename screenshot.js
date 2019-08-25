@@ -161,7 +161,6 @@ var path;
 var preferredRevision;
 var readline;
 var timeout;
-var tmp;
 var waitForChromeToClose;
 local.nop(assert, path);
 
@@ -430,34 +429,34 @@ await new Promise(function (resolve) {
 await Promise.all([
     // screenshot - png
     (async function () {
+        var result;
         await page._client.send("Target.activateTarget", {
             targetId: page._target._targetId
         });
-        await fsWriteFile(
-            ".aa.png",
-            Buffer.from((await page._client.send("Page.captureScreenshot", {
-                format: "png"
-            })).data, "base64")
-        );
+        result = await page._client.send("Page.captureScreenshot", {
+            format: "png"
+        });
+        await fsWriteFile(".aa.png", Buffer.from(result.data, "base64"));
     }()),
     (async function () {
+        var result;
         // screenshot - html
-        tmp = page._frameManager._mainFrame._secondaryWorld._contextPromise;
-        tmp = await local.identity(tmp);
-        tmp = await tmp._evaluateInternal(
+        result = page._frameManager._mainFrame._secondaryWorld._contextPromise;
+        result = await local.identity(result);
+        result = await result._evaluateInternal(
             true,
             Function( // jslint ignore:line
                 `var html = "";
-        if (document.doctype) {
-            html = new XMLSerializer().serializeToString(document.doctype);
-        }
-        if (document.documentElement) {
-            html += document.documentElement.outerHTML;
-        }
-        return html;`
+if (document.doctype) {
+    html = new XMLSerializer().serializeToString(document.doctype);
+}
+if (document.documentElement) {
+    html += document.documentElement.outerHTML;
+}
+return html.trim()` + " + \"\\n\""
             )
         );
-        await fsWriteFile(".aa.html", tmp.trim() + "\n");
+        await fsWriteFile(".aa.html", result);
     }())
 ]);
 
