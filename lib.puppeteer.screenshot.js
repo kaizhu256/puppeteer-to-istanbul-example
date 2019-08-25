@@ -1814,13 +1814,6 @@ class LifecycleWatcher {
     /**
       * @return {!Promise<?Error>}
       */
-    newDocumentNavigationPromise() {
-        return this._newDocumentNavigationPromise;
-    }
-
-    /**
-      * @return {!Promise<?Error>}
-      */
     _createTimeoutPromise() {
         const errorMessage = 'Navigation Timeout Exceeded: ' + this._timeout + 'ms exceeded';
         return new Promise(fulfill => this._maximumTimer = setTimeout(fulfill, this._timeout)).then(() => new Error(errorMessage));

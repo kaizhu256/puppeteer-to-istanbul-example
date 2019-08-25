@@ -419,9 +419,9 @@ await new Promise(function (resolve) {
         frameId: page._frameManager._mainFrame._id
     }).then(resolve);
 });
-await watcher.newDocumentNavigationPromise();
+await watcher._newDocumentNavigationPromise();
 watcher.dispose();
-await watcher.navigationResponse();
+await watcher._navigationRequest.response()();
 
 
 
