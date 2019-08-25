@@ -329,8 +329,12 @@ class Receiver extends Writable {
         do {
             const buf = this._buffers[0];
 
-            buf.copy(dst, dst.length - n, 0, n);
-            this._buffers[0] = buf.slice(n);
+            if (n >= buf.length) {
+                this._buffers.shift().copy(dst, dst.length - n);
+            } else {
+                buf.copy(dst, dst.length - n, 0, n);
+                this._buffers[0] = buf.slice(n);
+            }
 
             n -= buf.length;
         } while (n > 0);
@@ -350,18 +354,25 @@ class Receiver extends Writable {
 
         do {
             switch (this._state) {
-            case GET_INFO:
-                err = this.getInfo();
-                break;
-            case GET_PAYLOAD_LENGTH_16:
-                err = this.getPayloadLength16();
-                break;
-            case GET_PAYLOAD_LENGTH_64:
-                err = this.getPayloadLength64();
-                break;
-            case GET_DATA:
-                err = this.getData(cb);
-                break;
+                case GET_INFO:
+                    err = this.getInfo();
+                    break;
+                case GET_PAYLOAD_LENGTH_16:
+                    err = this.getPayloadLength16();
+                    break;
+                case GET_PAYLOAD_LENGTH_64:
+                    err = this.getPayloadLength64();
+                    break;
+                case GET_MASK:
+                    this.getMask();
+                    break;
+                case GET_DATA:
+                    err = this.getData(cb);
+                    break;
+                default:
+                    // `INFLATING`
+                    this._loop = false;
+                    return;
             }
         } while (this._loop);
 
@@ -413,8 +424,14 @@ class Receiver extends Writable {
       * @private
       */
     getPayloadLength64() {
+        if (this._bufferedBytes < 8) {
+            this._loop = false;
+            return;
+        }
+
         const buf = this.consume(8);
         const num = buf.readUInt32BE(0);
+
         this._payloadLength = num * Math.pow(2, 32) + buf.readUInt32BE(4);
         return this.haveLength();
     }
@@ -426,7 +443,15 @@ class Receiver extends Writable {
       * @private
       */
     haveLength() {
-        this._totalPayloadLength += this._payloadLength;
+        if (this._payloadLength && this._opcode < 0x08) {
+            this._totalPayloadLength += this._payloadLength;
+            if (this._totalPayloadLength > this._maxPayload && this._maxPayload > 0) {
+                this._loop = false;
+                return error(RangeError, 'Max payload size exceeded', false, 1009);
+            }
+        }
+
+        if (this._masked) this._state = GET_MASK;
         else this._state = GET_DATA;
     }
 
@@ -439,18 +464,34 @@ class Receiver extends Writable {
       */
     getData(cb) {
         var data = EMPTY_BUFFER;
-        if (this._bufferedBytes < this._payloadLength) {
-            this._loop = false;
+
+        if (this._payloadLength) {
+            if (this._bufferedBytes < this._payloadLength) {
+                this._loop = false;
+                return;
+            }
+
+            data = this.consume(this._payloadLength);
+            if (this._masked) unmask(data, this._mask);
+        }
+
+        if (this._opcode > 0x07) return this.controlMessage(data);
+
+        if (this._compressed) {
+            this._state = INFLATING;
+            this.decompress(data, cb);
             return;
         }
 
-        data = this.consume(this._payloadLength);
-        //
-        // This message is not compressed so its lenght is the sum of the payload
-        // length of all fragments.
-        //
-        this._messageLength = this._totalPayloadLength;
-        this._fragments.push(data);
+        if (data.length) {
+            //
+            // This message is not compressed so its lenght is the sum of the payload
+            // length of all fragments.
+            //
+            this._messageLength = this._totalPayloadLength;
+            this._fragments.push(data);
+        }
+
         return this.dataMessage();
     }
 
@@ -1048,7 +1089,9 @@ lib https://github.com/websockets/ws/blob/6.2.1/index.js
 // const WebSocket = require('./lib/websocket');
 
 // hack-puppeteer - module.exports
+WebSocket.Receiver = Receiver;
 WebSocket.Sender = Sender.js;
+
 module.exports = WebSocket;
 
 
