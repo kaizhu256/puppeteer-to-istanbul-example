@@ -387,15 +387,21 @@ page = await browser.newPage();
 //!! );
 
 async function navigateFrame(frame, url) {
-    assertNoLegacyNavigationOptions(options);
-    const referer = this._networkManager.extraHTTPHeaders()["referer"];
-    const waitUntil = [
+    var that;
+    that = page._frameManager._mainFrame._frameManager;
+    const referer = that._networkManager.extraHTTPHeaders().referer;
+    const watcher = new LifecycleWatcher(that, frame, [
         "load"
-    ];
-    const watcher = new LifecycleWatcher(this, frame, waitUntil, timeout);
-    let ensureNewDocumentNavigation = false;
+    ], timeout);
     await Promise.race([
-        navigate(this._client, url, referer, frame._id),
+        //!! navigate(that._client, url, referer, frame._id),
+        new Promise(function (resolve, reject) {
+            that._client.send("Page.navigate", {
+                url,
+                referer,
+                frameId: frame._id
+            }).then(resolve).catch(reject);
+        }),
         watcher.timeoutOrTerminationPromise()
     ]);
     await Promise.race([
@@ -404,23 +410,6 @@ async function navigateFrame(frame, url) {
     ]);
     watcher.dispose();
     return watcher.navigationResponse();
-
-    /**
-      * @param {!Puppeteer.CDPSession} client
-      * @param {string} url
-      * @param {string} referrer
-      * @param {string} frameId
-      * @return {!Promise<?Error>}
-      */
-    async function navigate(client, url, referrer, frameId) {
-        const response = await client.send("Page.navigate", {
-            url,
-            referrer,
-            frameId
-        });
-        ensureNewDocumentNavigation = !!response.loaderId;
-        return null;
-    }
 }
 
 
