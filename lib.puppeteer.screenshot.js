@@ -219,7 +219,6 @@ const EventTarget = {
 module.exports = EventTarget;
 // hack-puppeteer - module.exports
 const addEventListener = EventTarget.addEventListener;
-const removeEventListener = EventTarget.removeEventListener;
 
 
 
@@ -680,7 +679,6 @@ readyStates.forEach((readyState, i) => {
 });
 
 WebSocket.prototype.addEventListener = EventTarget.addEventListener;
-WebSocket.prototype.removeEventListener = EventTarget.removeEventListener;
 
 module.exports = WebSocket;
 
@@ -880,61 +878,6 @@ file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/helper.js
-*/
-/**
-  * Copyright 2017 Google Inc. All rights reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-// const {TimeoutError} = require('./Errors');
-// const debugError = require('debug')(`puppeteer:error`);
-// const fs = require('fs');
-
-class Helper {
-    /**
-      * @param {!NodeJS.EventEmitter} emitter
-      * @param {(string|symbol)} eventName
-      * @param {function(?):void} handler
-      * @return {{emitter: !NodeJS.EventEmitter, eventName: (string|symbol), handler: function(?)}}
-      */
-    static addEventListener(emitter, eventName, handler) {
-        emitter.on(eventName, handler);
-        return { emitter, eventName, handler };
-    }
-
-    /**
-      * @param {!Array<{emitter: !NodeJS.EventEmitter, eventName: (string|symbol), handler: function(?):void}>} listeners
-      */
-    static removeEventListeners(listeners) {
-        for (const listener of listeners)
-            listener.emitter.removeListener(listener.eventName, listener.handler);
-        listeners.splice(0, listeners.length);
-    }
-
-}
-
-module.exports = {
-    helper: Helper,
-    assert,
-    debugError
-};
-// hack-puppeteer - module.exports
-const helper = Helper;
-
-
-
-/*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
 */
 /**
@@ -953,7 +896,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
   * limitations under the License.
   */
 
-// const { helper, assert } = require('./helper');
 // const {Target} = require('./Target');
 // const EventEmitter = require('events');
 // const {Events} = require('./Events');
@@ -1103,7 +1045,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-// const {assert} = require('./helper');
 // const {Events} = require('./Events');
 // const debugProtocol = require('debug')('puppeteer:protocol');
 // const EventEmitter = require('events');
@@ -1437,7 +1378,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/ExecutionContext.js
   * limitations under the License.
   */
 
-// const {helper, assert} = require('./helper');
 // const {createJSHandle, JSHandle} = require('./JSHandle');
 
 const EVALUATION_SCRIPT_URL = '__puppeteer_evaluation_script__';
@@ -1503,7 +1443,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/FrameManager.js
   */
 
 // const EventEmitter = require('events');
-// const {helper, assert, debugError} = require('./helper');
 // const {Events} = require('./Events');
 // const {ExecutionContext, EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
 // const {LifecycleWatcher} = require('./LifecycleWatcher');
@@ -1714,7 +1653,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/LifecycleWatcher.js
   * limitations under the License.
   */
 
-// const {helper, assert} = require('./helper');
 // const {Events} = require('./Events');
 // const {TimeoutError} = require('./Errors');
 
@@ -1739,11 +1677,9 @@ class LifecycleWatcher {
         this._timeout = timeout;
         /** @type {?Puppeteer.Request} */
         this._navigationRequest = null;
-        this._eventListeners = [
-            helper.addEventListener(this._frameManager, Events.FrameManager.LifecycleEvent, this._checkLifecycleComplete.bind(this)),
-            helper.addEventListener(this._frameManager._networkManager, Events.NetworkManager.Request, this._onRequest.bind(this)),
+        this._frameManager.on(Events.FrameManager.LifecycleEvent, this._checkLifecycleComplete.bind(this)),
+        this._frameManager._networkManager.on(Events.NetworkManager.Request, this._onRequest.bind(this)),
         ];
-
         this._sameDocumentNavigationPromise = new Promise(fulfill => {
             this._sameDocumentNavigationCompleteCallback = fulfill;
         });
@@ -1824,7 +1760,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/NetworkManager.js
   * limitations under the License.
   */
 // const EventEmitter = require('events');
-// const {helper, assert, debugError} = require('./helper');
 // const {Events} = require('./Events');
 
 class NetworkManager extends EventEmitter {
@@ -2214,8 +2149,7 @@ module.exports = {
         Browser,
         Connection,
         LifecycleWatcher,
-        WebSocket,
-        helper
+        WebSocket
 };
 /*
 file none
