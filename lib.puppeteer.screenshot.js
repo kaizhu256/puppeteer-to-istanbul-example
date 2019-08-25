@@ -2542,6 +2542,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/api.js
 module.exports = {
         Browser,
         Connection,
+        LifecycleWatcher,
         WebSocketTransport,
 };
 /*

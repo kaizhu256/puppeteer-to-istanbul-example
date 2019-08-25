@@ -390,7 +390,7 @@ async function navigateFrame(frame, url) {
     var that;
     that = page._frameManager._mainFrame._frameManager;
     const referer = that._networkManager.extraHTTPHeaders().referer;
-    const watcher = new LifecycleWatcher(that, frame, [
+    const watcher = new module.exports.LifecycleWatcher(that, frame, [
         "load"
     ], timeout);
     await Promise.race([
@@ -414,7 +414,7 @@ async function navigateFrame(frame, url) {
 
 
 
-await page._frameManager._mainFrame._frameManager.navigateFrame(
+await navigateFrame(
     page._frameManager._mainFrame,
     "https://www.highcharts.com/stock/demo/stock-tools-gui"
 );
