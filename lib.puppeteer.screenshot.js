@@ -766,48 +766,24 @@ function initAsClient(websocket, address, protocols, options) {
             port: undefined
         }
     );
-
-    if (!protocolVersions.includes(opts.protocolVersion)) {
-        throw new RangeError(
-            `Unsupported protocol version: ${opts.protocolVersion} ` +
-                `(supported versions: ${protocolVersions.join(', ')})`
-        );
-    }
-
     var parsedUrl;
-
-    if (typeof address === 'object' && address.href !== undefined) {
-        parsedUrl = address;
-        websocket.url = address.href;
-    } else {
-        //
-        // The WHATWG URL constructor is not available on Node.js < 6.13.0
-        //
-        parsedUrl = url.URL ? new url.URL(address) : url.parse(address);
-        websocket.url = address;
-    }
-
+    //
+    // The WHATWG URL constructor is not available on Node.js < 6.13.0
+    //
+    parsedUrl = url.URL ? new url.URL(address) : url.parse(address);
+    websocket.url = address;
     const isUnixSocket = parsedUrl.protocol === 'ws+unix:';
-
-    if (!parsedUrl.host && (!isUnixSocket || !parsedUrl.pathname)) {
-        throw new Error(`Invalid URL: ${websocket.url}`);
-    }
-
     const isSecure =
         parsedUrl.protocol === 'wss:' || parsedUrl.protocol === 'https:';
-    const defaultPort = isSecure ? 443 : 80;
+    const defaultPort = 80;
     const key = crypto.randomBytes(16).toString('base64');
-    const get = isSecure ? https.get : http.get;
-    const path = parsedUrl.search
-        ? `${parsedUrl.pathname || '/'}${parsedUrl.search}`
-        : parsedUrl.pathname || '/';
+    const get = http.get;
+    const path = parsedUrl.pathname || '/';
 
-    opts.createConnection = isSecure ? tlsConnect : netConnect;
+    opts.createConnection = netConnect;
     opts.defaultPort = opts.defaultPort || defaultPort;
-    opts.port = parsedUrl.port || defaultPort;
-    opts.host = parsedUrl.hostname.startsWith('[')
-        ? parsedUrl.hostname.slice(1, -1)
-        : parsedUrl.hostname;
+    opts.port = parsedUrl.port;
+    opts.host = parsedUrl.hostname;
     opts.headers = Object.assign(
         {
             'Sec-WebSocket-Version': opts.protocolVersion,
@@ -855,7 +831,7 @@ function netConnect(options) {
     // `options.socketPath` might be `undefined` even if the `socketPath` option
     // was originally set.
     //
-    if (options.protocolVersion) options.path = options.socketPath;
+    options.path = options.socketPath;
     return net.connect(options);
 }
 
