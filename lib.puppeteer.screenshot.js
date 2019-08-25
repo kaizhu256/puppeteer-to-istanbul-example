@@ -1985,7 +1985,7 @@ class NetworkManager extends EventEmitter {
         const request = this._requestIdToRequest.get(event.requestId);
         // Under certain conditions we never get the Network.responseReceived
         // event from protocol. @see https://crbug.com/883475
-        request.response()._bodyLoadedPromiseFulfill.call(null);
+        request._response._bodyLoadedPromiseFulfill.call(null);
         this._requestIdToRequest.delete(request._requestId);
         this._attemptedAuthentications.delete(request._interceptionId);
         this.emit(Events.NetworkManager.RequestFinished, request);
