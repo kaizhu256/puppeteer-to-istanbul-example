@@ -105,32 +105,6 @@ const unmask = _mask;
 
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/constants.js
-*/
-"use strict";
-
-module.exports = {
-    BINARY_TYPES: [
-        "nodebuffer", "arraybuffer", "fragments"],
-    GUID: "258EAFA5-E914-47DA-95CA-C5AB0DC85B11",
-    kStatusCode: Symbol("status-code"),
-    EMPTY_BUFFER: Buffer.alloc(0),
-    NOOP: function () {
-        return;
-    }
-};
-// hack-puppeteer - module.exports
-const {
-    BINARY_TYPES,
-    GUID,
-    kStatusCode,
-    EMPTY_BUFFER,
-    NOOP
-} = module.exports;
-
-
-
-/*
 lib https://github.com/websockets/ws/blob/6.2.1/event-target.js
 */
 "use strict";
@@ -388,12 +362,11 @@ class Receiver extends Writable {
       * @private
       */
     getData(cb) {
-        var data = EMPTY_BUFFER;
         if (this._bufferedBytes < this._payloadLength) {
             this._loop = false;
             return;
         }
-        data = this.consume(this._payloadLength);
+        var data = this.consume(this._payloadLength);
         //
         // This message is not compressed so its lenght is the sum of the payload
         // length of all fragments.
@@ -543,7 +516,7 @@ const readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
     const websocket1 = new EventEmitter();
     websocket1.protocol = "";
 
-    websocket1._binaryType = BINARY_TYPES[0];
+    websocket1._binaryType = "nodebuffer";
     websocket1._closeFrameReceived = false;
     websocket1._closeFrameSent = false;
     websocket1._closeMessage = "";
@@ -603,13 +576,11 @@ module.exports = websocket1;
   * @param {Object} options Connection options
   * @param {(Boolean|Object)} options.perMessageDeflate Enable/disable
   *     permessage-deflate
-  * @param {Number} options.handshakeTimeout Timeout in milliseconds for the
-  *     handshake request
   * @param {String} options.origin Value of the `Origin` or
   *     `Sec-WebSocket-Origin` header
   * @private
   */
-function initAsClient(websocket1, address, protocols) {
+function initAsClient(websocket1, address) {
     const opts = {};
     var parsedUrl;
     //
@@ -640,7 +611,6 @@ function initAsClient(websocket1, address, protocols) {
         opts.headers
     );
     opts.path = path;
-    opts.timeout = opts.handshakeTimeout;
     var req = (websocket1._req = get(opts));
     req.on("upgrade", (res, socket, head) => {
         websocket1.emit("upgrade", res);
@@ -653,13 +623,10 @@ function initAsClient(websocket1, address, protocols) {
 
         const digest = crypto
             .createHash("sha1")
-            .update(key + GUID)
+            .update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
             .digest("base64");
 
         const serverProt = res.headers["sec-websocket-protocol"];
-        const protList = (protocols || "").split(
-    /,\u0020*/
-);
         const receiver = new Receiver(
             websocket1._binaryType,
             websocket1._extensions
