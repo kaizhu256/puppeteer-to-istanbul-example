@@ -1805,7 +1805,7 @@ class LifecycleWatcher {
       * @param {!Puppeteer.Request} request
       */
     _onRequest(request) {
-        if (request.frame() !== this._frame || !request.isNavigationRequest())
+        if (request._frame !== this._frame || !request._isNavigationRequest)
             return;
         this._navigationRequest = request;
     }
@@ -2022,20 +2022,6 @@ class Request {
             this._headers[key.toLowerCase()] = event.request.headers[key];
 
         this._fromMemoryCache = false;
-    }
-
-    /**
-      * @return {?Puppeteer.Frame}
-      */
-    frame() {
-        return this._frame;
-    }
-
-    /**
-      * @return {boolean}
-      */
-    isNavigationRequest() {
-        return this._isNavigationRequest;
     }
 }
 
