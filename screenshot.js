@@ -371,7 +371,7 @@ try {
         gracefullyCloseChrome
     );
     await browser.waitForTarget(function (t) {
-        return t.type() === "page";
+        return t._targetInfo.type === "page";
     });
 } catch (errCaught) {
     killChrome();

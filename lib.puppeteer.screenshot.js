@@ -2593,7 +2593,6 @@ class Target {
         /** @type {?Promise<!Worker>} */
         this._workerPromise = null;
         this._initializedPromise = new Promise(fulfill => this._initializedCallback = fulfill).then(async success => {
-            const opener = this.opener();
             return true;
         });
         this._isClosedPromise = new Promise(fulfill => this._closedCallback = fulfill);
@@ -2606,10 +2605,8 @@ class Target {
       * @return {!Promise<?Page>}
       */
     async page() {
-        if ((this._targetInfo.type === 'page' || this._targetInfo.type === 'background_page') && !this._pagePromise) {
-            this._pagePromise = this._sessionFactory()
-                    .then(client => Page.create(client, this, this._ignoreHTTPSErrors, this._defaultViewport, this._screenshotTaskQueue));
-        }
+        this._pagePromise = this._sessionFactory()
+                .then(client => Page.create(client, this, this._ignoreHTTPSErrors, this._defaultViewport, this._screenshotTaskQueue));
         return this._pagePromise;
     }
 
@@ -2621,30 +2618,10 @@ class Target {
     }
 
     /**
-      * @return {"page"|"background_page"|"service_worker"|"shared_worker"|"other"|"browser"}
-      */
-    type() {
-        const type = this._targetInfo.type;
-        if (type === 'page' || type === 'background_page' || type === 'service_worker' || type === 'shared_worker' || type === 'browser')
-            return type;
-        return 'other';
-    }
-
-    /**
       * @return {!Puppeteer.BrowserContext}
       */
     browserContext() {
         return this._browserContext;
-    }
-
-    /**
-      * @return {?Puppeteer.Target}
-      */
-    opener() {
-        const { openerId } = this._targetInfo;
-        if (!openerId)
-            return null;
-        return this.browser()._targets.get(openerId);
     }
 
     /**
