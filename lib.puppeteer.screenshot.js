@@ -45,11 +45,6 @@ const timeout = 30000;
 
 "use strict";
 
-// hack-puppeteer - module.exports
-const isValidUTF8 = () => true;
-
-
-
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/buffer-util.js
 */
@@ -256,9 +251,9 @@ class Receiver extends Writable {
     constructor(binaryType, extensions, maxPayload) {
         super();
 
-        this._binaryType = binaryType || BINARY_TYPES[0];
+        this._binaryType = binaryType;
         this[kWebSocket] = undefined;
-        this._extensions = extensions || {};
+        this._extensions = extensions;
         this._maxPayload = maxPayload | 0;
 
         this._bufferedBytes = 0;
@@ -886,7 +881,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/index.js
 // const WebSocket = require('./lib/websocket');
 
 // hack-puppeteer - module.exports
-WebSocket.Receiver = Receiver;
 WebSocket.Sender = Sender.js;
 
 module.exports = WebSocket;
