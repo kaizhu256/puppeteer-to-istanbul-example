@@ -1549,13 +1549,6 @@ class FrameManager extends EventEmitter {
     }
 
     /**
-      * @return {!NetworkManager}
-      */
-    networkManager() {
-        return this._networkManager;
-    }
-
-    /**
       * @param {!Protocol.Page.lifecycleEventPayload} event
       */
     _onLifecycleEvent(event) {
@@ -1569,7 +1562,8 @@ class FrameManager extends EventEmitter {
       */
     _onFrameStoppedLoading(frameId) {
         const frame = this._frames.get(frameId);
-        frame._onLoadingStopped();
+        frame._lifecycleEvents.add('DOMContentLoaded');
+        frame._lifecycleEvents.add('load');
         this.emit(Events.FrameManager.LifecycleEvent, frame);
     }
 
@@ -1691,11 +1685,6 @@ class Frame {
         }
         this._lifecycleEvents.add(name);
     }
-
-    _onLoadingStopped() {
-        this._lifecycleEvents.add('DOMContentLoaded');
-        this._lifecycleEvents.add('load');
-    }
 }
 
 module.exports = {FrameManager, Frame};
@@ -1748,7 +1737,7 @@ class LifecycleWatcher {
         this._navigationRequest = null;
         this._eventListeners = [
             helper.addEventListener(this._frameManager, Events.FrameManager.LifecycleEvent, this._checkLifecycleComplete.bind(this)),
-            helper.addEventListener(this._frameManager.networkManager(), Events.NetworkManager.Request, this._onRequest.bind(this)),
+            helper.addEventListener(this._frameManager._networkManager, Events.NetworkManager.Request, this._onRequest.bind(this)),
         ];
 
         this._sameDocumentNavigationPromise = new Promise(fulfill => {
@@ -2098,7 +2087,7 @@ class Page extends EventEmitter {
 
         this._frameManager.on(Events.FrameManager.FrameNavigated, event => this.emit(Events.Page.FrameNavigated, event));
 
-        const networkManager = this._frameManager.networkManager();
+        const networkManager = this._frameManager._networkManager;
         networkManager.on(Events.NetworkManager.Request, event => this.emit(Events.Page.Request, event));
         networkManager.on(Events.NetworkManager.Response, event => this.emit(Events.Page.Response, event));
         networkManager.on(Events.NetworkManager.RequestFinished, event => this.emit(Events.Page.RequestFinished, event));
