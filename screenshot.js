@@ -267,6 +267,10 @@ browserWSEndpoint = await new Promise(function (resolve, reject) {
     var timeoutId;
     cleanup = function () {
         clearTimeout(timeoutId);
+        rl.removeListener("line", onLine);
+        rl.removeListener("close", onClose);
+        chromeProcess.removeListener("exit", onClose);
+        chromeProcess.removeListener("error", onClose);
     };
     onClose = function (error) {
     /**
@@ -288,11 +292,10 @@ browserWSEndpoint = await new Promise(function (resolve, reject) {
         const match = line.match(
             /^DevTools\u0020listening\u0020on\u0020(ws:\/\/.*)$/
         );
-        if (!match) {
-            return;
+        if (match) {
+            cleanup();
+            resolve(match[1]);
         }
-        cleanup();
-        resolve(match[1]);
     };
     onTimeout = function () {
         cleanup();
