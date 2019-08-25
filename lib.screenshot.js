@@ -445,17 +445,20 @@ module.exports = websocket1;
   *     `Sec-WebSocket-Origin` header
   * @private
   */
-function initAsClient(websocket1, url) {
-    url = new url.URL(url);
-    http.get(debugInline({
+function initAsClient(websocket1, urlInspect) {
+    urlInspect = new url.URL(urlInspect);
+    const key = crypto.randomBytes(16).toString("base64");
+    http.get({
         headers: {
             "Sec-WebSocket-Version": 13,
-            "Sec-WebSocket-Key": crypto.randomBytes(16).toString("base64"),
+            "Sec-WebSocket-Key": key,
             "Connection": "Upgrade",
             "Upgrade": "websocket"
         },
-        pathname: url.pathname
-    })).on("upgrade", (res, socket, head) => {
+        host: "127.0.0.1",
+        path: urlInspect.pathname,
+        port: urlInspect.port
+    }).on("upgrade", (res, socket, head) => {
         websocket1.emit("upgrade", res);
         const digest = crypto
             .createHash("sha1")
