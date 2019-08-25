@@ -1540,7 +1540,7 @@ class FrameManager extends EventEmitter {
             this._client.send('Page.enable'),
             this._client.send('Page.getFrameTree'),
         ]);
-        this._handleFrameTree(frameTree);
+        this._onFrameNavigated(frameTree.frame);
         await Promise.all([
             this._client.send('Page.setLifecycleEventsEnabled', { enabled: true }),
             this._client.send('Runtime.enable', {}).then(() => this._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
@@ -1571,13 +1571,6 @@ class FrameManager extends EventEmitter {
         const frame = this._frames.get(frameId);
         frame._onLoadingStopped();
         this.emit(Events.FrameManager.LifecycleEvent, frame);
-    }
-
-    /**
-      * @param {!Protocol.Page.FrameTree} frameTree
-      */
-    _handleFrameTree(frameTree) {
-        this._onFrameNavigated(frameTree.frame);
     }
 
     /**
