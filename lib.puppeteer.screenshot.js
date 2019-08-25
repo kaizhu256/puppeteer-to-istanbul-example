@@ -2231,35 +2231,25 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/WebSocketTransport.js
 /**
   * @implements {!Puppeteer.ConnectionTransport}
   */
-class WebSocketTransport {
-    /**
-      * @param {string} url
-      * @return {!Promise<!WebSocketTransport>}
-      */
-    static create(url) {
-        return new Promise((resolve, reject) => {
-            const ws = new WebSocket(url, [], {
-                maxPayload: 256 * 1024 * 1024, // 256Mb
-            });
-            ws.addEventListener('open', () => resolve(new WebSocketTransport(ws)));
-            ws.addEventListener('error', reject);
+function WebSocketTransport (ws) {
+    this._ws = ws;
+    this._ws.addEventListener('message', event => {
+        this.onmessage.call(null, event.data);
+    });
+    this._ws.addEventListener('close', event => {
+        this.onclose.call(null);
+    });
+    // Silently ignore all errors - we don't know what to do with them.
+    this._ws.addEventListener('error', () => {});
+}
+WebSocketTransport.create = function (url) {
+    return new Promise((resolve, reject) => {
+        const ws = new WebSocket(url, [], {
+            maxPayload: 256 * 1024 * 1024, // 256Mb
         });
-    }
-
-    /**
-      * @param {!WebSocket} ws
-      */
-    constructor(ws) {
-        this._ws = ws;
-        this._ws.addEventListener('message', event => {
-            this.onmessage.call(null, event.data);
-        });
-        this._ws.addEventListener('close', event => {
-            this.onclose.call(null);
-        });
-        // Silently ignore all errors - we don't know what to do with them.
-        this._ws.addEventListener('error', () => {});
-    }
+        ws.addEventListener('open', () => resolve(new WebSocketTransport(ws)));
+        ws.addEventListener('error', reject);
+    });
 }
 
 module.exports = {
