@@ -2699,12 +2699,10 @@ class WebSocketTransport {
     constructor(ws) {
         this._ws = ws;
         this._ws.addEventListener('message', event => {
-            if (this.onmessage)
-                this.onmessage.call(null, event.data);
+            this.onmessage.call(null, event.data);
         });
         this._ws.addEventListener('close', event => {
-            if (this.onclose)
-                this.onclose.call(null);
+            this.onclose.call(null);
         });
         // Silently ignore all errors - we don't know what to do with them.
         this._ws.addEventListener('error', () => {});
