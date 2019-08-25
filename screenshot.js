@@ -389,11 +389,17 @@ try {
     console.error(errCaught);
 }
 //!! console.error(
-    //!! browser.newPage.toString()
+    //!! browser._defaultContext._id
 //!! );
-page = await browser._defaultContext._browser._createPageInContext(
-    browser._defaultContext._id
+page = await browser._defaultContext._browser._connection.send(
+    "Target.createTarget",
+    {
+        url: "about:blank"
+    }
 );
+page = await browser._defaultContext._browser._targets.get(page.targetId);
+assert(await page._initializedPromise, "Failed to create target for page");
+page = await page.page();
 
 
 

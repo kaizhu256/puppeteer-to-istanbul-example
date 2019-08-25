@@ -1069,11 +1069,12 @@ class Browser extends EventEmitter {
       * @param {?string} contextId
       * @return {!Promise<!Puppeteer.Page>}
       */
-    async _createPageInContext(contextId) {
-        const {targetId} = await this._connection.send('Target.createTarget', {url: 'about:blank', browserContextId: contextId || undefined});
-        const target = await this._targets.get(targetId);
-        assert(await target._initializedPromise, 'Failed to create target for page');
-        const page = await target.page();
+    async _createPageInContext() {
+        var page;
+        page = await this._connection.send('Target.createTarget', {url: 'about:blank'});
+        page = await this._targets.get(page.targetId);
+        assert(await page._initializedPromise, 'Failed to create target for page');
+        page = await page.page();
         return page;
     }
 
