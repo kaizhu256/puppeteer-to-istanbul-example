@@ -1930,6 +1930,7 @@ module.exports = {
 Browser,
 Connection,
 LifecycleWatcher,
+Page,
 WebSocket
 };
 /*
