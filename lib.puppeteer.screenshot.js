@@ -1136,9 +1136,11 @@ class Connection extends EventEmitter {
       * @return {!Promise<?Object>}
       */
     send(method, params = {}) {
-        const id = this._rawSend({method, params});
+        var that;
+        that = this;
+        const id = that._rawSend({method, params});
         return new Promise(function (resolve, reject) {
-            this._callbacks.set(id, {resolve, reject, error: new Error(), method});
+            that._callbacks.set(id, {resolve, reject, error: new Error(), method});
         });
     }
 
@@ -1228,9 +1230,11 @@ class CDPSession extends EventEmitter {
       * @return {!Promise<?Object>}
       */
     send(method, params = {}) {
-        const id = this._connection._rawSend({sessionId: this._sessionId, method, params});
+        var that;
+        that = this;
+        const id = that._connection._rawSend({sessionId: that._sessionId, method, params});
         return new Promise(function (resolve, reject) {
-            this._callbacks.set(id, {resolve, reject, error: new Error(), method});
+            that._callbacks.set(id, {resolve, reject, error: new Error(), method});
         });
     }
 
