@@ -1612,46 +1612,6 @@ class FrameManager extends EventEmitter {
     }
 
     /**
-      * @param {!Puppeteer.Frame} frame
-      * @param {string} url
-      * @param {!{referer?: string, timeout?: number, waitUntil?: string|!Array<string>}=} options
-      * @return {!Promise<?Puppeteer.Response>}
-      */
-    async navigateFrame(frame, url, options = {}) {
-        assertNoLegacyNavigationOptions(options);
-        const {
-            referer = this._networkManager.extraHTTPHeaders()['referer'],
-            waitUntil = ['load'],
-        } = options;
-
-        const watcher = new LifecycleWatcher(this, frame, waitUntil, timeout);
-        let ensureNewDocumentNavigation = false;
-        let error = await Promise.race([
-            navigate(this._client, url, referer, frame._id),
-            watcher.timeoutOrTerminationPromise(),
-        ]);
-        error = await Promise.race([
-            watcher.timeoutOrTerminationPromise(),
-            ensureNewDocumentNavigation ? watcher.newDocumentNavigationPromise() : watcher.sameDocumentNavigationPromise(),
-        ]);
-        watcher.dispose();
-        return watcher.navigationResponse();
-
-        /**
-          * @param {!Puppeteer.CDPSession} client
-          * @param {string} url
-          * @param {string} referrer
-          * @param {string} frameId
-          * @return {!Promise<?Error>}
-          */
-        async function navigate(client, url, referrer, frameId) {
-            const response = await client.send('Page.navigate', {url, referrer, frameId});
-            ensureNewDocumentNavigation = !!response.loaderId;
-            return null;
-        }
-    }
-
-    /**
       * @param {!Protocol.Page.lifecycleEventPayload} event
       */
     _onLifecycleEvent(event) {
@@ -1824,12 +1784,6 @@ class Frame {
         this._lifecycleEvents.add('DOMContentLoaded');
         this._lifecycleEvents.add('load');
     }
-}
-
-function assertNoLegacyNavigationOptions(options) {
-    assert(options['networkIdleTimeout'] === undefined, 'ERROR: networkIdleTimeout option is no longer supported.');
-    assert(options['networkIdleInflight'] === undefined, 'ERROR: networkIdleInflight option is no longer supported.');
-    assert(options.waitUntil !== 'networkidle', 'ERROR: "networkidle" option is no longer supported. Use "networkidle2" instead');
 }
 
 module.exports = {FrameManager, Frame};
