@@ -62,8 +62,9 @@ local.nop(
 
 
 /* jslint ignore:start */
-var websocket1;
+var connection1;
 var session1;
+var websocket1;
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
 */
@@ -787,23 +788,13 @@ module.exports = {Browser, BrowserContext};
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
 */
-class Connection extends EventEmitter {
-    /**
-      * @param {string} url
-      * @param {!Puppeteer.ConnectionTransport} transport
-      * @param {number=} delay
-      */
-    constructor(url, transport, delay = 0) {
-        super();
-        this._url = url;
-        this._lastId = 0;
-        /** @type {!Map<number, {resolve: function, reject: function, error: !Error, method: string}>}*/
-        this._callbacks = {};
-        this._delay = delay;
-
-        websocket1.on("message", this._onMessage.bind(this));
+    connection1 = new EventEmitter();
+    constructor(urlInspect, websocket1, delay = 0) {
+        connection1._lastId = 0;
+        connection1._callbacks = {};
+        websocket1.on("message", connection1._onMessage.bind(connection1));
         /** @type {!Map<string, !CDPSession>}*/
-        this._closed = false;
+        connection1._closed = false;
     }
 
     /**
@@ -811,13 +802,11 @@ class Connection extends EventEmitter {
       * @param {!Object=} params
       * @return {!Promise<?Object>}
       */
-    send(method, params = {}) {
-        var that;
-        that = this;
-        const id = that._rawSend({
+    connection1.send = function (method, params = {}) {
+        const id = connection1._rawSend({
             method, params});
         return new Promise(function (resolve, reject) {
-            that._callbacks[id] = {
+            connection1._callbacks[id] = {
                 resolve, reject, error: new Error(), method
             };
         });
@@ -827,9 +816,9 @@ class Connection extends EventEmitter {
       * @param {*} message
       * @return {number}
       */
-    _rawSend(message) {
-        this._lastId += 1;
-        const id = this._lastId;
+    connection1._rawSend = function (message) {
+        connection1._lastId += 1;
+        const id = connection1._lastId;
         message = JSON.stringify(Object.assign({}, message, {id}));
         websocket1.send(message);
         return id;
@@ -838,10 +827,10 @@ class Connection extends EventEmitter {
     /**
       * @param {string} message
       */
-    _onMessage(message) {
+    connection1._onMessage = function (message) {
         const object = JSON.parse(message);
         if (object.method === "Target.attachedToTarget") {
-            session1._connection = this;
+            session1._connection = connection1;
             session1._targetType = object.params.targetInfo.type;
             session1._sessionId = object.params.sessionId;
         }
@@ -855,40 +844,37 @@ class Connection extends EventEmitter {
                 session1.emit(object.method, object.params);
             }
         } else if (object.id) {
-            const callback = this._callbacks[object.id];
+            const callback = connection1._callbacks[object.id];
             // Callbacks could be all rejected if someone has called `.dispose()`.
-            delete this._callbacks[object.id];
+            delete connection1._callbacks[object.id];
             callback.resolve(object.result);
         } else {
-            this.emit(object.method, object.params);
+            connection1.emit(object.method, object.params);
         }
     }
 
-    _onClose() {
-        this._closed = true;
-        this._callbacks = {};
-        this.emit(Events.Connection.Disconnected);
+    connection1._onClose = function () {
+        connection1._closed = true;
+        connection1._callbacks = {};
+        connection1.emit(Events.Connection.Disconnected);
     }
 
-    dispose() {
-        this._onClose();
+    connection1.dispose = function () {
+        connection1._onClose();
     }
 
     /**
       * @param {Protocol.Target.TargetInfo} targetInfo
       * @return {!Promise<!CDPSession>}
       */
-    async createSession(targetInfo) {
+    connection1.createSession = async function (targetInfo) {
         var tmp;
-        var that;
-        that = this;
-        tmp = await that.send("Target.attachToTarget", {
+        tmp = await connection1.send("Target.attachToTarget", {
             targetId: targetInfo.targetId,
             flatten: true
         });
         return session1
     }
-}
 
     session1 = new EventEmitter();
     session1._callbacks = {};
@@ -899,12 +885,10 @@ class Connection extends EventEmitter {
       * @return {!Promise<?Object>}
       */
     session1.send = function (method, params = {}) {
-        var that;
-        that = session1;
-        const id = that._connection._rawSend({
-            sessionId: that._sessionId, method, params});
+        const id = session1._connection._rawSend({
+            sessionId: session1._sessionId, method, params});
         return new Promise(function (resolve, reject) {
-            that._callbacks[id] = {
+            session1._callbacks[id] = {
                 resolve, reject, error: new Error(), method
             };
         });
@@ -1638,7 +1622,8 @@ Connection,
 LifecycleWatcher,
 Page,
 websocket1,
-initAsClient
+initAsClient,
+connection1
 };
 /*
 file none
