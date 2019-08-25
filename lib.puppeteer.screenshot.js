@@ -2061,7 +2061,6 @@ class FrameManager extends EventEmitter {
 
         this._client.on('Page.frameAttached', event => this._onFrameAttached(event.frameId, event.parentFrameId));
         this._client.on('Page.frameNavigated', event => this._onFrameNavigated(event.frame));
-        this._client.on('Page.frameDetached', event => this._onFrameDetached(event.frameId));
         this._client.on('Page.frameStoppedLoading', event => this._onFrameStoppedLoading(event.frameId));
         this._client.on('Runtime.executionContextCreated', event => this._onExecutionContextCreated(event.context));
         this._client.on('Runtime.executionContextDestroyed', event => this._onExecutionContextDestroyed(event.executionContextId));
@@ -2424,9 +2423,7 @@ class LifecycleWatcher {
         /** @type {?Puppeteer.Request} */
         this._navigationRequest = null;
         this._eventListeners = [
-            helper.addEventListener(frameManager._client, Events.CDPSession.Disconnected, () => this._terminate(new Error('Navigation failed because browser has disconnected!'))),
             helper.addEventListener(this._frameManager, Events.FrameManager.LifecycleEvent, this._checkLifecycleComplete.bind(this)),
-            helper.addEventListener(this._frameManager, Events.FrameManager.FrameDetached, this._onFrameDetached.bind(this)),
             helper.addEventListener(this._frameManager.networkManager(), Events.NetworkManager.Request, this._onRequest.bind(this)),
         ];
 
@@ -2459,35 +2456,10 @@ class LifecycleWatcher {
     }
 
     /**
-      * @param {!Puppeteer.Frame} frame
-      */
-    _onFrameDetached(frame) {
-        if (this._frame === frame) {
-            this._terminationCallback.call(null, new Error('Navigating frame was detached'));
-            return;
-        }
-        this._checkLifecycleComplete();
-    }
-
-    /**
       * @return {?Puppeteer.Response}
       */
     navigationResponse() {
         return this._navigationRequest ? this._navigationRequest.response() : null;
-    }
-
-    /**
-      * @param {!Error} error
-      */
-    _terminate(error) {
-        this._terminationCallback.call(null, error);
-    }
-
-    /**
-      * @return {!Promise<?Error>}
-      */
-    sameDocumentNavigationPromise() {
-        return this._sameDocumentNavigationPromise;
     }
 
     /**
