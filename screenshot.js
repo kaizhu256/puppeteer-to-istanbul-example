@@ -143,6 +143,10 @@
 
 (async function (local) {
 "use strict";
+
+
+
+// init var
 var assert;
 var browser;
 var browserWSEndpoint;
@@ -155,11 +159,25 @@ var fs;
 var fsWriteFile;
 var page;
 var path;
-var preferredRevision;
 var readline;
-var timeout;
 local.nop(path);
 
+
+
+// init function
+chromeCloseGracefully = function () {
+/**
+  * @return {Promise}
+  */
+    // Attempt to close chrome gracefully
+    connection.send("Browser.close").catch(function (err) {
+        console.error(err);
+        chromeKillSync();
+    });
+    return new Promise(function (resolve) {
+        chromeProcess.once("exit", resolve);
+    });
+};
 chromeKillSync = function () {
 /*
  * This method has to be sync to be used as 'exit' event handler.
@@ -176,7 +194,6 @@ chromeKillSync = function () {
     // the process might have already stopped
     } catch (ignore) {}
 };
-
 fsWriteFile = function (file, data) {
     return new Promise(function (resolve, reject) {
         fs.writeFile(file, data, function (err) {
@@ -189,26 +206,20 @@ fsWriteFile = function (file, data) {
     });
 };
 
-chromeCloseGracefully = function () {
-/**
-  * @return {Promise}
-  */
-    // Attempt to close chrome gracefully
-    connection.send("Browser.close").catch(function (err) {
-        console.error(err);
-        chromeKillSync();
-    });
-    return new Promise(function (resolve) {
-        chromeProcess.once("exit", resolve);
-    });
-};
 
-// init
+
+// init process.exit and timerTimeout
 process.on("exit", chromeKillSync);
 process.on("SIGINT", chromeKillSync);
 process.on("SIGTERM", chromeKillSync);
 process.on("SIGHUP", chromeKillSync);
+setTimeout(function () {
+    throw new Error("chrome-screenshot - errTimeout - 30000 ms");
+}, 30000);
 
+
+
+// require module
 assert = require("assert");
 //!! EventEmitter = require("events");
 //!! URL = require("url");
@@ -226,11 +237,11 @@ readline = require("readline");
 //!! util = require("util");
 //!! { Writable} = require("stream");
 //!! { randomBytes} = require("crypto");
-
 module.exports = require("./lib.puppeteer.screenshot.js");
 
-preferredRevision = 674921;
-timeout = 30000;
+
+
+// init browser
 chromeProcess = child_process.spawn((
     "node_modules/puppeteer/.local-chromium"
     + "/linux-674921/chrome-linux/chrome"
@@ -253,70 +264,39 @@ chromeProcess = child_process.spawn((
         "pipe", "pipe", "pipe"
     ]
 });
-// dumpio
-chromeProcess.stderr.pipe(process.stderr);
-chromeProcess.stdout.pipe(process.stdout);
-
+// chromeProcess.stderr.pipe(process.stderr);
+// chromeProcess.stdout.pipe(process.stdout);
 browserWSEndpoint = await new Promise(function (resolve, reject) {
     var cleanup;
     var onClose;
     var onLine;
-    var onTimeout;
     var rl;
-    var stderr;
-    var timeoutId;
     cleanup = function () {
-        clearTimeout(timeoutId);
-        rl.removeListener("line", onLine);
-        rl.removeListener("close", onClose);
-        chromeProcess.removeListener("exit", onClose);
         chromeProcess.removeListener("error", onClose);
+        chromeProcess.removeListener("exit", onClose);
+        rl.removeListener("close", onClose);
+        rl.removeListener("line", onLine);
     };
-    onClose = function (error) {
-    /**
-      * @param {!Error=} error
-      */
+    onClose = function (err) {
         cleanup();
-        reject(new Error(
-            "Failed to launch chrome!" + error.message + "\n"
-            + stderr + "\n\n"
-            + "TROUBLESHOOTING: https://github.com/GoogleChrome/puppeteer"
-            + "/blob/master/docs/troubleshooting.md\n\n"
-        ));
+        reject(err);
     };
     onLine = function (line) {
-    /**
-      * @param {string} line
-      */
-        stderr += line + "\n";
-        const match = line.match(
+        line.replace((
             /^DevTools\u0020listening\u0020on\u0020(ws:\/\/.*)$/
-        );
-        if (match) {
+        ), function (ignore, match1) {
             cleanup();
-            resolve(match[1]);
-        }
-    };
-    onTimeout = function () {
-        cleanup();
-        reject(new Error(
-            "Timed out after " + timeout
-            + " ms while trying to connect to Chrome!"
-            + " The only Chrome revision guaranteed to work is "
-            + preferredRevision
-        ));
+            resolve(match1);
+        });
     };
     rl = readline.createInterface({
         input: chromeProcess.stderr
     });
-    stderr = "";
-    rl.on("line", onLine);
-    rl.on("close", onClose);
-    chromeProcess.on("exit", onClose);
     chromeProcess.on("error", onClose);
-    timeoutId = setTimeout(onTimeout, timeout);
+    chromeProcess.on("exit", onClose);
+    rl.on("close", onClose);
+    rl.on("line", onLine);
 });
-
 connection = await new Promise(function (resolve, reject) {
     const ws = new module.exports.WebSocket(browserWSEndpoint, [], {
         maxPayload: 256 * 1024 * 1024 // 256Mb
@@ -332,11 +312,7 @@ connection = await new Promise(function (resolve, reject) {
     });
     ws.addEventListener("error", reject);
 });
-connection = new module.exports.Connection(
-    browserWSEndpoint,
-    connection,
-    0
-);
+connection = new module.exports.Connection(browserWSEndpoint, connection, 0);
 browser = await module.exports.Browser.create(
     connection,
     [],
@@ -348,18 +324,12 @@ browser = await module.exports.Browser.create(
     chromeProcess,
     chromeCloseGracefully
 );
-await browser.waitForTarget(function (t) {
-    return t._targetInfo.type === "page";
+await browser.waitForTarget(function (target) {
+    return target._targetInfo.type === "page";
 });
-//!! console.error(
-    //!! browser._defaultContext._id
-//!! );
-page = await connection.send(
-    "Target.createTarget",
-    {
-        url: "about:blank"
-    }
-);
+page = await connection.send("Target.createTarget", {
+    url: "about:blank"
+});
 page = await browser._defaultContext._browser._targets.get(page.targetId);
 assert(await page._initializedPromise, "Failed to create target for page");
 page = await page.page();
@@ -372,8 +342,7 @@ const watcher = new module.exports.LifecycleWatcher(
     page._frameManager._mainFrame,
     [
         "load"
-    ],
-    timeout
+    ]
 );
 await new Promise(function (resolve) {
     page._frameManager._client.send("Page.navigate", {
@@ -394,6 +363,7 @@ await new Promise(function (resolve) {
 
 
 
+// browser - screenshot
 await Promise.all([
     // screenshot - png
     (async function () {
@@ -430,6 +400,6 @@ return html.trim()` + " + \"\\n\""
 
 
 
-// close browser
+// browser - close
 await browser.close();
 }(globalThis.globalLocal));
