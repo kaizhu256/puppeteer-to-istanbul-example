@@ -308,8 +308,8 @@ gotoNext = async function (err, data) {
         websocket1.addEventListener("close", function () {
             websocket1.onclose();
         });
-        websocket1.addEventListener("open", gotoNextData);
-        websocket1.addEventListener("error", gotoNext);
+        websocket1.once("open", gotoNextData);
+        websocket1.once("error", gotoNext);
         break;
     case 3:
         browser = new module.exports.Connection(urlInspect, websocket1, 0);

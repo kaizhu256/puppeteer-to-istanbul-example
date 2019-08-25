@@ -1005,9 +1005,8 @@ class Connection extends EventEmitter {
         this._callbacks = new Map();
         this._delay = delay;
 
-        this._transport = transport;
-        this._transport.onmessage = this._onMessage.bind(this);
-        this._transport.onclose = this._onClose.bind(this);
+        websocket1.onmessage = this._onMessage.bind(this);
+        websocket1.onclose = this._onClose.bind(this);
         /** @type {!Map<string, !CDPSession>}*/
         this._sessions = new Map();
         this._closed = false;
@@ -1037,7 +1036,7 @@ class Connection extends EventEmitter {
         this._lastId += 1;
         const id = this._lastId;
         message = JSON.stringify(Object.assign({}, message, {id}));
-        this._transport.send(message);
+        websocket1.send(message);
         return id;
     }
 
@@ -1072,8 +1071,6 @@ class Connection extends EventEmitter {
         if (this._closed)
             return;
         this._closed = true;
-        this._transport.onmessage = null;
-        this._transport.onclose = null;
         this._callbacks.clear();
         this._sessions.clear();
         this.emit(Events.Connection.Disconnected);
