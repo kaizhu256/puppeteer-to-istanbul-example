@@ -1581,14 +1581,6 @@ class FrameManager extends EventEmitter {
     }
 
     /**
-      * @param {!string} frameId
-      * @return {?Frame}
-      */
-    frame(frameId) {
-        return this._frames.get(frameId);
-    }
-
-    /**
       * @param {!Protocol.Page.Frame} framePayload
       */
     _onFrameNavigated(framePayload) {
@@ -1921,7 +1913,7 @@ class NetworkManager extends EventEmitter {
             this._handleRequestRedirect(request, event.redirectResponse);
             redirectChain = request._redirectChain;
         }
-        const frame = this._frameManager.frame(event.frameId);
+        const frame = this._frameManager._frames.get(event.frameId);
         const request = new Request(this._client, frame, interceptionId, this._userRequestInterceptionEnabled, event, redirectChain);
         this._requestIdToRequest.set(event.requestId, request);
         this.emit(Events.NetworkManager.Request, request);
