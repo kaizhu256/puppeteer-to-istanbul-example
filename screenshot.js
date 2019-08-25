@@ -248,7 +248,7 @@ onDataUrlInspect = function (data) {
 
 
 
-gotoNext = function (err, data) {
+gotoNext = async function (err, data) {
     gotoState += 1;
     if (err) {
         onReject(err);
@@ -309,6 +309,16 @@ gotoNext = function (err, data) {
         websocket.addEventListener("open", gotoNextData);
         websocket.addEventListener("error", gotoNext);
         break;
+    case 3:
+        browser = new module.exports.Connection(urlInspect, websocket, 0);
+        browser = await module.exports.Browser.create(
+            browser,
+            [],
+            chromeProcess,
+            chromeCloseGracefully
+        );
+        gotoNext();
+        break;
     default:
         onResolve(data);
     }
@@ -322,13 +332,6 @@ await new Promise(function (resolve, reject) {
 
 
 
-browser = new module.exports.Connection(urlInspect, websocket, 0);
-browser = await module.exports.Browser.create(
-    browser,
-    [],
-    chromeProcess,
-    chromeCloseGracefully
-);
 tmp = await browser._connection.send("Target.createTarget", {
     url: "about:blank"
 });
