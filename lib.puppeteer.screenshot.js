@@ -2470,13 +2470,6 @@ class LifecycleWatcher {
     }
 
     /**
-      * @return {!Promise}
-      */
-    lifecyclePromise() {
-        return this._lifecyclePromise;
-    }
-
-    /**
       * @return {!Promise<?Error>}
       */
     timeoutOrTerminationPromise() {
