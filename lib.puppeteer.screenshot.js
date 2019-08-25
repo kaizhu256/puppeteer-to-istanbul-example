@@ -1795,7 +1795,6 @@ class LifecycleWatcher {
             this._newDocumentNavigationCompleteCallback = fulfill;
         });
 
-        this._timeoutPromise = this._createTimeoutPromise();
         this._terminationPromise = new Promise(fulfill => {
             this._terminationCallback = fulfill;
         });
@@ -1809,14 +1808,6 @@ class LifecycleWatcher {
         if (request.frame() !== this._frame || !request.isNavigationRequest())
             return;
         this._navigationRequest = request;
-    }
-
-    /**
-      * @return {!Promise<?Error>}
-      */
-    _createTimeoutPromise() {
-        const errorMessage = 'Navigation Timeout Exceeded: ' + this._timeout + 'ms exceeded';
-        return new Promise(fulfill => this._maximumTimer = setTimeout(fulfill, this._timeout)).then(() => new Error(errorMessage));
     }
 
     _checkLifecycleComplete() {
