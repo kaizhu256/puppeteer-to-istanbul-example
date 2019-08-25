@@ -1677,9 +1677,8 @@ class LifecycleWatcher {
         this._timeout = timeout;
         /** @type {?Puppeteer.Request} */
         this._navigationRequest = null;
-        this._frameManager.on(Events.FrameManager.LifecycleEvent, this._checkLifecycleComplete.bind(this)),
-        this._frameManager._networkManager.on(Events.NetworkManager.Request, this._onRequest.bind(this)),
-        ];
+        this._frameManager.on(Events.FrameManager.LifecycleEvent, this._checkLifecycleComplete.bind(this));
+        this._frameManager._networkManager.on(Events.NetworkManager.Request, this._onRequest.bind(this));
         this._sameDocumentNavigationPromise = new Promise(fulfill => {
             this._sameDocumentNavigationCompleteCallback = fulfill;
         });
