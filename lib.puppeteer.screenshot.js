@@ -1956,11 +1956,8 @@ class LifecycleWatcher {
       * @return {!Promise<?Error>}
       */
     _createTimeoutPromise() {
-        if (!this._timeout)
-            return new Promise(() => {});
         const errorMessage = 'Navigation Timeout Exceeded: ' + this._timeout + 'ms exceeded';
-        return new Promise(fulfill => this._maximumTimer = setTimeout(fulfill, this._timeout))
-                .then(() => new Error(errorMessage));
+        return new Promise(fulfill => this._maximumTimer = setTimeout(fulfill, this._timeout)).then(() => new Error(errorMessage));
     }
 
     _checkLifecycleComplete() {
@@ -1970,11 +1967,7 @@ class LifecycleWatcher {
         this._lifecycleCallback();
         if (this._frame._loaderId === this._initialLoaderId && !this._hasSameDocumentNavigation)
             return;
-        if (this._hasSameDocumentNavigation)
-            this._sameDocumentNavigationCompleteCallback();
-        if (this._frame._loaderId !== this._initialLoaderId)
-            this._newDocumentNavigationCompleteCallback();
-
+        this._newDocumentNavigationCompleteCallback();
         /**
           * @param {!Puppeteer.Frame} frame
           * @param {!Array<string>} expectedLifecycle
@@ -1983,10 +1976,6 @@ class LifecycleWatcher {
         function checkLifecycle(frame, expectedLifecycle) {
             for (const event of expectedLifecycle) {
                 if (!frame._lifecycleEvents.has(event))
-                    return false;
-            }
-            for (const child of frame.childFrames()) {
-                if (!checkLifecycle(child, expectedLifecycle))
                     return false;
             }
             return true;
@@ -2068,8 +2057,6 @@ class NetworkManager extends EventEmitter {
 
     async initialize() {
         await this._client.send('Network.enable');
-        if (this._ignoreHTTPSErrors)
-            await this._client.send('Security.setIgnoreCertificateErrors', {ignore: true});
     }
 
     /**
@@ -2103,12 +2090,10 @@ class NetworkManager extends EventEmitter {
         if (event.redirectResponse) {
             const request = this._requestIdToRequest.get(event.requestId);
             // If we connect late to the target, we could have missed the requestWillBeSent event.
-            if (request) {
-                this._handleRequestRedirect(request, event.redirectResponse);
-                redirectChain = request._redirectChain;
-            }
+            this._handleRequestRedirect(request, event.redirectResponse);
+            redirectChain = request._redirectChain;
         }
-        const frame = event.frameId && this._frameManager ? this._frameManager.frame(event.frameId) : null;
+        const frame = this._frameManager.frame(event.frameId);
         const request = new Request(this._client, frame, interceptionId, this._userRequestInterceptionEnabled, event, redirectChain);
         this._requestIdToRequest.set(event.requestId, request);
         this.emit(Events.NetworkManager.Request, request);
@@ -2120,8 +2105,7 @@ class NetworkManager extends EventEmitter {
       */
     _onRequestServedFromCache(event) {
         const request = this._requestIdToRequest.get(event.requestId);
-        if (request)
-            request._fromMemoryCache = true;
+        request._fromMemoryCache = true;
     }
 
     /**
