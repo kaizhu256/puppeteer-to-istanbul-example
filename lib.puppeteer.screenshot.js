@@ -72,7 +72,7 @@ function concat(list, totalLength) {
   */
 function _mask(source, mask, output, offset, length) {
     var i;
-    for (i = 0; i < length; i++) {
+    for (i = 0; i < length; i += 1) {
         output[offset + i] = source[i] ^ mask[i & 3];
     }
 }
@@ -1093,7 +1093,8 @@ class Connection extends EventEmitter {
       * @return {number}
       */
     _rawSend(message) {
-        const id = ++this._lastId;
+        this._lastId += 1;
+        const id = this._lastId;
         message = JSON.stringify(Object.assign({}, message, {id}));
         this._transport.send(message);
         return id;
