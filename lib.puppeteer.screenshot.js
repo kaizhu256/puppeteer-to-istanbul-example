@@ -1093,10 +1093,14 @@ class Connection extends EventEmitter {
       * @return {!Promise<!CDPSession>}
       */
     async createSession(targetInfo) {
-        const {
-            sessionId} = await this.send("Target.attachToTarget", {
-                targetId: targetInfo.targetId, flatten: true});
-        return this._sessions.get(sessionId);
+        var tmp;
+        var that;
+        that = this;
+        tmp = await that.send("Target.attachToTarget", {
+            targetId: targetInfo.targetId,
+            flatten: true
+        });
+        return that._sessions.get(tmp.sessionId);
     }
 }
 

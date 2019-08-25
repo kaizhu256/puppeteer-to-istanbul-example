@@ -319,13 +319,17 @@ browser = await module.exports.Browser.create(
     chromeProcess,
     chromeCloseGracefully
 );
-page = await connection.send("Target.createTarget", {
+var target;
+target = await connection.send("Target.createTarget", {
     url: "about:blank"
 });
-page = await browser._defaultContext._browser._targets.get(page.targetId);
-page = await connection.createSession(page._targetInfo).then(function (client) {
-    return module.exports.Page.create(client, page);
-});
+target = await browser._defaultContext._browser._targets.get(target.targetId);
+page = await connection.createSession(target._targetInfo);
+console.error(page);
+page = await module.exports.Page.create(page, target);
+//!! page.then(function (client) {
+    //!! return module.exports.Page.create(debugInline(client), target);
+//!! });
 
     //!! /**
       //!! * @param {Protocol.Target.TargetInfo} targetInfo
