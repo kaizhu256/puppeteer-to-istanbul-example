@@ -541,18 +541,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
 const readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
 const protocolVersions = [8, 13];
 
-/**
-  * Class representing a WebSocket.
-  *
-  * @extends EventEmitter
-  */
-    /**
-      * Create a new `WebSocket`.
-      *
-      * @param {(String|url.Url|url.URL)} address The URL to which to connect
-      * @param {(String|String[])} protocols The subprotocols
-      * @param {Object} options Connection options
-      */
     const websocket1 = new EventEmitter();
         websocket1.readyState = websocket1.CONNECTING;
         websocket1.protocol = "";
@@ -648,7 +636,6 @@ module.exports = websocket1;
 /**
   * Initialize a WebSocket client.
   *
-  * @param {WebSocket} websocket The client to initialize
   * @param {(String|url.Url|url.URL)} address The URL to which to connect
   * @param {String} protocols The subprotocols
   * @param {Object} options Connection options
