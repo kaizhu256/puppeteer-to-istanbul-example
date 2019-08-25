@@ -302,12 +302,9 @@ gotoNext = async function (err, data) {
         module.exports.initAsClient(websocket1, urlInspect, "", {
             maxPayload: 256 * 1024 * 1024 // 256Mb
         });
-        websocket1.addEventListener("message", function (evt) {
-            websocket1.onmessage(evt.data);
-        });
-        websocket1.addEventListener("close", function () {
-            websocket1.onclose();
-        });
+        //!! websocket1.addEventListener("close", function () {
+            //!! websocket1.onclose();
+        //!! });
         websocket1.once("open", gotoNextData);
         websocket1.once("error", gotoNext);
         break;

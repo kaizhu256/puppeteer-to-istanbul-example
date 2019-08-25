@@ -999,14 +999,19 @@ class Connection extends EventEmitter {
       */
     constructor(url, transport, delay = 0) {
         super();
+        var that;
+        that = this;
         this._url = url;
         this._lastId = 0;
         /** @type {!Map<number, {resolve: function, reject: function, error: !Error, method: string}>}*/
         this._callbacks = new Map();
         this._delay = delay;
 
-        websocket1.onmessage = this._onMessage.bind(this);
-        websocket1.onclose = this._onClose.bind(this);
+        websocket1.addEventListener("message", function (evt) {
+            that._onMessage(evt.data);
+        });
+        //!! websocket1.onmessage = this._onMessage.bind(this);
+        //!! websocket1.onclose = this._onClose.bind(this);
         /** @type {!Map<string, !CDPSession>}*/
         this._sessions = new Map();
         this._closed = false;
