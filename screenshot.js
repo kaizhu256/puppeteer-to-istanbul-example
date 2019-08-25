@@ -298,7 +298,7 @@ gotoNext = function (err, data) {
             err = data;
         }
         urlWs = !err && (
-            /DevTools\u0020listening\u0020on\u0020(ws:\/\/.+?)$/
+            /\nDevTools\u0020listening\u0020on\u0020(ws:\/\/.+?)\n/
         ).exec(String(data));
         urlWs = urlWs && urlWs[1];
         if (err || urlWs) {
