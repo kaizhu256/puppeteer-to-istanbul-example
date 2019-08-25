@@ -882,18 +882,8 @@ function socketOnClose() {
 
     this.removeListener('data', socketOnData);
     this[kWebSocket] = undefined;
-
     clearTimeout(websocket._closeTimer);
-
-    if (
-        websocket._receiver._writableState.finished ||
-        websocket._receiver._writableState.errorEmitted
-    ) {
-        websocket.emitClose();
-    } else {
-        websocket._receiver.on('error', receiverOnFinish);
-        websocket._receiver.on('finish', receiverOnFinish);
-    }
+    websocket.emitClose();
 }
 
 /**
