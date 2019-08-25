@@ -874,20 +874,6 @@ function socketOnEnd() {
 
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/index.js
-*/
-'use strict';
-
-// const WebSocket = require('./lib/websocket');
-
-// hack-puppeteer - module.exports
-WebSocket.Sender = Sender.js;
-
-module.exports = WebSocket;
-
-
-
-/*
 file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0
 */
 
