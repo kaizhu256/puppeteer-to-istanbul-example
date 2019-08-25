@@ -867,13 +867,12 @@ class Browser extends EventEmitter {
     /**
       * @param {!Puppeteer.Connection} connection
       * @param {!Array<string>} contextIds
-      * @param {boolean} ignoreHTTPSErrors
       * @param {?Puppeteer.Viewport} defaultViewport
       * @param {?Puppeteer.ChildProcess} process
       * @param {function()=} closeCallback
       */
-    static async create(connection, contextIds, ignoreHTTPSErrors, defaultViewport, process, closeCallback) {
-        const browser = new Browser(connection, contextIds, ignoreHTTPSErrors, defaultViewport, process, closeCallback);
+    static async create(connection, contextIds, defaultViewport, process, closeCallback) {
+        const browser = new Browser(connection, contextIds, defaultViewport, process, closeCallback);
         await connection.send("Target.setDiscoverTargets", {
             discover: true});
         return browser;
@@ -882,14 +881,12 @@ class Browser extends EventEmitter {
     /**
       * @param {!Puppeteer.Connection} connection
       * @param {!Array<string>} contextIds
-      * @param {boolean} ignoreHTTPSErrors
       * @param {?Puppeteer.Viewport} defaultViewport
       * @param {?Puppeteer.ChildProcess} process
       * @param {(function():Promise)=} closeCallback
       */
-    constructor(connection, contextIds, ignoreHTTPSErrors, defaultViewport, process, closeCallback) {
+    constructor(connection, contextIds, defaultViewport, process, closeCallback) {
         super();
-        this._ignoreHTTPSErrors = ignoreHTTPSErrors;
         this._defaultViewport = defaultViewport;
         this._process = process;
         this._connection = connection;
@@ -913,8 +910,35 @@ class Browser extends EventEmitter {
         const {
             browserContextId} = targetInfo;
         const context = this._defaultContext;
+        var that;
+        that = this;
+        const target = {};
+        target._targetInfo = targetInfo;
+        target._browserContext = context;
+        target._targetId = targetInfo.targetId;
+        target._sessionFactory = function () {
+            return that._connection.createSession(targetInfo);
+        },
+        target._defaultViewport = this._defaultViewport;
+        /** @type {?Promise<!Puppeteer.Page>} */
+        target._pagePromise = null;
+        /** @type {?Promise<!Worker>} */
+        target._workerPromise = null;
+        target._initializedPromise = new Promise(function (fulfill) {
+            target._initializedCallback = fulfill;
+            return fulfill;
+        }).then(async function (success) {
+            return true;
+        });
+        target._isClosedPromise = new Promise(function (fulfill) {
+            target._closedCallback = fulfill;
+            return fulfill;
+        });
+        target._isInitialized = target._targetInfo.type !== "page" || target._targetInfo.url !== "";
+        if (target._isInitialized) {
+            target._initializedCallback(true);
+        }
 
-        const target = new Target(targetInfo, context, () => this._connection.createSession(targetInfo), this._ignoreHTTPSErrors, this._defaultViewport);
         assert(!this._targets.has(event.targetInfo.targetId), "Target should not exist before targetCreated");
         this._targets.set(event.targetInfo.targetId, target);
         this.emit(Events.Browser.TargetCreated, target);
@@ -1335,13 +1359,12 @@ class FrameManager extends EventEmitter {
     /**
       * @param {!Puppeteer.CDPSession} client
       * @param {!Puppeteer.Page} page
-      * @param {boolean} ignoreHTTPSErrors
       */
-    constructor(client, page, ignoreHTTPSErrors) {
+    constructor(client, page) {
         super();
         this._client = client;
         this._page = page;
-        this._networkManager = new NetworkManager(client, ignoreHTTPSErrors);
+        this._networkManager = new NetworkManager(client);
         this._networkManager.setFrameManager(this);
         /** @type {!Map<string, !Frame>} */
         this._frames = new Map();
@@ -1611,10 +1634,9 @@ class NetworkManager extends EventEmitter {
     /**
       * @param {!Puppeteer.CDPSession} client
       */
-    constructor(client, ignoreHTTPSErrors) {
+    constructor(client) {
         super();
         this._client = client;
-        this._ignoreHTTPSErrors = ignoreHTTPSErrors;
         this._frameManager = null;
         /** @type {!Map<string, !Request>} */
         this._requestIdToRequest = new Map();
@@ -1820,12 +1842,11 @@ class Page extends EventEmitter {
     /**
       * @param {!Puppeteer.CDPSession} client
       * @param {!Puppeteer.Target} target
-      * @param {boolean} ignoreHTTPSErrors
       * @param {?Puppeteer.Viewport} defaultViewport
       * @return {!Promise<!Page>}
       */
-    static async create(client, target, ignoreHTTPSErrors, defaultViewport) {
-        const page = new Page(client, target, ignoreHTTPSErrors);
+    static async create(client, target, defaultViewport) {
+        const page = new Page(client, target);
         await page._initialize();
         await page.setViewport(defaultViewport);
         return page;
@@ -1834,15 +1855,14 @@ class Page extends EventEmitter {
     /**
       * @param {!Puppeteer.CDPSession} client
       * @param {!Puppeteer.Target} target
-      * @param {boolean} ignoreHTTPSErrors
       */
-    constructor(client, target, ignoreHTTPSErrors) {
+    constructor(client, target) {
         super();
         this._closed = false;
         this._client = client;
         this._target = target;
         /** @type {!FrameManager} */
-        this._frameManager = new FrameManager(client, this, ignoreHTTPSErrors);
+        this._frameManager = new FrameManager(client, this);
         /** @type {!Map<string, Function>} */
         this._pageBindings = new Map();
         this._javascriptEnabled = true;
@@ -1888,44 +1908,6 @@ class Page extends EventEmitter {
         this._viewport = viewport;
     }
 }
-module.exports = {Page};
-
-
-
-/*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Target.js
-*/
-class Target {
-    /**
-      * @param {!Protocol.Target.TargetInfo} targetInfo
-      * @param {!Puppeteer.BrowserContext} browserContext
-      * @param {!function():!Promise<!Puppeteer.CDPSession>} sessionFactory
-      * @param {boolean} ignoreHTTPSErrors
-      * @param {?Puppeteer.Viewport} defaultViewport
-      */
-    constructor(targetInfo, browserContext, sessionFactory, ignoreHTTPSErrors, defaultViewport) {
-        this._targetInfo = targetInfo;
-        this._browserContext = browserContext;
-        this._targetId = targetInfo.targetId;
-        this._sessionFactory = sessionFactory;
-        this._ignoreHTTPSErrors = ignoreHTTPSErrors;
-        this._defaultViewport = defaultViewport;
-        /** @type {?Promise<!Puppeteer.Page>} */
-        this._pagePromise = null;
-        /** @type {?Promise<!Worker>} */
-        this._workerPromise = null;
-        this._initializedPromise = new Promise(fulfill => this._initializedCallback = fulfill).then(async success => {
-            return true;
-        });
-        this._isClosedPromise = new Promise(fulfill => this._closedCallback = fulfill);
-        this._isInitialized = this._targetInfo.type !== "page" || this._targetInfo.url !== "";
-        if (this._isInitialized)
-            this._initializedCallback(true);
-    }
-}
-
-
-
 module.exports = {
 Browser,
 Connection,
