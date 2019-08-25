@@ -421,7 +421,7 @@ await new Promise(function (resolve) {
 });
 await local.identity(watcher._newDocumentNavigationPromise);
 watcher.dispose();
-await watcher._navigationRequest.response()();
+await watcher._navigationRequest.response();
 
 
 
