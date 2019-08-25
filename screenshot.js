@@ -162,9 +162,9 @@ var onReject;
 var onResolve;
 var page;
 var path;
-var urlInspect;
-//!! var readline;
 var tmp;
+var urlInspect;
+var websocket;
 local.nop(assert, path);
 
 
@@ -241,6 +241,7 @@ gotoNext = function (err, data) {
         return;
     }
     switch (gotoState) {
+    // init-once
     case 1:
         // init timerTimeout
         setTimeout(function () {
@@ -281,15 +282,9 @@ gotoNext = function (err, data) {
             gotoState = 1;
             gotoNext(null, data);
         };
-        //!! rl = readline.createInterface({
-            //!! input: chromeProcess.stderr
-        //!! });
         chromeProcess.on("error", onEvent);
         chromeProcess.on("exit", onEvent);
         chromeProcess.stderr.on("data", onEvent);
-        //!! rl.on("close", onEvent);
-        //!! rl.on("line", onEvent);
-        //!! gotoNext();
         break;
     // init urlInspect
     case 2:
@@ -309,6 +304,20 @@ gotoNext = function (err, data) {
             gotoNext(err);
         }
         break;
+    case 3:
+        // init websocket
+        websocket = new module.exports.WebSocket(urlInspect, [], {
+            maxPayload: 256 * 1024 * 1024 // 256Mb
+        });
+        websocket.on("message", function (evt) {
+            websocket.onmessage(evt.data);
+        });
+        websocket.once("close", function () {
+            websocket.onclose();
+        });
+        websocket.once("open", gotoNext);
+        websocket.once("error", gotoNext);
+        break;
     default:
         onResolve(data);
     }
@@ -322,23 +331,7 @@ await new Promise(function (resolve, reject) {
 
 
 
-browser = await new Promise(function (resolve, reject) {
-    var ws;
-    ws = new module.exports.WebSocket(urlInspect, [], {
-        maxPayload: 256 * 1024 * 1024 // 256Mb
-    });
-    ws.addEventListener("message", function (evt) {
-        ws.onmessage(evt.data);
-    });
-    ws.addEventListener("close", function () {
-        ws.onclose();
-    });
-    ws.addEventListener("open", function () {
-        resolve(ws);
-    });
-    ws.addEventListener("error", reject);
-});
-browser = new module.exports.Connection(urlInspect, browser, 0);
+browser = new module.exports.Connection(urlInspect, websocket, 0);
 browser = await module.exports.Browser.create(
     browser,
     [],
