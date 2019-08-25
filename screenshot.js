@@ -420,8 +420,9 @@ await new Promise(function (resolve) {
     }).then(resolve);
 });
 await local.identity(watcher._newDocumentNavigationPromise);
-watcher.dispose();
-await watcher._navigationRequest.response();
+module.exports.helper.removeEventListeners(watcher._eventListeners);
+clearTimeout(watcher._maximumTimer);
+await local.identity(watcher._navigationRequest._response);
 
 
 

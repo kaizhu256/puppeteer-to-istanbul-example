@@ -1032,10 +1032,10 @@ class Browser extends EventEmitter {
     _targetInfoChanged(event) {
         const target = this._targets.get(event.targetInfo.targetId);
         assert(target, 'target should exist before targetInfoChanged');
-        const previousURL = target.url();
+        const previousURL = target._url;
         const wasInitialized = target._isInitialized;
         target._targetInfoChanged(event.targetInfo);
-        if (wasInitialized && previousURL !== target.url()) {
+        if (wasInitialized && previousURL !== target._url) {
             this.emit(Events.Browser.TargetChanged, target);
             target.browserContext().emit(Events.BrowserContext.TargetChanged, target);
         }
@@ -1831,11 +1831,6 @@ class LifecycleWatcher {
             return true;
         }
     }
-
-    dispose() {
-        helper.removeEventListeners(this._eventListeners);
-        clearTimeout(this._maximumTimer);
-    }
 }
 
 const puppeteerToProtocolLifecycle = {
@@ -2030,20 +2025,6 @@ class Request {
     }
 
     /**
-      * @return {string}
-      */
-    url() {
-        return this._url;
-    }
-
-    /**
-      * @return {?Response}
-      */
-    response() {
-        return this._response;
-    }
-
-    /**
       * @return {?Puppeteer.Frame}
       */
     frame() {
@@ -2096,7 +2077,7 @@ class Response {
         };
         this._status = responsePayload.status;
         this._statusText = responsePayload.statusText;
-        this._url = request.url();
+        this._url = request._url;
         this._fromDiskCache = !!responsePayload.fromDiskCache;
         this._fromServiceWorker = !!responsePayload.fromServiceWorker;
         this._headers = {};
@@ -2399,6 +2380,7 @@ module.exports = {
         Connection,
         LifecycleWatcher,
         WebSocketTransport,
+        helper
 };
 /*
 file none
