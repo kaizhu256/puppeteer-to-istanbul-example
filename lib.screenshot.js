@@ -63,69 +63,6 @@ local.nop(
 
 /* jslint ignore:start */
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/event-target.js
-*/
-"use strict";
-
-/**
-  * This provides methods for emulating the `EventTarget` interface. It's not
-  * meant to be used directly.
-  *
-  * @mixin
-  */
-const EventTarget = {
-/**
-  * Register an event listener.
-  *
-  * @param {String} method A string representing the event type to listen for
-  * @param {Function} listener The listener to add
-  * @public
-  */
-    addEventListener(method, listener) {
-        function onMessage(data) {
-            listener.call(this, {
-                data: data,
-                target: this,
-                type: "message"
-            });
-        }
-
-        function onClose(code, message) {
-            listener.call(this, {
-                code: code,
-                reason: message,
-                target: this,
-                type: "close"
-            });
-        }
-
-        function onOpen() {
-            listener.call(this, {
-                target: this,
-                type: "open"
-            });
-        }
-
-        if (method === "message") {
-            onMessage._listener = listener;
-            this.on(method, onMessage);
-        } else if (method === "close") {
-            onClose._listener = listener;
-            this.on(method, onClose);
-        } else if (method === "open") {
-            onOpen._listener = listener;
-            this.on(method, onOpen);
-        }
-    }
-};
-
-module.exports = EventTarget;
-// hack-puppeteer - module.exports
-const addEventListener = EventTarget.addEventListener;
-
-
-
-/*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
 */
 "use strict";
@@ -529,7 +466,11 @@ const readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
         websocket1._sender.send(data, opts, cb);
     }
 
-websocket1.addEventListener = EventTarget.addEventListener;
+websocket1.addEventListener = function (method, listener) {
+    websocket1.on(method, function onMessage(data) {
+        listener.call(websocket1, data);
+    });
+};
 
 module.exports = websocket1;
 
@@ -866,8 +807,8 @@ class Connection extends EventEmitter {
         this._callbacks = new Map();
         this._delay = delay;
 
-        websocket1.addEventListener("message", function (evt) {
-            that._onMessage(evt.data);
+        websocket1.addEventListener("message", function (data) {
+            that._onMessage(data);
         });
         /** @type {!Map<string, !CDPSession>}*/
         this._sessions = new Map();
