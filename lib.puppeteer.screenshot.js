@@ -123,24 +123,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/event-target.js
 'use strict';
 
 /**
-  * Class representing an event.
-  *
-  * @private
-  */
-class Event {
-    /**
-      * Create a new `Event`.
-      *
-      * @param {String} type The name of the event
-      * @param {Object} target A reference to the target to which the event was dispatched
-      */
-    constructor(type, target) {
-        this.target = target;
-        this.type = type;
-    }
-}
-
-/**
   * Class representing a message event.
   *
   * @extends Event
@@ -154,8 +136,8 @@ class MessageEvent extends Event {
       * @param {WebSocket} target A reference to the target to which the event was dispatched
       */
     constructor(data, target) {
-        super('message', target);
-
+        this.type = "message";
+        this.target = target;
         this.data = data;
     }
 }
@@ -175,9 +157,8 @@ class CloseEvent extends Event {
       * @param {WebSocket} target A reference to the target to which the event was dispatched
       */
     constructor(code, reason, target) {
-        super('close', target);
-
-        this.wasClean = target._closeFrameReceived && target._closeFrameSent;
+        this.type = "close";
+        this.target = target;
         this.reason = reason;
         this.code = code;
     }
@@ -196,7 +177,8 @@ class OpenEvent extends Event {
       * @param {WebSocket} target A reference to the target to which the event was dispatched
       */
     constructor(target) {
-        super('open', target);
+        this.type = "open";
+        this.target = target;
     }
 }
 
