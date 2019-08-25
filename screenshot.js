@@ -438,9 +438,9 @@ await Promise.all([
         });
         await fsWriteFile(".aa.png", Buffer.from(result.data, "base64"));
     }()),
+    // screenshot - html
     (async function () {
         var result;
-        // screenshot - html
         result = page._frameManager._mainFrame._secondaryWorld._contextPromise;
         result = await local.identity(result);
         result = await result._evaluateInternal(
