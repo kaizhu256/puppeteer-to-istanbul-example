@@ -283,7 +283,7 @@ await new Promise(function (resolve, reject) {
     };
     onLine = function (line) {
         browserWSEndpoint = (
-            /^DevTools\u0020listening\u0020on\u0020(ws:\/\/.*)$/
+            /^DevTools\u0020listening\u0020on\u0020(ws:\/\/.+?)$/
         ).exec(line);
         if (browserWSEndpoint) {
             cleanup();
