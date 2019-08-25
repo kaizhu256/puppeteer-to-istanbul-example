@@ -307,7 +307,6 @@ await new Promise(function (resolve, reject) {
         connection.onmessage(evt.data);
     });
     connection.addEventListener("close", connection.onclose);
-    });
     connection.addEventListener("open", resolve);
     connection.addEventListener("error", reject);
 });
