@@ -300,7 +300,6 @@ gotoNext = async function (err, data) {
         // init websocket1
         websocket1 = module.exports.websocket1;
         module.exports.initAsClient(websocket1, urlInspect, "");
-        websocket1.addeventlistener("close", process.exit);
         websocket1.once("open", gotoNextData);
         websocket1.once("error", gotoNext);
         break;
