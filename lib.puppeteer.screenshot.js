@@ -99,7 +99,7 @@ module.exports = {
     kStatusCode: Symbol("status-code"),
     kWebSocket: Symbol("websocket"),
     EMPTY_BUFFER: Buffer.alloc(0),
-    NOOP: () => {}
+    NOOP: function () {}
 };
 // hack-puppeteer - module.exports
 const {
@@ -299,7 +299,9 @@ class Receiver extends Writable {
     consume(n) {
         this._bufferedBytes -= n;
 
-        if (n === this._buffers[0].length) return this._buffers.shift();
+        if (n === this._buffers[0].length) {
+            return this._buffers.shift();
+        }
 
         if (n < this._buffers[0].length) {
             const buf = this._buffers[0];
@@ -368,9 +370,13 @@ class Receiver extends Writable {
 
         this._masked = (buf[1] & 0x80) === 0x80;
 
-        if (this._payloadLength === 126) this._state = GET_PAYLOAD_LENGTH_16;
-        else if (this._payloadLength === 127) this._state = GET_PAYLOAD_LENGTH_64;
-        else return this.haveLength();
+        if (this._payloadLength === 126) {
+            this._state = GET_PAYLOAD_LENGTH_16
+        } else if (this._payloadLength === 127) {
+            this._state = GET_PAYLOAD_LENGTH_64;
+        } else {
+            return this.haveLength();
+        }
     }
 
     /**
@@ -2047,9 +2053,11 @@ class Page extends EventEmitter {
 
         client.on("Page.domContentEventFired", event => this.emit(Events.Page.DOMContentLoaded));
         client.on("Page.loadEventFired", event => this.emit(Events.Page.Load));
-        this._target._isClosedPromise.then(() => {
-            this.emit(Events.Page.Close);
-            this._closed = true;
+        var that;
+        that = this;
+        this._target._isClosedPromise.then(function () {
+            that.emit(Events.Page.Close);
+            that._closed = true;
         });
     }
 
