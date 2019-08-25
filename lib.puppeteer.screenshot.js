@@ -891,7 +891,7 @@ class Browser extends EventEmitter {
         this._process = process;
         this._connection = connection;
         this._closeCallback = closeCallback;
-        this._defaultContext = new BrowserContext(this._connection, this, null);
+        this._defaultContext = new BrowserContext(this._connection, this);
         /** @type {Map<string, BrowserContext>} */
         this._contexts = new Map();
         /** @type {Map<string, Target>} */

@@ -316,7 +316,6 @@ connection = new module.exports.Connection(browserWSEndpoint, connection, 0);
 browser = await module.exports.Browser.create(
     connection,
     [],
-    false,
     {
         width: 800,
         height: 600
@@ -337,7 +336,6 @@ page._pagePromise = page._sessionFactory().then(function (client) {
     return module.exports.Page.create(
         client,
         page,
-        page._ignoreHTTPSErrors,
         page._defaultViewport
     );
 });
