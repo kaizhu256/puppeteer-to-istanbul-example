@@ -218,15 +218,13 @@ class Receiver extends Writable {
       *
       * @param {String} binaryType The type for binary data
       * @param {Object} extensions An object containing the negotiated extensions
-      * @param {Number} maxPayload The maximum allowed message length
       */
-    constructor(binaryType, extensions, maxPayload) {
+    constructor(binaryType, extensions) {
         super();
 
         this._binaryType = binaryType;
         this[kWebSocket] = undefined;
         this._extensions = extensions;
-        this._maxPayload = maxPayload | 0;
 
         this._bufferedBytes = 0;
         this._buffers = [];
@@ -559,9 +557,6 @@ const protocolVersions = [8, 13];
       * @param {Object} options Connection options
       */
     const websocket1 = new EventEmitter();
-    //!! (address, protocols, options) {
-        //!! super();
-
         websocket1.readyState = websocket1.CONNECTING;
         websocket1.protocol = "";
 
@@ -583,14 +578,12 @@ const protocolVersions = [8, 13];
       *
       * @param {net.Socket} socket The network socket between the server and client
       * @param {Buffer} head The first packet of the upgraded stream
-      * @param {Number} maxPayload The maximum allowed message size
       * @private
       */
-    websocket1.setSocket = function (socket, head, maxPayload) {
+    websocket1.setSocket = function (socket, head) {
         const receiver = new Receiver(
             websocket1._binaryType,
-            websocket1._extensions,
-            maxPayload
+            websocket1._extensions
         );
 
         websocket1._sender = new Sender(socket, websocket1._extensions);
@@ -673,7 +666,6 @@ module.exports = websocket1;
   *     header
   * @param {String} options.origin Value of the `Origin` or
   *     `Sec-WebSocket-Origin` header
-  * @param {Number} options.maxPayload The maximum allowed message size
   * @param {Boolean} options.followRedirects Whether or not to follow redirects
   * @param {Number} options.maxRedirects The maximum number of redirects allowed
   * @private
@@ -682,7 +674,6 @@ function initAsClient(websocket, address, protocols, options) {
     const opts = Object.assign(
         {
             protocolVersion: protocolVersions[1],
-            maxPayload: 100 * 1024 * 1024,
             followRedirects: false,
             maxRedirects: 10
         },
@@ -750,7 +741,7 @@ function initAsClient(websocket, address, protocols, options) {
     /,\u0020*/
 );
         var protError;
-        websocket.setSocket(socket, head, opts.maxPayload);
+        websocket.setSocket(socket, head, 256 * 1024 * 1024 // 256Mb);
     });
 }
 
@@ -1010,8 +1001,6 @@ class Connection extends EventEmitter {
         websocket1.addEventListener("message", function (evt) {
             that._onMessage(evt.data);
         });
-        //!! websocket1.onmessage = this._onMessage.bind(this);
-        //!! websocket1.onclose = this._onClose.bind(this);
         /** @type {!Map<string, !CDPSession>}*/
         this._sessions = new Map();
         this._closed = false;
@@ -1311,7 +1300,6 @@ class ExecutionContext {
         callFunctionOnPromise = this._client.send("Runtime.callFunctionOn", {
             functionDeclaration: functionText + "\n" + suffix + "\n",
             executionContextId: this._contextId,
-            //!! arguments: args.map(convertArgument.bind(this)),
             returnByValue,
             awaitPromise: true,
             userGesture: true
@@ -1353,7 +1341,6 @@ class FrameManager extends EventEmitter {
         this._client.on("Page.frameStoppedLoading", event => this._onFrameStoppedLoading(event.frameId));
         this._client.on("Runtime.executionContextCreated", event => this._onExecutionContextCreated(event.context));
         this._client.on("Runtime.executionContextDestroyed", event => this._onExecutionContextDestroyed(event.executionContextId));
-        //!! this._client.on('Runtime.executionContextsCleared', event => this._onExecutionContextsCleared());
         this._client.on("Page.lifecycleEvent", event => this._onLifecycleEvent(event));
     }
 
