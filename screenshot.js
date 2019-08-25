@@ -366,28 +366,38 @@ try {
         ]);
         timeoutId = setTimeout(onTimeout, timeout);
     });
-    browser = await new Promise(function (resolve, reject) {
-        const ws = new module.exports.WebSocket(browserWSEndpoint, [], {
-            maxPayload: 256 * 1024 * 1024 // 256Mb
+
+    function WebSocketTransport() {
+        return;
+    }
+    WebSocketTransport.create = function (url) {
+        return new Promise(function (resolve, reject) {
+            const ws = new module.exports.WebSocket(url, [], {
+                maxPayload: 256 * 1024 * 1024 // 256Mb
+            });
+            ws.addEventListener("message", function (event) {
+                ws.onmessage(event.data);
+            });
+            ws.addEventListener("close", function () {
+                ws.onclose();
+            });
+            ws.addEventListener("open", function () {
+                resolve(ws);
+            });
+            ws.addEventListener("error", reject);
         });
-        ws.addEventListener("message", function (event) {
-            ws.onmessage(event.data);
-        });
-        ws.addEventListener("close", function () {
-            ws.onclose();
-        });
-        ws.addEventListener("open", function () {
-            resolve(ws);
-        });
-        ws.addEventListener("error", reject);
-    });
-    browser = new module.exports.Connection(
+    }
+
+    connection = await WebSocketTransport.create(
+        browserWSEndpoint
+    );
+    connection = new module.exports.Connection(
         browserWSEndpoint,
-        browser,
+        connection,
         0
     );
     browser = await module.exports.Browser.create(
-        browser,
+        connection,
         [],
         false,
         {
