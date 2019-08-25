@@ -967,11 +967,14 @@ class Browser extends EventEmitter {
 
     /**
       * @param {function(!Target):boolean} predicate
-      * @param {{timeout?: number}=} options
       * @return {!Promise<!Target>}
       */
-    async waitForTarget(predicate, options = {}) {
-        return Array.from(this._targets.values()).filter(target => target._isInitialized).find(predicate);
+    async waitForTarget(predicate) {
+        return Array.from(this._targets.values()).filter(function (target) {
+            return target._isInitialized;
+        }).find(function (target) {
+            return target._targetInfo.type === "page";
+        });
     }
 
     async close() {
