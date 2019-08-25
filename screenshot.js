@@ -366,16 +366,26 @@ try {
         ]);
         timeoutId = setTimeout(onTimeout, timeout);
     });
-    connection = await module.exports.WebSocketTransport.create(
-        browserWSEndpoint
-    );
-    connection = new module.exports.Connection(
+    browser = await new Promise(function (resolve, reject) {
+        const ws = new module.exports.WebSocket(browserWSEndpoint, [], {
+            maxPayload: 256 * 1024 * 1024 // 256Mb
+        });
+        ws.addEventListener("message", function (event) {
+            ws.onmessage(event.data);
+        });
+        ws.addEventListener("close", ws.onclose);
+        ws.addEventListener("open", function () {
+            resolve(ws);
+        });
+        ws.addEventListener("error", reject);
+    });
+    browser = new module.exports.Connection(
         browserWSEndpoint,
-        connection,
+        browser,
         0
     );
     browser = await module.exports.Browser.create(
-        connection,
+        browser,
         [],
         false,
         {

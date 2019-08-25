@@ -2208,36 +2208,13 @@ class Target {
     }
 }
 
-module.exports = {Target};
 
-
-
-function WebSocketTransport () {
-    return;
-}
-WebSocketTransport.create = function (url) {
-    return new Promise(function (resolve, reject) {
-        const ws = new WebSocket(url, [], {
-            maxPayload: 256 * 1024 * 1024, // 256Mb
-        });
-        ws.addEventListener("message", function (event) {
-            ws.onmessage(event.data);
-        });
-        ws.addEventListener("close", function (event) {
-            ws.onclose();
-        });
-        ws.addEventListener("open", function () {
-            resolve(ws);
-        });
-        ws.addEventListener("error", reject);
-    });
-}
 
 module.exports = {
         Browser,
         Connection,
         LifecycleWatcher,
-        WebSocketTransport,
+        WebSocket,
         helper
 };
 /*
