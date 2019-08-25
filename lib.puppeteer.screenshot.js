@@ -892,7 +892,7 @@ class Browser extends EventEmitter {
         /** @type {Map<string, BrowserContext>} */
         this._contexts = new Map();
         /** @type {Map<string, Target>} */
-        this._targets = new Map();
+        this.targetDict = {};
         this._connection.on(Events.Connection.Disconnected, () => this.emit(Events.Browser.Disconnected));
         this._connection.on("Target.targetCreated", this._targetCreated.bind(this));
         this._connection.on("Target.targetDestroyed", this._targetDestroyed.bind(this));
@@ -930,8 +930,7 @@ class Browser extends EventEmitter {
             target._initializedCallback(true);
         }
 
-        assert(!this._targets.has(event.targetInfo.targetId), "Target should not exist before targetCreated");
-        this._targets.set(event.targetInfo.targetId, target);
+        this.targetDict[event.targetInfo.targetId] = target;
         this.emit(Events.Browser.TargetCreated, target);
         context.emit(Events.BrowserContext.TargetCreated, target);
     }
@@ -940,9 +939,9 @@ class Browser extends EventEmitter {
       * @param {{targetId: string}} event
       */
     async _targetDestroyed(event) {
-        const target = this._targets.get(event.targetId);
+        const target = this.targetDict[event.targetId];
         target._initializedCallback(false);
-        this._targets.delete(event.targetId);
+        delete this.targetDict[event.targetId];
         target._closedCallback();
         this.emit(Events.Browser.TargetDestroyed, target);
         target._browserContext.emit(Events.BrowserContext.TargetDestroyed, target);
@@ -952,7 +951,7 @@ class Browser extends EventEmitter {
       * @param {!Protocol.Target.targetInfoChangedPayload} event
       */
     _targetInfoChanged(event) {
-        const target = this._targets.get(event.targetInfo.targetId);
+        const target = this.targetDict[event.targetInfo.targetId];
         assert(target, "target should exist before targetInfoChanged");
         const previousURL = target._url;
         const wasInitialized = target._isInitialized;
