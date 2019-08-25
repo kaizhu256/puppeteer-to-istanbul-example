@@ -8,8 +8,8 @@
     "coverage0": "node index.js",
     "coverage": "npm_config_mode_coverage=node_modules ~/lib.utility2.sh shIstanbulCover index.js",
     "postcoverage": "ls -l .; nyc report --reporter=html; ls -l coverage/",
-    "screenshot0": "rm -f .aa.* && node screenshot.js && ls -l .aa.*",
-    "screenshot": "rm -f .aa.* && npm_config_mode_coverage=node_modules ~/lib.utility2.sh shIstanbulCover screenshot.js && ls -l .aa.*",
+    "screenshot0": "rm -f tmp/aa.* && node screenshot.js && ls -l tmp/aa.*",
+    "screenshot": "rm -f tmp/aa.* && npm_config_mode_coverage=node_modules ~/lib.utility2.sh shIstanbulCover screenshot.js && ls -l tmp/aa.*",
     "test": "standard"
   },
   "keywords": [

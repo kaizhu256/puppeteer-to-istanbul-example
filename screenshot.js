@@ -460,7 +460,7 @@ await Promise.all([
         result = await page._client.send("Page.captureScreenshot", {
             format: "png"
         });
-        await fsWriteFile(".aa.png", Buffer.from(result.data, "base64"));
+        await fsWriteFile("tmp/aa.png", Buffer.from(result.data, "base64"));
     }()),
     // screenshot - html
     (async function () {
@@ -480,7 +480,7 @@ if (document.documentElement) {
 return html.trim()` + " + \"\\n\""
             )
         );
-        await fsWriteFile(".aa.html", result);
+        await fsWriteFile("tmp/aa.html", result);
     }())
 ]);
 
