@@ -1581,13 +1581,6 @@ class FrameManager extends EventEmitter {
     }
 
     /**
-      * @return {!Array<!Frame>}
-      */
-    frames() {
-        return Array.from(this._frames.values());
-    }
-
-    /**
       * @param {!string} frameId
       * @return {?Frame}
       */
@@ -1628,7 +1621,7 @@ class FrameManager extends EventEmitter {
             source: `//# sourceURL=${EVALUATION_SCRIPT_URL}`,
             worldName: name,
         }),
-        await Promise.all(this.frames().map(frame => this._client.send('Page.createIsolatedWorld', {
+        await Promise.all(Array.from(this._frames.values()).map(frame => this._client.send('Page.createIsolatedWorld', {
             frameId: frame._id,
             grantUniveralAccess: true,
             worldName: name,
@@ -1690,16 +1683,6 @@ class Frame {
         this._mainWorld = new DOMWorld(frameManager, this);
         /** @type {!DOMWorld} */
         this._secondaryWorld = new DOMWorld(frameManager, this);
-
-        /** @type {!Set<!Frame>} */
-        this._childFrames = new Set();
-    }
-
-    /**
-      * @return {!Array.<!Frame>}
-      */
-    childFrames() {
-        return Array.from(this._childFrames);
     }
 
     /**
