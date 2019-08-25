@@ -1697,7 +1697,7 @@ class FrameManager extends EventEmitter {
       * @return {?Frame}
       */
     frame(frameId) {
-        return this._frames.get(frameId) || null;
+        return this._frames.get(frameId);
     }
 
     /**
@@ -1705,32 +1705,22 @@ class FrameManager extends EventEmitter {
       */
     _onFrameNavigated(framePayload) {
         const isMainFrame = !framePayload.parentId;
-        let frame = isMainFrame ? this._mainFrame : this._frames.get(framePayload.id);
-        assert(isMainFrame || frame, 'We either navigate top level or have old version of the navigated frame');
-
-        // Detach all child frames first.
-        if (frame) {
-            for (const child of frame.childFrames())
-                this._removeFramesRecursively(child);
-        }
+        let frame = this._mainFrame
+        assert(isMainFrame, 'We either navigate top level or have old version of the navigated frame');
 
         // Update or create main frame.
-        if (isMainFrame) {
-            if (frame) {
-                // Update frame id to retain frame identity on cross-process navigation.
-                this._frames.delete(frame._id);
-                frame._id = framePayload.id;
-            } else {
-                // Initial main frame navigation.
-                frame = new Frame(this, this._client, null, framePayload.id);
-            }
-            this._frames.set(framePayload.id, frame);
-            this._mainFrame = frame;
+        if (frame) {
+            // Update frame id to retain frame identity on cross-process navigation.
+            this._frames.delete(frame._id);
+            frame._id = framePayload.id;
+        } else {
+            // Initial main frame navigation.
+            frame = new Frame(this, this._client, null, framePayload.id);
         }
-
+        this._frames.set(framePayload.id, frame);
+        this._mainFrame = frame;
         // Update frame payload.
         frame._navigated(framePayload);
-
         this.emit(Events.FrameManager.FrameNavigated, frame);
     }
 
@@ -1738,8 +1728,6 @@ class FrameManager extends EventEmitter {
       * @param {string} name
       */
     async _ensureIsolatedWorld(name) {
-        if (this._isolatedWorlds.has(name))
-            return;
         this._isolatedWorlds.add(name);
         await this._client.send('Page.addScriptToEvaluateOnNewDocument', {
             source: `//# sourceURL=${EVALUATION_SCRIPT_URL}`,
@@ -1753,25 +1741,22 @@ class FrameManager extends EventEmitter {
     }
 
     _onExecutionContextCreated(contextPayload) {
-        const frameId = contextPayload.auxData ? contextPayload.auxData.frameId : null;
-        const frame = this._frames.get(frameId) || null;
+        const frameId = contextPayload.auxData.frameId;
+        const frame = this._frames.get(frameId)
         let world = null;
-        if (frame) {
-            if (contextPayload.auxData && !!contextPayload.auxData['isDefault']) {
-                world = frame._mainWorld;
-            } else if (contextPayload.name === UTILITY_WORLD_NAME && !frame._secondaryWorld._hasContext()) {
-                // In case of multiple sessions to the same target, there's a race between
-                // connections so we might end up creating multiple isolated worlds.
-                // We can use either.
-                world = frame._secondaryWorld;
-            }
+        if (contextPayload.auxData && !!contextPayload.auxData['isDefault']) {
+            world = frame._mainWorld;
+        } else if (contextPayload.name === UTILITY_WORLD_NAME && !frame._secondaryWorld._hasContext()) {
+            // In case of multiple sessions to the same target, there's a race between
+            // connections so we might end up creating multiple isolated worlds.
+            // We can use either.
+            world = frame._secondaryWorld;
         }
         if (contextPayload.auxData && contextPayload.auxData['type'] === 'isolated')
             this._isolatedWorlds.add(contextPayload.name);
         /** @type {!ExecutionContext} */
         const context = new ExecutionContext(this._client, contextPayload, world);
-        if (world)
-            world._setContext(context);
+        world._setContext(context);
         this._contextIdToContext.set(contextPayload.id, context);
     }
 
@@ -1780,11 +1765,8 @@ class FrameManager extends EventEmitter {
       */
     _onExecutionContextDestroyed(executionContextId) {
         const context = this._contextIdToContext.get(executionContextId);
-        if (!context)
-            return;
         this._contextIdToContext.delete(executionContextId);
-        if (context._world)
-            context._world._setContext(null);
+        context._world._setContext(null);
     }
 }
 
@@ -1816,8 +1798,6 @@ class Frame {
 
         /** @type {!Set<!Frame>} */
         this._childFrames = new Set();
-        if (this._parentFrame)
-            this._parentFrame._childFrames.add(this);
     }
 
     /**
@@ -1905,10 +1885,7 @@ class LifecycleWatcher {
       * @param {number} timeout
       */
     constructor(frameManager, frame, waitUntil, timeout) {
-        if (Array.isArray(waitUntil))
-            waitUntil = waitUntil.slice();
-        else if (typeof waitUntil === 'string')
-            waitUntil = [waitUntil];
+        waitUntil = waitUntil.slice();
         this._expectedLifecycle = waitUntil.map(value => {
             const protocolEvent = puppeteerToProtocolLifecycle[value];
             assert(protocolEvent, 'Unknown value for options.waitUntil: ' + value);
