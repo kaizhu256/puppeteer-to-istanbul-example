@@ -941,7 +941,13 @@ class Browser extends EventEmitter {
         assert(target, "target should exist before targetInfoChanged");
         const previousURL = target._url;
         const wasInitialized = target._isInitialized;
-        target._targetInfoChanged(event.targetInfo);
+        target._targetInfo = event.targetInfo;
+
+        if (!target._isInitialized && (target._targetInfo.type !== "page" || target._targetInfo.url !== "")) {
+            target._isInitialized = true;
+            target._initializedCallback(true);
+            return;
+        }
     }
 
     /**
@@ -1931,19 +1937,6 @@ class Target {
       */
     browserContext() {
         return this._browserContext;
-    }
-
-    /**
-      * @param {!Protocol.Target.TargetInfo} targetInfo
-      */
-    _targetInfoChanged(targetInfo) {
-        this._targetInfo = targetInfo;
-
-        if (!this._isInitialized && (this._targetInfo.type !== "page" || this._targetInfo.url !== "")) {
-            this._isInitialized = true;
-            this._initializedCallback(true);
-            return;
-        }
     }
 }
 
