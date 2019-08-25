@@ -930,7 +930,7 @@ class Browser extends EventEmitter {
         this._targets.delete(event.targetId);
         target._closedCallback();
         this.emit(Events.Browser.TargetDestroyed, target);
-        target.browserContext().emit(Events.BrowserContext.TargetDestroyed, target);
+        target._browserContext.emit(Events.BrowserContext.TargetDestroyed, target);
     }
 
     /**
@@ -1930,13 +1930,6 @@ class Target {
         this._pagePromise = this._sessionFactory()
         .then(client => Page.create(client, this, this._ignoreHTTPSErrors, this._defaultViewport));
         return this._pagePromise;
-    }
-
-    /**
-      * @return {!Puppeteer.BrowserContext}
-      */
-    browserContext() {
-        return this._browserContext;
     }
 }
 
