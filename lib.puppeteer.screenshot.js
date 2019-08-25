@@ -2025,23 +2025,6 @@ class Request {
     }
 }
 
-const errorReasons = {
-    'aborted': 'Aborted',
-    'accessdenied': 'AccessDenied',
-    'addressunreachable': 'AddressUnreachable',
-    'blockedbyclient': 'BlockedByClient',
-    'blockedbyresponse': 'BlockedByResponse',
-    'connectionaborted': 'ConnectionAborted',
-    'connectionclosed': 'ConnectionClosed',
-    'connectionfailed': 'ConnectionFailed',
-    'connectionrefused': 'ConnectionRefused',
-    'connectionreset': 'ConnectionReset',
-    'internetdisconnected': 'InternetDisconnected',
-    'namenotresolved': 'NameNotResolved',
-    'timedout': 'TimedOut',
-    'failed': 'Failed',
-};
-
 class Response {
     /**
       * @param {!Puppeteer.CDPSession} client
@@ -2241,13 +2224,6 @@ class Target {
         this._pagePromise = this._sessionFactory()
                 .then(client => Page.create(client, this, this._ignoreHTTPSErrors, this._defaultViewport));
         return this._pagePromise;
-    }
-
-    /**
-      * @return {string}
-      */
-    url() {
-        return this._targetInfo.url;
     }
 
     /**
