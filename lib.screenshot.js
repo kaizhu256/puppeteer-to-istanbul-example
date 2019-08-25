@@ -444,31 +444,6 @@ const readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
         websocket1.emit("close", websocket1._closeCode, websocket1._closeMessage);
     }
 
-    /**
-      * Send a data message.
-      *
-      * @param {*} data The message to send
-      * @param {Object} options Options object
-      * @param {Boolean} options.compress Specifies whether or not to compress `data`
-      * @param {Boolean} options.binary Specifies whether `data` is binary or text
-      * @param {Boolean} options.fin Specifies whether the fragment is the last one
-      * @param {Boolean} options.mask Specifies whether or not to mask `data`
-      * @param {Function} cb Callback which is executed when data is written out
-      * @public
-      */
-    websocket1.send = function (data, options, cb) {
-        const opts = Object.assign(
-            {
-                binary: typeof data !== "string",
-                mask: !websocket1._isServer,
-                compress: true,
-                fin: true
-            },
-            options
-        );
-        websocket1._sender.send(data, opts, cb);
-    }
-
 module.exports = websocket1;
 
 /**
@@ -498,8 +473,6 @@ function initAsClient(websocket1, address) {
     const key = crypto.randomBytes(16).toString("base64");
     const get = http.get;
     const path = parsedUrl.pathname || "/";
-
-    opts.createConnection = netConnect;
     opts.defaultPort = opts.defaultPort || defaultPort;
     opts.port = parsedUrl.port;
     opts.host = parsedUrl.hostname;
@@ -556,23 +529,6 @@ function initAsClient(websocket1, address) {
         socket.on("error", console.error);
         websocket1.emit("open");
     });
-}
-
-/**
-  * Create a `net.Socket` and initiate a connection.
-  *
-  * @return {net.Socket} The newly created socket used to start the connection
-  * @private
-  */
-function netConnect(options) {
-    //
-    // Override `options.path` only if `options` is a copy of the original options
-    // object. This is always true on Node.js >= 8 but not on Node.js 6 where
-    // `options.socketPath` might be `undefined` even if the `socketPath` option
-    // was originally set.
-    //
-    options.path = options.socketPath;
-    return net.connect(options);
 }
 
 /**
@@ -812,7 +768,12 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         connection1._lastId += 1;
         const id = connection1._lastId;
         message = JSON.stringify(Object.assign({}, message, {id}));
-        websocket1.send(message);
+        websocket1._sender.send(message, {
+            binary: typeof message !== "string",
+            mask: !websocket1._isServer,
+            compress: true,
+            fin: true
+        });
         return id;
     }
 
