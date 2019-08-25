@@ -542,52 +542,20 @@ const readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
 const protocolVersions = [8, 13];
 
     const websocket1 = new EventEmitter();
-        websocket1.readyState = websocket1.CONNECTING;
-        websocket1.protocol = "";
+    websocket1.protocol = "";
 
-        websocket1._binaryType = BINARY_TYPES[0];
-        websocket1._closeFrameReceived = false;
-        websocket1._closeFrameSent = false;
-        websocket1._closeMessage = "";
-        websocket1._closeTimer = null;
-        websocket1._closeCode = 1006;
-        websocket1._extensions = {};
-        websocket1._receiver = null;
-        websocket1._sender = null;
-        websocket1._socket = null;
-        websocket1._isServer = false;
-        websocket1._redirects = 0;
-
-    /**
-      * Set up the socket and the internal resources.
-      *
-      * @param {net.Socket} socket The network socket between the server and client
-      * @param {Buffer} head The first packet of the upgraded stream
-      * @private
-      */
-    websocket1.setSocket = function (socket, head) {
-        const receiver = new Receiver(
-            websocket1._binaryType,
-            websocket1._extensions
-        );
-
-        websocket1._sender = new Sender(socket, websocket1._extensions);
-        websocket1._receiver = receiver;
-        websocket1._socket = socket;
-
-        receiver.on("drain", receiverOnDrain);
-        receiver.on("message", receiverOnMessage);
-
-        socket.setTimeout(0);
-        socket.setNoDelay();
-        socket.on("close", socketOnClose);
-        socket.on("data", socketOnData);
-        socket.on("end", socketOnEnd);
-        socket.on("error", console.error);
-
-        websocket1.readyState = websocket1.OPEN;
-        websocket1.emit("open");
-    }
+    websocket1._binaryType = BINARY_TYPES[0];
+    websocket1._closeFrameReceived = false;
+    websocket1._closeFrameSent = false;
+    websocket1._closeMessage = "";
+    websocket1._closeTimer = null;
+    websocket1._closeCode = 1006;
+    websocket1._extensions = {};
+    websocket1._receiver = null;
+    websocket1._sender = null;
+    websocket1._socket = null;
+    websocket1._isServer = false;
+    websocket1._redirects = 0;
 
     /**
       * Emit the `'close'` event.
@@ -595,7 +563,6 @@ const protocolVersions = [8, 13];
       * @private
       */
     websocket1.emitClose = function () {
-        websocket1.readyState = websocket1.CLOSED;
         websocket1._receiver.removeAllListeners();
         websocket1.emit("close", websocket1._closeCode, websocket1._closeMessage);
     }
@@ -624,10 +591,6 @@ const protocolVersions = [8, 13];
         );
         websocket1._sender.send(data, opts, cb);
     }
-
-readyStates.forEach((readyState, i) => {
-    websocket1[readyState] = i;
-});
 
 websocket1.addEventListener = EventTarget.addEventListener;
 
@@ -721,8 +684,32 @@ function initAsClient(websocket1, address, protocols, options) {
         const protList = (protocols || "").split(
     /,\u0020*/
 );
-        var protError;
-        websocket1.setSocket(socket, head);
+        const receiver = new Receiver(
+            websocket1._binaryType,
+            websocket1._extensions
+        );
+
+        /**
+          * Set up the socket and the internal resources.
+          *
+          * @param {net.Socket} socket The network socket between the server and client
+          * @param {Buffer} head The first packet of the upgraded stream
+          * @private
+          */
+        websocket1._sender = new Sender(socket, websocket1._extensions);
+        websocket1._receiver = receiver;
+        websocket1._socket = socket;
+
+        receiver.on("drain", receiverOnDrain);
+        receiver.on("message", receiverOnMessage);
+
+        socket.setTimeout(0);
+        socket.setNoDelay();
+        socket.on("close", socketOnClose);
+        socket.on("data", socketOnData);
+        socket.on("end", socketOnEnd);
+        socket.on("error", console.error);
+        websocket1.emit("open");
     });
 }
 
@@ -772,8 +759,6 @@ function socketOnClose() {
     this.removeListener("close", socketOnClose);
     this.removeListener("end", socketOnEnd);
 
-    websocket1.readyState = websocket1.CLOSING;
-
     //
     // The close frame might not have been received or the `'end'` event emitted,
     // for example, if the socket was destroyed due to an error. Ensure that the
@@ -810,7 +795,6 @@ function socketOnData(chunk) {
   * @private
   */
 function socketOnEnd() {
-    websocket1.readyState = websocket1.CLOSING;
     websocket1._receiver.end();
     this.end();
 }
