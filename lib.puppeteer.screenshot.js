@@ -966,19 +966,12 @@ class Browser extends EventEmitter {
     }
 
     /**
-      * @return {!Array<!Target>}
-      */
-    targets() {
-        return Array.from(this._targets.values()).filter(target => target._isInitialized);
-    }
-
-    /**
       * @param {function(!Target):boolean} predicate
       * @param {{timeout?: number}=} options
       * @return {!Promise<!Target>}
       */
     async waitForTarget(predicate, options = {}) {
-        return this.targets().find(predicate);
+        return Array.from(this._targets.values()).filter(target => target._isInitialized).find(predicate);
     }
 
     async close() {
