@@ -434,16 +434,6 @@ const readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
     websocket1._isServer = false;
     websocket1._redirects = 0;
 
-    /**
-      * Emit the `'close'` event.
-      *
-      * @private
-      */
-    websocket1.emitClose = function () {
-        websocket1._receiver.removeAllListeners();
-        websocket1.emit("close", websocket1._closeCode, websocket1._closeMessage);
-    }
-
 module.exports = websocket1;
 
 /**
@@ -574,7 +564,8 @@ function socketOnClose() {
 
     this.removeListener("data", socketOnData);
     clearTimeout(websocket1._closeTimer);
-    websocket1.emitClose();
+    websocket1._receiver.removeAllListeners();
+    websocket1.emit("close", websocket1._closeCode, websocket1._closeMessage);
 }
 
 /**
