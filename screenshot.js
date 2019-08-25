@@ -326,7 +326,7 @@ var target;
 target = await connection.send("Target.createTarget", {
     url: "about:blank"
 });
-target = await browser._defaultContext._browser._targets.get(target.targetId);
+target = await browser._targets.get(target.targetId);
 page = await connection.createSession(target._targetInfo);
 page = await module.exports.Page.create(page, target);
 //!! page.then(function (client) {
