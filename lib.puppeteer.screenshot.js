@@ -8,9 +8,10 @@
 
 
 
-///* jslint utility2:true */
+/* jslint utility2:true */
 
-/* jslint ignore:start */
+
+
 (function (local) {
 "use strict";
 // hack-puppeteer - module.exports
@@ -36,9 +37,6 @@ const { randomBytes } = require("crypto");
 
 const child_process = require("child_process");
 const debugError = console.error;
-const debugProtocol = function () {
-        return;
-}
 const timeout = 30000;
 
 
@@ -73,7 +71,8 @@ function concat(list, totalLength) {
   * @public
   */
 function _mask(source, mask, output, offset, length) {
-    for (var i = 0; i < length; i++) {
+    var i;
+    for (i = 0; i < length; i++) {
         output[offset + i] = source[i] ^ mask[i & 3];
     }
 }
@@ -92,7 +91,8 @@ lib https://github.com/websockets/ws/blob/6.2.1/constants.js
 "use strict";
 
 module.exports = {
-    BINARY_TYPES: ["nodebuffer", "arraybuffer", "fragments"],
+    BINARY_TYPES: [
+        "nodebuffer", "arraybuffer", "fragments"],
     GUID: "258EAFA5-E914-47DA-95CA-C5AB0DC85B11",
     kStatusCode: Symbol("status-code"),
     kWebSocket: Symbol("websocket"),
@@ -505,7 +505,8 @@ class Sender {
         target[offset - 2] = mask[2];
         target[offset - 1] = mask[3];
         applyMask(data, mask, data, 0, data.length);
-        return [target, data];
+        return [
+            target, data];
     }
 
     /**
@@ -645,7 +646,7 @@ class WebSocket extends EventEmitter {
     emitClose() {
         this.readyState = WebSocket.CLOSED;
         this._receiver.removeAllListeners();
-        this.emit('close', this._closeCode, this._closeMessage);
+        this.emit("close", this._closeCode, this._closeMessage);
     }
 
     /**
@@ -663,7 +664,7 @@ class WebSocket extends EventEmitter {
     send(data, options, cb) {
         const opts = Object.assign(
             {
-                binary: typeof data !== 'string',
+                binary: typeof data !== "string",
                 mask: !this._isServer,
                 compress: true,
                 fin: true
@@ -730,13 +731,14 @@ function initAsClient(websocket, address, protocols, options) {
     //
     parsedUrl = new url.URL(address);
     websocket.url = address;
-    const isUnixSocket = parsedUrl.protocol === 'ws+unix:';
-    const isSecure =
-        parsedUrl.protocol === 'wss:' || parsedUrl.protocol === 'https:';
+    const isUnixSocket = parsedUrl.protocol === "ws+unix:";
+    const isSecure = (
+    parsedUrl.protocol === "wss:" || parsedUrl.protocol === "https:"
+);
     const defaultPort = 80;
-    const key = crypto.randomBytes(16).toString('base64');
+    const key = crypto.randomBytes(16).toString("base64");
     const get = http.get;
-    const path = parsedUrl.pathname || '/';
+    const path = parsedUrl.pathname || "/";
 
     opts.createConnection = netConnect;
     opts.defaultPort = opts.defaultPort || defaultPort;
@@ -744,18 +746,18 @@ function initAsClient(websocket, address, protocols, options) {
     opts.host = parsedUrl.hostname;
     opts.headers = Object.assign(
         {
-            'Sec-WebSocket-Version': opts.protocolVersion,
-            'Sec-WebSocket-Key': key,
-            Connection: 'Upgrade',
-            Upgrade: 'websocket'
+            "Sec-WebSocket-Version": opts.protocolVersion,
+            "Sec-WebSocket-Key": key,
+            Connection: "Upgrade",
+            Upgrade: "websocket"
         },
         opts.headers
     );
     opts.path = path;
     opts.timeout = opts.handshakeTimeout;
     var req = (websocket._req = get(opts));
-    req.on('upgrade', (res, socket, head) => {
-        websocket.emit('upgrade', res);
+    req.on("upgrade", (res, socket, head) => {
+        websocket.emit("upgrade", res);
 
         //
         // The user may have closed the connection from a listener of the `upgrade`
@@ -764,12 +766,14 @@ function initAsClient(websocket, address, protocols, options) {
         req = websocket._req = null;
 
         const digest = crypto
-            .createHash('sha1')
+            .createHash("sha1")
             .update(key + GUID)
-            .digest('base64');
+            .digest("base64");
 
-        const serverProt = res.headers['sec-websocket-protocol'];
-        const protList = (protocols || '').split(/, */);
+        const serverProt = res.headers["sec-websocket-protocol"];
+        const protList = (protocols || "").split(
+    /,\u0020*/
+);
         var protError;
         websocket.setSocket(socket, head, opts.maxPayload);
     });
@@ -809,7 +813,7 @@ function receiverOnDrain() {
   * @private
   */
 function receiverOnMessage(data) {
-    this[kWebSocket].emit('message', data);
+    this[kWebSocket].emit("message", data);
 }
 
 /**
@@ -820,8 +824,8 @@ function receiverOnMessage(data) {
 function socketOnClose() {
     const websocket = this[kWebSocket];
 
-    this.removeListener('close', socketOnClose);
-    this.removeListener('end', socketOnEnd);
+    this.removeListener("close", socketOnClose);
+    this.removeListener("end", socketOnEnd);
 
     websocket.readyState = WebSocket.CLOSING;
 
@@ -838,7 +842,7 @@ function socketOnClose() {
     websocket._socket.read();
     websocket._receiver.end();
 
-    this.removeListener('data', socketOnData);
+    this.removeListener("data", socketOnData);
     this[kWebSocket] = undefined;
     clearTimeout(websocket._closeTimer);
     websocket.emitClose();
@@ -911,7 +915,8 @@ class Browser extends EventEmitter {
       */
     static async create(connection, contextIds, ignoreHTTPSErrors, defaultViewport, process, closeCallback) {
         const browser = new Browser(connection, contextIds, ignoreHTTPSErrors, defaultViewport, process, closeCallback);
-        await connection.send('Target.setDiscoverTargets', {discover: true});
+        await connection.send("Target.setDiscoverTargets", {
+            discover: true});
         return browser;
     }
 
@@ -936,9 +941,9 @@ class Browser extends EventEmitter {
         /** @type {Map<string, Target>} */
         this._targets = new Map();
         this._connection.on(Events.Connection.Disconnected, () => this.emit(Events.Browser.Disconnected));
-        this._connection.on('Target.targetCreated', this._targetCreated.bind(this));
-        this._connection.on('Target.targetDestroyed', this._targetDestroyed.bind(this));
-        this._connection.on('Target.targetInfoChanged', this._targetInfoChanged.bind(this));
+        this._connection.on("Target.targetCreated", this._targetCreated.bind(this));
+        this._connection.on("Target.targetDestroyed", this._targetDestroyed.bind(this));
+        this._connection.on("Target.targetInfoChanged", this._targetInfoChanged.bind(this));
     }
 
     /**
@@ -946,11 +951,12 @@ class Browser extends EventEmitter {
       */
     async _targetCreated(event) {
         const targetInfo = event.targetInfo;
-        const {browserContextId} = targetInfo;
+        const {
+            browserContextId} = targetInfo;
         const context = this._defaultContext;
 
         const target = new Target(targetInfo, context, () => this._connection.createSession(targetInfo), this._ignoreHTTPSErrors, this._defaultViewport);
-        assert(!this._targets.has(event.targetInfo.targetId), 'Target should not exist before targetCreated');
+        assert(!this._targets.has(event.targetInfo.targetId), "Target should not exist before targetCreated");
         this._targets.set(event.targetInfo.targetId, target);
         this.emit(Events.Browser.TargetCreated, target);
         context.emit(Events.BrowserContext.TargetCreated, target);
@@ -973,7 +979,7 @@ class Browser extends EventEmitter {
       */
     _targetInfoChanged(event) {
         const target = this._targets.get(event.targetInfo.targetId);
-        assert(target, 'target should exist before targetInfoChanged');
+        assert(target, "target should exist before targetInfoChanged");
         const previousURL = target._url;
         const wasInitialized = target._isInitialized;
         target._targetInfoChanged(event.targetInfo);
@@ -1042,7 +1048,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
   * limitations under the License.
   */
 // const {Events} = require('./Events');
-// const debugProtocol = require('debug')('puppeteer:protocol');
 // const EventEmitter = require('events');
 
 class Connection extends EventEmitter {
@@ -1075,9 +1080,11 @@ class Connection extends EventEmitter {
     send(method, params = {}) {
         var that;
         that = this;
-        const id = that._rawSend({method, params});
+        const id = that._rawSend({
+            method, params});
         return new Promise(function (resolve, reject) {
-            that._callbacks.set(id, {resolve, reject, error: new Error(), method});
+            that._callbacks.set(id, {
+                resolve, reject, error: new Error(), method});
         });
     }
 
@@ -1088,7 +1095,6 @@ class Connection extends EventEmitter {
     _rawSend(message) {
         const id = ++this._lastId;
         message = JSON.stringify(Object.assign({}, message, {id}));
-        debugProtocol('SEND ► ' + message);
         this._transport.send(message);
         return id;
     }
@@ -1097,13 +1103,12 @@ class Connection extends EventEmitter {
       * @param {string} message
       */
     async _onMessage(message) {
-        debugProtocol('◀ RECV ' + message);
         const object = JSON.parse(message);
-        if (object.method === 'Target.attachedToTarget') {
+        if (object.method === "Target.attachedToTarget") {
             const sessionId = object.params.sessionId;
             const session = new CDPSession(this, object.params.targetInfo.type, sessionId);
             this._sessions.set(sessionId, session);
-        } else if (object.method === 'Target.detachedFromTarget') {
+        } else if (object.method === "Target.detachedFromTarget") {
             const session = this._sessions.get(object.params.sessionId);
             session._onClosed();
             this._sessions.delete(object.params.sessionId);
@@ -1141,7 +1146,9 @@ class Connection extends EventEmitter {
       * @return {!Promise<!CDPSession>}
       */
     async createSession(targetInfo) {
-        const {sessionId} = await this.send('Target.attachToTarget', {targetId: targetInfo.targetId, flatten: true});
+        const {
+            sessionId} = await this.send("Target.attachToTarget", {
+                targetId: targetInfo.targetId, flatten: true});
         return this._sessions.get(sessionId);
     }
 }
@@ -1169,9 +1176,11 @@ class CDPSession extends EventEmitter {
     send(method, params = {}) {
         var that;
         that = this;
-        const id = that._connection._rawSend({sessionId: that._sessionId, method, params});
+        const id = that._connection._rawSend({
+            sessionId: that._sessionId, method, params});
         return new Promise(function (resolve, reject) {
-            that._callbacks.set(id, {resolve, reject, error: new Error(), method});
+            that._callbacks.set(id, {
+                resolve, reject, error: new Error(), method});
         });
     }
 
@@ -1291,63 +1300,63 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Events.js
 
 const Events = {
     Page: {
-        Close: 'close',
-        Console: 'console',
-        Dialog: 'dialog',
-        DOMContentLoaded: 'domcontentloaded',
-        Error: 'error',
+        Close: "close",
+        Console: "console",
+        Dialog: "dialog",
+        DOMContentLoaded: "domcontentloaded",
+        Error: "error",
         // Can't use just 'error' due to node.js special treatment of error events.
         // @see https://nodejs.org/api/events.html#events_error_events
-        PageError: 'pageerror',
-        Request: 'request',
-        Response: 'response',
-        RequestFailed: 'requestfailed',
-        RequestFinished: 'requestfinished',
-        FrameAttached: 'frameattached',
-        FrameDetached: 'framedetached',
-        FrameNavigated: 'framenavigated',
-        Load: 'load',
-        Metrics: 'metrics',
-        Popup: 'popup',
-        WorkerCreated: 'workercreated',
-        WorkerDestroyed: 'workerdestroyed',
+        PageError: "pageerror",
+        Request: "request",
+        Response: "response",
+        RequestFailed: "requestfailed",
+        RequestFinished: "requestfinished",
+        FrameAttached: "frameattached",
+        FrameDetached: "framedetached",
+        FrameNavigated: "framenavigated",
+        Load: "load",
+        Metrics: "metrics",
+        Popup: "popup",
+        WorkerCreated: "workercreated",
+        WorkerDestroyed: "workerdestroyed",
     },
 
     Browser: {
-        TargetCreated: 'targetcreated',
-        TargetDestroyed: 'targetdestroyed',
-        TargetChanged: 'targetchanged',
-        Disconnected: 'disconnected'
+        TargetCreated: "targetcreated",
+        TargetDestroyed: "targetdestroyed",
+        TargetChanged: "targetchanged",
+        Disconnected: "disconnected"
     },
 
     BrowserContext: {
-        TargetCreated: 'targetcreated',
-        TargetDestroyed: 'targetdestroyed',
-        TargetChanged: 'targetchanged',
+        TargetCreated: "targetcreated",
+        TargetDestroyed: "targetdestroyed",
+        TargetChanged: "targetchanged",
     },
 
     NetworkManager: {
-        Request: Symbol('Events.NetworkManager.Request'),
-        Response: Symbol('Events.NetworkManager.Response'),
-        RequestFailed: Symbol('Events.NetworkManager.RequestFailed'),
-        RequestFinished: Symbol('Events.NetworkManager.RequestFinished'),
+        Request: Symbol("Events.NetworkManager.Request"),
+        Response: Symbol("Events.NetworkManager.Response"),
+        RequestFailed: Symbol("Events.NetworkManager.RequestFailed"),
+        RequestFinished: Symbol("Events.NetworkManager.RequestFinished"),
     },
 
     FrameManager: {
-        FrameAttached: Symbol('Events.FrameManager.FrameAttached'),
-        FrameNavigated: Symbol('Events.FrameManager.FrameNavigated'),
-        FrameDetached: Symbol('Events.FrameManager.FrameDetached'),
-        LifecycleEvent: Symbol('Events.FrameManager.LifecycleEvent'),
-        ExecutionContextCreated: Symbol('Events.FrameManager.ExecutionContextCreated'),
-        ExecutionContextDestroyed: Symbol('Events.FrameManager.ExecutionContextDestroyed'),
+        FrameAttached: Symbol("Events.FrameManager.FrameAttached"),
+        FrameNavigated: Symbol("Events.FrameManager.FrameNavigated"),
+        FrameDetached: Symbol("Events.FrameManager.FrameDetached"),
+        LifecycleEvent: Symbol("Events.FrameManager.LifecycleEvent"),
+        ExecutionContextCreated: Symbol("Events.FrameManager.ExecutionContextCreated"),
+        ExecutionContextDestroyed: Symbol("Events.FrameManager.ExecutionContextDestroyed"),
     },
 
     Connection: {
-        Disconnected: Symbol('Events.Connection.Disconnected'),
+        Disconnected: Symbol("Events.Connection.Disconnected"),
     },
 
     CDPSession: {
-        Disconnected: Symbol('Events.CDPSession.Disconnected'),
+        Disconnected: Symbol("Events.CDPSession.Disconnected"),
     },
 };
 
@@ -1376,8 +1385,10 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/ExecutionContext.js
 
 // const {createJSHandle, JSHandle} = require('./JSHandle');
 
-const EVALUATION_SCRIPT_URL = '__puppeteer_evaluation_script__';
-const SOURCE_URL_REGEX = /^[\040\t]*\/\/[@#] sourceURL=\s*(\S*?)\s*$/m;
+const EVALUATION_SCRIPT_URL = "__puppeteer_evaluation_script__";
+const SOURCE_URL_REGEX = (
+    /^[\040\t]*\/\/[@#]\u0020sourceURL=\s*(\S*?)\s*$/m
+);
 
 class ExecutionContext {
     /**
@@ -1400,17 +1411,18 @@ class ExecutionContext {
     async _evaluateInternal(returnByValue, pageFunction, ...args) {
         const suffix = `//# sourceURL=${EVALUATION_SCRIPT_URL}`;
         let functionText = pageFunction.toString();
-        new Function('(' + functionText + ')');
+        new Function("(" + functionText + ")");
         let callFunctionOnPromise;
-        callFunctionOnPromise = this._client.send('Runtime.callFunctionOn', {
-            functionDeclaration: functionText + '\n' + suffix + '\n',
+        callFunctionOnPromise = this._client.send("Runtime.callFunctionOn", {
+            functionDeclaration: functionText + "\n" + suffix + "\n",
             executionContextId: this._contextId,
             //!! arguments: args.map(convertArgument.bind(this)),
             returnByValue,
             awaitPromise: true,
             userGesture: true
         });
-        const { exceptionDetails, result: remoteObject } = await callFunctionOnPromise.catch(console.error);
+        const {
+            exceptionDetails, result: remoteObject } = await callFunctionOnPromise.catch(console.error);
         return remoteObject.value;
     }
 }
@@ -1445,7 +1457,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/FrameManager.js
 // const {DOMWorld} = require('./DOMWorld');
 // const {NetworkManager} = require('./NetworkManager');
 
-const UTILITY_WORLD_NAME = '__puppeteer_utility_world__';
+const UTILITY_WORLD_NAME = "__puppeteer_utility_world__";
 
 class FrameManager extends EventEmitter {
     /**
@@ -1466,23 +1478,26 @@ class FrameManager extends EventEmitter {
         /** @type {!Set<string>} */
         this._isolatedWorlds = new Set();
 
-        this._client.on('Page.frameNavigated', event => this._onFrameNavigated(event.frame));
-        this._client.on('Page.frameStoppedLoading', event => this._onFrameStoppedLoading(event.frameId));
-        this._client.on('Runtime.executionContextCreated', event => this._onExecutionContextCreated(event.context));
-        this._client.on('Runtime.executionContextDestroyed', event => this._onExecutionContextDestroyed(event.executionContextId));
+        this._client.on("Page.frameNavigated", event => this._onFrameNavigated(event.frame));
+        this._client.on("Page.frameStoppedLoading", event => this._onFrameStoppedLoading(event.frameId));
+        this._client.on("Runtime.executionContextCreated", event => this._onExecutionContextCreated(event.context));
+        this._client.on("Runtime.executionContextDestroyed", event => this._onExecutionContextDestroyed(event.executionContextId));
         //!! this._client.on('Runtime.executionContextsCleared', event => this._onExecutionContextsCleared());
-        this._client.on('Page.lifecycleEvent', event => this._onLifecycleEvent(event));
+        this._client.on("Page.lifecycleEvent", event => this._onLifecycleEvent(event));
     }
 
     async initialize() {
-        const [,{frameTree}] = await Promise.all([
-            this._client.send('Page.enable'),
-            this._client.send('Page.getFrameTree'),
+        const [
+            ,{
+                frameTree}] = await Promise.all([
+            this._client.send("Page.enable"),
+            this._client.send("Page.getFrameTree"),
         ]);
         this._onFrameNavigated(frameTree.frame);
         await Promise.all([
-            this._client.send('Page.setLifecycleEventsEnabled', { enabled: true }),
-            this._client.send('Runtime.enable', {}).then(() => this._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
+            this._client.send("Page.setLifecycleEventsEnabled", {
+                enabled: true }),
+            this._client.send("Runtime.enable", {}).then(() => this._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
             this._networkManager.initialize(),
         ]);
     }
@@ -1501,8 +1516,8 @@ class FrameManager extends EventEmitter {
       */
     _onFrameStoppedLoading(frameId) {
         const frame = this._frames.get(frameId);
-        frame._lifecycleEvents.add('DOMContentLoaded');
-        frame._lifecycleEvents.add('load');
+        frame._lifecycleEvents.add("DOMContentLoaded");
+        frame._lifecycleEvents.add("load");
         this.emit(Events.FrameManager.LifecycleEvent, frame);
     }
 
@@ -1512,7 +1527,7 @@ class FrameManager extends EventEmitter {
     _onFrameNavigated(framePayload) {
         const isMainFrame = !framePayload.parentId;
         let frame = this._mainFrame
-        assert(isMainFrame, 'We either navigate top level or have old version of the navigated frame');
+        assert(isMainFrame, "We either navigate top level or have old version of the navigated frame");
 
         // Update or create main frame.
         if (frame) {
@@ -1535,11 +1550,11 @@ class FrameManager extends EventEmitter {
       */
     async _ensureIsolatedWorld(name) {
         this._isolatedWorlds.add(name);
-        await this._client.send('Page.addScriptToEvaluateOnNewDocument', {
+        await this._client.send("Page.addScriptToEvaluateOnNewDocument", {
             source: `//# sourceURL=${EVALUATION_SCRIPT_URL}`,
             worldName: name,
         }),
-        await Promise.all(Array.from(this._frames.values()).map(frame => this._client.send('Page.createIsolatedWorld', {
+        await Promise.all(Array.from(this._frames.values()).map(frame => this._client.send("Page.createIsolatedWorld", {
             frameId: frame._id,
             grantUniveralAccess: true,
             worldName: name,
@@ -1550,7 +1565,7 @@ class FrameManager extends EventEmitter {
         const frameId = contextPayload.auxData.frameId;
         const frame = this._frames.get(frameId)
         let world = null;
-        if (contextPayload.auxData && !!contextPayload.auxData['isDefault']) {
+        if (contextPayload.auxData && !!contextPayload.auxData["isDefault"]) {
             world = frame._mainWorld;
         } else if (contextPayload.name === UTILITY_WORLD_NAME && !frame._secondaryWorld._hasContext()) {
             // In case of multiple sessions to the same target, there's a race between
@@ -1558,7 +1573,7 @@ class FrameManager extends EventEmitter {
             // We can use either.
             world = frame._secondaryWorld;
         }
-        if (contextPayload.auxData && contextPayload.auxData['type'] === 'isolated')
+        if (contextPayload.auxData && contextPayload.auxData["type"] === "isolated")
             this._isolatedWorlds.add(contextPayload.name);
         /** @type {!ExecutionContext} */
         const context = new ExecutionContext(this._client, contextPayload, world);
@@ -1590,11 +1605,11 @@ class Frame {
         this._frameManager = frameManager;
         this._client = client;
         this._parentFrame = parentFrame;
-        this._url = '';
+        this._url = "";
         this._id = frameId;
         this._detached = false;
 
-        this._loaderId = '';
+        this._loaderId = "";
         /** @type {!Set<string>} */
         this._lifecycleEvents = new Set();
         /** @type {!DOMWorld} */
@@ -1618,7 +1633,7 @@ class Frame {
       * @param {string} name
       */
     _onLifecycleEvent(loaderId, name) {
-        if (name === 'init') {
+        if (name === "init") {
             this._loaderId = loaderId;
             this._lifecycleEvents.clear();
         }
@@ -1663,7 +1678,7 @@ class LifecycleWatcher {
         waitUntil = waitUntil.slice();
         this._expectedLifecycle = waitUntil.map(value => {
             const protocolEvent = puppeteerToProtocolLifecycle[value];
-            assert(protocolEvent, 'Unknown value for options.waitUntil: ' + value);
+            assert(protocolEvent, "Unknown value for options.waitUntil: " + value);
             return protocolEvent;
         });
 
@@ -1726,10 +1741,10 @@ class LifecycleWatcher {
 }
 
 const puppeteerToProtocolLifecycle = {
-    'load': 'load',
-    'domcontentloaded': 'DOMContentLoaded',
-    'networkidle0': 'networkIdle',
-    'networkidle2': 'networkAlmostIdle',
+    "load": "load",
+    "domcontentloaded": "DOMContentLoaded",
+    "networkidle0": "networkIdle",
+    "networkidle2": "networkAlmostIdle",
 };
 
 module.exports = {LifecycleWatcher};
@@ -1785,14 +1800,14 @@ class NetworkManager extends EventEmitter {
         /** @type {!Map<string, string>} */
         this._requestIdToInterceptionId = new Map();
 
-        this._client.on('Network.requestWillBeSent', this._onRequestWillBeSent.bind(this));
-        this._client.on('Network.requestServedFromCache', this._onRequestServedFromCache.bind(this));
-        this._client.on('Network.responseReceived', this._onResponseReceived.bind(this));
-        this._client.on('Network.loadingFinished', this._onLoadingFinished.bind(this));
+        this._client.on("Network.requestWillBeSent", this._onRequestWillBeSent.bind(this));
+        this._client.on("Network.requestServedFromCache", this._onRequestServedFromCache.bind(this));
+        this._client.on("Network.responseReceived", this._onResponseReceived.bind(this));
+        this._client.on("Network.loadingFinished", this._onLoadingFinished.bind(this));
     }
 
     async initialize() {
-        await this._client.send('Network.enable');
+        await this._client.send("Network.enable");
     }
 
     /**
@@ -1835,7 +1850,6 @@ class NetworkManager extends EventEmitter {
         this.emit(Events.NetworkManager.Request, request);
     }
 
-
     /**
       * @param {!Protocol.Network.requestServedFromCachePayload} event
       */
@@ -1852,7 +1866,7 @@ class NetworkManager extends EventEmitter {
         const response = new Response(this._client, request, responsePayload);
         request._response = response;
         request._redirectChain.push(request);
-        response._bodyLoadedPromiseFulfill.call(null, new Error('Response body is unavailable for redirect responses'));
+        response._bodyLoadedPromiseFulfill.call(null, new Error("Response body is unavailable for redirect responses"));
         this._requestIdToRequest.delete(request._requestId);
         this._attemptedAuthentications.delete(request._interceptionId);
         this.emit(Events.NetworkManager.Response, response);
@@ -1895,7 +1909,7 @@ class Request {
     constructor(client, frame, interceptionId, allowInterception, event, redirectChain) {
         this._client = client;
         this._requestId = event.requestId;
-        this._isNavigationRequest = event.requestId === event.loaderId && event.type === 'Document';
+        this._isNavigationRequest = event.requestId === event.loaderId && event.type === "Document";
         this._interceptionId = interceptionId;
         this._allowInterception = allowInterception;
         this._interceptionHandled = false;
@@ -1952,11 +1966,11 @@ class SecurityDetails {
       * @param {!Protocol.Network.SecurityDetails} securityPayload
       */
     constructor(securityPayload) {
-        this._subjectName = securityPayload['subjectName'];
-        this._issuer = securityPayload['issuer'];
-        this._validFrom = securityPayload['validFrom'];
-        this._validTo = securityPayload['validTo'];
-        this._protocol = securityPayload['protocol'];
+        this._subjectName = securityPayload["subjectName"];
+        this._issuer = securityPayload["issuer"];
+        this._validFrom = securityPayload["validFrom"];
+        this._validTo = securityPayload["validTo"];
+        this._protocol = securityPayload["protocol"];
     }
 }
 
@@ -2028,8 +2042,8 @@ class Page extends EventEmitter {
         this._fileChooserInterceptionIsDisabled = false;
         this._fileChooserInterceptors = new Set();
 
-        client.on('Page.domContentEventFired', event => this.emit(Events.Page.DOMContentLoaded));
-        client.on('Page.loadEventFired', event => this.emit(Events.Page.Load));
+        client.on("Page.domContentEventFired", event => this.emit(Events.Page.DOMContentLoaded));
+        client.on("Page.loadEventFired", event => this.emit(Events.Page.Load));
         this._target._isClosedPromise.then(() => {
             this.emit(Events.Page.Close);
             this._closed = true;
@@ -2039,9 +2053,10 @@ class Page extends EventEmitter {
     async _initialize() {
         await Promise.all([
             this._frameManager.initialize(),
-            this._client.send('Target.setAutoAttach', {autoAttach: true, waitForDebuggerOnStart: false, flatten: true}),
-            this._client.send('Performance.enable', {}),
-            this._client.send('Log.enable', {}),
+            this._client.send("Target.setAutoAttach", {
+                autoAttach: true, waitForDebuggerOnStart: false, flatten: true}),
+            this._client.send("Performance.enable", {}),
+            this._client.send("Log.enable", {}),
         ]);
     }
 
@@ -2103,7 +2118,7 @@ class Target {
             return true;
         });
         this._isClosedPromise = new Promise(fulfill => this._closedCallback = fulfill);
-        this._isInitialized = this._targetInfo.type !== 'page' || this._targetInfo.url !== '';
+        this._isInitialized = this._targetInfo.type !== "page" || this._targetInfo.url !== "";
         if (this._isInitialized)
             this._initializedCallback(true);
     }
@@ -2113,7 +2128,7 @@ class Target {
       */
     async page() {
         this._pagePromise = this._sessionFactory()
-                .then(client => Page.create(client, this, this._ignoreHTTPSErrors, this._defaultViewport));
+        .then(client => Page.create(client, this, this._ignoreHTTPSErrors, this._defaultViewport));
         return this._pagePromise;
     }
 
@@ -2130,7 +2145,7 @@ class Target {
     _targetInfoChanged(targetInfo) {
         this._targetInfo = targetInfo;
 
-        if (!this._isInitialized && (this._targetInfo.type !== 'page' || this._targetInfo.url !== '')) {
+        if (!this._isInitialized && (this._targetInfo.type !== "page" || this._targetInfo.url !== "")) {
             this._isInitialized = true;
             this._initializedCallback(true);
             return;
