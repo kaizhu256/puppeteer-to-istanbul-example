@@ -168,26 +168,25 @@ local.nop(assert, path);
 
 
 
-gotoNext = function (err, data) {
-    gotoState += 1;
-    if (err) {
-        onReject(err);
-        return;
-    }
-    switch (gotoState) {
-    case 1:
-        gotoNext();
-        break;
-    default:
-        onResolve(data);
-    }
-};
-await new Promise(function (resolve, reject) {
-    onReject = reject;
-    onResolve = resolve;
-    gotoState = 0;
-    gotoNext();
-});
+// require module
+assert = require("assert");
+//!! EventEmitter = require("events");
+//!! URL = require("url");
+child_process = require("child_process");
+//!! crypto = require("crypto");
+fs = require("fs");
+//!! http = require("http");
+//!! https = require("https");
+//!! net = require("net");
+//!! os = require("os");
+path = require("path");
+readline = require("readline");
+//!! tls = require("tls");
+//!! url = require("url");
+//!! util = require("util");
+//!! { Writable} = require("stream");
+//!! { randomBytes} = require("crypto");
+module.exports = require("./lib.puppeteer.screenshot.js");
 
 
 
@@ -235,64 +234,63 @@ fsWriteFile = function (file, data) {
 
 
 
-// init process.exit and timerTimeout
-process.on("exit", chromeKillSync);
-process.on("SIGINT", chromeKillSync);
-process.on("SIGTERM", chromeKillSync);
-process.on("SIGHUP", chromeKillSync);
-setTimeout(function () {
-    throw new Error("chrome-screenshot - errTimeout - 30000 ms");
-}, 30000).unref();
-
-
-
-// require module
-assert = require("assert");
-//!! EventEmitter = require("events");
-//!! URL = require("url");
-child_process = require("child_process");
-//!! crypto = require("crypto");
-fs = require("fs");
-//!! http = require("http");
-//!! https = require("https");
-//!! net = require("net");
-//!! os = require("os");
-path = require("path");
-readline = require("readline");
-//!! tls = require("tls");
-//!! url = require("url");
-//!! util = require("util");
-//!! { Writable} = require("stream");
-//!! { randomBytes} = require("crypto");
-module.exports = require("./lib.puppeteer.screenshot.js");
-
-
-
-// init browser
-chromeProcess = child_process.spawn((
-    "node_modules/puppeteer/.local-chromium"
-    + "/linux-674921/chrome-linux/chrome"
-), [
-    "--disable-setuid-sandbox",
-    "--headless",
-    "--hide-scrollbars",
-    "--incognito",
-    "--mute-audio",
-    "--no-sandbox",
-    "--remote-debugging-port=0"
-], {
-    // On non-windows platforms, `detached: false` makes child process
-    // a leader of a new process group, making it possible
-    // to kill child process tree with `.kill(-pid)` command.
-    // https://nodejs.org/api/child_process.html#child_process_options_detached
-    detached: process.platform !== "win32",
-    env: process.env,
-    stdio: [
-        "pipe", "pipe", "pipe"
-    ]
+gotoNext = function (err, data) {
+    gotoState += 1;
+    if (err) {
+        onReject(err);
+        return;
+    }
+    switch (gotoState) {
+    case 1:
+        // init process.exit
+        process.on("exit", chromeKillSync);
+        process.on("SIGINT", chromeKillSync);
+        process.on("SIGTERM", chromeKillSync);
+        process.on("SIGHUP", chromeKillSync);
+        // init timerTimeout
+        setTimeout(function () {
+            throw new Error("chrome-screenshot - errTimeout - 30000 ms");
+        }, 30000).unref();
+        // init browser
+        chromeProcess = child_process.spawn((
+            "node_modules/puppeteer/.local-chromium"
+            + "/linux-674921/chrome-linux/chrome"
+        ), [
+            "--disable-setuid-sandbox",
+            "--headless",
+            "--hide-scrollbars",
+            "--incognito",
+            "--mute-audio",
+            "--no-sandbox",
+            "--remote-debugging-port=0"
+        ], {
+            // On non-windows platforms, `detached: false` makes child process
+            // a leader of a new process group, making it possible
+            // to kill child process tree with `.kill(-pid)` command.
+            // https://nodejs.org/api/child_process.html#child_process_options_detached
+            detached: process.platform !== "win32",
+            env: process.env,
+            stdio: [
+                "pipe", "pipe", "pipe"
+            ]
+        });
+        chromeProcess.stderr.pipe(process.stderr);
+        chromeProcess.stdout.pipe(process.stdout);
+        gotoNext();
+        break;
+    default:
+        onResolve(data);
+    }
+};
+await new Promise(function (resolve, reject) {
+    onReject = reject;
+    onResolve = resolve;
+    gotoState = 0;
+    gotoNext();
 });
-chromeProcess.stderr.pipe(process.stderr);
-chromeProcess.stdout.pipe(process.stdout);
+
+
+
 await new Promise(function (resolve, reject) {
     var cleanup;
     var onClose;
