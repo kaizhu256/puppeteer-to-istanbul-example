@@ -149,7 +149,6 @@
 // init var
 var assert;
 var browser;
-var browserWSEndpoint;
 var child_process;
 var chromeCloseGracefully;
 var chromeKillSync;
@@ -158,11 +157,13 @@ var fs;
 var fsWriteFile;
 var gotoNext;
 var gotoState;
+var onEvent;
 var onReject;
 var onResolve;
 var page;
 var path;
-var readline;
+var urlWs;
+//!! var readline;
 var tmp;
 local.nop(assert, path);
 
@@ -180,7 +181,6 @@ fs = require("fs");
 //!! net = require("net");
 //!! os = require("os");
 path = require("path");
-readline = require("readline");
 //!! tls = require("tls");
 //!! url = require("url");
 //!! util = require("util");
@@ -242,16 +242,16 @@ gotoNext = function (err, data) {
     }
     switch (gotoState) {
     case 1:
+        // init timerTimeout
+        setTimeout(function () {
+            throw new Error("chrome-screenshot - errTimeout - 30000 ms");
+        }, 30000).unref();
         // init process.exit
         process.on("exit", chromeKillSync);
         process.on("SIGINT", chromeKillSync);
         process.on("SIGTERM", chromeKillSync);
         process.on("SIGHUP", chromeKillSync);
-        // init timerTimeout
-        setTimeout(function () {
-            throw new Error("chrome-screenshot - errTimeout - 30000 ms");
-        }, 30000).unref();
-        // init browser
+        // init chromeProcess
         chromeProcess = child_process.spawn((
             "node_modules/puppeteer/.local-chromium"
             + "/linux-674921/chrome-linux/chrome"
@@ -274,9 +274,40 @@ gotoNext = function (err, data) {
                 "pipe", "pipe", "pipe"
             ]
         });
+        // init evt-handling - chromeProcess
         chromeProcess.stderr.pipe(process.stderr);
         chromeProcess.stdout.pipe(process.stdout);
-        gotoNext();
+        onEvent = function (data) {
+            gotoState = 1;
+            gotoNext(null, data);
+        };
+        //!! rl = readline.createInterface({
+            //!! input: chromeProcess.stderr
+        //!! });
+        chromeProcess.on("error", onEvent);
+        chromeProcess.on("exit", onEvent);
+        chromeProcess.stderr.on("data", onEvent);
+        //!! rl.on("close", onEvent);
+        //!! rl.on("line", onEvent);
+        //!! gotoNext();
+        break;
+    // init urlWs
+    case 2:
+        // data is err
+        if (!Buffer.isBuffer(data)) {
+            err = data;
+        }
+        urlWs = !err && (
+            /DevTools\u0020listening\u0020on\u0020(ws:\/\/.+?)$/
+        ).exec(String(data));
+        urlWs = urlWs && urlWs[1];
+        if (err || urlWs) {
+            // cleanup evt-handling - chromeProcess
+            chromeProcess.removeListener("error", onEvent);
+            chromeProcess.removeListener("exit", onEvent);
+            chromeProcess.stderr.removeListener("data", onEvent);
+            gotoNext(err);
+        }
         break;
     default:
         onResolve(data);
@@ -291,42 +322,9 @@ await new Promise(function (resolve, reject) {
 
 
 
-await new Promise(function (resolve, reject) {
-    var cleanup;
-    var onClose;
-    var onLine;
-    var rl;
-    cleanup = function () {
-        chromeProcess.removeListener("error", onClose);
-        chromeProcess.removeListener("exit", onClose);
-        rl.removeListener("close", onClose);
-        rl.removeListener("line", onLine);
-    };
-    onClose = function (err) {
-        cleanup();
-        reject(err);
-    };
-    onLine = function (line) {
-        browserWSEndpoint = (
-            /^DevTools\u0020listening\u0020on\u0020(ws:\/\/.+?)$/
-        ).exec(line);
-        if (browserWSEndpoint) {
-            cleanup();
-            browserWSEndpoint = browserWSEndpoint[1];
-            resolve();
-        }
-    };
-    rl = readline.createInterface({
-        input: chromeProcess.stderr
-    });
-    chromeProcess.once("error", onClose);
-    chromeProcess.once("exit", onClose);
-    rl.once("close", onClose);
-    rl.on("line", onLine);
-});
 browser = await new Promise(function (resolve, reject) {
     var ws;
-    ws = new module.exports.WebSocket(browserWSEndpoint, [], {
+    ws = new module.exports.WebSocket(urlWs, [], {
         maxPayload: 256 * 1024 * 1024 // 256Mb
     });
     ws.addEventListener("message", function (evt) {
@@ -340,7 +338,7 @@ browser = await new Promise(function (resolve, reject) {
     });
     ws.addEventListener("error", reject);
 });
-browser = new module.exports.Connection(browserWSEndpoint, browser, 0);
+browser = new module.exports.Connection(urlWs, browser, 0);
 browser = await module.exports.Browser.create(
     browser,
     [],
