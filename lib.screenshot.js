@@ -114,7 +114,6 @@ module.exports = {
         "nodebuffer", "arraybuffer", "fragments"],
     GUID: "258EAFA5-E914-47DA-95CA-C5AB0DC85B11",
     kStatusCode: Symbol("status-code"),
-    kWebSocket: Symbol("websocket"),
     EMPTY_BUFFER: Buffer.alloc(0),
     NOOP: function () {
         return;
@@ -125,7 +124,6 @@ const {
     BINARY_TYPES,
     GUID,
     kStatusCode,
-    kWebSocket,
     EMPTY_BUFFER,
     NOOP
 } = module.exports;
@@ -223,7 +221,6 @@ class Receiver extends Writable {
         super();
 
         this._binaryType = binaryType;
-        this[kWebSocket] = undefined;
         this._extensions = extensions;
 
         this._bufferedBytes = 0;
@@ -590,9 +587,6 @@ const protocolVersions = [8, 13];
         websocket1._receiver = receiver;
         websocket1._socket = socket;
 
-        receiver[kWebSocket] = websocket1;
-        socket[kWebSocket] = websocket1;
-
         receiver.on("drain", receiverOnDrain);
         receiver.on("message", receiverOnMessage);
 
@@ -670,7 +664,7 @@ module.exports = websocket1;
   * @param {Number} options.maxRedirects The maximum number of redirects allowed
   * @private
   */
-function initAsClient(websocket, address, protocols, options) {
+function initAsClient(websocket1, address, protocols, options) {
     const opts = Object.assign(
         {
             protocolVersion: protocolVersions[1],
@@ -696,7 +690,7 @@ function initAsClient(websocket, address, protocols, options) {
     // The WHATWG URL constructor is not available on Node.js < 6.13.0
     //
     parsedUrl = new url.URL(address);
-    websocket.url = address;
+    websocket1.url = address;
     const isUnixSocket = parsedUrl.protocol === "ws+unix:";
     const isSecure = (
     parsedUrl.protocol === "wss:" || parsedUrl.protocol === "https:"
@@ -721,15 +715,15 @@ function initAsClient(websocket, address, protocols, options) {
     );
     opts.path = path;
     opts.timeout = opts.handshakeTimeout;
-    var req = (websocket._req = get(opts));
+    var req = (websocket1._req = get(opts));
     req.on("upgrade", (res, socket, head) => {
-        websocket.emit("upgrade", res);
+        websocket1.emit("upgrade", res);
 
         //
         // The user may have closed the connection from a listener of the `upgrade`
         // event.
         //
-        req = websocket._req = null;
+        req = websocket1._req = null;
 
         const digest = crypto
             .createHash("sha1")
@@ -741,7 +735,7 @@ function initAsClient(websocket, address, protocols, options) {
     /,\u0020*/
 );
         var protError;
-        websocket.setSocket(socket, head);
+        websocket1.setSocket(socket, head);
     });
 }
 
@@ -769,7 +763,7 @@ function netConnect(options) {
   * @private
   */
 function receiverOnDrain() {
-    this[kWebSocket]._socket.resume();
+    websocket1._socket.resume();
 }
 
 /**
@@ -779,7 +773,7 @@ function receiverOnDrain() {
   * @private
   */
 function receiverOnMessage(data) {
-    this[kWebSocket].emit("message", data);
+    websocket1.emit("message", data);
 }
 
 /**
@@ -788,12 +782,10 @@ function receiverOnMessage(data) {
   * @private
   */
 function socketOnClose() {
-    const websocket = this[kWebSocket];
-
     this.removeListener("close", socketOnClose);
     this.removeListener("end", socketOnEnd);
 
-    websocket.readyState = websocket1.CLOSING;
+    websocket1.readyState = websocket1.CLOSING;
 
     //
     // The close frame might not have been received or the `'end'` event emitted,
@@ -805,13 +797,12 @@ function socketOnClose() {
     // data will be read as a single chunk and emitted synchronously in a single
     // `'data'` event.
     //
-    websocket._socket.read();
-    websocket._receiver.end();
+    websocket1._socket.read();
+    websocket1._receiver.end();
 
     this.removeListener("data", socketOnData);
-    this[kWebSocket] = undefined;
-    clearTimeout(websocket._closeTimer);
-    websocket.emitClose();
+    clearTimeout(websocket1._closeTimer);
+    websocket1.emitClose();
 }
 
 /**
@@ -821,7 +812,7 @@ function socketOnClose() {
   * @private
   */
 function socketOnData(chunk) {
-    if (!this[kWebSocket]._receiver.write(chunk)) {
+    if (!websocket1._receiver.write(chunk)) {
         this.pause();
     }
 }
@@ -832,10 +823,8 @@ function socketOnData(chunk) {
   * @private
   */
 function socketOnEnd() {
-    const websocket = this[kWebSocket];
-
-    websocket.readyState = websocket1.CLOSING;
-    websocket._receiver.end();
+    websocket1.readyState = websocket1.CLOSING;
+    websocket1._receiver.end();
     this.end();
 }
 
