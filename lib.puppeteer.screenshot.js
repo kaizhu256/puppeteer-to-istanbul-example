@@ -541,19 +541,11 @@ class Sender {
       */
     send(data, options, cb) {
         const buf = Buffer.from(data);
-        var opcode = options.binary ? 2 : 1;
+        var opcode = 1;
         var rsv1 = options.compress;
-
-        if (this._firstFragment) {
-            this._firstFragment = false;
-            this._compress = rsv1;
-        } else {
-            rsv1 = false;
-            opcode = 0;
-        }
-
-        if (options.fin) this._firstFragment = true;
-
+        this._firstFragment = false;
+        this._compress = rsv1;
+        this._firstFragment = true;
         this.sendFrame(
             Sender.frame(buf, {
                 fin: options.fin,
@@ -574,14 +566,10 @@ class Sender {
       * @private
       */
     sendFrame(list, cb) {
-        if (list.length === 2) {
-            this._socket.cork();
-            this._socket.write(list[0]);
-            this._socket.write(list[1], cb);
-            this._socket.uncork();
-        } else {
-            this._socket.write(list[0], cb);
-        }
+        this._socket.cork();
+        this._socket.write(list[0]);
+        this._socket.write(list[1], cb);
+        this._socket.uncork();
     }
 }
 
