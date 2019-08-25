@@ -304,7 +304,9 @@ gotoNext = async function (err, data) {
         websocket1.once("error", gotoNext);
         break;
     case 3:
-        connection1 = new module.exports.Connection(urlInspect, websocket1, 0);
+        connection1 = module.exports.connection1;
+        connection1._url = urlInspect;
+        websocket1.on("message", connection1._onMessage.bind(connection1));
         browser = await module.exports.Browser.create(
             connection1,
             [],

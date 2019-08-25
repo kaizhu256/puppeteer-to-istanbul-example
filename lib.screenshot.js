@@ -476,7 +476,6 @@ module.exports = websocket1;
   *
   * @param {(String|url.Url|url.URL)} address The URL to which to connect
   * @param {String} protocols The subprotocols
-  * @param {Object} options Connection options
   * @param {(Boolean|Object)} options.perMessageDeflate Enable/disable
   *     permessage-deflate
   * @param {String} options.origin Value of the `Origin` or
@@ -562,7 +561,6 @@ function initAsClient(websocket1, address) {
 /**
   * Create a `net.Socket` and initiate a connection.
   *
-  * @param {Object} options Connection options
   * @return {net.Socket} The newly created socket used to start the connection
   * @private
   */
@@ -658,7 +656,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
 */
 class Browser extends EventEmitter {
     /**
-      * @param {!Puppeteer.Connection} connection
       * @param {!Array<string>} contextIds
       * @param {?Puppeteer.ChildProcess} process
       * @param {function()=} closeCallback
@@ -671,7 +668,6 @@ class Browser extends EventEmitter {
     }
 
     /**
-      * @param {!Puppeteer.Connection} connection
       * @param {!Array<string>} contextIds
       * @param {?Puppeteer.ChildProcess} process
       * @param {(function():Promise)=} closeCallback
@@ -769,7 +765,6 @@ class Browser extends EventEmitter {
 
 class BrowserContext extends EventEmitter {
     /**
-      * @param {!Puppeteer.Connection} connection
       * @param {!Browser} browser
       * @param {?string} contextId
       */
@@ -789,13 +784,10 @@ module.exports = {Browser, BrowserContext};
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
 */
     connection1 = new EventEmitter();
-    constructor(urlInspect, websocket1, delay = 0) {
-        connection1._lastId = 0;
-        connection1._callbacks = {};
-        websocket1.on("message", connection1._onMessage.bind(connection1));
-        /** @type {!Map<string, !CDPSession>}*/
-        connection1._closed = false;
-    }
+    connection1._lastId = 0;
+    connection1._callbacks = {};
+    /** @type {!Map<string, !CDPSession>}*/
+    connection1._closed = false;
 
     /**
       * @param {string} method
@@ -1618,7 +1610,6 @@ class Page extends EventEmitter {
 }
 module.exports = {
 Browser,
-Connection,
 LifecycleWatcher,
 Page,
 websocket1,
