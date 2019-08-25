@@ -445,7 +445,7 @@ class Sender {
         target[offset - 3] = mask[1];
         target[offset - 2] = mask[2];
         target[offset - 1] = mask[3];
-        _(data, mask, data, 0, data.length);
+        _mask(data, mask, data, 0, data.length);
         return [
             target, data];
     }
