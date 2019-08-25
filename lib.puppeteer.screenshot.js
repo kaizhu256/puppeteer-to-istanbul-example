@@ -422,7 +422,7 @@ class Receiver extends Writable {
       */
     haveLength() {
         this._totalPayloadLength += this._payloadLength;
-        else this._state = GET_DATA;
+        this._state = GET_DATA;
     }
 
     /**
