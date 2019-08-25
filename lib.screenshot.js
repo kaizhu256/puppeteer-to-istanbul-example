@@ -63,6 +63,7 @@ local.nop(
 
 /* jslint ignore:start */
 var connection1;
+var reciver1;
 var session1;
 var websocket1;
 /*
@@ -414,7 +415,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
     websocket1._closeMessage = "";
     websocket1._closeTimer = null;
     websocket1._closeCode = 1006;
-    websocket1._receiver = null;
     websocket1._sender = null;
     websocket1._socket = null;
     websocket1._isServer = false;
@@ -447,7 +447,7 @@ function initAsClient(websocket1, urlInspect) {
         port: urlInspect.port
     }).on("upgrade", (res, socket, head) => {
         websocket1.emit("upgrade", res);
-        const receiver = new Receiver();
+        receiver1 = new Receiver();
 
         /**
           * Set up the socket and the internal resources.
@@ -457,11 +457,10 @@ function initAsClient(websocket1, urlInspect) {
           * @private
           */
         websocket1._sender = new Sender(socket);
-        websocket1._receiver = receiver;
         websocket1._socket = socket;
 
-        receiver.on("drain", receiverOnDrain);
-        receiver.on("message", receiverOnMessage);
+        receiver1.on("drain", receiverOnDrain);
+        receiver1.on("message", receiverOnMessage);
 
         socket.setTimeout(0);
         socket.setNoDelay();
@@ -512,11 +511,11 @@ function socketOnClose() {
     // `'data'` event.
     //
     websocket1._socket.read();
-    websocket1._receiver.end();
+    receiver1.end();
 
     this.removeListener("data", socketOnData);
     clearTimeout(websocket1._closeTimer);
-    websocket1._receiver.removeAllListeners();
+    receiver1.removeAllListeners();
     websocket1.emit("close", websocket1._closeCode, websocket1._closeMessage);
 }
 
@@ -527,7 +526,7 @@ function socketOnClose() {
   * @private
   */
 function socketOnData(chunk) {
-    if (!websocket1._receiver.write(chunk)) {
+    if (!receiver1.write(chunk)) {
         this.pause();
     }
 }
@@ -538,7 +537,7 @@ function socketOnData(chunk) {
   * @private
   */
 function socketOnEnd() {
-    websocket1._receiver.end();
+    receiver1.end();
     this.end();
 }
 
