@@ -1137,7 +1137,7 @@ class Connection extends EventEmitter {
       */
     send(method, params = {}) {
         const id = this._rawSend({method, params});
-        return new Promise((resolve, reject) => {
+        return new Promise(function (resolve, reject) {
             this._callbacks.set(id, {resolve, reject, error: new Error(), method});
         });
     }
@@ -1229,7 +1229,7 @@ class CDPSession extends EventEmitter {
       */
     send(method, params = {}) {
         const id = this._connection._rawSend({sessionId: this._sessionId, method, params});
-        return new Promise((resolve, reject) => {
+        return new Promise(function (resolve, reject) {
             this._callbacks.set(id, {resolve, reject, error: new Error(), method});
         });
     }
@@ -2232,10 +2232,10 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/WebSocketTransport.js
   * @implements {!Puppeteer.ConnectionTransport}
   */
 function WebSocketTransport (ws) {
-    ws.addEventListener("message", event => {
+    ws.addEventListener("message", function (event) {
         ws.onmessage.call(null, event.data);
     });
-    ws.addEventListener("close", event => {
+    ws.addEventListener("close", function (event) {
         ws.onclose.call(null);
     });
     // Silently ignore all errors - we don't know what to do with them.
@@ -2243,7 +2243,7 @@ function WebSocketTransport (ws) {
     return ws
 }
 WebSocketTransport.create = function (url) {
-    return new Promise((resolve, reject) => {
+    return new Promise(function (resolve, reject) {
         const ws = new WebSocket(url, [], {
             maxPayload: 256 * 1024 * 1024, // 256Mb
         });
