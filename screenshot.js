@@ -292,7 +292,6 @@ gotoNext = async function (err, data) {
         });
         // init evt-handling - chromeProcess
         chromeProcess.stderr.pipe(process.stderr);
-        chromeProcess.stdout.pipe(process.stdout);
         urlInspect = "";
         chromeProcess.stderr.on("data", onDataUrlInspect);
         break;

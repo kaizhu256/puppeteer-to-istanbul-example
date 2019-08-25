@@ -741,7 +741,7 @@ function initAsClient(websocket, address, protocols, options) {
     /,\u0020*/
 );
         var protError;
-        websocket.setSocket(socket, head, 256 * 1024 * 1024);
+        websocket.setSocket(socket, head);
     });
 }
 
