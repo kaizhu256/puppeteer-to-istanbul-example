@@ -421,15 +421,7 @@ class Receiver extends Writable {
       * @private
       */
     haveLength() {
-        if (this._payloadLength && this._opcode < 0x08) {
-            this._totalPayloadLength += this._payloadLength;
-            if (this._totalPayloadLength > this._maxPayload && this._maxPayload > 0) {
-                this._loop = false;
-                return error(RangeError, 'Max payload size exceeded', false, 1009);
-            }
-        }
-
-        if (this._masked) this._state = GET_MASK;
+        this._totalPayloadLength += this._payloadLength;
         else this._state = GET_DATA;
     }
 
