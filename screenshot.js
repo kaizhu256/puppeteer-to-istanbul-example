@@ -162,7 +162,7 @@ var onReject;
 var onResolve;
 var page;
 var path;
-var urlWs;
+var urlInspect;
 //!! var readline;
 var tmp;
 local.nop(assert, path);
@@ -291,17 +291,17 @@ gotoNext = function (err, data) {
         //!! rl.on("line", onEvent);
         //!! gotoNext();
         break;
-    // init urlWs
+    // init urlInspect
     case 2:
         // data is err
         if (!Buffer.isBuffer(data)) {
             err = data;
         }
-        urlWs = !err && (
+        urlInspect = !err && (
             /\nDevTools\u0020listening\u0020on\u0020(ws:\/\/.+?)\n/
         ).exec(String(data));
-        urlWs = urlWs && urlWs[1];
-        if (err || urlWs) {
+        urlInspect = urlInspect && urlInspect[1];
+        if (err || urlInspect) {
             // cleanup evt-handling - chromeProcess
             chromeProcess.removeListener("error", onEvent);
             chromeProcess.removeListener("exit", onEvent);
@@ -324,7 +324,7 @@ await new Promise(function (resolve, reject) {
 
 browser = await new Promise(function (resolve, reject) {
     var ws;
-    ws = new module.exports.WebSocket(urlWs, [], {
+    ws = new module.exports.WebSocket(urlInspect, [], {
         maxPayload: 256 * 1024 * 1024 // 256Mb
     });
     ws.addEventListener("message", function (evt) {
@@ -338,7 +338,7 @@ browser = await new Promise(function (resolve, reject) {
     });
     ws.addEventListener("error", reject);
 });
-browser = new module.exports.Connection(urlWs, browser, 0);
+browser = new module.exports.Connection(urlInspect, browser, 0);
 browser = await module.exports.Browser.create(
     browser,
     [],
