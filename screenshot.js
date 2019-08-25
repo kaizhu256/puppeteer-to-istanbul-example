@@ -154,7 +154,6 @@ var child_process;
 var chromeCloseGracefully;
 var chromeKillSync;
 var chromeProcess;
-var connection;
 var fs;
 var fsWriteFile;
 var page;
@@ -171,7 +170,7 @@ chromeCloseGracefully = function () {
   * @return {Promise}
   */
     // Attempt to close chrome gracefully
-    connection.send("Browser.close").catch(function (err) {
+    browser._connection.send("Browser.close").catch(function (err) {
         console.error(err);
         chromeKillSync();
     });
@@ -300,7 +299,7 @@ await new Promise(function (resolve, reject) {
     rl.on("close", onClose);
     rl.on("line", onLine);
 });
-connection = await new Promise(function (resolve, reject) {
+browser = await new Promise(function (resolve, reject) {
     var ws;
     ws = new module.exports.WebSocket(browserWSEndpoint, [], {
         maxPayload: 256 * 1024 * 1024 // 256Mb
@@ -316,18 +315,18 @@ connection = await new Promise(function (resolve, reject) {
     });
     ws.addEventListener("error", reject);
 });
-connection = new module.exports.Connection(browserWSEndpoint, connection, 0);
+browser = new module.exports.Connection(browserWSEndpoint, browser, 0);
 browser = await module.exports.Browser.create(
-    connection,
+    browser,
     [],
     chromeProcess,
     chromeCloseGracefully
 );
-tmp = await connection.send("Target.createTarget", {
+tmp = await browser._connection.send("Target.createTarget", {
     url: "about:blank"
 });
 tmp = await browser.targetDict[tmp.targetId];
-page = await connection.createSession(tmp._targetInfo);
+page = await browser._connection.createSession(tmp._targetInfo);
 page = await module.exports.Page.create(page, tmp);
 //!! page.then(function (client) {
     //!! return module.exports.Page.create(debugInline(client), target);
