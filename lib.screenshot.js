@@ -83,17 +83,8 @@ const INFLATING = 5;
   * @extends stream.Writable
   */
 class Receiver extends Writable {
-    /**
-      * Creates a Receiver instance.
-      *
-      * @param {String} binaryType The type for binary data
-      * @param {Object} extensions An object containing the negotiated extensions
-      */
-    constructor(binaryType, extensions) {
+    constructor() {
         super();
-
-        this._binaryType = binaryType;
-        this._extensions = extensions;
 
         this._bufferedBytes = 0;
         this._buffers = [];
@@ -309,7 +300,6 @@ class Sender {
       * @param {Object} extensions An object containing the negotiated extensions
       */
     constructor(socket, extensions) {
-        this._extensions = extensions;
         this._socket = socket;
 
         this._firstFragment = true;
@@ -419,13 +409,11 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
     websocket1 = new EventEmitter();
     websocket1.protocol = "";
 
-    websocket1._binaryType = "nodebuffer";
     websocket1._closeFrameReceived = false;
     websocket1._closeFrameSent = false;
     websocket1._closeMessage = "";
     websocket1._closeTimer = null;
     websocket1._closeCode = 1006;
-    websocket1._extensions = {};
     websocket1._receiver = null;
     websocket1._sender = null;
     websocket1._socket = null;
@@ -447,11 +435,10 @@ module.exports = websocket1;
   */
 function initAsClient(websocket1, urlInspect) {
     urlInspect = new url.URL(urlInspect);
-    const key = crypto.randomBytes(16).toString("base64");
     http.get({
         headers: {
             "Sec-WebSocket-Version": 13,
-            "Sec-WebSocket-Key": key,
+            "Sec-WebSocket-Key": crypto.randomBytes(16).toString("base64"),
             "Connection": "Upgrade",
             "Upgrade": "websocket"
         },
@@ -460,14 +447,7 @@ function initAsClient(websocket1, urlInspect) {
         port: urlInspect.port
     }).on("upgrade", (res, socket, head) => {
         websocket1.emit("upgrade", res);
-        const digest = crypto
-            .createHash("sha1")
-            .update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
-            .digest("base64");
-        const receiver = new Receiver(
-            websocket1._binaryType,
-            websocket1._extensions
-        );
+        const receiver = new Receiver();
 
         /**
           * Set up the socket and the internal resources.
@@ -476,7 +456,7 @@ function initAsClient(websocket1, urlInspect) {
           * @param {Buffer} head The first packet of the upgraded stream
           * @private
           */
-        websocket1._sender = new Sender(socket, websocket1._extensions);
+        websocket1._sender = new Sender(socket);
         websocket1._receiver = receiver;
         websocket1._socket = socket;
 
