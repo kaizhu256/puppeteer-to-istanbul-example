@@ -1792,15 +1792,6 @@ class Frame {
     }
 
     /**
-      * @param {string} url
-      * @param {!{referer?: string, timeout?: number, waitUntil?: string|!Array<string>}=} options
-      * @return {!Promise<?Puppeteer.Response>}
-      */
-    async goto(url, options) {
-        return await this._frameManager.navigateFrame(this, url, options);
-    }
-
-    /**
       * @return {!Array.<!Frame>}
       */
     childFrames() {

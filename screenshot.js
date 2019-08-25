@@ -385,7 +385,10 @@ page = await browser.newPage();
 //!! console.error(
     //!! page.goto.toString()
 //!! );
-await page._frameManager._mainFrame.goto("https://www.highcharts.com/stock/demo/stock-tools-gui");
+await page._frameManager._mainFrame._frameManager.navigateFrame(
+    page._frameManager._mainFrame,
+    "https://www.highcharts.com/stock/demo/stock-tools-gui"
+);
 
 // screenshot - wait 2000 ms
 await new Promise(function (resolve) {
