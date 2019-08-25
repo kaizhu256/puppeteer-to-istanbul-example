@@ -266,7 +266,7 @@ chromeProcess = child_process.spawn((
 });
 chromeProcess.stderr.pipe(process.stderr);
 chromeProcess.stdout.pipe(process.stdout);
-browserWSEndpoint = await new Promise(function (resolve, reject) {
+await new Promise(function (resolve, reject) {
     var cleanup;
     var onClose;
     var onLine;
@@ -282,12 +282,14 @@ browserWSEndpoint = await new Promise(function (resolve, reject) {
         reject(err);
     };
     onLine = function (line) {
-        line.replace((
+        browserWSEndpoint = (
             /^DevTools\u0020listening\u0020on\u0020(ws:\/\/.*)$/
-        ), function (ignore, match1) {
+        ).exec(line);
+        if (browserWSEndpoint) {
             cleanup();
-            resolve(match1);
-        });
+            browserWSEndpoint = browserWSEndpoint[1];
+            resolve();
+        }
     };
     rl = readline.createInterface({
         input: chromeProcess.stderr
@@ -325,7 +327,6 @@ target = await connection.send("Target.createTarget", {
 });
 target = await browser._defaultContext._browser._targets.get(target.targetId);
 page = await connection.createSession(target._targetInfo);
-console.error(page);
 page = await module.exports.Page.create(page, target);
 //!! page.then(function (client) {
     //!! return module.exports.Page.create(debugInline(client), target);
