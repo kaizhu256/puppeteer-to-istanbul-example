@@ -128,7 +128,7 @@ lib https://github.com/websockets/ws/blob/6.2.1/event-target.js
   * @extends Event
   * @private
   */
-class MessageEvent extends Event {
+class MessageEvent {
     /**
       * Create a new `MessageEvent`.
       *
@@ -148,7 +148,7 @@ class MessageEvent extends Event {
   * @extends Event
   * @private
   */
-class CloseEvent extends Event {
+class CloseEvent {
     /**
       * Create a new `CloseEvent`.
       *
@@ -170,7 +170,7 @@ class CloseEvent extends Event {
   * @extends Event
   * @private
   */
-class OpenEvent extends Event {
+class OpenEvent {
     /**
       * Create a new `OpenEvent`.
       *
