@@ -980,7 +980,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
 // const { helper, assert } = require('./helper');
 // const {Target} = require('./Target');
 // const EventEmitter = require('events');
-// const {TaskQueue} = require('./TaskQueue');
 // const {Events} = require('./Events');
 
 class Browser extends EventEmitter {
@@ -2476,19 +2475,6 @@ class Target {
 }
 
 module.exports = {Target};
-
-
-
-/*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/TaskQueue.js
-*/
-class TaskQueue {
-    constructor() {
-        this._chain = Promise.resolve();
-    }
-}
-
-module.exports = {TaskQueue};
 
 
 
