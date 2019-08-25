@@ -366,10 +366,14 @@ try {
         ]);
         timeoutId = setTimeout(onTimeout, timeout);
     });
-    const transport = await module.exports.WebSocketTransport.create(
+    connection = await module.exports.WebSocketTransport.create(
         browserWSEndpoint
     );
-    connection = new module.exports.Connection(browserWSEndpoint, transport, 0);
+    connection = new module.exports.Connection(
+        browserWSEndpoint,
+        connection,
+        0
+    );
     browser = await module.exports.Browser.create(
         connection,
         [],
