@@ -433,10 +433,15 @@ await Promise.all([
         await page._client.send("Target.activateTarget", {
             targetId: page._target._targetId
         });
-        tmp = await page._client.send("Page.captureScreenshot", {
-            format: "png"
-        });
-        await fsWriteFile(".aa.png", Buffer.from(tmp.data, "base64"));
+        await fsWriteFile(
+            ".aa.png",
+            Buffer.from(await page._client.send("Page.captureScreenshot", {
+                format: "png"
+            }).data, "base64")
+        );
+    }()),
+    (async function () {
+        return;
     }())
 ]);
 
