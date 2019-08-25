@@ -518,10 +518,6 @@ class Receiver extends Writable {
     }
 }
 
-module.exports = Receiver;
-
-
-
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/sender.js
 */
