@@ -153,6 +153,7 @@ var child_process;
 var chromeCloseGracefully;
 var chromeKillSync;
 var chromeProcess;
+var connection1;
 var fs;
 var fsWriteFile;
 var gotoNext;
@@ -298,14 +299,14 @@ gotoNext = async function (err, data) {
     case 2:
         // init websocket1
         websocket1 = module.exports.websocket1;
-        module.exports.initAsClient(websocket1, urlInspect, "");
+        module.exports.initAsClient(websocket1, urlInspect);
         websocket1.once("open", gotoNextData);
         websocket1.once("error", gotoNext);
         break;
     case 3:
-        browser = new module.exports.Connection(urlInspect, websocket1, 0);
+        connection1 = new module.exports.Connection(urlInspect, websocket1, 0);
         browser = await module.exports.Browser.create(
-            browser,
+            connection1,
             [],
             chromeProcess,
             chromeCloseGracefully
@@ -325,11 +326,11 @@ await new Promise(function (resolve, reject) {
 
 
 
-tmp = await browser._connection.send("Target.createTarget", {
+tmp = await connection1.send("Target.createTarget", {
     url: "about:blank"
 });
 tmp = await browser.targetDict[tmp.targetId];
-page = await browser._connection.createSession(tmp._targetInfo);
+page = await connection1.createSession(tmp._targetInfo);
 page = await module.exports.Page.create(page, tmp);
 //!! page.then(function (client) {
     //!! return module.exports.Page.create(debugInline(client), target);
