@@ -71,9 +71,11 @@ function concat(list, totalLength) {
   * @public
   */
 function _mask(source, mask, output, offset, length) {
-    var i;
-    for (i = 0; i < length; i += 1) {
-        output[offset + i] = source[i] ^ mask[i & 3];
+    var ii;
+    ii = 0;
+    while (ii < length) {
+        output[offset + ii] = source[ii] ^ mask[ii & 3];
+        ii += 1;
     }
 }
 
@@ -213,7 +215,7 @@ const EventTarget = {
             onOpen._listener = listener;
             this.on(method, onOpen);
         }
-    },
+    }
 };
 
 module.exports = EventTarget;
