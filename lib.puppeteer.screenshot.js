@@ -2128,9 +2128,6 @@ class NetworkManager extends EventEmitter {
       */
     _onResponseReceived(event) {
         const request = this._requestIdToRequest.get(event.requestId);
-        // FileUpload sends a response without a matching request.
-        if (!request)
-            return;
         const response = new Response(this._client, request, event.response);
         request._response = response;
         this.emit(Events.NetworkManager.Response, response);
@@ -2141,15 +2138,9 @@ class NetworkManager extends EventEmitter {
       */
     _onLoadingFinished(event) {
         const request = this._requestIdToRequest.get(event.requestId);
-        // For certain requestIds we never receive requestWillBeSent event.
-        // @see https://crbug.com/750469
-        if (!request)
-            return;
-
         // Under certain conditions we never get the Network.responseReceived
         // event from protocol. @see https://crbug.com/883475
-        if (request.response())
-            request.response()._bodyLoadedPromiseFulfill.call(null);
+        request.response()._bodyLoadedPromiseFulfill.call(null);
         this._requestIdToRequest.delete(request._requestId);
         this._attemptedAuthentications.delete(request._interceptionId);
         this.emit(Events.NetworkManager.RequestFinished, request);
