@@ -867,12 +867,11 @@ class Browser extends EventEmitter {
     /**
       * @param {!Puppeteer.Connection} connection
       * @param {!Array<string>} contextIds
-      * @param {?Puppeteer.Viewport} defaultViewport
       * @param {?Puppeteer.ChildProcess} process
       * @param {function()=} closeCallback
       */
-    static async create(connection, contextIds, defaultViewport, process, closeCallback) {
-        const browser = new Browser(connection, contextIds, defaultViewport, process, closeCallback);
+    static async create(connection, contextIds, process, closeCallback) {
+        const browser = new Browser(connection, contextIds, process, closeCallback);
         await connection.send("Target.setDiscoverTargets", {
             discover: true});
         return browser;
@@ -881,13 +880,11 @@ class Browser extends EventEmitter {
     /**
       * @param {!Puppeteer.Connection} connection
       * @param {!Array<string>} contextIds
-      * @param {?Puppeteer.Viewport} defaultViewport
       * @param {?Puppeteer.ChildProcess} process
       * @param {(function():Promise)=} closeCallback
       */
-    constructor(connection, contextIds, defaultViewport, process, closeCallback) {
+    constructor(connection, contextIds, process, closeCallback) {
         super();
-        this._defaultViewport = defaultViewport;
         this._process = process;
         this._connection = connection;
         this._closeCallback = closeCallback;
@@ -919,7 +916,6 @@ class Browser extends EventEmitter {
         target._sessionFactory = function () {
             return that._connection.createSession(targetInfo);
         },
-        target._defaultViewport = this._defaultViewport;
         /** @type {?Promise<!Puppeteer.Page>} */
         target._pagePromise = null;
         /** @type {?Promise<!Worker>} */
@@ -1842,13 +1838,11 @@ class Page extends EventEmitter {
     /**
       * @param {!Puppeteer.CDPSession} client
       * @param {!Puppeteer.Target} target
-      * @param {?Puppeteer.Viewport} defaultViewport
       * @return {!Promise<!Page>}
       */
-    static async create(client, target, defaultViewport) {
+    static async create(client, target) {
         const page = new Page(client, target);
         await page._initialize();
-        await page.setViewport(defaultViewport);
         return page;
     }
 
@@ -1866,8 +1860,6 @@ class Page extends EventEmitter {
         /** @type {!Map<string, Function>} */
         this._pageBindings = new Map();
         this._javascriptEnabled = true;
-        /** @type {?Puppeteer.Viewport} */
-        this._viewport = null;
 
         /** @type {!Map<string, Worker>} */
         this._workers = new Map();
@@ -1899,13 +1891,6 @@ class Page extends EventEmitter {
             this._client.send("Performance.enable", {}),
             this._client.send("Log.enable", {}),
         ]);
-    }
-
-    /**
-      * @param {!Puppeteer.Viewport} viewport
-      */
-    async setViewport(viewport) {
-        this._viewport = viewport;
     }
 }
 module.exports = {
