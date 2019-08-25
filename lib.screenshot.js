@@ -846,7 +846,7 @@ class Connection extends EventEmitter {
     /**
       * @param {string} message
       */
-    async _onMessage(message) {
+    _onMessage(message) {
         const object = JSON.parse(message);
         if (object.method === "Target.attachedToTarget") {
             const sessionId = object.params.sessionId;
@@ -859,7 +859,14 @@ class Connection extends EventEmitter {
         }
         if (object.sessionId) {
             const session = this._sessions.get(object.sessionId);
-            session._onMessage(object);
+            if (object.id && session._callbacks.has(object.id)) {
+                const callback = session._callbacks.get(object.id);
+                session._callbacks.delete(object.id);
+                callback.resolve(object.result);
+            } else {
+                assert(!object.id);
+                session.emit(object.method, object.params);
+            }
         } else if (object.id) {
             const callback = this._callbacks.get(object.id);
             // Callbacks could be all rejected if someone has called `.dispose()`.
@@ -928,20 +935,6 @@ class CDPSession extends EventEmitter {
             that._callbacks.set(id, {
                 resolve, reject, error: new Error(), method});
         });
-    }
-
-    /**
-      * @param {{id?: number, method: string, params: Object, error: {message: string, data: any}, result?: *}} object
-      */
-    _onMessage(object) {
-        if (object.id && this._callbacks.has(object.id)) {
-            const callback = this._callbacks.get(object.id);
-            this._callbacks.delete(object.id);
-            callback.resolve(object.result);
-        } else {
-            assert(!object.id);
-            this.emit(object.method, object.params);
-        }
     }
 
     _onClosed() {
