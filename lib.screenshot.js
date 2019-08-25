@@ -840,8 +840,7 @@ class Connection extends EventEmitter {
     _onMessage(message) {
         const object = JSON.parse(message);
         if (object.method === "Target.attachedToTarget") {
-            const sessionId = object.params.sessionId;
-            session1 = new CDPSession(this, object.params.targetInfo.type, sessionId);
+            session1 = new CDPSession(this, object.params.targetInfo.type, object.params.sessionId);
         }
         if (object.sessionId) {
             if (object.id && session1._callbacks.has(object.id)) {
