@@ -1033,14 +1033,10 @@ class Browser extends EventEmitter {
         this._process = process;
         this._screenshotTaskQueue = new TaskQueue();
         this._connection = connection;
-        this._closeCallback = closeCallback || new Function();
-
+        this._closeCallback = closeCallback;
         this._defaultContext = new BrowserContext(this._connection, this, null);
         /** @type {Map<string, BrowserContext>} */
         this._contexts = new Map();
-        for (const contextId of contextIds)
-            this._contexts.set(contextId, new BrowserContext(this._connection, this, contextId));
-
         /** @type {Map<string, Target>} */
         this._targets = new Map();
         this._connection.on(Events.Connection.Disconnected, () => this.emit(Events.Browser.Disconnected));
@@ -1055,16 +1051,13 @@ class Browser extends EventEmitter {
     async _targetCreated(event) {
         const targetInfo = event.targetInfo;
         const {browserContextId} = targetInfo;
-        const context = (browserContextId && this._contexts.has(browserContextId)) ? this._contexts.get(browserContextId) : this._defaultContext;
+        const context = this._defaultContext;
 
         const target = new Target(targetInfo, context, () => this._connection.createSession(targetInfo), this._ignoreHTTPSErrors, this._defaultViewport, this._screenshotTaskQueue);
         assert(!this._targets.has(event.targetInfo.targetId), 'Target should not exist before targetCreated');
         this._targets.set(event.targetInfo.targetId, target);
-
-        if (await target._initializedPromise) {
-            this.emit(Events.Browser.TargetCreated, target);
-            context.emit(Events.BrowserContext.TargetCreated, target);
-        }
+        this.emit(Events.Browser.TargetCreated, target);
+        context.emit(Events.BrowserContext.TargetCreated, target);
     }
 
     /**
@@ -1075,10 +1068,8 @@ class Browser extends EventEmitter {
         target._initializedCallback(false);
         this._targets.delete(event.targetId);
         target._closedCallback();
-        if (await target._initializedPromise) {
-            this.emit(Events.Browser.TargetDestroyed, target);
-            target.browserContext().emit(Events.BrowserContext.TargetDestroyed, target);
-        }
+        this.emit(Events.Browser.TargetDestroyed, target);
+        target.browserContext().emit(Events.BrowserContext.TargetDestroyed, target);
     }
 
     /**
@@ -1239,8 +1230,6 @@ class Connection extends EventEmitter {
       * @param {string} message
       */
     async _onMessage(message) {
-        if (this._delay)
-            await new Promise(f => setTimeout(f, this._delay));
         debugProtocol('◀ RECV ' + message);
         const object = JSON.parse(message);
         if (object.method === 'Target.attachedToTarget') {
@@ -1249,25 +1238,17 @@ class Connection extends EventEmitter {
             this._sessions.set(sessionId, session);
         } else if (object.method === 'Target.detachedFromTarget') {
             const session = this._sessions.get(object.params.sessionId);
-            if (session) {
-                session._onClosed();
-                this._sessions.delete(object.params.sessionId);
-            }
+            session._onClosed();
+            this._sessions.delete(object.params.sessionId);
         }
         if (object.sessionId) {
             const session = this._sessions.get(object.sessionId);
-            if (session)
-                session._onMessage(object);
+            session._onMessage(object);
         } else if (object.id) {
             const callback = this._callbacks.get(object.id);
             // Callbacks could be all rejected if someone has called `.dispose()`.
-            if (callback) {
-                this._callbacks.delete(object.id);
-                if (object.error)
-                    callback.reject(createProtocolError(callback.error, callback.method, object));
-                else
-                    callback.resolve(object.result);
-            }
+            this._callbacks.delete(object.id);
+            callback.resolve(object.result);
         } else {
             this.emit(object.method, object.params);
         }
