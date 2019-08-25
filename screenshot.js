@@ -215,7 +215,7 @@ process.on("SIGTERM", chromeKillSync);
 process.on("SIGHUP", chromeKillSync);
 setTimeout(function () {
     throw new Error("chrome-screenshot - errTimeout - 30000 ms");
-}, 30000);
+}, 30000).unref();
 
 
 
@@ -264,8 +264,8 @@ chromeProcess = child_process.spawn((
         "pipe", "pipe", "pipe"
     ]
 });
-// chromeProcess.stderr.pipe(process.stderr);
-// chromeProcess.stdout.pipe(process.stdout);
+chromeProcess.stderr.pipe(process.stderr);
+chromeProcess.stdout.pipe(process.stdout);
 browserWSEndpoint = await new Promise(function (resolve, reject) {
     var cleanup;
     var onClose;
