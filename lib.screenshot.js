@@ -539,7 +539,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
 "use strict";
 
 const readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
-const protocolVersions = [8, 13];
 
     const websocket1 = new EventEmitter();
     websocket1.protocol = "";
@@ -606,35 +605,12 @@ module.exports = websocket1;
   *     permessage-deflate
   * @param {Number} options.handshakeTimeout Timeout in milliseconds for the
   *     handshake request
-  * @param {Number} options.protocolVersion Value of the `Sec-WebSocket-Version`
-  *     header
   * @param {String} options.origin Value of the `Origin` or
   *     `Sec-WebSocket-Origin` header
-  * @param {Boolean} options.followRedirects Whether or not to follow redirects
-  * @param {Number} options.maxRedirects The maximum number of redirects allowed
   * @private
   */
-function initAsClient(websocket1, address, protocols, options) {
-    const opts = Object.assign(
-        {
-            protocolVersion: protocolVersions[1],
-            followRedirects: false,
-            maxRedirects: 10
-        },
-        options,
-        {
-            createConnection: undefined,
-            socketPath: undefined,
-            hostname: undefined,
-            protocol: undefined,
-            timeout: undefined,
-            method: undefined,
-            auth: undefined,
-            host: undefined,
-            path: undefined,
-            port: undefined
-        }
-    );
+function initAsClient(websocket1, address, protocols) {
+    const opts = {};
     var parsedUrl;
     //
     // The WHATWG URL constructor is not available on Node.js < 6.13.0
@@ -656,7 +632,7 @@ function initAsClient(websocket1, address, protocols, options) {
     opts.host = parsedUrl.hostname;
     opts.headers = Object.assign(
         {
-            "Sec-WebSocket-Version": opts.protocolVersion,
+            "Sec-WebSocket-Version": 13,
             "Sec-WebSocket-Key": key,
             Connection: "Upgrade",
             Upgrade: "websocket"
