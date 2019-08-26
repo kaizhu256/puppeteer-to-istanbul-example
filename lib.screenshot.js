@@ -868,8 +868,6 @@ class FrameManager extends EventEmitter {
         framemanager1._client = client;
         framemanager1._page = page;
         framemanager1._networkManager = new NetworkManager(client);
-        /** @type {!Map<string, !Frame>} */
-        framemanager1._frames = new Map();
         /** @type {!Map<number, !ExecutionContext>} */
         framemanager1._contextIdToContext = new Map();
         /** @type {!Set<string>} */
@@ -902,19 +900,17 @@ class FrameManager extends EventEmitter {
       * @param {!Protocol.Page.lifecycleEventPayload} event
       */
     _onLifecycleEvent(event) {
-        const frame = framemanager1._frames.get(event.frameId);
-        frame._onLifecycleEvent(event.loaderId, event.name);
-        framemanager1.emit(Events.FrameManager.LifecycleEvent, frame);
+        frame1._onLifecycleEvent(event.loaderId, event.name);
+        framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
     }
 
     /**
       * @param {string} frameId
       */
     _onFrameStoppedLoading(frameId) {
-        const frame = framemanager1._frames.get(frameId);
-        frame._lifecycleEvents.add("DOMContentLoaded");
-        frame._lifecycleEvents.add("load");
-        framemanager1.emit(Events.FrameManager.LifecycleEvent, frame);
+        frame1._lifecycleEvents.add("DOMContentLoaded");
+        frame1._lifecycleEvents.add("load");
+        framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
     }
 
     /**
@@ -924,13 +920,11 @@ class FrameManager extends EventEmitter {
         // Update or create main frame.
         if (frame1) {
             // Update frame id to retain frame identity on cross-process navigation.
-            framemanager1._frames.delete(frame1._id);
             frame1._id = framePayload.id;
         } else {
             // Initial main frame navigation.
             frame1 = new Frame(framemanager1, framemanager1._client, null, framePayload.id);
         }
-        framemanager1._frames.set(framePayload.id, frame1);
         // Update frame payload.
         frame1._navigated(framePayload);
         framemanager1.emit(Events.FrameManager.FrameNavigated, frame1);
@@ -945,16 +939,14 @@ class FrameManager extends EventEmitter {
             source: `//# sourceURL=${EVALUATION_SCRIPT_URL}`,
             worldName: name,
         }),
-        await Promise.all(Array.from(framemanager1._frames.values()).map(frame => framemanager1._client.send("Page.createIsolatedWorld", {
-            frameId: frame._id,
+        await framemanager1._client.send("Page.createIsolatedWorld", {
+            frameId: frame1._id,
             grantUniveralAccess: true,
-            worldName: name,
-        }).catch(debugError))); // frames might be removed before we send this
+            worldName: name
+        }).catch(console.error); // frames might be removed before we send this
     }
 
     _onExecutionContextCreated(contextPayload) {
-        const frameId = contextPayload.auxData.frameId;
-        const frame = framemanager1._frames.get(frameId)
         let world = null;
         if (contextPayload.auxData && !!contextPayload.auxData["isDefault"]) {
             world = domworld1;
@@ -1187,8 +1179,7 @@ class NetworkManager extends EventEmitter {
             this._handleRequestRedirect(request, event.redirectResponse);
             redirectChain = request._redirectChain;
         }
-        const frame = framemanager1._frames.get(event.frameId);
-        const request = new Request(this._client, frame, interceptionId, this._userRequestInterceptionEnabled, event, redirectChain);
+        const request = new Request(this._client, frame1, interceptionId, this._userRequestInterceptionEnabled, event, redirectChain);
         this._requestIdToRequest.set(event.requestId, request);
         this.emit(Events.NetworkManager.Request, request);
     }
