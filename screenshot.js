@@ -334,24 +334,6 @@ tmp = await connection1.send("Target.createTarget", {
 tmp = await browser.targetDict[tmp.targetId];
 page = await connection1.createSession(tmp._targetInfo);
 page = await module.exports.Page.create(page, tmp);
-//!! page.then(function (client) {
-    //!! return module.exports.Page.create(debugInline(client), target);
-//!! });
-
-    //!! /**
-      //!! * @param {Protocol.Target.TargetInfo} targetInfo
-      //!! * @return {!Promise<!CDPSession>}
-      //!! */
-    //!! async createSession(targetInfo) {
-        //!! const {
-            //!! sessionIdi
-        //!! }
-        //!! page = await connection.send("Target.attachToTarget", {
-            //!! targetId: page._targetInfo.targetId,
-            //!! flatten: true
-        //!! });
-        //!! page = await connection._sessions.get(page.sessionId);
-    //!! }
 
 
 

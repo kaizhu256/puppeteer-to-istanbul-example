@@ -114,9 +114,9 @@ class Receiver extends Writable {
       * @param {Function} cb Callback
       */
     _write(chunk, encoding, cb) {
-        this._bufferedBytes += chunk.length;
-        this._buffers.push(chunk);
-        this.startLoop(cb);
+        receiver1._bufferedBytes += chunk.length;
+        receiver1._buffers.push(chunk);
+        receiver1.startLoop(cb);
     }
 
     /**
@@ -127,21 +127,21 @@ class Receiver extends Writable {
       * @private
       */
     consume(n) {
-        this._bufferedBytes -= n;
+        receiver1._bufferedBytes -= n;
 
-        if (n === this._buffers[0].length) {
-            return this._buffers.shift();
+        if (n === receiver1._buffers[0].length) {
+            return receiver1._buffers.shift();
         }
 
-        if (n < this._buffers[0].length) {
-            const buf = this._buffers[0];
-            this._buffers[0] = buf.slice(n);
+        if (n < receiver1._buffers[0].length) {
+            const buf = receiver1._buffers[0];
+            receiver1._buffers[0] = buf.slice(n);
             return buf.slice(0, n);
         }
         const dst = Buffer.allocUnsafe(n);
         do {
-            const buf = this._buffers[0];
-            this._buffers.shift().copy(dst, dst.length - n);
+            const buf = receiver1._buffers[0];
+            receiver1._buffers.shift().copy(dst, dst.length - n);
             n -= buf.length;
         } while (n > 0);
 
@@ -156,24 +156,24 @@ class Receiver extends Writable {
       */
     startLoop(cb) {
         var err;
-        this._loop = true;
+        receiver1._loop = true;
 
         do {
-            switch (this._state) {
+            switch (receiver1._state) {
             case GET_INFO:
-                err = this.getInfo();
+                err = receiver1.getInfo();
                 break;
             case GET_PAYLOAD_LENGTH_16:
-                err = this.getPayloadLength16();
+                err = receiver1.getPayloadLength16();
                 break;
             case GET_PAYLOAD_LENGTH_64:
-                err = this.getPayloadLength64();
+                err = receiver1.getPayloadLength64();
                 break;
             case GET_DATA:
-                err = this.getData(cb);
+                err = receiver1.getData(cb);
                 break;
             }
-        } while (this._loop);
+        } while (receiver1._loop);
 
         cb(err);
     }
@@ -185,27 +185,27 @@ class Receiver extends Writable {
       * @private
       */
     getInfo() {
-        if (this._bufferedBytes < 2) {
-            this._loop = false;
+        if (receiver1._bufferedBytes < 2) {
+            receiver1._loop = false;
             return;
         }
 
-        const buf = this.consume(2);
+        const buf = receiver1.consume(2);
 
         const compressed = (buf[0] & 0x40) === 0x40;
 
-        this._fin = (buf[0] & 0x80) === 0x80;
-        this._opcode = buf[0] & 0x0f;
-        this._payloadLength = buf[1] & 0x7f;
+        receiver1._fin = (buf[0] & 0x80) === 0x80;
+        receiver1._opcode = buf[0] & 0x0f;
+        receiver1._payloadLength = buf[1] & 0x7f;
 
-        this._masked = (buf[1] & 0x80) === 0x80;
+        receiver1._masked = (buf[1] & 0x80) === 0x80;
 
-        if (this._payloadLength === 126) {
-            this._state = GET_PAYLOAD_LENGTH_16
-        } else if (this._payloadLength === 127) {
-            this._state = GET_PAYLOAD_LENGTH_64;
+        if (receiver1._payloadLength === 126) {
+            receiver1._state = GET_PAYLOAD_LENGTH_16
+        } else if (receiver1._payloadLength === 127) {
+            receiver1._state = GET_PAYLOAD_LENGTH_64;
         } else {
-            return this.haveLength();
+            return receiver1.haveLength();
         }
     }
 
@@ -216,8 +216,8 @@ class Receiver extends Writable {
       * @private
       */
     getPayloadLength16() {
-        this._payloadLength = this.consume(2).readUInt16BE(0);
-        return this.haveLength();
+        receiver1._payloadLength = receiver1.consume(2).readUInt16BE(0);
+        return receiver1.haveLength();
     }
 
     /**
@@ -227,10 +227,10 @@ class Receiver extends Writable {
       * @private
       */
     getPayloadLength64() {
-        const buf = this.consume(8);
+        const buf = receiver1.consume(8);
         const num = buf.readUInt32BE(0);
-        this._payloadLength = num * Math.pow(2, 32) + buf.readUInt32BE(4);
-        return this.haveLength();
+        receiver1._payloadLength = num * Math.pow(2, 32) + buf.readUInt32BE(4);
+        return receiver1.haveLength();
     }
 
     /**
@@ -240,8 +240,8 @@ class Receiver extends Writable {
       * @private
       */
     haveLength() {
-        this._totalPayloadLength += this._payloadLength;
-        this._state = GET_DATA;
+        receiver1._totalPayloadLength += receiver1._payloadLength;
+        receiver1._state = GET_DATA;
     }
 
     /**
@@ -252,18 +252,18 @@ class Receiver extends Writable {
       * @private
       */
     getData(cb) {
-        if (this._bufferedBytes < this._payloadLength) {
-            this._loop = false;
+        if (receiver1._bufferedBytes < receiver1._payloadLength) {
+            receiver1._loop = false;
             return;
         }
-        var data = this.consume(this._payloadLength);
+        var data = receiver1.consume(receiver1._payloadLength);
         //
         // This message is not compressed so its lenght is the sum of the payload
         // length of all fragments.
         //
-        this._messageLength = this._totalPayloadLength;
-        this._fragments.push(data);
-        return this.dataMessage();
+        receiver1._messageLength = receiver1._totalPayloadLength;
+        receiver1._fragments.push(data);
+        return receiver1.dataMessage();
     }
 
     /**
@@ -273,15 +273,15 @@ class Receiver extends Writable {
       * @private
       */
     dataMessage() {
-        const messageLength = this._messageLength;
-        const fragments = this._fragments;
-        this._totalPayloadLength = 0;
-        this._messageLength = 0;
-        this._fragmented = 0;
-        this._fragments = [];
+        const messageLength = receiver1._messageLength;
+        const fragments = receiver1._fragments;
+        receiver1._totalPayloadLength = 0;
+        receiver1._messageLength = 0;
+        receiver1._fragmented = 0;
+        receiver1._fragments = [];
         const buf = fragments[0];
-        this.emit("message", buf.toString());
-        this._state = GET_INFO;
+        receiver1.emit("message", buf.toString());
+        receiver1._state = GET_INFO;
     }
 }
 
@@ -445,23 +445,13 @@ function initAsClient(websocket1, urlInspect) {
         host: "127.0.0.1",
         path: urlInspect.pathname,
         port: urlInspect.port
-    }).on("upgrade", (res, socket, head) => {
+    }).on("upgrade", function (res, socket) {
         websocket1.emit("upgrade", res);
         receiver1 = new Receiver();
-
-        /**
-          * Set up the socket and the internal resources.
-          *
-          * @param {net.Socket} socket The network socket between the server and client
-          * @param {Buffer} head The first packet of the upgraded stream
-          * @private
-          */
         websocket1._sender = new Sender(socket);
         websocket1._socket = socket;
-
         receiver1.on("drain", receiverOnDrain);
         receiver1.on("message", receiverOnMessage);
-
         socket.setTimeout(0);
         socket.setNoDelay();
         socket.on("close", socketOnClose);
