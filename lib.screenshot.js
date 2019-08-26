@@ -433,12 +433,10 @@ function initAsClient(websocket1, urlInspect) {
         path: urlInspect.pathname,
         port: urlInspect.port
     }).on("upgrade", function (res, socket) {
-        websocket1.emit("upgrade", res);
         receiver1 = new Receiver();
         sender1 = new Sender(socket);
-        websocket1._socket = socket;
         receiver1.on("drain", function () {
-            websocket1._socket.resume();
+            socket.resume();
         });
         receiver1.on("message", function (data) {
             websocket1.emit("message", data);
