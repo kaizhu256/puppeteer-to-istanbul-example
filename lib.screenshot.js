@@ -70,7 +70,7 @@ var domworld2;
 var frame1;
 var framemanager1;
 var page1;
-var receiver1;
+var websocketReceiver;
 var session1;
 var websocket1;
 var websocketSend;
@@ -93,21 +93,21 @@ const INFLATING = 5;
   *
   * @extends stream.Writable
   */
-receiver1 = new stream.Writable();
-receiver1._bufferedBytes = 0;
-receiver1._buffers = [];
-receiver1._compressed = false;
-receiver1._payloadLength = 0;
-receiver1._mask = undefined;
-receiver1._fragmented = 0;
-receiver1._masked = false;
-receiver1._fin = false;
-receiver1._opcode = 0;
-receiver1._totalPayloadLength = 0;
-receiver1._messageLength = 0;
-receiver1._fragments = [];
-receiver1._state = GET_INFO;
-receiver1._loop = false;
+websocketReceiver = new stream.Writable();
+websocketReceiver._bufferedBytes = 0;
+websocketReceiver._buffers = [];
+websocketReceiver._compressed = false;
+websocketReceiver._payloadLength = 0;
+websocketReceiver._mask = undefined;
+websocketReceiver._fragmented = 0;
+websocketReceiver._masked = false;
+websocketReceiver._fin = false;
+websocketReceiver._opcode = 0;
+websocketReceiver._totalPayloadLength = 0;
+websocketReceiver._messageLength = 0;
+websocketReceiver._fragments = [];
+websocketReceiver._state = GET_INFO;
+websocketReceiver._loop = false;
 
 /**
   * Implements `Writable.prototype._write()`.
@@ -116,72 +116,72 @@ receiver1._loop = false;
   * @param {String} encoding The character encoding of `chunk`
   * @param {Function} cb Callback
   */
-receiver1._write = function (chunk, encoding, cb) {
+websocketReceiver._write = function (chunk, encoding, cb) {
     var bff;
     var data;
     var fragments;
     var messageLength;
     var num;
-    receiver1._bufferedBytes += chunk.length;
-    receiver1._buffers.push(chunk);
-    receiver1._loop = true;
+    websocketReceiver._bufferedBytes += chunk.length;
+    websocketReceiver._buffers.push(chunk);
+    websocketReceiver._loop = true;
     do {
-        switch (receiver1._state) {
+        switch (websocketReceiver._state) {
         // Reads the first two bytes of a frame.
         case GET_INFO:
-            if (receiver1._bufferedBytes < 2) {
-                receiver1._loop = false;
+            if (websocketReceiver._bufferedBytes < 2) {
+                websocketReceiver._loop = false;
                 break;
             }
-            bff = receiver1.consume(2);
-            receiver1._fin = (bff[0] & 0x80) === 0x80;
-            receiver1._opcode = bff[0] & 0x0f;
-            receiver1._payloadLength = bff[1] & 0x7f;
-            receiver1._masked = (bff[1] & 0x80) === 0x80;
-            if (receiver1._payloadLength === 126) {
-                receiver1._state = GET_PAYLOAD_LENGTH_16
-            } else if (receiver1._payloadLength === 127) {
-                receiver1._state = GET_PAYLOAD_LENGTH_64;
+            bff = websocketReceiver.consume(2);
+            websocketReceiver._fin = (bff[0] & 0x80) === 0x80;
+            websocketReceiver._opcode = bff[0] & 0x0f;
+            websocketReceiver._payloadLength = bff[1] & 0x7f;
+            websocketReceiver._masked = (bff[1] & 0x80) === 0x80;
+            if (websocketReceiver._payloadLength === 126) {
+                websocketReceiver._state = GET_PAYLOAD_LENGTH_16
+            } else if (websocketReceiver._payloadLength === 127) {
+                websocketReceiver._state = GET_PAYLOAD_LENGTH_64;
             } else {
-                receiver1.haveLength();
+                websocketReceiver.haveLength();
             }
             break;
         // Gets extended payload length (7+16).
         case GET_PAYLOAD_LENGTH_16:
-            receiver1._payloadLength = receiver1.consume(2).readUInt16BE(0);
-            receiver1.haveLength();
+            websocketReceiver._payloadLength = websocketReceiver.consume(2).readUInt16BE(0);
+            websocketReceiver.haveLength();
             break;
         // Gets extended payload length (7+64).
         case GET_PAYLOAD_LENGTH_64:
-            bff = receiver1.consume(8);
+            bff = websocketReceiver.consume(8);
             num = bff.readUInt32BE(0);
-            receiver1._payloadLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
-            receiver1.haveLength();
+            websocketReceiver._payloadLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
+            websocketReceiver.haveLength();
             break;
         case GET_DATA:
-            if (receiver1._bufferedBytes < receiver1._payloadLength) {
-                receiver1._loop = false;
+            if (websocketReceiver._bufferedBytes < websocketReceiver._payloadLength) {
+                websocketReceiver._loop = false;
                 break;
             }
-            data = receiver1.consume(receiver1._payloadLength);
-            receiver1._messageLength = receiver1._totalPayloadLength;
-            receiver1._fragments.push(data);
-            messageLength = receiver1._messageLength;
-            fragments = receiver1._fragments;
-            receiver1._totalPayloadLength = 0;
-            receiver1._messageLength = 0;
-            receiver1._fragmented = 0;
-            receiver1._fragments = [];
+            data = websocketReceiver.consume(websocketReceiver._payloadLength);
+            websocketReceiver._messageLength = websocketReceiver._totalPayloadLength;
+            websocketReceiver._fragments.push(data);
+            messageLength = websocketReceiver._messageLength;
+            fragments = websocketReceiver._fragments;
+            websocketReceiver._totalPayloadLength = 0;
+            websocketReceiver._messageLength = 0;
+            websocketReceiver._fragmented = 0;
+            websocketReceiver._fragments = [];
             bff = fragments[0];
-            receiver1._state = GET_INFO;
+            websocketReceiver._state = GET_INFO;
             connection1._onMessage(bff.toString());
             break;
         }
-    } while (receiver1._loop);
+    } while (websocketReceiver._loop);
     cb();
 }
 
-receiver1.consume = function (n) {
+websocketReceiver.consume = function (n) {
 /**
   * Consumes `n` bytes from the buffered data.
   *
@@ -191,19 +191,19 @@ receiver1.consume = function (n) {
   */
     var bff;
     var dst;
-    receiver1._bufferedBytes -= n;
-    if (n === receiver1._buffers[0].length) {
-        return receiver1._buffers.shift();
+    websocketReceiver._bufferedBytes -= n;
+    if (n === websocketReceiver._buffers[0].length) {
+        return websocketReceiver._buffers.shift();
     }
-    if (n < receiver1._buffers[0].length) {
-        bff = receiver1._buffers[0];
-        receiver1._buffers[0] = bff.slice(n);
+    if (n < websocketReceiver._buffers[0].length) {
+        bff = websocketReceiver._buffers[0];
+        websocketReceiver._buffers[0] = bff.slice(n);
         return bff.slice(0, n);
     }
     dst = Buffer.allocUnsafe(n);
     do {
-        const bff = receiver1._buffers[0];
-        receiver1._buffers.shift().copy(dst, dst.length - n);
+        const bff = websocketReceiver._buffers[0];
+        websocketReceiver._buffers.shift().copy(dst, dst.length - n);
         n -= bff.length;
     } while (n > 0);
 
@@ -216,9 +216,9 @@ receiver1.consume = function (n) {
       * @return {(RangeError|undefined)} A possible error
       * @private
       */
-    receiver1.haveLength = function () {
-        receiver1._totalPayloadLength += receiver1._payloadLength;
-        receiver1._state = GET_DATA;
+    websocketReceiver.haveLength = function () {
+        websocketReceiver._totalPayloadLength += websocketReceiver._payloadLength;
+        websocketReceiver._state = GET_DATA;
     }
 
 /*
@@ -239,11 +239,11 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
   */
 function initAsClient(socket) {
     websocket1 = socket;
-    receiver1.on("drain", websocket1.resume.bind(websocket1));
+    websocketReceiver.on("drain", websocket1.resume.bind(websocket1));
     websocket1.setTimeout(0);
     websocket1.setNoDelay();
     websocket1.on("data", function (chunk) {
-        if (!receiver1.write(chunk)) {
+        if (!websocketReceiver.write(chunk)) {
             websocket1.pause();
         }
     });
