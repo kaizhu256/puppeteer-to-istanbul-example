@@ -408,20 +408,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
 */
 "use strict";
 
-    websocket1 = new EventEmitter();
-    websocket1.protocol = "";
-
-    websocket1._closeFrameReceived = false;
-    websocket1._closeFrameSent = false;
-    websocket1._closeMessage = "";
-    websocket1._closeTimer = null;
-    websocket1._closeCode = 1006;
-    websocket1._socket = null;
-    websocket1._isServer = false;
-    websocket1._redirects = 0;
-
-module.exports = websocket1;
-
 /**
   * Initialize a WebSocket client.
   *
@@ -433,6 +419,7 @@ module.exports = websocket1;
   *     `Sec-WebSocket-Origin` header
   * @private
   */
+websocket1 = new EventEmitter();
 function initAsClient(websocket1, urlInspect) {
     urlInspect = new url.URL(urlInspect);
     http.get({
@@ -639,7 +626,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         message = JSON.stringify(Object.assign({}, message, {id}));
         sender1.send(message, {
             binary: typeof message !== "string",
-            mask: !websocket1._isServer,
+            mask: true,
             compress: true,
             fin: true
         });
