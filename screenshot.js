@@ -165,7 +165,6 @@ var onReject;
 var onResolve;
 var page1;
 var path;
-var session1;
 var tmp;
 var url;
 var urlWebsocket;
@@ -189,7 +188,6 @@ path = require("path");
 url = require("url");
 util = require("util");
 module.exports = require("./lib.screenshot.js");
-session1 = module.exports.session1;
 websocketSend = module.exports.websocketSend;
 
 
@@ -301,7 +299,7 @@ gotoNext = async function (err, data, meta) {
     case 3:
         module.exports.initAsClient(meta);
         browser1 = await module.exports.Browser.create(
-            module.exports.connection1,
+            null,
             [],
             chromeProcess
         );
@@ -328,7 +326,7 @@ await websocketSend("Target.attachToTarget", {
     flatten: true,
     targetId: tmp._targetInfo.targetId
 });
-page1 = await module.exports.Page.create(session1, tmp);
+page1 = await module.exports.Page.create(null, tmp);
 
 
 
