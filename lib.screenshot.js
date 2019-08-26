@@ -367,7 +367,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         data = {
             method,
             params,
-            sessionId: session1._sessionId
+            sessionId: websocket1._sessionId
         };
         data.id = websocket1.ii;
         data = Buffer.from(JSON.stringify(data));
@@ -420,8 +420,7 @@ var websocketOnMessage = function (message) {
         sessionId
     } = JSON.parse(message);
     if (method === "Target.attachedToTarget") {
-        session1._targetType = params.targetInfo.type;
-        session1._sessionId = params.sessionId;
+        websocket1._sessionId = params.sessionId;
     }
     if (sessionId) {
         if (id && callbackDict[id]) {
@@ -430,7 +429,6 @@ var websocketOnMessage = function (message) {
             callback.resolve(result);
         } else {
             assert(!id);
-            //!! session1.emit(method, params);
         }
     } else if (id) {
         const callback = callbackDict[id];
