@@ -473,10 +473,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         });
     }
 
-    /**
-      * @param {*} message
-      * @return {number}
-      */
     connection1._rawSend = function (data) {
     /*
      * this function will convert <data> to websocket-masked-frame and send it

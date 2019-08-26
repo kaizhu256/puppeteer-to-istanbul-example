@@ -167,6 +167,7 @@ var onReject;
 var onResolve;
 var page1;
 var path;
+var session1;
 var tmp;
 var url;
 var urlInspect;
@@ -338,8 +339,8 @@ tmp = await connection1.send("Target.createTarget", {
     url: "about:blank"
 });
 tmp = await browser1.targetDict[tmp.targetId];
-page1 = await connection1.createSession(tmp._targetInfo);
-page1 = await module.exports.Page.create(page1, tmp);
+session1 = await connection1.createSession(tmp._targetInfo);
+page1 = await module.exports.Page.create(session1, tmp);
 
 
 
