@@ -190,6 +190,7 @@ path = require("path");
 url = require("url");
 util = require("util");
 module.exports = require("./lib.screenshot.js");
+session1 = module.exports.session1;
 websocketSend = module.exports.websocketSend;
 
 
@@ -326,7 +327,7 @@ tmp = await websocketSend("Target.createTarget", {
     url: "about:blank"
 });
 tmp = await browser1.targetDict[tmp.targetId];
-session1 = await connection1.createSession(tmp._targetInfo);
+await connection1.createSession(tmp._targetInfo);
 page1 = await module.exports.Page.create(session1, tmp);
 
 

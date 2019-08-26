@@ -1131,6 +1131,7 @@ Page,
 connection1,
 domworld2,
 initAsClient,
+session1,
 websocketSend
 };
 /*
