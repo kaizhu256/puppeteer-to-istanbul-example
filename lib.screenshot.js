@@ -1291,20 +1291,6 @@ class Response {
         this._headers = {};
         for (const key of Object.keys(responsePayload.headers))
             this._headers[key.toLowerCase()] = responsePayload.headers[key];
-        this._securityDetails = responsePayload.securityDetails ? new SecurityDetails(responsePayload.securityDetails) : null;
-    }
-}
-
-class SecurityDetails {
-    /**
-      * @param {!Protocol.Network.SecurityDetails} securityPayload
-      */
-    constructor(securityPayload) {
-        this._subjectName = securityPayload["subjectName"];
-        this._issuer = securityPayload["issuer"];
-        this._validFrom = securityPayload["validFrom"];
-        this._validTo = securityPayload["validTo"];
-        this._protocol = securityPayload["protocol"];
     }
 }
 
