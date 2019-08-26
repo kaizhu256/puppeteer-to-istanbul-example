@@ -62,6 +62,7 @@ local.nop(
 
 
 /* jslint ignore:start */
+var brower1;
 var connection1;
 var page1;
 var receiver1;

@@ -148,7 +148,7 @@
 
 // init var
 var assert;
-var browser;
+var browser1;
 var child_process;
 var chromeCloseGracefully;
 var chromeKillSync;
@@ -199,7 +199,7 @@ chromeCloseGracefully = function () {
   * @return {Promise}
   */
     // Attempt to close chrome gracefully
-    browser._connection.send("Browser.close").catch(function (err) {
+    browser1._connection.send("Browser.close").catch(function (err) {
         console.error(err);
         chromeKillSync();
     });
@@ -307,7 +307,7 @@ gotoNext = async function (err, data) {
         connection1 = module.exports.connection1;
         connection1._url = urlInspect;
         websocket1.on("message", connection1._onMessage.bind(connection1));
-        browser = await module.exports.Browser.create(
+        browser1 = await module.exports.Browser.create(
             connection1,
             [],
             chromeProcess,
@@ -331,7 +331,7 @@ await new Promise(function (resolve, reject) {
 tmp = await connection1.send("Target.createTarget", {
     url: "about:blank"
 });
-tmp = await browser.targetDict[tmp.targetId];
+tmp = await browser1.targetDict[tmp.targetId];
 page1 = await connection1.createSession(tmp._targetInfo);
 page1 = await module.exports.Page.create(page1, tmp);
 
@@ -402,5 +402,5 @@ return html.trim()` + " + \"\\n\""
 
 
 // browser - close
-await browser.close();
+await browser1.close();
 }(globalThis.globalLocal));
