@@ -64,6 +64,7 @@ local.nop(
 /* jslint ignore:start */
 var browser1;
 var browserContext1;
+var callbackDict;
 var connection1;
 var domworld1;
 var domworld2;
@@ -73,6 +74,8 @@ var page1;
 var receiver1;
 var session1;
 var websocket1;
+
+callbackDict = {};
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
 */
@@ -448,7 +451,6 @@ browserContext1 = new EventEmitter();
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
 */
     connection1 = new EventEmitter();
-    connection1._callbacks = {};
     /** @type {!Map<string, !CDPSession>}*/
     connection1._closed = false;
 
@@ -464,7 +466,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         };
         const id = connection1._rawSend(message);
         return new Promise(function (resolve, reject) {
-            connection1._callbacks[id] = {
+            callbackDict[id] = {
                 resolve,
                 reject,
                 error: new Error(),
@@ -522,18 +524,18 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
             session1._sessionId = object.params.sessionId;
         }
         if (object.sessionId) {
-            if (object.id && session1._callbacks[object.id]) {
-                const callback = session1._callbacks[object.id];
-                delete session1._callbacks[object.id];
+            if (object.id && callbackDict[object.id]) {
+                const callback = callbackDict[object.id];
+                delete callbackDict[object.id];
                 callback.resolve(object.result);
             } else {
                 assert(!object.id);
                 session1.emit(object.method, object.params);
             }
         } else if (object.id) {
-            const callback = connection1._callbacks[object.id];
+            const callback = callbackDict[object.id];
             // Callbacks could be all rejected if someone has called `.dispose()`.
-            delete connection1._callbacks[object.id];
+            delete callbackDict[object.id];
             callback.resolve(object.result);
         } else {
             connection1.emit(object.method, object.params);
@@ -542,7 +544,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
 
     connection1._onClose = function () {
         connection1._closed = true;
-        connection1._callbacks = {};
         connection1.emit(Events.Connection.Disconnected);
     }
 
@@ -564,7 +565,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
     }
 
     session1 = new EventEmitter();
-    session1._callbacks = {};
 
     /**
       * @param {string} method
@@ -579,7 +579,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         };
         const id = connection1._rawSend(message);
         return new Promise(function (resolve, reject) {
-            session1._callbacks[id] = {
+            callbackDict[id] = {
                 resolve,
                 reject,
                 error: new Error(),
@@ -1254,9 +1254,9 @@ Browser,
 LifecycleWatcher,
 Page,
 Receiver,
-initAsClient,
 connection1,
-domworld2
+domworld2,
+initAsClient,
 };
 /*
 file none
