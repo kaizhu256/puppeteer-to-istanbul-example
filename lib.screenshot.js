@@ -65,6 +65,8 @@ local.nop(
 var browser1;
 var browserContext1;
 var connection1;
+var domworld1;
+var domworld2;
 var page1;
 var receiver1;
 var sender1;
@@ -702,8 +704,6 @@ class DOMWorld {
 
         /** @type {?Promise<!Puppeteer.ElementHandle>} */
         this._documentPromise = null;
-        /** @type {!Promise<!Puppeteer.ExecutionContext>} */
-        this._contextPromise;
         this._contextResolveCallback = null;
         this._setContext(null);
 
@@ -960,12 +960,12 @@ class FrameManager extends EventEmitter {
         const frame = this._frames.get(frameId)
         let world = null;
         if (contextPayload.auxData && !!contextPayload.auxData["isDefault"]) {
-            world = frame._mainWorld;
-        } else if (contextPayload.name === UTILITY_WORLD_NAME && !frame._secondaryWorld._hasContext()) {
+            world = domworld1;
+        } else if (contextPayload.name === UTILITY_WORLD_NAME && !domworld2._hasContext()) {
             // In case of multiple sessions to the same target, there's a race between
             // connections so we might end up creating multiple isolated worlds.
             // We can use either.
-            world = frame._secondaryWorld;
+            world = domworld2;
         }
         if (contextPayload.auxData && contextPayload.auxData["type"] === "isolated")
             this._isolatedWorlds.add(contextPayload.name);
@@ -1007,9 +1007,8 @@ class Frame {
         /** @type {!Set<string>} */
         this._lifecycleEvents = new Set();
         /** @type {!DOMWorld} */
-        this._mainWorld = new DOMWorld(frameManager, this);
-        /** @type {!DOMWorld} */
-        this._secondaryWorld = new DOMWorld(frameManager, this);
+        domworld1 = new DOMWorld(frameManager, this);
+        module.exports.domworld1 = domworld1;
     }
 
     /**
@@ -1397,7 +1396,9 @@ LifecycleWatcher,
 Page,
 websocket1,
 initAsClient,
-connection1
+connection1,
+domworld1,
+domworld2
 };
 /*
 file none

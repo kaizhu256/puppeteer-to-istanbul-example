@@ -380,7 +380,7 @@ await Promise.all([
     // screenshot - html
     (async function () {
         var result;
-        result = page1._frameManager._mainFrame._secondaryWorld._contextPromise;
+        result = module.exports.domworld1._contextPromise;
         result = await local.identity(result);
         result = await result._evaluateInternal(
             true,
