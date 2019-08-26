@@ -446,9 +446,7 @@ function initAsClient(websocket1, urlInspect) {
         receiver1.on("drain", function () {
             websocket2.resume();
         });
-        receiver1.on("message", function (data) {
-            websocket1.emit("message", data);
-        });
+        receiver1.on("message", connection1._onMessage);
         websocket2.setTimeout(0);
         websocket2.setNoDelay();
         websocket2.on("data", function socketOnData(chunk) {
