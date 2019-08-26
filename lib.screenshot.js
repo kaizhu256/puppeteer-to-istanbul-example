@@ -459,16 +459,17 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
      * this function will convert <data> to websocket-masked-frame and send it
      * https://tools.ietf.org/html/rfc6455
      */
-        var data = {
+        var data;
+        var header;
+        var ii;
+        var mask;
+        websocket1.ii = (websocket1.ii | 0) + 1;
+        data = {
             method,
             params,
             sessionId: session1._sessionId
         };
-        var header;
-        var ii;
-        var mask;
-        websocket1.counter = (websocket1.counter | 0) + 1;
-        data.id = websocket1.counter;
+        data.id = websocket1.ii;
         data = Buffer.from(JSON.stringify(data));
         // init header
         header = Buffer.allocUnsafe(8);
@@ -495,9 +496,10 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         // send data
         websocket1.write(data);
         websocket1.uncork();
-        const id = websocket1.counter;
+        // resolve
+        ii = websocket1.ii;
         return new Promise(function (resolve, reject) {
-            callbackDict[id] = {
+            callbackDict[ii] = {
                 resolve,
                 reject,
                 error: new Error(),
@@ -755,8 +757,9 @@ class FrameManager extends EventEmitter {
         framemanager1._onFrameNavigated(frameTree.frame);
         await Promise.all([
             connection1.send("Page.setLifecycleEventsEnabled", {
-                enabled: true }),
-            connection1.send("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
+                enabled: true
+            }),
+            connection1.send("Runtime.enable").then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
             framemanager1._networkManager.initialize(),
         ]);
     }
@@ -1213,9 +1216,12 @@ class Page extends EventEmitter {
         await Promise.all([
             framemanager1.initialize(),
             connection1.send("Target.setAutoAttach", {
-                autoAttach: true, waitForDebuggerOnStart: false, flatten: true}),
-            connection1.send("Performance.enable", {}),
-            connection1.send("Log.enable", {}),
+                autoAttach: true,
+                waitForDebuggerOnStart: false,
+                flatten: true
+            }),
+            connection1.send("Performance.enable"),
+            connection1.send("Log.enable"),
         ]);
     }
 }
