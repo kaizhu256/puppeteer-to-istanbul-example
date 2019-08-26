@@ -716,12 +716,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         });
     }
 
-    session1._onClosed = function () {
-        session1._callbacks = {};
-        session1._connection = null;
-        session1.emit(Events.CDPSession.Disconnected);
-    }
-
 
 
 /*
