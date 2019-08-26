@@ -700,7 +700,6 @@ class DOMWorld {
       * @param {!Puppeteer.Frame} frame
       */
     constructor(frameManager, frame) {
-        this._frameManager = frameManager;
         this._frame = frame;
 
         /** @type {?Promise<!Puppeteer.ElementHandle>} */
@@ -868,7 +867,6 @@ class FrameManager extends EventEmitter {
         framemanager1._client = client;
         framemanager1._page = page;
         framemanager1._networkManager = new NetworkManager(client);
-        framemanager1._networkManager.setFrameManager(framemanager1);
         /** @type {!Map<string, !Frame>} */
         framemanager1._frames = new Map();
         /** @type {!Map<number, !ExecutionContext>} */
@@ -999,7 +997,6 @@ class Frame {
       * @param {string} frameId
       */
     constructor(frameManager, client, parentFrame, frameId) {
-        this._frameManager = frameManager;
         this._client = client;
         this._parentFrame = parentFrame;
         this._url = "";
@@ -1060,7 +1057,6 @@ class LifecycleWatcher {
             return protocolEvent;
         });
 
-        this._frameManager = frameManager;
         this._frame = frame;
         this._initialLoaderId = frame._loaderId;
         this._timeout = timeout;
@@ -1137,7 +1133,6 @@ class NetworkManager extends EventEmitter {
     constructor(client) {
         super();
         this._client = client;
-        this._frameManager = null;
         /** @type {!Map<string, !Request>} */
         this._requestIdToRequest = new Map();
         /** @type {!Map<string, !Protocol.Network.requestWillBeSentPayload>} */
@@ -1165,13 +1160,6 @@ class NetworkManager extends EventEmitter {
 
     async initialize() {
         await this._client.send("Network.enable");
-    }
-
-    /**
-      * @param {!Puppeteer.FrameManager} frameManager
-      */
-    setFrameManager(frameManager) {
-        this._frameManager = frameManager;
     }
 
     /**
@@ -1359,7 +1347,7 @@ class Page extends EventEmitter {
         page1._client = client;
         page1._target = target;
         /** @type {!FrameManager} */
-        page1._frameManager = new FrameManager(client, page1);
+        new FrameManager(client, page1);
         /** @type {!Map<string, Function>} */
         page1._pageBindings = new Map();
         page1._javascriptEnabled = true;
