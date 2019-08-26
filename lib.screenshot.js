@@ -327,9 +327,9 @@ class Sender {
       * @public
       */
     send(data, opt) {
-        data = Buffer.from(data);
         var list;
         var opt;
+        data = Buffer.from(data);
         opt = {
             fin: opt.fin,
             rsv1: false,
@@ -351,20 +351,17 @@ class Sender {
           * @public
           */
         const merge = opt.mask && opt.readOnly;
-        var offset = 6;
         var payloadLength = data.length;
-        offset += 2;
         payloadLength = 126;
-        const target = Buffer.allocUnsafe(offset);
+        const target = Buffer.allocUnsafe(8);
         target[0] = opt.opcode | 0x80;
-        target[1] = payloadLength;
+        target[1] = payloadLength | 0x80;
         target.writeUInt16BE(data.length, 2);
         const mask = crypto.randomBytes(4);
-        target[1] |= 0x80;
-        target[offset - 4] = mask[0];
-        target[offset - 3] = mask[1];
-        target[offset - 2] = mask[2];
-        target[offset - 1] = mask[3];
+        target[4] = mask[0];
+        target[5] = mask[1];
+        target[6] = mask[2];
+        target[7] = mask[3];
         // mask data
         var ii;
         ii = data.length;
