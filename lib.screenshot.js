@@ -64,6 +64,7 @@ local.nop(
 /* jslint ignore:start */
 var connection1;
 var receiver1;
+var sender1;
 var session1;
 var websocket1;
 /*
@@ -415,7 +416,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
     websocket1._closeMessage = "";
     websocket1._closeTimer = null;
     websocket1._closeCode = 1006;
-    websocket1._sender = null;
     websocket1._socket = null;
     websocket1._isServer = false;
     websocket1._redirects = 0;
@@ -448,7 +448,7 @@ function initAsClient(websocket1, urlInspect) {
     }).on("upgrade", function (res, socket) {
         websocket1.emit("upgrade", res);
         receiver1 = new Receiver();
-        websocket1._sender = new Sender(socket);
+        sender1 = new Sender(socket);
         websocket1._socket = socket;
         receiver1.on("drain", receiverOnDrain);
         receiver1.on("message", receiverOnMessage);
@@ -700,7 +700,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         connection1._lastId += 1;
         const id = connection1._lastId;
         message = JSON.stringify(Object.assign({}, message, {id}));
-        websocket1._sender.send(message, {
+        sender1.send(message, {
             binary: typeof message !== "string",
             mask: !websocket1._isServer,
             compress: true,
