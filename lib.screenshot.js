@@ -310,52 +310,7 @@ class Sender {
     constructor(socket, extensions) {
         this._socket = socket;
     }
-
-    /**
-      * Sends a data message to the other peer.
-      *
-      * @param {*} data The message to send
-      * @param {Object} options Options object
-      * @param {Boolean} options.compress Specifies whether or not to compress `data`
-      * @param {Boolean} options.binary Specifies whether `data` is binary or text
-      * @param {Boolean} options.fin Specifies whether the fragment is the last one
-      * @param {Boolean} options.mask Specifies whether or not to mask `data`
-      * @param {Function} cb Callback
-      * @public
-      */
-    send(data) {
-        var ii;
-        var mask;
-        var target;
-        // send websocket-frame
-        // https://tools.ietf.org/html/rfc6455
-        target = Buffer.allocUnsafe(8);
-        // opcode
-        target[0] = 0x81;
-        // size
-        target[1] = 0xfe;
-        target.writeUInt16BE(data.length, 2);
-        // mask
-        mask = crypto.randomBytes(4);
-        target[4] = mask[0];
-        target[5] = mask[1];
-        target[6] = mask[2];
-        target[7] = mask[3];
-        data = Buffer.from(data);
-        ii = data.length;
-        while (ii > 0) {
-            ii -= 1;
-            data[ii] = data[ii] ^ mask[ii & 3];
-        }
-        // send
-        sender1._socket.cork();
-        sender1._socket.write(target);
-        sender1._socket.write(data);
-        sender1._socket.uncork();
-    }
 }
-
-
 
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
@@ -545,11 +500,37 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       */
     connection1._rawSend = function (message) {
         connection1._lastId += 1;
-        var id;
-        id = connection1._lastId;
+        var id = connection1._lastId;
         message.id = id;
-        message = JSON.stringify(message);
-        sender1.send(message);
+        var data = JSON.stringify(message);
+        var ii;
+        var mask;
+        var target;
+        // send websocket-frame
+        // https://tools.ietf.org/html/rfc6455
+        target = Buffer.allocUnsafe(8);
+        // opcode
+        target[0] = 0x81;
+        // size
+        target[1] = 0xfe;
+        target.writeUInt16BE(data.length, 2);
+        // mask
+        mask = crypto.randomBytes(4);
+        target[4] = mask[0];
+        target[5] = mask[1];
+        target[6] = mask[2];
+        target[7] = mask[3];
+        data = Buffer.from(data);
+        ii = data.length;
+        while (ii > 0) {
+            ii -= 1;
+            data[ii] = data[ii] ^ mask[ii & 3];
+        }
+        // send
+        sender1._socket.cork();
+        sender1._socket.write(target);
+        sender1._socket.write(data);
+        sender1._socket.uncork();
         return id;
     }
 
