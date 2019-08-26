@@ -67,6 +67,7 @@ var receiver1;
 var sender1;
 var session1;
 var websocket1;
+var websocket2;
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
 */
@@ -399,8 +400,6 @@ class Sender {
     }
 }
 
-module.exports = Sender;
-
 
 
 /*
@@ -433,22 +432,23 @@ function initAsClient(websocket1, urlInspect) {
         path: urlInspect.pathname,
         port: urlInspect.port
     }).on("upgrade", function (res, socket) {
+        websocket2 = socket;
         receiver1 = new Receiver();
-        sender1 = new Sender(socket);
+        sender1 = new Sender(websocket2);
         receiver1.on("drain", function () {
-            socket.resume();
+            websocket2.resume();
         });
         receiver1.on("message", function (data) {
             websocket1.emit("message", data);
         });
-        socket.setTimeout(0);
-        socket.setNoDelay();
-        socket.on("data", function socketOnData(chunk) {
+        websocket2.setTimeout(0);
+        websocket2.setNoDelay();
+        websocket2.on("data", function socketOnData(chunk) {
             if (!receiver1.write(chunk)) {
-                socket.pause();
+                websocket2.pause();
             }
         });
-        socket.on("error", local.assertThrow);
+        websocket2.on("error", local.assertThrow);
         websocket1.emit("open");
     });
 }
@@ -585,8 +585,6 @@ class BrowserContext extends EventEmitter {
         this._id = contextId;
     }
 }
-
-module.exports = {Browser, BrowserContext};
 
 
 
@@ -750,8 +748,6 @@ class DOMWorld {
     }
 }
 
-module.exports = {DOMWorld};
-
 
 
 /*
@@ -819,8 +815,6 @@ const Events = {
     },
 };
 
-module.exports = { Events };
-
 
 
 /*
@@ -866,8 +860,6 @@ class ExecutionContext {
         return remoteObject.value;
     }
 }
-
-module.exports = {ExecutionContext, EVALUATION_SCRIPT_URL};
 
 
 
@@ -1056,8 +1048,6 @@ class Frame {
     }
 }
 
-module.exports = {FrameManager, Frame};
-
 
 
 /*
@@ -1142,8 +1132,6 @@ const puppeteerToProtocolLifecycle = {
     "networkidle0": "networkIdle",
     "networkidle2": "networkAlmostIdle",
 };
-
-module.exports = {LifecycleWatcher};
 
 
 
@@ -1350,8 +1338,6 @@ class SecurityDetails {
         this._protocol = securityPayload["protocol"];
     }
 }
-
-module.exports = {Request, Response, NetworkManager, SecurityDetails};
 
 
 
