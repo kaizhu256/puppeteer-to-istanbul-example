@@ -68,6 +68,7 @@ var domworld1;
 var domworld2;
 var frame1;
 var framemanager1;
+var networkmanager1;
 var page1;
 var websocketReceiver;
 var session1;
@@ -891,29 +892,30 @@ class NetworkManager extends EventEmitter {
       */
     constructor(client) {
         super();
+        networkmanager1 = this;
         /** @type {!Map<string, !Request>} */
-        this._requestIdToRequest = new Map();
+        networkmanager1._requestIdToRequest = new Map();
         /** @type {!Map<string, !Protocol.Network.requestWillBeSentPayload>} */
-        this._requestIdToRequestWillBeSentEvent = new Map();
+        networkmanager1._requestIdToRequestWillBeSentEvent = new Map();
         /** @type {!Object<string, string>} */
-        this._extraHTTPHeaders = {};
+        networkmanager1._extraHTTPHeaders = {};
 
-        this._offline = false;
+        networkmanager1._offline = false;
 
         /** @type {?{username: string, password: string}} */
-        this._credentials = null;
+        networkmanager1._credentials = null;
         /** @type {!Set<string>} */
-        this._attemptedAuthentications = new Set();
-        this._userRequestInterceptionEnabled = false;
-        this._protocolRequestInterceptionEnabled = false;
-        this._userCacheDisabled = false;
+        networkmanager1._attemptedAuthentications = new Set();
+        networkmanager1._userRequestInterceptionEnabled = false;
+        networkmanager1._protocolRequestInterceptionEnabled = false;
+        networkmanager1._userCacheDisabled = false;
         /** @type {!Map<string, string>} */
-        this._requestIdToInterceptionId = new Map();
+        networkmanager1._requestIdToInterceptionId = new Map();
 
-        session1.on("Network.requestWillBeSent", this._onRequestWillBeSent.bind(this));
-        session1.on("Network.requestServedFromCache", this._onRequestServedFromCache.bind(this));
-        session1.on("Network.responseReceived", this._onResponseReceived.bind(this));
-        session1.on("Network.loadingFinished", this._onLoadingFinished.bind(this));
+        session1.on("Network.requestWillBeSent", networkmanager1._onRequestWillBeSent.bind(networkmanager1));
+        session1.on("Network.requestServedFromCache", networkmanager1._onRequestServedFromCache.bind(networkmanager1));
+        session1.on("Network.responseReceived", networkmanager1._onResponseReceived.bind(networkmanager1));
+        session1.on("Network.loadingFinished", networkmanager1._onLoadingFinished.bind(networkmanager1));
     }
 
     async initialize() {
@@ -924,7 +926,7 @@ class NetworkManager extends EventEmitter {
       * @return {!Object<string, string>}
       */
     extraHTTPHeaders() {
-        return Object.assign({}, this._extraHTTPHeaders);
+        return Object.assign({}, networkmanager1._extraHTTPHeaders);
     }
 
     /**
@@ -932,7 +934,7 @@ class NetworkManager extends EventEmitter {
       */
     _onRequestWillBeSent(event) {
         // Request interception doesn't happen for data URLs with Network Service.
-        this._onRequest(event, null);
+        networkmanager1._onRequest(event, null);
     }
 
     /**
@@ -942,21 +944,21 @@ class NetworkManager extends EventEmitter {
     _onRequest(event, interceptionId) {
         let redirectChain = [];
         if (event.redirectResponse) {
-            const request = this._requestIdToRequest.get(event.requestId);
+            const request = networkmanager1._requestIdToRequest.get(event.requestId);
             // If we connect late to the target, we could have missed the requestWillBeSent event.
-            this._handleRequestRedirect(request, event.redirectResponse);
+            networkmanager1._handleRequestRedirect(request, event.redirectResponse);
             redirectChain = request._redirectChain;
         }
-        const request = new Request(session1, frame1, interceptionId, this._userRequestInterceptionEnabled, event, redirectChain);
-        this._requestIdToRequest.set(event.requestId, request);
-        this.emit(Events.NetworkManager.Request, request);
+        const request = new Request(session1, frame1, interceptionId, networkmanager1._userRequestInterceptionEnabled, event, redirectChain);
+        networkmanager1._requestIdToRequest.set(event.requestId, request);
+        networkmanager1.emit(Events.NetworkManager.Request, request);
     }
 
     /**
       * @param {!Protocol.Network.requestServedFromCachePayload} event
       */
     _onRequestServedFromCache(event) {
-        const request = this._requestIdToRequest.get(event.requestId);
+        const request = networkmanager1._requestIdToRequest.get(event.requestId);
         request._fromMemoryCache = true;
     }
 
@@ -969,33 +971,33 @@ class NetworkManager extends EventEmitter {
         request._response = response;
         request._redirectChain.push(request);
         response._bodyLoadedPromiseFulfill.call(null, new Error("Response body is unavailable for redirect responses"));
-        this._requestIdToRequest.delete(request._requestId);
-        this._attemptedAuthentications.delete(request._interceptionId);
-        this.emit(Events.NetworkManager.Response, response);
-        this.emit(Events.NetworkManager.RequestFinished, request);
+        networkmanager1._requestIdToRequest.delete(request._requestId);
+        networkmanager1._attemptedAuthentications.delete(request._interceptionId);
+        networkmanager1.emit(Events.NetworkManager.Response, response);
+        networkmanager1.emit(Events.NetworkManager.RequestFinished, request);
     }
 
     /**
       * @param {!Protocol.Network.responseReceivedPayload} event
       */
     _onResponseReceived(event) {
-        const request = this._requestIdToRequest.get(event.requestId);
+        const request = networkmanager1._requestIdToRequest.get(event.requestId);
         const response = new Response(session1, request, event.response);
         request._response = response;
-        this.emit(Events.NetworkManager.Response, response);
+        networkmanager1.emit(Events.NetworkManager.Response, response);
     }
 
     /**
       * @param {!Protocol.Network.loadingFinishedPayload} event
       */
     _onLoadingFinished(event) {
-        const request = this._requestIdToRequest.get(event.requestId);
+        const request = networkmanager1._requestIdToRequest.get(event.requestId);
         // Under certain conditions we never get the Network.responseReceived
         // event from protocol. @see https://crbug.com/883475
         request._response._bodyLoadedPromiseFulfill.call(null);
-        this._requestIdToRequest.delete(request._requestId);
-        this._attemptedAuthentications.delete(request._interceptionId);
-        this.emit(Events.NetworkManager.RequestFinished, request);
+        networkmanager1._requestIdToRequest.delete(request._requestId);
+        networkmanager1._attemptedAuthentications.delete(request._interceptionId);
+        networkmanager1.emit(Events.NetworkManager.RequestFinished, request);
     }
 }
 
