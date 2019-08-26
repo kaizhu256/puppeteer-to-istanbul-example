@@ -1009,6 +1009,9 @@ class Frame {
         /** @type {!DOMWorld} */
         domworld1 = new DOMWorld(frameManager, this);
         module.exports.domworld1 = domworld1;
+        /** @type {!DOMWorld} */
+        domworld2 = new DOMWorld(frameManager, this);
+        module.exports.domworld2 = domworld2;
     }
 
     /**
@@ -1397,7 +1400,6 @@ Page,
 websocket1,
 initAsClient,
 connection1,
-domworld1,
 domworld2
 };
 /*
