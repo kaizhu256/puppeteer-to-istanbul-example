@@ -154,18 +154,21 @@ var chromeCloseGracefully;
 var chromeKillSync;
 var chromeProcess;
 var connection1;
+var crypto;
 var framemanager1;
 var fs;
 var fsWriteFile;
 var gotoNext;
 var gotoNextData;
 var gotoState;
+var http;
 var onDataUrlInspect;
 var onReject;
 var onResolve;
 var page1;
 var path;
 var tmp;
+var url;
 var urlInspect;
 var util;
 var websocket1;
@@ -176,20 +179,16 @@ local.nop(assert, path, util);
 // require module
 assert = require("assert");
 //!! EventEmitter = require("events");
-//!! URL = require("url");
 child_process = require("child_process");
-//!! crypto = require("crypto");
+crypto = require("crypto");
 fs = require("fs");
-//!! http = require("http");
+http = require("http");
 //!! https = require("https");
 //!! net = require("net");
 //!! os = require("os");
 path = require("path");
-//!! tls = require("tls");
-//!! url = require("url");
+url = require("url");
 util = require("util");
-//!! { Writable} = require("stream");
-//!! { randomBytes} = require("crypto");
 module.exports = require("./lib.screenshot.js");
 
 
@@ -235,8 +234,8 @@ fsWriteFile = function (file, data) {
         });
     });
 };
-gotoNextData = function (data) {
-    gotoNext(null, data);
+gotoNextData = function (data, meta) {
+    gotoNext(null, data, meta);
 };
 onDataUrlInspect = function (data) {
     urlInspect += String(data);
@@ -251,7 +250,7 @@ onDataUrlInspect = function (data) {
 
 
 
-gotoNext = async function (err, data) {
+gotoNext = async function (err, data, meta) {
     gotoState += 1;
     if (err) {
         onReject(err);
@@ -298,13 +297,30 @@ gotoNext = async function (err, data) {
         chromeProcess.stderr.on("data", onDataUrlInspect);
         break;
     case 2:
+        data = new url.URL(urlInspect);
+        http.get({
+            headers: {
+                "Sec-WebSocket-Version": 13,
+                "Sec-WebSocket-Key": crypto.randomBytes(16).toString("base64"),
+                "Connection": "Upgrade",
+                "Upgrade": "websocket"
+            },
+            host: "127.0.0.1",
+            path: data.pathname,
+            port: data.port
+        }).on("upgrade", gotoNextData);
+        break;
+    case 3:
+
+
+
         module.exports.initAsClient(urlInspect);
         // init websocket1
         websocket1 = module.exports.websocket1;
         websocket1.once("open", gotoNextData);
         websocket1.once("error", gotoNext);
         break;
-    case 3:
+    case 4:
         connection1 = module.exports.connection1;
         connection1._url = urlInspect;
         browser1 = await module.exports.Browser.create(
