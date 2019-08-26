@@ -309,10 +309,6 @@ class Sender {
       */
     constructor(socket, extensions) {
         this._socket = socket;
-
-        this._firstFragment = true;
-        this._compress = false;
-
         this._bufferedBytes = 0;
         this._deflating = false;
         this._queue = [];
@@ -373,9 +369,6 @@ class Sender {
       */
     send(data, opt) {
         data = Buffer.from(data);
-        sender1._firstFragment = false;
-        sender1._compress = rsv1;
-        sender1._firstFragment = true;
         var list;
         var opt;
         opt = {
