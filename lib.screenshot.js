@@ -326,17 +326,8 @@ class Sender {
       * @param {Function} cb Callback
       * @public
       */
-    send(data, opt) {
-        var list;
-        var opt;
+    send(data) {
         data = Buffer.from(data);
-        opt = {
-            fin: opt.fin,
-            rsv1: false,
-            opcode: 1,
-            mask: opt.mask,
-            readOnly: false
-        };
         /**
           * Frames a piece of data according to the HyBi WebSocket protocol.
           *
@@ -350,11 +341,10 @@ class Sender {
           * @return {Buffer[]} The framed data as a list of `Buffer` instances
           * @public
           */
-        const merge = opt.mask && opt.readOnly;
         var payloadLength = data.length;
         payloadLength = 126;
         const target = Buffer.allocUnsafe(8);
-        target[0] = opt.opcode | 0x80;
+        target[0] = 0x81;
         target[1] = payloadLength | 0x80;
         target.writeUInt16BE(data.length, 2);
         const mask = crypto.randomBytes(4);
@@ -369,12 +359,9 @@ class Sender {
             ii -= 1;
             data[ii] = data[ii] ^ mask[ii & 3];
         }
-        list = [
-            target, data
-        ];
         sender1._socket.cork();
-        sender1._socket.write(list[0]);
-        sender1._socket.write(list[1]);
+        sender1._socket.write(target);
+        sender1._socket.write(data);
         sender1._socket.uncork();
     }
 }
@@ -565,12 +552,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         connection1._lastId += 1;
         const id = connection1._lastId;
         message = JSON.stringify(Object.assign({}, message, {id}));
-        sender1.send(message, {
-            binary: typeof message !== "string",
-            mask: true,
-            compress: true,
-            fin: true
-        });
+        sender1.send(message);
         return id;
     }
 
