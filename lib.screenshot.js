@@ -173,8 +173,8 @@ receiver1._write = function (chunk, encoding, cb) {
             receiver1._fragmented = 0;
             receiver1._fragments = [];
             bff = fragments[0];
-            receiver1.emit("message", bff.toString());
             receiver1._state = GET_INFO;
+            connection1._onMessage(bff.toString());
             break;
         }
     } while (receiver1._loop);
@@ -240,7 +240,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
 function initAsClient(socket) {
     websocket1 = socket;
     receiver1.on("drain", websocket1.resume.bind(websocket1));
-    receiver1.on("message", connection1._onMessage);
     websocket1.setTimeout(0);
     websocket1.setNoDelay();
     websocket1.on("data", function (chunk) {
@@ -250,12 +249,6 @@ function initAsClient(socket) {
     });
     websocket1.on("error", local.assertThrow);
 }
-
-
-
-/*
-file https://github.com/GoogleChrome/puppeteer/tree/v1.19.0
-*/
 
 
 
