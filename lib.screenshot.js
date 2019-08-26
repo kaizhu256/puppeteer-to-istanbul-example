@@ -386,17 +386,6 @@ class Sender {
             mask: options.mask,
             readOnly: false
         });
-        sender1.sendFrame(list, cb);
-    }
-
-    /**
-      * Sends a frame.
-      *
-      * @param {Buffer[]} list The frame to send
-      * @param {Function} cb Callback
-      * @private
-      */
-    sendFrame(list, cb) {
         sender1._socket.cork();
         sender1._socket.write(list[0]);
         sender1._socket.write(list[1], cb);
