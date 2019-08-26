@@ -541,10 +541,12 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       */
     connection1._rawSend = function (message) {
         connection1._lastId += 1;
-        message.id = connection1._lastId;
+        var id;
+        id = connection1._lastId;
+        message.id = id;
         message = JSON.stringify(message);
         sender1.send(message);
-        return connection1._lastId;
+        return id;
     }
 
     /**
@@ -608,10 +610,13 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       * @return {!Promise<?Object>}
       */
     session1.send = function (method, params = {}) {
-        const id = session1._connection._rawSend({
+        var message;
+        message = {
             sessionId: session1._sessionId,
-            method, params
-        });
+            method,
+            params
+        };
+        const id = session1._connection._rawSend(message);
         return new Promise(function (resolve, reject) {
             session1._callbacks[id] = {
                 resolve, reject, error: new Error(), method
