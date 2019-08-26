@@ -346,11 +346,6 @@ class Browser extends EventEmitter {
             return;
         }
     }
-
-    async close() {
-        await browser1._closeCallback.call(null);
-        connection1.dispose();
-    }
 }
 
 
@@ -447,15 +442,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         } else {
             connection1.emit(object.method, object.params);
         }
-    }
-
-    connection1._onClose = function () {
-        connection1._closed = true;
-        connection1.emit(Events.Connection.Disconnected);
-    }
-
-    connection1.dispose = function () {
-        connection1._onClose();
     }
 
     /**
