@@ -427,7 +427,8 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
   */
 websocket1 = new EventEmitter();
 function initAsClient(websocket1, urlInspect) {
-    urlInspect = new url.URL(urlInspect);
+    var data;
+    data = new url.URL(urlInspect);
     http.get({
         headers: {
             "Sec-WebSocket-Version": 13,
@@ -436,12 +437,12 @@ function initAsClient(websocket1, urlInspect) {
             "Upgrade": "websocket"
         },
         host: "127.0.0.1",
-        path: urlInspect.pathname,
-        port: urlInspect.port
+        path: data.pathname,
+        port: data.port
     }).on("upgrade", function (res, socket) {
         websocket2 = socket;
-        receiver1 = new Receiver();
-        sender1 = new Sender(websocket2);
+        receiver1 = new module.exports.Receiver();
+        sender1 = new module.exports.Sender(websocket2);
         receiver1.on("drain", function () {
             websocket2.resume();
         });
@@ -1363,6 +1364,8 @@ module.exports = {
 Browser,
 LifecycleWatcher,
 Page,
+Receiver,
+Sender,
 websocket1,
 initAsClient,
 connection1,
