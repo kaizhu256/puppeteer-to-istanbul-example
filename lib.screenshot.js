@@ -439,8 +439,20 @@ var websocketOnMessage = function (message) {
         return;
     }
     switch (method) {
-    case "Events.Connection.Disconnected":
-        browser1.emit(method);
+    case "Page.frameNavigated":
+        framemanager1._onFrameNavigated(params.frame);
+        break;
+    case "Page.frameStoppedLoading":
+        framemanager1._onFrameStoppedLoading(params.frameId);
+        break;
+    case "Page.lifecycleEvent":
+        framemanager1._onLifecycleEvent(params);
+        break;
+    case "Runtime.executionContextCreated":
+        framemanager1._onExecutionContextCreated(params.context);
+        break;
+    case "Runtime.executionContextDestroyed":
+        framemanager1._onExecutionContextDestroyed(params.executionContextId);
         break;
     case "Target.targetCreated":
         browser1._targetCreated(params);
@@ -635,12 +647,6 @@ class FrameManager extends EventEmitter {
         framemanager1._contextIdToContext = new Map();
         /** @type {!Set<string>} */
         framemanager1._isolatedWorlds = new Set();
-
-        session1.on("Page.frameNavigated", event => framemanager1._onFrameNavigated(event.frame));
-        session1.on("Page.frameStoppedLoading", event => framemanager1._onFrameStoppedLoading(event.frameId));
-        session1.on("Runtime.executionContextCreated", event => framemanager1._onExecutionContextCreated(event.context));
-        session1.on("Runtime.executionContextDestroyed", event => framemanager1._onExecutionContextDestroyed(event.executionContextId));
-        session1.on("Page.lifecycleEvent", event => framemanager1._onLifecycleEvent(event));
     }
 
     async initialize() {
