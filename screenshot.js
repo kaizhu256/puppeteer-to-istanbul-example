@@ -342,7 +342,7 @@ page1 = await module.exports.Page.create(page1, tmp);
 framemanager1 = module.exports.framemanager1;
 const watcher = new module.exports.LifecycleWatcher(
     framemanager1,
-    framemanager1._mainFrame,
+    module.exports.frame1,
     [
         "load"
     ]
@@ -351,7 +351,7 @@ await new Promise(function (resolve) {
     framemanager1._client.send("Page.navigate", {
         url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
         referer: framemanager1._networkManager.extraHTTPHeaders().referer,
-        frameId: framemanager1._mainFrame._id
+        frameId: module.exports.frame1._id
     }).then(resolve);
 });
 await local.identity(watcher._newDocumentNavigationPromise);
