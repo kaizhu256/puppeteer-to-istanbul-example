@@ -94,24 +94,20 @@ const INFLATING = 5;
   * @extends stream.Writable
   */
 receiver1 = new stream.Writable();
-
-        receiver1._bufferedBytes = 0;
-        receiver1._buffers = [];
-
-        receiver1._compressed = false;
-        receiver1._payloadLength = 0;
-        receiver1._mask = undefined;
-        receiver1._fragmented = 0;
-        receiver1._masked = false;
-        receiver1._fin = false;
-        receiver1._opcode = 0;
-
-        receiver1._totalPayloadLength = 0;
-        receiver1._messageLength = 0;
-        receiver1._fragments = [];
-
-        receiver1._state = GET_INFO;
-        receiver1._loop = false;
+receiver1._bufferedBytes = 0;
+receiver1._buffers = [];
+receiver1._compressed = false;
+receiver1._payloadLength = 0;
+receiver1._mask = undefined;
+receiver1._fragmented = 0;
+receiver1._masked = false;
+receiver1._fin = false;
+receiver1._opcode = 0;
+receiver1._totalPayloadLength = 0;
+receiver1._messageLength = 0;
+receiver1._fragments = [];
+receiver1._state = GET_INFO;
+receiver1._loop = false;
 
 /**
   * Implements `Writable.prototype._write()`.
