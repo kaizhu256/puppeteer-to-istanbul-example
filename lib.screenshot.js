@@ -293,26 +293,6 @@ class Receiver extends Writable {
 }
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/sender.js
-*/
-"use strict";
-
-/**
-  * HyBi Sender implementation.
-  */
-class Sender {
-    /**
-      * Creates a Sender instance.
-      *
-      * @param {net.Socket} socket The connection socket
-      * @param {Object} extensions An object containing the negotiated extensions
-      */
-    constructor(socket, extensions) {
-        this._socket = socket;
-    }
-}
-
-/*
 lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
 */
 "use strict";
@@ -330,7 +310,8 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
   */
 function initAsClient(websocket1) {
     receiver1 = new module.exports.Receiver();
-    sender1 = new module.exports.Sender(websocket1);
+    sender1 = {};
+    sender1._socket = websocket1;
     receiver1.on("drain", function () {
         websocket1.resume();
     });
@@ -1284,7 +1265,6 @@ Browser,
 LifecycleWatcher,
 Page,
 Receiver,
-Sender,
 initAsClient,
 connection1,
 domworld2
