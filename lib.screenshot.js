@@ -63,6 +63,7 @@ local.nop(
 
 /* jslint ignore:start */
 var connection1;
+var page1;
 var receiver1;
 var sender1;
 var session1;

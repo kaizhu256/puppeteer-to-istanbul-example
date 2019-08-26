@@ -162,7 +162,7 @@ var gotoState;
 var onDataUrlInspect;
 var onReject;
 var onResolve;
-var page;
+var page1;
 var path;
 var tmp;
 var urlInspect;
@@ -332,24 +332,24 @@ tmp = await connection1.send("Target.createTarget", {
     url: "about:blank"
 });
 tmp = await browser.targetDict[tmp.targetId];
-page = await connection1.createSession(tmp._targetInfo);
-page = await module.exports.Page.create(page, tmp);
+page1 = await connection1.createSession(tmp._targetInfo);
+page1 = await module.exports.Page.create(page1, tmp);
 
 
 
 // browser - load url
 const watcher = new module.exports.LifecycleWatcher(
-    page._frameManager,
-    page._frameManager._mainFrame,
+    page1._frameManager,
+    page1._frameManager._mainFrame,
     [
         "load"
     ]
 );
 await new Promise(function (resolve) {
-    page._frameManager._client.send("Page.navigate", {
+    page1._frameManager._client.send("Page.navigate", {
         url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
-        referer: page._frameManager._networkManager.extraHTTPHeaders().referer,
-        frameId: page._frameManager._mainFrame._id
+        referer: page1._frameManager._networkManager.extraHTTPHeaders().referer,
+        frameId: page1._frameManager._mainFrame._id
     }).then(resolve);
 });
 await local.identity(watcher._newDocumentNavigationPromise);
@@ -369,10 +369,10 @@ await Promise.all([
     // screenshot - png
     (async function () {
         var result;
-        await page._client.send("Target.activateTarget", {
-            targetId: page._target._targetId
+        await page1._client.send("Target.activateTarget", {
+            targetId: page1._target._targetId
         });
-        result = await page._client.send("Page.captureScreenshot", {
+        result = await page1._client.send("Page.captureScreenshot", {
             format: "png"
         });
         await fsWriteFile("tmp/aa.png", Buffer.from(result.data, "base64"));
@@ -380,7 +380,7 @@ await Promise.all([
     // screenshot - html
     (async function () {
         var result;
-        result = page._frameManager._mainFrame._secondaryWorld._contextPromise;
+        result = page1._frameManager._mainFrame._secondaryWorld._contextPromise;
         result = await local.identity(result);
         result = await result._evaluateInternal(
             true,
