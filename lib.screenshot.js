@@ -524,10 +524,11 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       * @return {!Promise<?Object>}
       */
     connection1.send = function (method, params = {}) {
-        const id = connection1._rawSend({
+        var message = {
             method,
             params
-        });
+        };
+        const id = connection1._rawSend(message);
         return new Promise(function (resolve, reject) {
             connection1._callbacks[id] = {
                 resolve, reject, error: new Error(), method
