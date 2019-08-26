@@ -440,6 +440,18 @@ var websocketOnMessage = function (message) {
         return;
     }
     switch (method) {
+    case "Network.requestWillBeSent":
+        networkmanager1._onRequestWillBeSent(params);
+        break;
+    case "Network.requestServedFromCache":
+        networkmanager1._onRequestServedFromCache(params);
+        break;
+    case "Network.responseReceived":
+        networkmanager1._onResponseReceived(params);
+        break;
+    case "Network.loadingFinished":
+        networkmanager1._onLoadingFinished(params);
+        break;
     case "Page.frameNavigated":
         framemanager1._onFrameNavigated(params.frame);
         break;
@@ -911,11 +923,6 @@ class NetworkManager extends EventEmitter {
         networkmanager1._userCacheDisabled = false;
         /** @type {!Map<string, string>} */
         networkmanager1._requestIdToInterceptionId = new Map();
-
-        session1.on("Network.requestWillBeSent", networkmanager1._onRequestWillBeSent.bind(networkmanager1));
-        session1.on("Network.requestServedFromCache", networkmanager1._onRequestServedFromCache.bind(networkmanager1));
-        session1.on("Network.responseReceived", networkmanager1._onResponseReceived.bind(networkmanager1));
-        session1.on("Network.loadingFinished", networkmanager1._onLoadingFinished.bind(networkmanager1));
     }
 
     async initialize() {
