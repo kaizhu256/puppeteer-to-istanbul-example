@@ -309,9 +309,6 @@ class Sender {
       */
     constructor(socket, extensions) {
         this._socket = socket;
-        this._bufferedBytes = 0;
-        this._deflating = false;
-        this._queue = [];
     }
 
     /**
@@ -330,19 +327,8 @@ class Sender {
         var ii;
         var mask;
         var target;
-        /**
-          * Frames a piece of data according to the HyBi WebSocket protocol.
-          *
-          * @param {Buffer} data The data to frame
-          * @param {Object} options Options object
-          * @param {Number} options.opcode The opcode
-          * @param {Boolean} options.readOnly Specifies whether `data` can be modified
-          * @param {Boolean} options.fin Specifies whether or not to set the FIN bit
-          * @param {Boolean} options.mask Specifies whether or not to mask `data`
-          * @param {Boolean} options.rsv1 Specifies whether or not to set the RSV1 bit
-          * @return {Buffer[]} The framed data as a list of `Buffer` instances
-          * @public
-          */
+        // send websocket-frame
+        // https://tools.ietf.org/html/rfc6455
         target = Buffer.allocUnsafe(8);
         // opcode
         target[0] = 0x81;
