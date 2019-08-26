@@ -430,7 +430,7 @@ var websocketOnMessage = function (message) {
             callback.resolve(result);
         } else {
             assert(!id);
-            session1.emit(method, params);
+            //!! session1.emit(method, params);
         }
     } else if (id) {
         const callback = callbackDict[id];
@@ -451,6 +451,12 @@ var websocketOnMessage = function (message) {
         break;
     case "Network.loadingFinished":
         networkmanager1._onLoadingFinished(params);
+        break;
+    case "Page.domContentEventFired":
+        page1.emit(Events.Page.DOMContentLoaded);
+        break;
+    case "Page.loadEventFired":
+        page1.emit(Events.Page.Load);
         break;
     case "Page.frameNavigated":
         framemanager1._onFrameNavigated(params.frame);
@@ -1112,8 +1118,6 @@ class Page extends EventEmitter {
         page1._fileChooserInterceptionIsDisabled = false;
         page1._fileChooserInterceptors = new Set();
 
-        session1.on("Page.domContentEventFired", event => page1.emit(Events.Page.DOMContentLoaded));
-        session1.on("Page.loadEventFired", event => page1.emit(Events.Page.Load));
         page1._target._isClosedPromise.then(function () {
             page1.emit(Events.Page.Close);
         });
