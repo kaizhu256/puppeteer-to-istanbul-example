@@ -921,24 +921,19 @@ class FrameManager extends EventEmitter {
       * @param {!Protocol.Page.Frame} framePayload
       */
     _onFrameNavigated(framePayload) {
-        const isMainFrame = !framePayload.parentId;
-        let frame = framemanager1._mainFrame
-        assert(isMainFrame, "We either navigate top level or have old version of the navigated frame");
-
         // Update or create main frame.
-        if (frame) {
+        if (frame1) {
             // Update frame id to retain frame identity on cross-process navigation.
-            framemanager1._frames.delete(frame._id);
-            frame._id = framePayload.id;
+            framemanager1._frames.delete(frame1._id);
+            frame1._id = framePayload.id;
         } else {
             // Initial main frame navigation.
-            frame = new Frame(framemanager1, framemanager1._client, null, framePayload.id);
+            frame1 = new Frame(framemanager1, framemanager1._client, null, framePayload.id);
         }
-        framemanager1._frames.set(framePayload.id, frame);
-        framemanager1._mainFrame = frame;
+        framemanager1._frames.set(framePayload.id, frame1);
         // Update frame payload.
-        frame._navigated(framePayload);
-        framemanager1.emit(Events.FrameManager.FrameNavigated, frame);
+        frame1._navigated(framePayload);
+        framemanager1.emit(Events.FrameManager.FrameNavigated, frame1);
     }
 
     /**
