@@ -73,6 +73,7 @@ var page1;
 var receiver1;
 var session1;
 var websocket1;
+var websocketSend;
 
 callbackDict = {};
 /*
@@ -346,8 +347,9 @@ class Browser extends EventEmitter {
       */
     static async create(connection, contextIds, process, closeCallback) {
         browser1 = new Browser(connection, contextIds, process, closeCallback);
-        await connection.send("Target.setDiscoverTargets", {
-            discover: true});
+        await websocketSend("Target.setDiscoverTargets", {
+            discover: true
+        });
         return browser1;
     }
 
@@ -454,7 +456,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       * @param {!Object=} params
       * @return {!Promise<?Object>}
       */
-    connection1.send = function (method, params = {}) {
+    websocketSend = function (method, params = {}) {
     /*
      * this function will convert <data> to websocket-masked-frame and send it
      * https://tools.ietf.org/html/rfc6455
@@ -551,7 +553,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       */
     connection1.createSession = async function (targetInfo) {
         var tmp;
-        tmp = await connection1.send("Target.attachToTarget", {
+        tmp = await websocketSend("Target.attachToTarget", {
             targetId: targetInfo.targetId,
             flatten: true
         });
@@ -705,7 +707,7 @@ class ExecutionContext {
         let functionText = pageFunction.toString();
         new Function("(" + functionText + ")");
         let callFunctionOnPromise;
-        callFunctionOnPromise = connection1.send("Runtime.callFunctionOn", {
+        callFunctionOnPromise = websocketSend("Runtime.callFunctionOn", {
             functionDeclaration: functionText + "\n" + suffix + "\n",
             executionContextId: this._contextId,
             returnByValue,
@@ -751,15 +753,15 @@ class FrameManager extends EventEmitter {
         const [
             ,{
                 frameTree}] = await Promise.all([
-            connection1.send("Page.enable"),
-            connection1.send("Page.getFrameTree"),
+            websocketSend("Page.enable"),
+            websocketSend("Page.getFrameTree"),
         ]);
         framemanager1._onFrameNavigated(frameTree.frame);
         await Promise.all([
-            connection1.send("Page.setLifecycleEventsEnabled", {
+            websocketSend("Page.setLifecycleEventsEnabled", {
                 enabled: true
             }),
-            connection1.send("Runtime.enable").then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
+            websocketSend("Runtime.enable").then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
             framemanager1._networkManager.initialize(),
         ]);
     }
@@ -803,11 +805,11 @@ class FrameManager extends EventEmitter {
       */
     async _ensureIsolatedWorld(name) {
         framemanager1._isolatedWorlds.add(name);
-        await connection1.send("Page.addScriptToEvaluateOnNewDocument", {
+        await websocketSend("Page.addScriptToEvaluateOnNewDocument", {
             source: `//# sourceURL=${EVALUATION_SCRIPT_URL}`,
             worldName: name,
         }),
-        await connection1.send("Page.createIsolatedWorld", {
+        await websocketSend("Page.createIsolatedWorld", {
             frameId: frame1._id,
             grantUniveralAccess: true,
             worldName: name
@@ -1015,7 +1017,7 @@ class NetworkManager extends EventEmitter {
     }
 
     async initialize() {
-        await connection1.send("Network.enable");
+        await websocketSend("Network.enable");
     }
 
     /**
@@ -1215,13 +1217,13 @@ class Page extends EventEmitter {
     async _initialize() {
         await Promise.all([
             framemanager1.initialize(),
-            connection1.send("Target.setAutoAttach", {
+            websocketSend("Target.setAutoAttach", {
                 autoAttach: true,
                 waitForDebuggerOnStart: false,
                 flatten: true
             }),
-            connection1.send("Performance.enable"),
-            connection1.send("Log.enable"),
+            websocketSend("Performance.enable"),
+            websocketSend("Log.enable"),
         ]);
     }
 }
@@ -1233,6 +1235,7 @@ Receiver,
 connection1,
 domworld2,
 initAsClient,
+websocketSend
 };
 /*
 file none

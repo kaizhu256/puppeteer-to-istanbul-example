@@ -172,6 +172,7 @@ var tmp;
 var url;
 var urlInspect;
 var util;
+var websocketSend;
 local.nop(assert, path, util);
 
 
@@ -190,6 +191,7 @@ path = require("path");
 url = require("url");
 util = require("util");
 module.exports = require("./lib.screenshot.js");
+websocketSend = module.exports.websocketSend;
 
 
 
@@ -199,7 +201,7 @@ chromeCloseGracefully = function () {
   * @return {Promise}
   */
     // Attempt to close chrome gracefully
-    browser1._connection.send("Browser.close").catch(function (err) {
+    websocketSend("Browser.close").catch(function (err) {
         console.error(err);
         chromeKillSync();
     });
@@ -335,7 +337,7 @@ await new Promise(function (resolve, reject) {
 
 
 
-tmp = await connection1.send("Target.createTarget", {
+tmp = await websocketSend("Target.createTarget", {
     url: "about:blank"
 });
 tmp = await browser1.targetDict[tmp.targetId];
@@ -354,7 +356,7 @@ const watcher = new module.exports.LifecycleWatcher(
     ]
 );
 await new Promise(function (resolve) {
-    connection1.send("Page.navigate", {
+    websocketSend("Page.navigate", {
         url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
         referer: framemanager1._networkManager.extraHTTPHeaders().referer,
         frameId: module.exports.frame1._id
@@ -377,10 +379,10 @@ await Promise.all([
     // screenshot - png
     (async function () {
         var result;
-        await connection1.send("Target.activateTarget", {
+        await websocketSend("Target.activateTarget", {
             targetId: page1._target._targetId
         });
-        result = await connection1.send("Page.captureScreenshot", {
+        result = await websocketSend("Page.captureScreenshot", {
             format: "png"
         });
         await fsWriteFile("tmp/aa.png", Buffer.from(result.data, "base64"));
