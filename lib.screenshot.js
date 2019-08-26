@@ -455,27 +455,15 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       * @return {!Promise<?Object>}
       */
     connection1.send = function (method, params = {}) {
-        var message = {
-            sessionId: session1._sessionId,
-            method,
-            params
-        };
-        const id = connection1._rawSend(message);
-        return new Promise(function (resolve, reject) {
-            callbackDict[id] = {
-                resolve,
-                reject,
-                error: new Error(),
-                method
-            };
-        });
-    }
-
-    connection1._rawSend = function (data) {
     /*
      * this function will convert <data> to websocket-masked-frame and send it
      * https://tools.ietf.org/html/rfc6455
      */
+        var data = {
+            method,
+            params,
+            sessionId: session1._sessionId
+        };
         var header;
         var ii;
         var mask;
@@ -507,7 +495,15 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         // send data
         websocket1.write(data);
         websocket1.uncork();
-        return websocket1.counter;
+        const id = websocket1.counter;
+        return new Promise(function (resolve, reject) {
+            callbackDict[id] = {
+                resolve,
+                reject,
+                error: new Error(),
+                method
+            };
+        });
     }
 
     /**
