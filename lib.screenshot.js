@@ -354,8 +354,6 @@ class Browser extends EventEmitter {
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
 */
     connection1 = new EventEmitter();
-    /** @type {!Map<string, !CDPSession>}*/
-    connection1._closed = false;
 
     /**
       * @param {string} method
@@ -1068,7 +1066,6 @@ class Page extends EventEmitter {
     constructor(client, target) {
         super();
         page1 = this;
-        page1._closed = false;
         page1._target = target;
         /** @type {!FrameManager} */
         new FrameManager(client, page1);
@@ -1092,7 +1089,6 @@ class Page extends EventEmitter {
         client.on("Page.loadEventFired", event => page1.emit(Events.Page.Load));
         page1._target._isClosedPromise.then(function () {
             page1.emit(Events.Page.Close);
-            page1._closed = true;
         });
     }
 
