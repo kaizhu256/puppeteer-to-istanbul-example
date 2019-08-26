@@ -283,9 +283,6 @@ class Browser extends EventEmitter {
         /** @type {Map<string, Target>} */
         browser1.targetDict = {};
         connection1.on(Events.Connection.Disconnected, () => browser1.emit(Events.Browser.Disconnected));
-        connection1.on("Target.targetCreated", browser1._targetCreated.bind(browser1));
-        connection1.on("Target.targetDestroyed", browser1._targetDestroyed.bind(browser1));
-        connection1.on("Target.targetInfoChanged", browser1._targetInfoChanged.bind(browser1));
     }
 
     /**
@@ -445,7 +442,17 @@ connection1._onMessage = function (message) {
         callback.resolve(result);
         return;
     }
-    connection1.emit(method, params);
+    switch (method) {
+    case "Target.targetCreated":
+        browser1._targetCreated(params);
+        break;
+    case "Target.targetDestroyed":
+        browser1._targetDestroyed(params);
+        break;
+    case "Target.targetInfoChanged":
+        browser1._targetInfoChanged(params);
+        break;
+    }
 }
 
     session1 = new EventEmitter();
