@@ -371,24 +371,24 @@ class Sender {
       * @param {Function} cb Callback
       * @public
       */
-    send(data, options, cb) {
+    send(data, opt) {
         data = Buffer.from(data);
-        var opcode = 1;
-        var rsv1 = options.compress;
         sender1._firstFragment = false;
         sender1._compress = rsv1;
         sender1._firstFragment = true;
         var list;
-        list = Sender.frame(data, {
-            fin: options.fin,
+        var opt;
+        opt = {
+            fin: opt.fin,
             rsv1: false,
-            opcode,
-            mask: options.mask,
+            opcode: 1,
+            mask: opt.mask,
             readOnly: false
-        });
+        };
+        list = Sender.frame(data, opt);
         sender1._socket.cork();
         sender1._socket.write(list[0]);
-        sender1._socket.write(list[1], cb);
+        sender1._socket.write(list[1]);
         sender1._socket.uncork();
     }
 }
