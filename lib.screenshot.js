@@ -414,33 +414,38 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         });
     }
 
-    /**
-      * @param {string} message
-      */
-    connection1._onMessage = function (message) {
-        const object = JSON.parse(message);
-        if (object.method === "Target.attachedToTarget") {
-            session1._targetType = object.params.targetInfo.type;
-            session1._sessionId = object.params.sessionId;
-        }
-        if (object.sessionId) {
-            if (object.id && callbackDict[object.id]) {
-                const callback = callbackDict[object.id];
-                delete callbackDict[object.id];
-                callback.resolve(object.result);
-            } else {
-                assert(!object.id);
-                session1.emit(object.method, object.params);
-            }
-        } else if (object.id) {
-            const callback = callbackDict[object.id];
-            // Callbacks could be all rejected if someone has called `.dispose()`.
-            delete callbackDict[object.id];
+/**
+  * @param {string} message
+  */
+connection1._onMessage = function (message) {
+    let {
+        id,
+        method,
+        params,
+        sessionId
+    } = JSON.parse(message);
+    if (method === "Target.attachedToTarget") {
+        session1._targetType = params.targetInfo.type;
+        session1._sessionId = params.sessionId;
+    }
+    if (sessionId) {
+        if (id && callbackDict[id]) {
+            const callback = callbackDict[id];
+            delete callbackDict[id];
             callback.resolve(object.result);
         } else {
-            connection1.emit(object.method, object.params);
+            assert(!id);
+            session1.emit(method, params);
         }
+    } else if (id) {
+        const callback = callbackDict[id];
+        // Callbacks could be all rejected if someone has called `.dispose()`.
+        delete callbackDict[id];
+        callback.resolve(object.result);
+        return;
     }
+    connection1.emit(method, params);
+}
 
     session1 = new EventEmitter();
 
