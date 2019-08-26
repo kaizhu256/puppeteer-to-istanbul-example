@@ -362,15 +362,14 @@ class Browser extends EventEmitter {
         super();
         browser1 = this;
         browser1._process = process;
-        browser1._connection = connection;
         browser1._closeCallback = closeCallback;
         browser1._contexts = new Map();
         /** @type {Map<string, Target>} */
         browser1.targetDict = {};
-        browser1._connection.on(Events.Connection.Disconnected, () => browser1.emit(Events.Browser.Disconnected));
-        browser1._connection.on("Target.targetCreated", browser1._targetCreated.bind(browser1));
-        browser1._connection.on("Target.targetDestroyed", browser1._targetDestroyed.bind(browser1));
-        browser1._connection.on("Target.targetInfoChanged", browser1._targetInfoChanged.bind(browser1));
+        connection1.on(Events.Connection.Disconnected, () => browser1.emit(Events.Browser.Disconnected));
+        connection1.on("Target.targetCreated", browser1._targetCreated.bind(browser1));
+        connection1.on("Target.targetDestroyed", browser1._targetDestroyed.bind(browser1));
+        connection1.on("Target.targetInfoChanged", browser1._targetInfoChanged.bind(browser1));
     }
 
     /**
@@ -430,15 +429,6 @@ class Browser extends EventEmitter {
             target._initializedCallback(true);
             return;
         }
-    }
-
-    async close() {
-        await browser1._closeCallback.call(null);
-        browser1.disconnect();
-    }
-
-    disconnect() {
-        browser1._connection.dispose();
     }
 }
 

@@ -150,7 +150,6 @@
 var assert;
 var browser1;
 var child_process;
-var chromeCloseGracefully;
 var chromeKillSync;
 var chromeProcess;
 var connection1;
@@ -170,7 +169,7 @@ var path;
 var session1;
 var tmp;
 var url;
-var urlInspect;
+var urlWebsocket;
 var util;
 var websocketSend;
 local.nop(assert, path, util);
@@ -195,20 +194,6 @@ websocketSend = module.exports.websocketSend;
 
 
 
-// init function
-chromeCloseGracefully = function () {
-/**
-  * @return {Promise}
-  */
-    // Attempt to close chrome gracefully
-    websocketSend("Browser.close").catch(function (err) {
-        console.error(err);
-        chromeKillSync();
-    });
-    return new Promise(function (resolve) {
-        chromeProcess.once("exit", resolve);
-    });
-};
 chromeKillSync = function () {
 /*
  * This method has to be sync to be used as 'exit' event handler.
@@ -240,11 +225,11 @@ gotoNextData = function (data, meta) {
     gotoNext(null, data, meta);
 };
 onDataUrlInspect = function (data) {
-    urlInspect += String(data);
-    urlInspect.replace((
+    urlWebsocket += String(data);
+    urlWebsocket.replace((
         /\nDevTools\u0020listening\u0020on\u0020(ws:\/\/.+?)\n/
     ), function (ignore, match1) {
-        urlInspect = match1;
+        urlWebsocket = match1;
         chromeProcess.stderr.removeListener("data", onDataUrlInspect);
         gotoNext();
     });
@@ -294,12 +279,13 @@ gotoNext = async function (err, data, meta) {
             ]
         });
         // init evt-handling - chromeProcess
+        chromeProcess.on("exit", process.exit);
         chromeProcess.stderr.pipe(process.stderr);
-        urlInspect = "";
+        urlWebsocket = "";
         chromeProcess.stderr.on("data", onDataUrlInspect);
         break;
     case 2:
-        data = new url.URL(urlInspect);
+        data = new url.URL(urlWebsocket);
         http.get({
             headers: {
                 "Sec-WebSocket-Version": 13,
@@ -315,12 +301,11 @@ gotoNext = async function (err, data, meta) {
     case 3:
         module.exports.initAsClient(meta);
         connection1 = module.exports.connection1;
-        connection1._url = urlInspect;
+        connection1._url = urlWebsocket;
         browser1 = await module.exports.Browser.create(
             connection1,
             [],
-            chromeProcess,
-            chromeCloseGracefully
+            chromeProcess
         );
         gotoNext();
         break;
@@ -409,8 +394,9 @@ return html.trim()` + " + \"\\n\""
     }())
 ]);
 
-
-
-// browser - close
-await browser1.close();
+// Attempt to close chrome gracefully
+websocketSend("Browser.close").catch(function (err) {
+    console.error(err);
+    chromeKillSync();
+});
 }(globalThis.globalLocal));
