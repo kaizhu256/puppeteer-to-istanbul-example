@@ -478,22 +478,24 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       * @return {number}
       */
     connection1._rawSend = function (data) {
+    /*
+     * this function will convert <data> to websocket-masked-frame and send it
+     * https://tools.ietf.org/html/rfc6455
+     */
         var header;
         var ii;
         var mask;
-        websocket1.counter |= 0;
-        websocket1.counter += 1;
+        websocket1.counter = (websocket1.counter | 0) + 1;
         data.id = websocket1.counter;
         data = Buffer.from(JSON.stringify(data));
-        // send websocket-frame
-        // https://tools.ietf.org/html/rfc6455
+        // init header
         header = Buffer.allocUnsafe(8);
-        // opcode
+        // init field-opcode
         header[0] = 0x81;
-        // size
+        // init field-size
         header[1] = 0xfe;
         header.writeUInt16BE(data.length, 2);
-        // mask
+        // init field-mask
         mask = crypto.randomBytes(4);
         header[4] = mask[0];
         header[5] = mask[1];
@@ -502,12 +504,13 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         // send header
         websocket1.cork();
         websocket1.write(header);
-        // send data
+        // mask data
         ii = data.length;
         while (ii > 0) {
             ii -= 1;
             data[ii] = data[ii] ^ mask[ii & 3];
         }
+        // send data
         websocket1.write(data);
         websocket1.uncork();
         return websocket1.counter;
