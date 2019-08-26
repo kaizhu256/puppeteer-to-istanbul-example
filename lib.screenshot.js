@@ -486,18 +486,19 @@ class Browser extends EventEmitter {
       */
     constructor(connection, contextIds, process, closeCallback) {
         super();
-        this._process = process;
-        this._connection = connection;
-        this._closeCallback = closeCallback;
-        this._defaultContext = new BrowserContext(this._connection, this);
+        browser1 = this;
+        browser1._process = process;
+        browser1._connection = connection;
+        browser1._closeCallback = closeCallback;
+        browser1._defaultContext = new BrowserContext(browser1._connection, browser1);
         /** @type {Map<string, BrowserContext>} */
-        this._contexts = new Map();
+        browser1._contexts = new Map();
         /** @type {Map<string, Target>} */
-        this.targetDict = {};
-        this._connection.on(Events.Connection.Disconnected, () => this.emit(Events.Browser.Disconnected));
-        this._connection.on("Target.targetCreated", this._targetCreated.bind(this));
-        this._connection.on("Target.targetDestroyed", this._targetDestroyed.bind(this));
-        this._connection.on("Target.targetInfoChanged", this._targetInfoChanged.bind(this));
+        browser1.targetDict = {};
+        browser1._connection.on(Events.Connection.Disconnected, () => browser1.emit(Events.Browser.Disconnected));
+        browser1._connection.on("Target.targetCreated", browser1._targetCreated.bind(browser1));
+        browser1._connection.on("Target.targetDestroyed", browser1._targetDestroyed.bind(browser1));
+        browser1._connection.on("Target.targetInfoChanged", browser1._targetInfoChanged.bind(browser1));
     }
 
     /**
@@ -507,7 +508,7 @@ class Browser extends EventEmitter {
         const targetInfo = event.targetInfo;
         const {
             browserContextId} = targetInfo;
-        const context = this._defaultContext;
+        const context = browser1._defaultContext;
         const target = {};
         target._targetInfo = targetInfo;
         target._browserContext = context;
@@ -531,8 +532,8 @@ class Browser extends EventEmitter {
             target._initializedCallback(true);
         }
 
-        this.targetDict[event.targetInfo.targetId] = target;
-        this.emit(Events.Browser.TargetCreated, target);
+        browser1.targetDict[event.targetInfo.targetId] = target;
+        browser1.emit(Events.Browser.TargetCreated, target);
         context.emit(Events.BrowserContext.TargetCreated, target);
     }
 
@@ -540,11 +541,11 @@ class Browser extends EventEmitter {
       * @param {{targetId: string}} event
       */
     async _targetDestroyed(event) {
-        const target = this.targetDict[event.targetId];
+        const target = browser1.targetDict[event.targetId];
         target._initializedCallback(false);
-        delete this.targetDict[event.targetId];
+        delete browser1.targetDict[event.targetId];
         target._closedCallback();
-        this.emit(Events.Browser.TargetDestroyed, target);
+        browser1.emit(Events.Browser.TargetDestroyed, target);
         target._browserContext.emit(Events.BrowserContext.TargetDestroyed, target);
     }
 
@@ -552,7 +553,7 @@ class Browser extends EventEmitter {
       * @param {!Protocol.Target.targetInfoChangedPayload} event
       */
     _targetInfoChanged(event) {
-        const target = this.targetDict[event.targetInfo.targetId];
+        const target = browser1.targetDict[event.targetInfo.targetId];
         assert(target, "target should exist before targetInfoChanged");
         const previousURL = target._url;
         const wasInitialized = target._isInitialized;
@@ -566,12 +567,12 @@ class Browser extends EventEmitter {
     }
 
     async close() {
-        await this._closeCallback.call(null);
-        this.disconnect();
+        await browser1._closeCallback.call(null);
+        browser1.disconnect();
     }
 
     disconnect() {
-        this._connection.dispose();
+        browser1._connection.dispose();
     }
 }
 
