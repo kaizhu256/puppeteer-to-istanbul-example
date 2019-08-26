@@ -314,13 +314,11 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
 function initAsClient(socket) {
     websocket1 = socket;
     receiver1 = new module.exports.Receiver();
-    receiver1.on("drain", function () {
-        websocket1.resume();
-    });
+    receiver1.on("drain", websocket1.resume.bind(websocket1));
     receiver1.on("message", connection1._onMessage);
     websocket1.setTimeout(0);
     websocket1.setNoDelay();
-    websocket1.on("data", function socketOnData(chunk) {
+    websocket1.on("data", function (chunk) {
         if (!receiver1.write(chunk)) {
             websocket1.pause();
         }
@@ -429,6 +427,11 @@ class Browser extends EventEmitter {
             target._initializedCallback(true);
             return;
         }
+    }
+
+    async close() {
+        await browser1._closeCallback.call(null);
+        connection1.dispose();
     }
 }
 
