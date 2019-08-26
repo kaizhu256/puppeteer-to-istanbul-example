@@ -67,6 +67,7 @@ var browserContext1;
 var connection1;
 var domworld1;
 var domworld2;
+var framemanager1;
 var page1;
 var receiver1;
 var sender1;
@@ -862,37 +863,38 @@ class FrameManager extends EventEmitter {
       */
     constructor(client, page) {
         super();
-        this._client = client;
-        this._page = page;
-        this._networkManager = new NetworkManager(client);
-        this._networkManager.setFrameManager(this);
+        framemanager1 = this;
+        framemanager1._client = client;
+        framemanager1._page = page;
+        framemanager1._networkManager = new NetworkManager(client);
+        framemanager1._networkManager.setFrameManager(framemanager1);
         /** @type {!Map<string, !Frame>} */
-        this._frames = new Map();
+        framemanager1._frames = new Map();
         /** @type {!Map<number, !ExecutionContext>} */
-        this._contextIdToContext = new Map();
+        framemanager1._contextIdToContext = new Map();
         /** @type {!Set<string>} */
-        this._isolatedWorlds = new Set();
+        framemanager1._isolatedWorlds = new Set();
 
-        this._client.on("Page.frameNavigated", event => this._onFrameNavigated(event.frame));
-        this._client.on("Page.frameStoppedLoading", event => this._onFrameStoppedLoading(event.frameId));
-        this._client.on("Runtime.executionContextCreated", event => this._onExecutionContextCreated(event.context));
-        this._client.on("Runtime.executionContextDestroyed", event => this._onExecutionContextDestroyed(event.executionContextId));
-        this._client.on("Page.lifecycleEvent", event => this._onLifecycleEvent(event));
+        framemanager1._client.on("Page.frameNavigated", event => framemanager1._onFrameNavigated(event.frame));
+        framemanager1._client.on("Page.frameStoppedLoading", event => framemanager1._onFrameStoppedLoading(event.frameId));
+        framemanager1._client.on("Runtime.executionContextCreated", event => framemanager1._onExecutionContextCreated(event.context));
+        framemanager1._client.on("Runtime.executionContextDestroyed", event => framemanager1._onExecutionContextDestroyed(event.executionContextId));
+        framemanager1._client.on("Page.lifecycleEvent", event => framemanager1._onLifecycleEvent(event));
     }
 
     async initialize() {
         const [
             ,{
                 frameTree}] = await Promise.all([
-            this._client.send("Page.enable"),
-            this._client.send("Page.getFrameTree"),
+            framemanager1._client.send("Page.enable"),
+            framemanager1._client.send("Page.getFrameTree"),
         ]);
-        this._onFrameNavigated(frameTree.frame);
+        framemanager1._onFrameNavigated(frameTree.frame);
         await Promise.all([
-            this._client.send("Page.setLifecycleEventsEnabled", {
+            framemanager1._client.send("Page.setLifecycleEventsEnabled", {
                 enabled: true }),
-            this._client.send("Runtime.enable", {}).then(() => this._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
-            this._networkManager.initialize(),
+            framemanager1._client.send("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
+            framemanager1._networkManager.initialize(),
         ]);
     }
 
@@ -900,19 +902,19 @@ class FrameManager extends EventEmitter {
       * @param {!Protocol.Page.lifecycleEventPayload} event
       */
     _onLifecycleEvent(event) {
-        const frame = this._frames.get(event.frameId);
+        const frame = framemanager1._frames.get(event.frameId);
         frame._onLifecycleEvent(event.loaderId, event.name);
-        this.emit(Events.FrameManager.LifecycleEvent, frame);
+        framemanager1.emit(Events.FrameManager.LifecycleEvent, frame);
     }
 
     /**
       * @param {string} frameId
       */
     _onFrameStoppedLoading(frameId) {
-        const frame = this._frames.get(frameId);
+        const frame = framemanager1._frames.get(frameId);
         frame._lifecycleEvents.add("DOMContentLoaded");
         frame._lifecycleEvents.add("load");
-        this.emit(Events.FrameManager.LifecycleEvent, frame);
+        framemanager1.emit(Events.FrameManager.LifecycleEvent, frame);
     }
 
     /**
@@ -920,35 +922,35 @@ class FrameManager extends EventEmitter {
       */
     _onFrameNavigated(framePayload) {
         const isMainFrame = !framePayload.parentId;
-        let frame = this._mainFrame
+        let frame = framemanager1._mainFrame
         assert(isMainFrame, "We either navigate top level or have old version of the navigated frame");
 
         // Update or create main frame.
         if (frame) {
             // Update frame id to retain frame identity on cross-process navigation.
-            this._frames.delete(frame._id);
+            framemanager1._frames.delete(frame._id);
             frame._id = framePayload.id;
         } else {
             // Initial main frame navigation.
-            frame = new Frame(this, this._client, null, framePayload.id);
+            frame = new Frame(framemanager1, framemanager1._client, null, framePayload.id);
         }
-        this._frames.set(framePayload.id, frame);
-        this._mainFrame = frame;
+        framemanager1._frames.set(framePayload.id, frame);
+        framemanager1._mainFrame = frame;
         // Update frame payload.
         frame._navigated(framePayload);
-        this.emit(Events.FrameManager.FrameNavigated, frame);
+        framemanager1.emit(Events.FrameManager.FrameNavigated, frame);
     }
 
     /**
       * @param {string} name
       */
     async _ensureIsolatedWorld(name) {
-        this._isolatedWorlds.add(name);
-        await this._client.send("Page.addScriptToEvaluateOnNewDocument", {
+        framemanager1._isolatedWorlds.add(name);
+        await framemanager1._client.send("Page.addScriptToEvaluateOnNewDocument", {
             source: `//# sourceURL=${EVALUATION_SCRIPT_URL}`,
             worldName: name,
         }),
-        await Promise.all(Array.from(this._frames.values()).map(frame => this._client.send("Page.createIsolatedWorld", {
+        await Promise.all(Array.from(framemanager1._frames.values()).map(frame => framemanager1._client.send("Page.createIsolatedWorld", {
             frameId: frame._id,
             grantUniveralAccess: true,
             worldName: name,
@@ -957,7 +959,7 @@ class FrameManager extends EventEmitter {
 
     _onExecutionContextCreated(contextPayload) {
         const frameId = contextPayload.auxData.frameId;
-        const frame = this._frames.get(frameId)
+        const frame = framemanager1._frames.get(frameId)
         let world = null;
         if (contextPayload.auxData && !!contextPayload.auxData["isDefault"]) {
             world = domworld1;
@@ -968,19 +970,19 @@ class FrameManager extends EventEmitter {
             world = domworld2;
         }
         if (contextPayload.auxData && contextPayload.auxData["type"] === "isolated")
-            this._isolatedWorlds.add(contextPayload.name);
+            framemanager1._isolatedWorlds.add(contextPayload.name);
         /** @type {!ExecutionContext} */
-        const context = new ExecutionContext(this._client, contextPayload, world);
+        const context = new ExecutionContext(framemanager1._client, contextPayload, world);
         world._setContext(context);
-        this._contextIdToContext.set(contextPayload.id, context);
+        framemanager1._contextIdToContext.set(contextPayload.id, context);
     }
 
     /**
       * @param {number} executionContextId
       */
     _onExecutionContextDestroyed(executionContextId) {
-        const context = this._contextIdToContext.get(executionContextId);
-        this._contextIdToContext.delete(executionContextId);
+        const context = framemanager1._contextIdToContext.get(executionContextId);
+        framemanager1._contextIdToContext.delete(executionContextId);
         context._world._setContext(null);
     }
 }
