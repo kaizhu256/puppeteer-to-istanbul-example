@@ -369,10 +369,10 @@ class Sender {
         const buf = Buffer.from(data);
         var opcode = 1;
         var rsv1 = options.compress;
-        this._firstFragment = false;
-        this._compress = rsv1;
-        this._firstFragment = true;
-        this.sendFrame(
+        sender1._firstFragment = false;
+        sender1._compress = rsv1;
+        sender1._firstFragment = true;
+        sender1.sendFrame(
             Sender.frame(buf, {
                 fin: options.fin,
                 rsv1: false,
@@ -392,10 +392,10 @@ class Sender {
       * @private
       */
     sendFrame(list, cb) {
-        this._socket.cork();
-        this._socket.write(list[0]);
-        this._socket.write(list[1], cb);
-        this._socket.uncork();
+        sender1._socket.cork();
+        sender1._socket.write(list[0]);
+        sender1._socket.write(list[1], cb);
+        sender1._socket.uncork();
     }
 }
 
@@ -450,85 +450,22 @@ function initAsClient(websocket1, urlInspect) {
         receiver1 = new Receiver();
         sender1 = new Sender(socket);
         websocket1._socket = socket;
-        receiver1.on("drain", receiverOnDrain);
-        receiver1.on("message", receiverOnMessage);
+        receiver1.on("drain", function () {
+            websocket1._socket.resume();
+        });
+        receiver1.on("message", function (data) {
+            websocket1.emit("message", data);
+        });
         socket.setTimeout(0);
         socket.setNoDelay();
-        socket.on("close", socketOnClose);
-        socket.on("data", socketOnData);
-        socket.on("end", socketOnEnd);
-        socket.on("error", console.error);
+        socket.on("data", function socketOnData(chunk) {
+            if (!receiver1.write(chunk)) {
+                socket.pause();
+            }
+        });
+        socket.on("error", local.assertThrow);
         websocket1.emit("open");
     });
-}
-
-/**
-  * The listener of the `Receiver` `'drain'` event.
-  *
-  * @private
-  */
-function receiverOnDrain() {
-    websocket1._socket.resume();
-}
-
-/**
-  * The listener of the `Receiver` `'message'` event.
-  *
-  * @param {(String|Buffer|ArrayBuffer|Buffer[])} data The message
-  * @private
-  */
-function receiverOnMessage(data) {
-    websocket1.emit("message", data);
-}
-
-/**
-  * The listener of the `net.Socket` `'close'` event.
-  *
-  * @private
-  */
-function socketOnClose() {
-    this.removeListener("close", socketOnClose);
-    this.removeListener("end", socketOnEnd);
-
-    //
-    // The close frame might not have been received or the `'end'` event emitted,
-    // for example, if the socket was destroyed due to an error. Ensure that the
-    // `receiver` stream is closed after writing any remaining buffered data to
-    // it. If the readable side of the socket is in flowing mode then there is no
-    // buffered data as everything has been already written and `readable.read()`
-    // will return `null`. If instead, the socket is paused, any possible buffered
-    // data will be read as a single chunk and emitted synchronously in a single
-    // `'data'` event.
-    //
-    websocket1._socket.read();
-    receiver1.end();
-
-    this.removeListener("data", socketOnData);
-    clearTimeout(websocket1._closeTimer);
-    receiver1.removeAllListeners();
-    websocket1.emit("close", websocket1._closeCode, websocket1._closeMessage);
-}
-
-/**
-  * The listener of the `net.Socket` `'data'` event.
-  *
-  * @param {Buffer} chunk A chunk of data
-  * @private
-  */
-function socketOnData(chunk) {
-    if (!receiver1.write(chunk)) {
-        this.pause();
-    }
-}
-
-/**
-  * The listener of the `net.Socket` `'end'` event.
-  *
-  * @private
-  */
-function socketOnEnd() {
-    receiver1.end();
-    this.end();
 }
 
 
