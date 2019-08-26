@@ -251,10 +251,10 @@ gotoNext = async function (err, data, meta) {
             throw new Error("chrome-screenshot - errTimeout - 30000 ms");
         }, 30000).unref();
         // init process.exit
-        process.on("exit", chromeKillSync);
-        process.on("SIGINT", chromeKillSync);
-        process.on("SIGTERM", chromeKillSync);
-        process.on("SIGHUP", chromeKillSync);
+        process.once("exit", chromeKillSync);
+        process.once("SIGINT", chromeKillSync);
+        process.once("SIGTERM", chromeKillSync);
+        process.once("SIGHUP", chromeKillSync);
         // init chromeProcess
         chromeProcess = child_process.spawn((
             "node_modules/puppeteer/.local-chromium"
