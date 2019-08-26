@@ -426,7 +426,7 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
   * @private
   */
 websocket1 = new EventEmitter();
-function initAsClient(websocket1, urlInspect) {
+function initAsClient(urlInspect) {
     var data;
     data = new url.URL(urlInspect);
     http.get({

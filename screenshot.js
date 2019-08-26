@@ -298,9 +298,9 @@ gotoNext = async function (err, data) {
         chromeProcess.stderr.on("data", onDataUrlInspect);
         break;
     case 2:
+        module.exports.initAsClient(urlInspect);
         // init websocket1
         websocket1 = module.exports.websocket1;
-        module.exports.initAsClient(websocket1, urlInspect);
         websocket1.once("open", gotoNextData);
         websocket1.once("error", gotoNext);
         break;
