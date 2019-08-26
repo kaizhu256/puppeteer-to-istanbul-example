@@ -63,7 +63,6 @@ local.nop(
 
 /* jslint ignore:start */
 var browser1;
-var browserContext1;
 var callbackDict;
 var connection1;
 var domworld1;
@@ -401,7 +400,6 @@ class Browser extends EventEmitter {
 
         browser1.targetDict[event.targetInfo.targetId] = target;
         browser1.emit(Events.Browser.TargetCreated, target);
-        browserContext1.emit(Events.BrowserContext.TargetCreated, target);
     }
 
     /**
@@ -413,7 +411,6 @@ class Browser extends EventEmitter {
         delete browser1.targetDict[event.targetId];
         target._closedCallback();
         browser1.emit(Events.Browser.TargetDestroyed, target);
-        browserContext1.emit(Events.BrowserContext.TargetDestroyed, target);
     }
 
     /**
@@ -442,8 +439,6 @@ class Browser extends EventEmitter {
         browser1._connection.dispose();
     }
 }
-
-browserContext1 = new EventEmitter();
 
 
 
