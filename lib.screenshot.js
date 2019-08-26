@@ -123,7 +123,25 @@ receiver1 = new stream.Writable();
     receiver1._write = function (chunk, encoding, cb) {
         receiver1._bufferedBytes += chunk.length;
         receiver1._buffers.push(chunk);
-        receiver1.startLoop(cb);
+        var err;
+        receiver1._loop = true;
+        do {
+            switch (receiver1._state) {
+            case GET_INFO:
+                err = receiver1.getInfo();
+                break;
+            case GET_PAYLOAD_LENGTH_16:
+                err = receiver1.getPayloadLength16();
+                break;
+            case GET_PAYLOAD_LENGTH_64:
+                err = receiver1.getPayloadLength64();
+                break;
+            case GET_DATA:
+                err = receiver1.getData(cb);
+                break;
+            }
+        } while (receiver1._loop);
+        cb(err);
     }
 
     /**
@@ -153,36 +171,6 @@ receiver1 = new stream.Writable();
         } while (n > 0);
 
         return dst;
-    }
-
-    /**
-      * Starts the parsing loop.
-      *
-      * @param {Function} cb Callback
-      * @private
-      */
-    receiver1.startLoop = function (cb) {
-        var err;
-        receiver1._loop = true;
-
-        do {
-            switch (receiver1._state) {
-            case GET_INFO:
-                err = receiver1.getInfo();
-                break;
-            case GET_PAYLOAD_LENGTH_16:
-                err = receiver1.getPayloadLength16();
-                break;
-            case GET_PAYLOAD_LENGTH_64:
-                err = receiver1.getPayloadLength64();
-                break;
-            case GET_DATA:
-                err = receiver1.getData(cb);
-                break;
-            }
-        } while (receiver1._loop);
-
-        cb(err);
     }
 
     /**
