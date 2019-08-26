@@ -131,7 +131,8 @@ receiver1 = new stream.Writable();
                 err = receiver1.getInfo();
                 break;
             case GET_PAYLOAD_LENGTH_16:
-                err = receiver1.getPayloadLength16();
+                receiver1._payloadLength = receiver1.consume(2).readUInt16BE(0);
+                err = receiver1.haveLength();
                 break;
             case GET_PAYLOAD_LENGTH_64:
                 err = receiver1.getPayloadLength64();
@@ -202,17 +203,6 @@ receiver1 = new stream.Writable();
         } else {
             return receiver1.haveLength();
         }
-    }
-
-    /**
-      * Gets extended payload length (7+16).
-      *
-      * @return {(RangeError|undefined)} A possible error
-      * @private
-      */
-    receiver1.getPayloadLength16 = function () {
-        receiver1._payloadLength = receiver1.consume(2).readUInt16BE(0);
-        return receiver1.haveLength();
     }
 
     /**
