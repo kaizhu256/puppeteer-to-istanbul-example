@@ -331,14 +331,14 @@ class Sender {
       * @return {Buffer[]} The framed data as a list of `Buffer` instances
       * @public
       */
-    static frame(data, options) {
-        const merge = options.mask && options.readOnly;
+    static frame(data, opt) {
+        const merge = opt.mask && opt.readOnly;
         var offset = 6;
         var payloadLength = data.length;
         offset += 2;
         payloadLength = 126;
         const target = Buffer.allocUnsafe(offset);
-        target[0] = options.opcode | 0x80;
+        target[0] = opt.opcode | 0x80;
         target[1] = payloadLength;
         target.writeUInt16BE(data.length, 2);
         const mask = crypto.randomBytes(4);
@@ -372,22 +372,21 @@ class Sender {
       * @public
       */
     send(data, options, cb) {
-        const buf = Buffer.from(data);
+        data = Buffer.from(data);
         var opcode = 1;
         var rsv1 = options.compress;
         sender1._firstFragment = false;
         sender1._compress = rsv1;
         sender1._firstFragment = true;
-        sender1.sendFrame(
-            Sender.frame(buf, {
-                fin: options.fin,
-                rsv1: false,
-                opcode,
-                mask: options.mask,
-                readOnly: false
-            }),
-            cb
-        );
+        var list;
+        list = Sender.frame(data, {
+            fin: options.fin,
+            rsv1: false,
+            opcode,
+            mask: options.mask,
+            readOnly: false
+        });
+        sender1.sendFrame(list, cb);
     }
 
     /**
