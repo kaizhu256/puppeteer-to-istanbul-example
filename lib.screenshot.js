@@ -531,7 +531,10 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         const id = connection1._rawSend(message);
         return new Promise(function (resolve, reject) {
             connection1._callbacks[id] = {
-                resolve, reject, error: new Error(), method
+                resolve,
+                reject,
+                error: new Error(),
+                method
             };
         });
     }
@@ -556,7 +559,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
     connection1._onMessage = function (message) {
         const object = JSON.parse(message);
         if (object.method === "Target.attachedToTarget") {
-            session1._connection = connection1;
             session1._targetType = object.params.targetInfo.type;
             session1._sessionId = object.params.sessionId;
         }
@@ -611,16 +613,18 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       * @return {!Promise<?Object>}
       */
     session1.send = function (method, params = {}) {
-        var message;
-        message = {
+        var message = {
             sessionId: session1._sessionId,
             method,
             params
         };
-        const id = session1._connection._rawSend(message);
+        const id = connection1._rawSend(message);
         return new Promise(function (resolve, reject) {
             session1._callbacks[id] = {
-                resolve, reject, error: new Error(), method
+                resolve,
+                reject,
+                error: new Error(),
+                method
             };
         });
     }
