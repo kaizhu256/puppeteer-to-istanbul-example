@@ -171,7 +171,6 @@ var tmp;
 var url;
 var urlInspect;
 var util;
-var websocket1;
 var websocket2;
 local.nop(assert, path, util);
 

@@ -73,7 +73,6 @@ var page1;
 var receiver1;
 var sender1;
 var session1;
-var websocket1;
 var websocket2;
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
@@ -425,7 +424,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
   *     `Sec-WebSocket-Origin` header
   * @private
   */
-websocket1 = new EventEmitter();
 function initAsClient(socket) {
     websocket2 = socket;
     receiver1 = new module.exports.Receiver();
@@ -1349,7 +1347,6 @@ LifecycleWatcher,
 Page,
 Receiver,
 Sender,
-websocket1,
 initAsClient,
 connection1,
 domworld2
