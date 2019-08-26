@@ -64,7 +64,6 @@ local.nop(
 /* jslint ignore:start */
 var browser1;
 var callbackDict;
-var connection1;
 var domworld1;
 var domworld2;
 var frame1;
@@ -282,7 +281,6 @@ class Browser extends EventEmitter {
         browser1._contexts = new Map();
         /** @type {Map<string, Target>} */
         browser1.targetDict = {};
-        connection1.on(Events.Connection.Disconnected, () => browser1.emit(Events.Browser.Disconnected));
     }
 
     /**
@@ -350,8 +348,6 @@ class Browser extends EventEmitter {
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
 */
-    connection1 = new EventEmitter();
-
     /**
       * @param {string} method
       * @param {!Object=} params
@@ -443,6 +439,9 @@ var websocketOnMessage = function (message) {
         return;
     }
     switch (method) {
+    case "Events.Connection.Disconnected":
+        browser1.emit(method);
+        break;
     case "Target.targetCreated":
         browser1._targetCreated(params);
         break;
@@ -1122,7 +1121,6 @@ module.exports = {
 Browser,
 LifecycleWatcher,
 Page,
-connection1,
 domworld2,
 initAsClient,
 session1,
