@@ -327,7 +327,9 @@ class Sender {
       * @public
       */
     send(data) {
-        data = Buffer.from(data);
+        var ii;
+        var mask;
+        var target;
         /**
           * Frames a piece of data according to the HyBi WebSocket protocol.
           *
@@ -341,24 +343,25 @@ class Sender {
           * @return {Buffer[]} The framed data as a list of `Buffer` instances
           * @public
           */
-        var payloadLength = data.length;
-        payloadLength = 126;
-        const target = Buffer.allocUnsafe(8);
+        target = Buffer.allocUnsafe(8);
+        // opcode
         target[0] = 0x81;
-        target[1] = payloadLength | 0x80;
+        // size
+        target[1] = 0xfe;
         target.writeUInt16BE(data.length, 2);
-        const mask = crypto.randomBytes(4);
+        // mask
+        mask = crypto.randomBytes(4);
         target[4] = mask[0];
         target[5] = mask[1];
         target[6] = mask[2];
         target[7] = mask[3];
-        // mask data
-        var ii;
+        data = Buffer.from(data);
         ii = data.length;
         while (ii > 0) {
             ii -= 1;
             data[ii] = data[ii] ^ mask[ii & 3];
         }
+        // send
         sender1._socket.cork();
         sender1._socket.write(target);
         sender1._socket.write(data);
