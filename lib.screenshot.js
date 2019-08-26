@@ -718,7 +718,6 @@ class ExecutionContext {
       * @param {?Puppeteer.DOMWorld} world
       */
     constructor(client, contextPayload, world) {
-        this._client = client;
         this._world = world;
         this._contextId = contextPayload.id;
     }
@@ -734,7 +733,7 @@ class ExecutionContext {
         let functionText = pageFunction.toString();
         new Function("(" + functionText + ")");
         let callFunctionOnPromise;
-        callFunctionOnPromise = this._client.send("Runtime.callFunctionOn", {
+        callFunctionOnPromise = session1.send("Runtime.callFunctionOn", {
             functionDeclaration: functionText + "\n" + suffix + "\n",
             executionContextId: this._contextId,
             returnByValue,
@@ -763,7 +762,6 @@ class FrameManager extends EventEmitter {
         super();
         framemanager1 = this;
         module.exports.framemanager1 = this;
-        framemanager1._client = client;
         framemanager1._page = page;
         framemanager1._networkManager = new NetworkManager(client);
         /** @type {!Map<number, !ExecutionContext>} */
@@ -771,25 +769,25 @@ class FrameManager extends EventEmitter {
         /** @type {!Set<string>} */
         framemanager1._isolatedWorlds = new Set();
 
-        framemanager1._client.on("Page.frameNavigated", event => framemanager1._onFrameNavigated(event.frame));
-        framemanager1._client.on("Page.frameStoppedLoading", event => framemanager1._onFrameStoppedLoading(event.frameId));
-        framemanager1._client.on("Runtime.executionContextCreated", event => framemanager1._onExecutionContextCreated(event.context));
-        framemanager1._client.on("Runtime.executionContextDestroyed", event => framemanager1._onExecutionContextDestroyed(event.executionContextId));
-        framemanager1._client.on("Page.lifecycleEvent", event => framemanager1._onLifecycleEvent(event));
+        session1.on("Page.frameNavigated", event => framemanager1._onFrameNavigated(event.frame));
+        session1.on("Page.frameStoppedLoading", event => framemanager1._onFrameStoppedLoading(event.frameId));
+        session1.on("Runtime.executionContextCreated", event => framemanager1._onExecutionContextCreated(event.context));
+        session1.on("Runtime.executionContextDestroyed", event => framemanager1._onExecutionContextDestroyed(event.executionContextId));
+        session1.on("Page.lifecycleEvent", event => framemanager1._onLifecycleEvent(event));
     }
 
     async initialize() {
         const [
             ,{
                 frameTree}] = await Promise.all([
-            framemanager1._client.send("Page.enable"),
-            framemanager1._client.send("Page.getFrameTree"),
+            session1.send("Page.enable"),
+            session1.send("Page.getFrameTree"),
         ]);
         framemanager1._onFrameNavigated(frameTree.frame);
         await Promise.all([
-            framemanager1._client.send("Page.setLifecycleEventsEnabled", {
+            session1.send("Page.setLifecycleEventsEnabled", {
                 enabled: true }),
-            framemanager1._client.send("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
+            session1.send("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
             framemanager1._networkManager.initialize(),
         ]);
     }
@@ -821,7 +819,7 @@ class FrameManager extends EventEmitter {
             frame1._id = framePayload.id;
         } else {
             // Initial main frame navigation.
-            frame1 = new Frame(framemanager1, framemanager1._client, null, framePayload.id);
+            frame1 = new Frame(framemanager1, session1, null, framePayload.id);
         }
         // Update frame payload.
         frame1._navigated(framePayload);
@@ -833,11 +831,11 @@ class FrameManager extends EventEmitter {
       */
     async _ensureIsolatedWorld(name) {
         framemanager1._isolatedWorlds.add(name);
-        await framemanager1._client.send("Page.addScriptToEvaluateOnNewDocument", {
+        await session1.send("Page.addScriptToEvaluateOnNewDocument", {
             source: `//# sourceURL=${EVALUATION_SCRIPT_URL}`,
             worldName: name,
         }),
-        await framemanager1._client.send("Page.createIsolatedWorld", {
+        await session1.send("Page.createIsolatedWorld", {
             frameId: frame1._id,
             grantUniveralAccess: true,
             worldName: name
@@ -857,7 +855,7 @@ class FrameManager extends EventEmitter {
         if (contextPayload.auxData && contextPayload.auxData["type"] === "isolated")
             framemanager1._isolatedWorlds.add(contextPayload.name);
         /** @type {!ExecutionContext} */
-        const context = new ExecutionContext(framemanager1._client, contextPayload, world);
+        const context = new ExecutionContext(session1, contextPayload, world);
         world._setContext(context);
         framemanager1._contextIdToContext.set(contextPayload.id, context);
     }
@@ -885,7 +883,6 @@ class Frame {
     constructor(frameManager, client, parentFrame, frameId) {
         frame1 = this;
         module.exports.frame1 = this;
-        frame1._client = client;
         frame1._parentFrame = parentFrame;
         frame1._url = "";
         frame1._id = frameId;
@@ -1020,7 +1017,6 @@ class NetworkManager extends EventEmitter {
       */
     constructor(client) {
         super();
-        this._client = client;
         /** @type {!Map<string, !Request>} */
         this._requestIdToRequest = new Map();
         /** @type {!Map<string, !Protocol.Network.requestWillBeSentPayload>} */
@@ -1040,14 +1036,14 @@ class NetworkManager extends EventEmitter {
         /** @type {!Map<string, string>} */
         this._requestIdToInterceptionId = new Map();
 
-        this._client.on("Network.requestWillBeSent", this._onRequestWillBeSent.bind(this));
-        this._client.on("Network.requestServedFromCache", this._onRequestServedFromCache.bind(this));
-        this._client.on("Network.responseReceived", this._onResponseReceived.bind(this));
-        this._client.on("Network.loadingFinished", this._onLoadingFinished.bind(this));
+        session1.on("Network.requestWillBeSent", this._onRequestWillBeSent.bind(this));
+        session1.on("Network.requestServedFromCache", this._onRequestServedFromCache.bind(this));
+        session1.on("Network.responseReceived", this._onResponseReceived.bind(this));
+        session1.on("Network.loadingFinished", this._onLoadingFinished.bind(this));
     }
 
     async initialize() {
-        await this._client.send("Network.enable");
+        await session1.send("Network.enable");
     }
 
     /**
@@ -1077,7 +1073,7 @@ class NetworkManager extends EventEmitter {
             this._handleRequestRedirect(request, event.redirectResponse);
             redirectChain = request._redirectChain;
         }
-        const request = new Request(this._client, frame1, interceptionId, this._userRequestInterceptionEnabled, event, redirectChain);
+        const request = new Request(session1, frame1, interceptionId, this._userRequestInterceptionEnabled, event, redirectChain);
         this._requestIdToRequest.set(event.requestId, request);
         this.emit(Events.NetworkManager.Request, request);
     }
@@ -1095,7 +1091,7 @@ class NetworkManager extends EventEmitter {
       * @param {!Protocol.Network.Response} responsePayload
       */
     _handleRequestRedirect(request, responsePayload) {
-        const response = new Response(this._client, request, responsePayload);
+        const response = new Response(session1, request, responsePayload);
         request._response = response;
         request._redirectChain.push(request);
         response._bodyLoadedPromiseFulfill.call(null, new Error("Response body is unavailable for redirect responses"));
@@ -1110,7 +1106,7 @@ class NetworkManager extends EventEmitter {
       */
     _onResponseReceived(event) {
         const request = this._requestIdToRequest.get(event.requestId);
-        const response = new Response(this._client, request, event.response);
+        const response = new Response(session1, request, event.response);
         request._response = response;
         this.emit(Events.NetworkManager.Response, response);
     }
@@ -1139,7 +1135,6 @@ class Request {
       * @param {!Array<!Request>} redirectChain
       */
     constructor(client, frame, interceptionId, allowInterception, event, redirectChain) {
-        this._client = client;
         this._requestId = event.requestId;
         this._isNavigationRequest = event.requestId === event.loaderId && event.type === "Document";
         this._interceptionId = interceptionId;
@@ -1169,7 +1164,6 @@ class Response {
       * @param {!Protocol.Network.Response} responsePayload
       */
     constructor(client, request, responsePayload) {
-        this._client = client;
         this._request = request;
         this._contentPromise = null;
 
@@ -1217,7 +1211,6 @@ class Page extends EventEmitter {
         super();
         page1 = this;
         page1._closed = false;
-        page1._client = client;
         page1._target = target;
         /** @type {!FrameManager} */
         new FrameManager(client, page1);
@@ -1250,10 +1243,10 @@ class Page extends EventEmitter {
     async _initialize() {
         await Promise.all([
             framemanager1.initialize(),
-            page1._client.send("Target.setAutoAttach", {
+            session1.send("Target.setAutoAttach", {
                 autoAttach: true, waitForDebuggerOnStart: false, flatten: true}),
-            page1._client.send("Performance.enable", {}),
-            page1._client.send("Log.enable", {}),
+            session1.send("Performance.enable", {}),
+            session1.send("Log.enable", {}),
         ]);
     }
 }

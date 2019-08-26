@@ -354,7 +354,7 @@ const watcher = new module.exports.LifecycleWatcher(
     ]
 );
 await new Promise(function (resolve) {
-    framemanager1._client.send("Page.navigate", {
+    session1.send("Page.navigate", {
         url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
         referer: framemanager1._networkManager.extraHTTPHeaders().referer,
         frameId: module.exports.frame1._id
@@ -377,10 +377,10 @@ await Promise.all([
     // screenshot - png
     (async function () {
         var result;
-        await page1._client.send("Target.activateTarget", {
+        await session1.send("Target.activateTarget", {
             targetId: page1._target._targetId
         });
-        result = await page1._client.send("Page.captureScreenshot", {
+        result = await session1.send("Page.captureScreenshot", {
             format: "png"
         });
         await fsWriteFile("tmp/aa.png", Buffer.from(result.data, "base64"));
