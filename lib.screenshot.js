@@ -479,13 +479,15 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       * @return {number}
       */
     connection1._rawSend = function (message) {
-        connection1._lastId += 1;
-        var id = connection1._lastId;
-        message.id = id;
-        var data = JSON.stringify(message);
+        var data;
+        var id;
         var ii;
         var mask;
         var target;
+        connection1._lastId += 1;
+        id = connection1._lastId;
+        message.id = id;
+        data = JSON.stringify(message);
         // send websocket-frame
         // https://tools.ietf.org/html/rfc6455
         target = Buffer.allocUnsafe(8);
