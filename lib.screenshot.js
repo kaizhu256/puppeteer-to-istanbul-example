@@ -1090,11 +1090,9 @@ class Page extends EventEmitter {
 
         client.on("Page.domContentEventFired", event => page1.emit(Events.Page.DOMContentLoaded));
         client.on("Page.loadEventFired", event => page1.emit(Events.Page.Load));
-        var that;
-        that = page1;
         page1._target._isClosedPromise.then(function () {
-            that.emit(Events.Page.Close);
-            that._closed = true;
+            page1.emit(Events.Page.Close);
+            page1._closed = true;
         });
     }
 
