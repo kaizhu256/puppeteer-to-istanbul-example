@@ -172,6 +172,7 @@ var url;
 var urlInspect;
 var util;
 var websocket1;
+var websocket2;
 local.nop(assert, path, util);
 
 
@@ -311,16 +312,24 @@ gotoNext = async function (err, data, meta) {
         }).on("upgrade", gotoNextData);
         break;
     case 3:
+        module.exports.initAsClient(meta);
+        //!! websocket2 = meta;
 
+        //!! var receiver1 = new module.exports.Receiver();
+        //!! var sender1 = new module.exports.Sender(websocket2);
+        //!! receiver1.on("drain", function () {
+            //!! websocket2.resume();
+        //!! });
+        //!! receiver1.on("message", connection1._onMessage);
+        //!! websocket2.setTimeout(0);
+        //!! websocket2.setNoDelay();
+        //!! websocket2.on("data", function socketOnData(chunk) {
+            //!! if (!receiver1.write(chunk)) {
+                //!! websocket2.pause();
+            //!! }
+        //!! });
+        //!! websocket2.on("error", local.assertThrow);
 
-
-        module.exports.initAsClient(urlInspect);
-        // init websocket1
-        websocket1 = module.exports.websocket1;
-        websocket1.once("open", gotoNextData);
-        websocket1.once("error", gotoNext);
-        break;
-    case 4:
         connection1 = module.exports.connection1;
         connection1._url = urlInspect;
         browser1 = await module.exports.Browser.create(

@@ -426,37 +426,22 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
   * @private
   */
 websocket1 = new EventEmitter();
-function initAsClient(urlInspect) {
-    var data;
-    data = new url.URL(urlInspect);
-    http.get({
-        headers: {
-            "Sec-WebSocket-Version": 13,
-            "Sec-WebSocket-Key": crypto.randomBytes(16).toString("base64"),
-            "Connection": "Upgrade",
-            "Upgrade": "websocket"
-        },
-        host: "127.0.0.1",
-        path: data.pathname,
-        port: data.port
-    }).on("upgrade", function (res, socket) {
-        websocket2 = socket;
-        receiver1 = new module.exports.Receiver();
-        sender1 = new module.exports.Sender(websocket2);
-        receiver1.on("drain", function () {
-            websocket2.resume();
-        });
-        receiver1.on("message", connection1._onMessage);
-        websocket2.setTimeout(0);
-        websocket2.setNoDelay();
-        websocket2.on("data", function socketOnData(chunk) {
-            if (!receiver1.write(chunk)) {
-                websocket2.pause();
-            }
-        });
-        websocket2.on("error", local.assertThrow);
-        websocket1.emit("open");
+function initAsClient(socket) {
+    websocket2 = socket;
+    receiver1 = new module.exports.Receiver();
+    sender1 = new module.exports.Sender(websocket2);
+    receiver1.on("drain", function () {
+        websocket2.resume();
     });
+    receiver1.on("message", connection1._onMessage);
+    websocket2.setTimeout(0);
+    websocket2.setNoDelay();
+    websocket2.on("data", function socketOnData(chunk) {
+        if (!receiver1.write(chunk)) {
+            websocket2.pause();
+        }
+    });
+    websocket2.on("error", local.assertThrow);
 }
 
 
