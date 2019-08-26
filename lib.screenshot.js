@@ -444,19 +444,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         }
     }
 
-    /**
-      * @param {Protocol.Target.TargetInfo} targetInfo
-      * @return {!Promise<!CDPSession>}
-      */
-    connection1.createSession = async function (targetInfo) {
-        var tmp;
-        tmp = await websocketSend("Target.attachToTarget", {
-            targetId: targetInfo.targetId,
-            flatten: true
-        });
-        return session1
-    }
-
     session1 = new EventEmitter();
 
 

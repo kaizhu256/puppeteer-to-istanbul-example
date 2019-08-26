@@ -302,7 +302,6 @@ gotoNext = async function (err, data, meta) {
     case 3:
         module.exports.initAsClient(meta);
         connection1 = module.exports.connection1;
-        connection1._url = urlWebsocket;
         browser1 = await module.exports.Browser.create(
             connection1,
             [],
@@ -327,7 +326,10 @@ tmp = await websocketSend("Target.createTarget", {
     url: "about:blank"
 });
 tmp = await browser1.targetDict[tmp.targetId];
-await connection1.createSession(tmp._targetInfo);
+await websocketSend("Target.attachToTarget", {
+    targetId: tmp._targetInfo.targetId,
+    flatten: true
+})
 page1 = await module.exports.Page.create(session1, tmp);
 
 
