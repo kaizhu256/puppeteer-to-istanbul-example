@@ -30,7 +30,7 @@ const readline = require("readline");
 const tls = require("tls");
 const url = require("url");
 const util = require("util");
-const {Writable} = require("stream");
+const stream = require("stream");
 
 
 
@@ -52,11 +52,11 @@ local.nop(
     os,
     path,
     readline,
+    stream,
     timeout,
     tls,
     url,
-    util,
-    Writable
+    util
 );
 
 
@@ -93,28 +93,25 @@ const INFLATING = 5;
   *
   * @extends stream.Writable
   */
-class Receiver extends Writable {
-    constructor() {
-        super();
+receiver1 = new stream.Writable();
 
-        this._bufferedBytes = 0;
-        this._buffers = [];
+        receiver1._bufferedBytes = 0;
+        receiver1._buffers = [];
 
-        this._compressed = false;
-        this._payloadLength = 0;
-        this._mask = undefined;
-        this._fragmented = 0;
-        this._masked = false;
-        this._fin = false;
-        this._opcode = 0;
+        receiver1._compressed = false;
+        receiver1._payloadLength = 0;
+        receiver1._mask = undefined;
+        receiver1._fragmented = 0;
+        receiver1._masked = false;
+        receiver1._fin = false;
+        receiver1._opcode = 0;
 
-        this._totalPayloadLength = 0;
-        this._messageLength = 0;
-        this._fragments = [];
+        receiver1._totalPayloadLength = 0;
+        receiver1._messageLength = 0;
+        receiver1._fragments = [];
 
-        this._state = GET_INFO;
-        this._loop = false;
-    }
+        receiver1._state = GET_INFO;
+        receiver1._loop = false;
 
     /**
       * Implements `Writable.prototype._write()`.
@@ -123,7 +120,7 @@ class Receiver extends Writable {
       * @param {String} encoding The character encoding of `chunk`
       * @param {Function} cb Callback
       */
-    _write(chunk, encoding, cb) {
+    receiver1._write = function (chunk, encoding, cb) {
         receiver1._bufferedBytes += chunk.length;
         receiver1._buffers.push(chunk);
         receiver1.startLoop(cb);
@@ -136,7 +133,7 @@ class Receiver extends Writable {
       * @return {Buffer} The consumed bytes
       * @private
       */
-    consume(n) {
+    receiver1.consume = function (n) {
         receiver1._bufferedBytes -= n;
 
         if (n === receiver1._buffers[0].length) {
@@ -164,7 +161,7 @@ class Receiver extends Writable {
       * @param {Function} cb Callback
       * @private
       */
-    startLoop(cb) {
+    receiver1.startLoop = function (cb) {
         var err;
         receiver1._loop = true;
 
@@ -194,7 +191,7 @@ class Receiver extends Writable {
       * @return {(RangeError|undefined)} A possible error
       * @private
       */
-    getInfo() {
+    receiver1.getInfo = function () {
         if (receiver1._bufferedBytes < 2) {
             receiver1._loop = false;
             return;
@@ -225,7 +222,7 @@ class Receiver extends Writable {
       * @return {(RangeError|undefined)} A possible error
       * @private
       */
-    getPayloadLength16() {
+    receiver1.getPayloadLength16 = function () {
         receiver1._payloadLength = receiver1.consume(2).readUInt16BE(0);
         return receiver1.haveLength();
     }
@@ -236,7 +233,7 @@ class Receiver extends Writable {
       * @return {(RangeError|undefined)} A possible error
       * @private
       */
-    getPayloadLength64() {
+    receiver1.getPayloadLength64 = function () {
         const buf = receiver1.consume(8);
         const num = buf.readUInt32BE(0);
         receiver1._payloadLength = num * Math.pow(2, 32) + buf.readUInt32BE(4);
@@ -249,7 +246,7 @@ class Receiver extends Writable {
       * @return {(RangeError|undefined)} A possible error
       * @private
       */
-    haveLength() {
+    receiver1.haveLength = function () {
         receiver1._totalPayloadLength += receiver1._payloadLength;
         receiver1._state = GET_DATA;
     }
@@ -261,7 +258,7 @@ class Receiver extends Writable {
       * @return {(Error|RangeError|undefined)} A possible error
       * @private
       */
-    getData(cb) {
+    receiver1.getData = function (cb) {
         if (receiver1._bufferedBytes < receiver1._payloadLength) {
             receiver1._loop = false;
             return;
@@ -282,7 +279,7 @@ class Receiver extends Writable {
       * @return {(Error|undefined)} A possible error
       * @private
       */
-    dataMessage() {
+    receiver1.dataMessage = function () {
         const messageLength = receiver1._messageLength;
         const fragments = receiver1._fragments;
         receiver1._totalPayloadLength = 0;
@@ -293,7 +290,6 @@ class Receiver extends Writable {
         receiver1.emit("message", buf.toString());
         receiver1._state = GET_INFO;
     }
-}
 
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
@@ -313,7 +309,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
   */
 function initAsClient(socket) {
     websocket1 = socket;
-    receiver1 = new module.exports.Receiver();
     receiver1.on("drain", websocket1.resume.bind(websocket1));
     receiver1.on("message", connection1._onMessage);
     websocket1.setTimeout(0);
@@ -1224,7 +1219,6 @@ module.exports = {
 Browser,
 LifecycleWatcher,
 Page,
-Receiver,
 connection1,
 domworld2,
 initAsClient,
