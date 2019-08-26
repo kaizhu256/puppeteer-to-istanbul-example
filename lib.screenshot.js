@@ -461,6 +461,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       */
     connection1.send = function (method, params = {}) {
         var message = {
+            sessionId: session1._sessionId,
             method,
             params
         };
@@ -565,28 +566,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
     }
 
     session1 = new EventEmitter();
-
-    /**
-      * @param {string} method
-      * @param {!Object=} params
-      * @return {!Promise<?Object>}
-      */
-    session1.send = function (method, params = {}) {
-        var message = {
-            sessionId: session1._sessionId,
-            method,
-            params
-        };
-        const id = connection1._rawSend(message);
-        return new Promise(function (resolve, reject) {
-            callbackDict[id] = {
-                resolve,
-                reject,
-                error: new Error(),
-                method
-            };
-        });
-    }
 
 
 
@@ -733,7 +712,7 @@ class ExecutionContext {
         let functionText = pageFunction.toString();
         new Function("(" + functionText + ")");
         let callFunctionOnPromise;
-        callFunctionOnPromise = session1.send("Runtime.callFunctionOn", {
+        callFunctionOnPromise = connection1.send("Runtime.callFunctionOn", {
             functionDeclaration: functionText + "\n" + suffix + "\n",
             executionContextId: this._contextId,
             returnByValue,
@@ -779,14 +758,14 @@ class FrameManager extends EventEmitter {
         const [
             ,{
                 frameTree}] = await Promise.all([
-            session1.send("Page.enable"),
-            session1.send("Page.getFrameTree"),
+            connection1.send("Page.enable"),
+            connection1.send("Page.getFrameTree"),
         ]);
         framemanager1._onFrameNavigated(frameTree.frame);
         await Promise.all([
-            session1.send("Page.setLifecycleEventsEnabled", {
+            connection1.send("Page.setLifecycleEventsEnabled", {
                 enabled: true }),
-            session1.send("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
+            connection1.send("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
             framemanager1._networkManager.initialize(),
         ]);
     }
@@ -830,11 +809,11 @@ class FrameManager extends EventEmitter {
       */
     async _ensureIsolatedWorld(name) {
         framemanager1._isolatedWorlds.add(name);
-        await session1.send("Page.addScriptToEvaluateOnNewDocument", {
+        await connection1.send("Page.addScriptToEvaluateOnNewDocument", {
             source: `//# sourceURL=${EVALUATION_SCRIPT_URL}`,
             worldName: name,
         }),
-        await session1.send("Page.createIsolatedWorld", {
+        await connection1.send("Page.createIsolatedWorld", {
             frameId: frame1._id,
             grantUniveralAccess: true,
             worldName: name
@@ -1042,7 +1021,7 @@ class NetworkManager extends EventEmitter {
     }
 
     async initialize() {
-        await session1.send("Network.enable");
+        await connection1.send("Network.enable");
     }
 
     /**
@@ -1242,10 +1221,10 @@ class Page extends EventEmitter {
     async _initialize() {
         await Promise.all([
             framemanager1.initialize(),
-            session1.send("Target.setAutoAttach", {
+            connection1.send("Target.setAutoAttach", {
                 autoAttach: true, waitForDebuggerOnStart: false, flatten: true}),
-            session1.send("Performance.enable", {}),
-            session1.send("Log.enable", {}),
+            connection1.send("Performance.enable", {}),
+            connection1.send("Log.enable", {}),
         ]);
     }
 }
