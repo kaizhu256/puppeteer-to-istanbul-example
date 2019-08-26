@@ -525,7 +525,9 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       */
     connection1.send = function (method, params = {}) {
         const id = connection1._rawSend({
-            method, params});
+            method,
+            params
+        });
         return new Promise(function (resolve, reject) {
             connection1._callbacks[id] = {
                 resolve, reject, error: new Error(), method
@@ -539,10 +541,10 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       */
     connection1._rawSend = function (message) {
         connection1._lastId += 1;
-        const id = connection1._lastId;
-        message = JSON.stringify(Object.assign({}, message, {id}));
+        message.id = connection1._lastId;
+        message = JSON.stringify(message);
         sender1.send(message);
-        return id;
+        return connection1._lastId;
     }
 
     /**
@@ -607,7 +609,9 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       */
     session1.send = function (method, params = {}) {
         const id = session1._connection._rawSend({
-            sessionId: session1._sessionId, method, params});
+            sessionId: session1._sessionId,
+            method, params
+        });
         return new Promise(function (resolve, reject) {
             session1._callbacks[id] = {
                 resolve, reject, error: new Error(), method
