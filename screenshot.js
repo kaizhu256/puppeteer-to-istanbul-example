@@ -152,7 +152,6 @@ var browser1;
 var child_process;
 var chromeKillSync;
 var chromeProcess;
-var connection1;
 var crypto;
 var framemanager1;
 var fs;
@@ -301,9 +300,8 @@ gotoNext = async function (err, data, meta) {
         break;
     case 3:
         module.exports.initAsClient(meta);
-        connection1 = module.exports.connection1;
         browser1 = await module.exports.Browser.create(
-            connection1,
+            module.exports.connection1,
             [],
             chromeProcess
         );
@@ -327,9 +325,9 @@ tmp = await websocketSend("Target.createTarget", {
 });
 tmp = await browser1.targetDict[tmp.targetId];
 await websocketSend("Target.attachToTarget", {
-    targetId: tmp._targetInfo.targetId,
-    flatten: true
-})
+    flatten: true,
+    targetId: tmp._targetInfo.targetId
+});
 page1 = await module.exports.Page.create(session1, tmp);
 
 
