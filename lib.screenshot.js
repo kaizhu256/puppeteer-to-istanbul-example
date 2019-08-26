@@ -71,8 +71,8 @@ var frame1;
 var framemanager1;
 var page1;
 var receiver1;
-var sender1;
 var session1;
+var websocket1;
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
 */
@@ -308,10 +308,9 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
   *     `Sec-WebSocket-Origin` header
   * @private
   */
-function initAsClient(websocket1) {
+function initAsClient(socket) {
+    websocket1 = socket;
     receiver1 = new module.exports.Receiver();
-    sender1 = {};
-    sender1._socket = websocket1;
     receiver1.on("drain", function () {
         websocket1.resume();
     });
@@ -508,10 +507,10 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
             data[ii] = data[ii] ^ mask[ii & 3];
         }
         // send
-        sender1._socket.cork();
-        sender1._socket.write(target);
-        sender1._socket.write(data);
-        sender1._socket.uncork();
+        websocket1.cork();
+        websocket1.write(target);
+        websocket1.write(data);
+        websocket1.uncork();
         return id;
     }
 
