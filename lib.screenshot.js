@@ -864,6 +864,7 @@ class FrameManager extends EventEmitter {
     constructor(client, page) {
         super();
         framemanager1 = this;
+        module.exports.framemanager1 = this;
         framemanager1._client = client;
         framemanager1._page = page;
         framemanager1._networkManager = new NetworkManager(client);
@@ -1065,8 +1066,8 @@ class LifecycleWatcher {
         this._timeout = timeout;
         /** @type {?Puppeteer.Request} */
         this._navigationRequest = null;
-        this._frameManager.on(Events.FrameManager.LifecycleEvent, this._checkLifecycleComplete.bind(this));
-        this._frameManager._networkManager.on(Events.NetworkManager.Request, this._onRequest.bind(this));
+        framemanager1.on(Events.FrameManager.LifecycleEvent, this._checkLifecycleComplete.bind(this));
+        framemanager1._networkManager.on(Events.NetworkManager.Request, this._onRequest.bind(this));
         this._sameDocumentNavigationPromise = new Promise(fulfill => {
             this._sameDocumentNavigationCompleteCallback = fulfill;
         });
@@ -1200,7 +1201,7 @@ class NetworkManager extends EventEmitter {
             this._handleRequestRedirect(request, event.redirectResponse);
             redirectChain = request._redirectChain;
         }
-        const frame = this._frameManager._frames.get(event.frameId);
+        const frame = framemanager1._frames.get(event.frameId);
         const request = new Request(this._client, frame, interceptionId, this._userRequestInterceptionEnabled, event, redirectChain);
         this._requestIdToRequest.set(event.requestId, request);
         this.emit(Events.NetworkManager.Request, request);
@@ -1366,9 +1367,9 @@ class Page extends EventEmitter {
         /** @type {!Map<string, Worker>} */
         page1._workers = new Map();
 
-        page1._frameManager.on(Events.FrameManager.FrameNavigated, event => page1.emit(Events.Page.FrameNavigated, event));
+        framemanager1.on(Events.FrameManager.FrameNavigated, event => page1.emit(Events.Page.FrameNavigated, event));
 
-        const networkManager = page1._frameManager._networkManager;
+        const networkManager = framemanager1._networkManager;
         networkManager.on(Events.NetworkManager.Request, event => page1.emit(Events.Page.Request, event));
         networkManager.on(Events.NetworkManager.Response, event => page1.emit(Events.Page.Response, event));
         networkManager.on(Events.NetworkManager.RequestFinished, event => page1.emit(Events.Page.RequestFinished, event));
@@ -1387,7 +1388,7 @@ class Page extends EventEmitter {
 
     async _initialize() {
         await Promise.all([
-            page1._frameManager.initialize(),
+            framemanager1.initialize(),
             page1._client.send("Target.setAutoAttach", {
                 autoAttach: true, waitForDebuggerOnStart: false, flatten: true}),
             page1._client.send("Performance.enable", {}),

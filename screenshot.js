@@ -154,6 +154,7 @@ var chromeCloseGracefully;
 var chromeKillSync;
 var chromeProcess;
 var connection1;
+var framemanager1;
 var fs;
 var fsWriteFile;
 var gotoNext;
@@ -338,18 +339,19 @@ page1 = await module.exports.Page.create(page1, tmp);
 
 
 // browser - load url
+framemanager1 = module.exports.framemanager1;
 const watcher = new module.exports.LifecycleWatcher(
-    page1._frameManager,
-    page1._frameManager._mainFrame,
+    framemanager1,
+    framemanager1._mainFrame,
     [
         "load"
     ]
 );
 await new Promise(function (resolve) {
-    page1._frameManager._client.send("Page.navigate", {
+    framemanager1._client.send("Page.navigate", {
         url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
-        referer: page1._frameManager._networkManager.extraHTTPHeaders().referer,
-        frameId: page1._frameManager._mainFrame._id
+        referer: framemanager1._networkManager.extraHTTPHeaders().referer,
+        frameId: framemanager1._mainFrame._id
     }).then(resolve);
 });
 await local.identity(watcher._newDocumentNavigationPromise);
