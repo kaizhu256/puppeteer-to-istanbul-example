@@ -491,10 +491,6 @@ class Browser extends EventEmitter {
         browser1._process = process;
         browser1._connection = connection;
         browser1._closeCallback = closeCallback;
-        browser1._defaultContext = browserContext1;
-        browserContext1._connection = browser1._connection;
-        browserContext1._browser = browser1;
-        /** @type {Map<string, BrowserContext>} */
         browser1._contexts = new Map();
         /** @type {Map<string, Target>} */
         browser1.targetDict = {};
@@ -509,12 +505,8 @@ class Browser extends EventEmitter {
       */
     async _targetCreated(event) {
         const targetInfo = event.targetInfo;
-        const {
-            browserContextId} = targetInfo;
-        const context = browser1._defaultContext;
         const target = {};
         target._targetInfo = targetInfo;
-        target._browserContext = context;
         target._targetId = targetInfo.targetId;
         /** @type {?Promise<!Puppeteer.Page>} */
         target._pagePromise = null;
@@ -537,7 +529,7 @@ class Browser extends EventEmitter {
 
         browser1.targetDict[event.targetInfo.targetId] = target;
         browser1.emit(Events.Browser.TargetCreated, target);
-        context.emit(Events.BrowserContext.TargetCreated, target);
+        browserContext1.emit(Events.BrowserContext.TargetCreated, target);
     }
 
     /**
@@ -549,7 +541,7 @@ class Browser extends EventEmitter {
         delete browser1.targetDict[event.targetId];
         target._closedCallback();
         browser1.emit(Events.Browser.TargetDestroyed, target);
-        target._browserContext.emit(Events.BrowserContext.TargetDestroyed, target);
+        browserContext1.emit(Events.BrowserContext.TargetDestroyed, target);
     }
 
     /**
