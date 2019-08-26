@@ -113,61 +113,61 @@ receiver1 = new stream.Writable();
         receiver1._state = GET_INFO;
         receiver1._loop = false;
 
-    /**
-      * Implements `Writable.prototype._write()`.
-      *
-      * @param {Buffer} chunk The chunk of data to write
-      * @param {String} encoding The character encoding of `chunk`
-      * @param {Function} cb Callback
-      */
-    receiver1._write = function (chunk, encoding, cb) {
-        var buf;
-        var err;
-        var num;
-        receiver1._bufferedBytes += chunk.length;
-        receiver1._buffers.push(chunk);
-        receiver1._loop = true;
-        do {
-            err = null;
-            switch (receiver1._state) {
-            // Reads the first two bytes of a frame.
-            case GET_INFO:
-                if (receiver1._bufferedBytes < 2) {
-                    receiver1._loop = false;
-                    break;
-                }
-                buf = receiver1.consume(2);
-                receiver1._fin = (buf[0] & 0x80) === 0x80;
-                receiver1._opcode = buf[0] & 0x0f;
-                receiver1._payloadLength = buf[1] & 0x7f;
-                receiver1._masked = (buf[1] & 0x80) === 0x80;
-                if (receiver1._payloadLength === 126) {
-                    receiver1._state = GET_PAYLOAD_LENGTH_16
-                } else if (receiver1._payloadLength === 127) {
-                    receiver1._state = GET_PAYLOAD_LENGTH_64;
-                } else {
-                    err = receiver1.haveLength();
-                }
-                break;
-            // Gets extended payload length (7+16).
-            case GET_PAYLOAD_LENGTH_16:
-                receiver1._payloadLength = receiver1.consume(2).readUInt16BE(0);
-                err = receiver1.haveLength();
-                break;
-            // Gets extended payload length (7+64).
-            case GET_PAYLOAD_LENGTH_64:
-                buf = receiver1.consume(8);
-                num = buf.readUInt32BE(0);
-                receiver1._payloadLength = num * Math.pow(2, 32) + buf.readUInt32BE(4);
-                err = receiver1.haveLength();
-                break;
-            case GET_DATA:
-                err = receiver1.getData(cb);
+/**
+  * Implements `Writable.prototype._write()`.
+  *
+  * @param {Buffer} chunk The chunk of data to write
+  * @param {String} encoding The character encoding of `chunk`
+  * @param {Function} cb Callback
+  */
+receiver1._write = function (chunk, encoding, cb) {
+    var bff;
+    var err;
+    var num;
+    receiver1._bufferedBytes += chunk.length;
+    receiver1._buffers.push(chunk);
+    receiver1._loop = true;
+    do {
+        err = null;
+        switch (receiver1._state) {
+        // Reads the first two bytes of a frame.
+        case GET_INFO:
+            if (receiver1._bufferedBytes < 2) {
+                receiver1._loop = false;
                 break;
             }
-        } while (receiver1._loop);
-        cb(err);
-    }
+            bff = receiver1.consume(2);
+            receiver1._fin = (bff[0] & 0x80) === 0x80;
+            receiver1._opcode = bff[0] & 0x0f;
+            receiver1._payloadLength = bff[1] & 0x7f;
+            receiver1._masked = (bff[1] & 0x80) === 0x80;
+            if (receiver1._payloadLength === 126) {
+                receiver1._state = GET_PAYLOAD_LENGTH_16
+            } else if (receiver1._payloadLength === 127) {
+                receiver1._state = GET_PAYLOAD_LENGTH_64;
+            } else {
+                err = receiver1.haveLength();
+            }
+            break;
+        // Gets extended payload length (7+16).
+        case GET_PAYLOAD_LENGTH_16:
+            receiver1._payloadLength = receiver1.consume(2).readUInt16BE(0);
+            err = receiver1.haveLength();
+            break;
+        // Gets extended payload length (7+64).
+        case GET_PAYLOAD_LENGTH_64:
+            bff = receiver1.consume(8);
+            num = bff.readUInt32BE(0);
+            receiver1._payloadLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
+            err = receiver1.haveLength();
+            break;
+        case GET_DATA:
+            err = receiver1.getData(cb);
+            break;
+        }
+    } while (receiver1._loop);
+    cb(err);
+}
 
     /**
       * Consumes `n` bytes from the buffered data.
@@ -184,15 +184,15 @@ receiver1 = new stream.Writable();
         }
 
         if (n < receiver1._buffers[0].length) {
-            const buf = receiver1._buffers[0];
-            receiver1._buffers[0] = buf.slice(n);
-            return buf.slice(0, n);
+            const bff = receiver1._buffers[0];
+            receiver1._buffers[0] = bff.slice(n);
+            return bff.slice(0, n);
         }
         const dst = Buffer.allocUnsafe(n);
         do {
-            const buf = receiver1._buffers[0];
+            const bff = receiver1._buffers[0];
             receiver1._buffers.shift().copy(dst, dst.length - n);
-            n -= buf.length;
+            n -= bff.length;
         } while (n > 0);
 
         return dst;
@@ -234,8 +234,8 @@ receiver1 = new stream.Writable();
         receiver1._messageLength = 0;
         receiver1._fragmented = 0;
         receiver1._fragments = [];
-        const buf = fragments[0];
-        receiver1.emit("message", buf.toString());
+        const bff = fragments[0];
+        receiver1.emit("message", bff.toString());
         receiver1._state = GET_INFO;
     }
 
