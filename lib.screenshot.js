@@ -448,7 +448,6 @@ browserContext1 = new EventEmitter();
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
 */
     connection1 = new EventEmitter();
-    connection1._lastId = 0;
     connection1._callbacks = {};
     /** @type {!Map<string, !CDPSession>}*/
     connection1._closed = false;
@@ -480,13 +479,12 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
       */
     connection1._rawSend = function (message) {
         var data;
-        var id;
         var ii;
         var mask;
         var target;
-        connection1._lastId += 1;
-        id = connection1._lastId;
-        message.id = id;
+        websocket1.counter |= 0;
+        websocket1.counter += 1;
+        message.id = websocket1.counter;
         data = JSON.stringify(message);
         // send websocket-frame
         // https://tools.ietf.org/html/rfc6455
@@ -513,7 +511,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         websocket1.write(target);
         websocket1.write(data);
         websocket1.uncork();
-        return id;
+        return websocket1.counter;
     }
 
     /**
