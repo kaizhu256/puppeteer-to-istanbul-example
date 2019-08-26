@@ -473,10 +473,10 @@ class Browser extends EventEmitter {
       * @param {function()=} closeCallback
       */
     static async create(connection, contextIds, process, closeCallback) {
-        const browser = new Browser(connection, contextIds, process, closeCallback);
+        browser1 = new Browser(connection, contextIds, process, closeCallback);
         await connection.send("Target.setDiscoverTargets", {
             discover: true});
-        return browser;
+        return browser1;
     }
 
     /**
@@ -1353,9 +1353,9 @@ class Page extends EventEmitter {
       * @return {!Promise<!Page>}
       */
     static async create(client, target) {
-        const page = new Page(client, target);
-        await page._initialize();
-        return page;
+        page1 = new Page(client, target);
+        await page1._initialize();
+        return page1;
     }
 
     /**
