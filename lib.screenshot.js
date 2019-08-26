@@ -67,6 +67,7 @@ var browserContext1;
 var connection1;
 var domworld1;
 var domworld2;
+var frame1;
 var framemanager1;
 var page1;
 var receiver1;
@@ -997,20 +998,22 @@ class Frame {
       * @param {string} frameId
       */
     constructor(frameManager, client, parentFrame, frameId) {
-        this._client = client;
-        this._parentFrame = parentFrame;
-        this._url = "";
-        this._id = frameId;
-        this._detached = false;
+        frame1 = this;
+        module.exports.frame1 = this;
+        frame1._client = client;
+        frame1._parentFrame = parentFrame;
+        frame1._url = "";
+        frame1._id = frameId;
+        frame1._detached = false;
 
-        this._loaderId = "";
+        frame1._loaderId = "";
         /** @type {!Set<string>} */
-        this._lifecycleEvents = new Set();
+        frame1._lifecycleEvents = new Set();
         /** @type {!DOMWorld} */
-        domworld1 = new DOMWorld(frameManager, this);
+        domworld1 = new DOMWorld(frameManager, frame1);
         module.exports.domworld1 = domworld1;
         /** @type {!DOMWorld} */
-        domworld2 = new DOMWorld(frameManager, this);
+        domworld2 = new DOMWorld(frameManager, frame1);
         module.exports.domworld2 = domworld2;
     }
 
@@ -1018,10 +1021,10 @@ class Frame {
       * @param {!Protocol.Page.Frame} framePayload
       */
     _navigated(framePayload) {
-        this._name = framePayload.name;
+        frame1._name = framePayload.name;
         // TODO(lushnikov): remove this once requestInterception has loaderId exposed.
-        this._navigationURL = framePayload.url;
-        this._url = framePayload.url;
+        frame1._navigationURL = framePayload.url;
+        frame1._url = framePayload.url;
     }
 
     /**
@@ -1030,10 +1033,10 @@ class Frame {
       */
     _onLifecycleEvent(loaderId, name) {
         if (name === "init") {
-            this._loaderId = loaderId;
-            this._lifecycleEvents.clear();
+            frame1._loaderId = loaderId;
+            frame1._lifecycleEvents.clear();
         }
-        this._lifecycleEvents.add(name);
+        frame1._lifecycleEvents.add(name);
     }
 }
 
