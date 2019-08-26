@@ -422,6 +422,7 @@ connection1._onMessage = function (message) {
         id,
         method,
         params,
+        result,
         sessionId
     } = JSON.parse(message);
     if (method === "Target.attachedToTarget") {
@@ -432,7 +433,7 @@ connection1._onMessage = function (message) {
         if (id && callbackDict[id]) {
             const callback = callbackDict[id];
             delete callbackDict[id];
-            callback.resolve(object.result);
+            callback.resolve(result);
         } else {
             assert(!id);
             session1.emit(method, params);
@@ -441,7 +442,7 @@ connection1._onMessage = function (message) {
         const callback = callbackDict[id];
         // Callbacks could be all rejected if someone has called `.dispose()`.
         delete callbackDict[id];
-        callback.resolve(object.result);
+        callback.resolve(result);
         return;
     }
     connection1.emit(method, params);
