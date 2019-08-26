@@ -63,6 +63,7 @@ local.nop(
 
 /* jslint ignore:start */
 var browser1;
+var browserContext1;
 var connection1;
 var page1;
 var receiver1;
@@ -490,7 +491,9 @@ class Browser extends EventEmitter {
         browser1._process = process;
         browser1._connection = connection;
         browser1._closeCallback = closeCallback;
-        browser1._defaultContext = new BrowserContext(browser1._connection, browser1);
+        browser1._defaultContext = browserContext1;
+        browserContext1._connection = browser1._connection;
+        browserContext1._browser = browser1;
         /** @type {Map<string, BrowserContext>} */
         browser1._contexts = new Map();
         /** @type {Map<string, Target>} */
@@ -576,18 +579,7 @@ class Browser extends EventEmitter {
     }
 }
 
-class BrowserContext extends EventEmitter {
-    /**
-      * @param {!Browser} browser
-      * @param {?string} contextId
-      */
-    constructor(connection, browser, contextId) {
-        super();
-        this._connection = connection;
-        this._browser = browser;
-        this._id = contextId;
-    }
-}
+browserContext1 = new EventEmitter();
 
 
 
