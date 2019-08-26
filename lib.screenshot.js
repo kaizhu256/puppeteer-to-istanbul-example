@@ -174,7 +174,7 @@ websocketReceiver._write = function (chunk, encoding, cb) {
             websocketReceiver._fragments = [];
             bff = fragments[0];
             websocketReceiver._state = GET_INFO;
-            connection1._onMessage(bff.toString());
+            websocketOnMessage(bff.toString());
             break;
         }
     } while (websocketReceiver._loop);
@@ -414,7 +414,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
 /**
   * @param {string} message
   */
-connection1._onMessage = function (message) {
+var websocketOnMessage = function (message) {
     let {
         id,
         method,
