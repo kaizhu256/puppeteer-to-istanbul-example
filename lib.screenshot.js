@@ -119,7 +119,6 @@ receiver1._loop = false;
 receiver1._write = function (chunk, encoding, cb) {
     var bff;
     var data;
-    var err;
     var fragments;
     var messageLength;
     var num;
@@ -127,7 +126,6 @@ receiver1._write = function (chunk, encoding, cb) {
     receiver1._buffers.push(chunk);
     receiver1._loop = true;
     do {
-        err = null;
         switch (receiver1._state) {
         // Reads the first two bytes of a frame.
         case GET_INFO:
@@ -145,20 +143,20 @@ receiver1._write = function (chunk, encoding, cb) {
             } else if (receiver1._payloadLength === 127) {
                 receiver1._state = GET_PAYLOAD_LENGTH_64;
             } else {
-                err = receiver1.haveLength();
+                receiver1.haveLength();
             }
             break;
         // Gets extended payload length (7+16).
         case GET_PAYLOAD_LENGTH_16:
             receiver1._payloadLength = receiver1.consume(2).readUInt16BE(0);
-            err = receiver1.haveLength();
+            receiver1.haveLength();
             break;
         // Gets extended payload length (7+64).
         case GET_PAYLOAD_LENGTH_64:
             bff = receiver1.consume(8);
             num = bff.readUInt32BE(0);
             receiver1._payloadLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
-            err = receiver1.haveLength();
+            receiver1.haveLength();
             break;
         case GET_DATA:
             if (receiver1._bufferedBytes < receiver1._payloadLength) {
@@ -180,37 +178,37 @@ receiver1._write = function (chunk, encoding, cb) {
             break;
         }
     } while (receiver1._loop);
-    cb(err);
+    cb();
 }
 
-    /**
-      * Consumes `n` bytes from the buffered data.
-      *
-      * @param {Number} n The number of bytes to consume
-      * @return {Buffer} The consumed bytes
-      * @private
-      */
-    receiver1.consume = function (n) {
-        receiver1._bufferedBytes -= n;
-
-        if (n === receiver1._buffers[0].length) {
-            return receiver1._buffers.shift();
-        }
-
-        if (n < receiver1._buffers[0].length) {
-            const bff = receiver1._buffers[0];
-            receiver1._buffers[0] = bff.slice(n);
-            return bff.slice(0, n);
-        }
-        const dst = Buffer.allocUnsafe(n);
-        do {
-            const bff = receiver1._buffers[0];
-            receiver1._buffers.shift().copy(dst, dst.length - n);
-            n -= bff.length;
-        } while (n > 0);
-
-        return dst;
+receiver1.consume = function (n) {
+/**
+  * Consumes `n` bytes from the buffered data.
+  *
+  * @param {Number} n The number of bytes to consume
+  * @return {Buffer} The consumed bytes
+  * @private
+  */
+    var bff;
+    var dst;
+    receiver1._bufferedBytes -= n;
+    if (n === receiver1._buffers[0].length) {
+        return receiver1._buffers.shift();
     }
+    if (n < receiver1._buffers[0].length) {
+        bff = receiver1._buffers[0];
+        receiver1._buffers[0] = bff.slice(n);
+        return bff.slice(0, n);
+    }
+    dst = Buffer.allocUnsafe(n);
+    do {
+        const bff = receiver1._buffers[0];
+        receiver1._buffers.shift().copy(dst, dst.length - n);
+        n -= bff.length;
+    } while (n > 0);
+
+    return dst;
+}
 
     /**
       * Payload length has been read.
