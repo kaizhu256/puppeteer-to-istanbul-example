@@ -481,34 +481,34 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         var data;
         var ii;
         var mask;
-        var target;
         websocket1.counter |= 0;
         websocket1.counter += 1;
         message.id = websocket1.counter;
-        data = JSON.stringify(message);
+        message = Buffer.from(JSON.stringify(message));
         // send websocket-frame
         // https://tools.ietf.org/html/rfc6455
-        target = Buffer.allocUnsafe(8);
+        data = Buffer.allocUnsafe(8);
         // opcode
-        target[0] = 0x81;
+        data[0] = 0x81;
         // size
-        target[1] = 0xfe;
-        target.writeUInt16BE(data.length, 2);
+        data[1] = 0xfe;
+        data.writeUInt16BE(message.length, 2);
         // mask
         mask = crypto.randomBytes(4);
-        target[4] = mask[0];
-        target[5] = mask[1];
-        target[6] = mask[2];
-        target[7] = mask[3];
-        data = Buffer.from(data);
+        data[4] = mask[0];
+        data[5] = mask[1];
+        data[6] = mask[2];
+        data[7] = mask[3];
+        // send header
+        websocket1.cork();
+        websocket1.write(data);
+        // send data
+        data = message;
         ii = data.length;
         while (ii > 0) {
             ii -= 1;
             data[ii] = data[ii] ^ mask[ii & 3];
         }
-        // send
-        websocket1.cork();
-        websocket1.write(target);
         websocket1.write(data);
         websocket1.uncork();
         return websocket1.counter;
