@@ -118,7 +118,10 @@ receiver1._loop = false;
   */
 receiver1._write = function (chunk, encoding, cb) {
     var bff;
+    var data;
     var err;
+    var fragments;
+    var messageLength;
     var num;
     receiver1._bufferedBytes += chunk.length;
     receiver1._buffers.push(chunk);
@@ -158,7 +161,22 @@ receiver1._write = function (chunk, encoding, cb) {
             err = receiver1.haveLength();
             break;
         case GET_DATA:
-            err = receiver1.getData(cb);
+            if (receiver1._bufferedBytes < receiver1._payloadLength) {
+                receiver1._loop = false;
+                break;
+            }
+            data = receiver1.consume(receiver1._payloadLength);
+            receiver1._messageLength = receiver1._totalPayloadLength;
+            receiver1._fragments.push(data);
+            messageLength = receiver1._messageLength;
+            fragments = receiver1._fragments;
+            receiver1._totalPayloadLength = 0;
+            receiver1._messageLength = 0;
+            receiver1._fragmented = 0;
+            receiver1._fragments = [];
+            bff = fragments[0];
+            receiver1.emit("message", bff.toString());
+            receiver1._state = GET_INFO;
             break;
         }
     } while (receiver1._loop);
@@ -203,36 +221,6 @@ receiver1._write = function (chunk, encoding, cb) {
     receiver1.haveLength = function () {
         receiver1._totalPayloadLength += receiver1._payloadLength;
         receiver1._state = GET_DATA;
-    }
-
-    receiver1.getData = function (cb) {
-    /**
-      * Reads data bytes.
-      *
-      * @param {Function} cb Callback
-      * @return {(Error|RangeError|undefined)} A possible error
-      * @private
-      */
-        if (receiver1._bufferedBytes < receiver1._payloadLength) {
-            receiver1._loop = false;
-            return;
-        }
-        var data = receiver1.consume(receiver1._payloadLength);
-        //
-        // This message is not compressed so its lenght is the sum of the payload
-        // length of all fragments.
-        //
-        receiver1._messageLength = receiver1._totalPayloadLength;
-        receiver1._fragments.push(data);
-        const messageLength = receiver1._messageLength;
-        const fragments = receiver1._fragments;
-        receiver1._totalPayloadLength = 0;
-        receiver1._messageLength = 0;
-        receiver1._fragmented = 0;
-        receiver1._fragments = [];
-        const bff = fragments[0];
-        receiver1.emit("message", bff.toString());
-        receiver1._state = GET_INFO;
     }
 
 /*
