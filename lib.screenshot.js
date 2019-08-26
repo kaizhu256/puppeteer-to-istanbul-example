@@ -73,7 +73,6 @@ var page1;
 var receiver1;
 var sender1;
 var session1;
-var websocket2;
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
 */
@@ -424,22 +423,21 @@ lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
   *     `Sec-WebSocket-Origin` header
   * @private
   */
-function initAsClient(socket) {
-    websocket2 = socket;
+function initAsClient(websocket1) {
     receiver1 = new module.exports.Receiver();
-    sender1 = new module.exports.Sender(websocket2);
+    sender1 = new module.exports.Sender(websocket1);
     receiver1.on("drain", function () {
-        websocket2.resume();
+        websocket1.resume();
     });
     receiver1.on("message", connection1._onMessage);
-    websocket2.setTimeout(0);
-    websocket2.setNoDelay();
-    websocket2.on("data", function socketOnData(chunk) {
+    websocket1.setTimeout(0);
+    websocket1.setNoDelay();
+    websocket1.on("data", function socketOnData(chunk) {
         if (!receiver1.write(chunk)) {
-            websocket2.pause();
+            websocket1.pause();
         }
     });
-    websocket2.on("error", local.assertThrow);
+    websocket1.on("error", local.assertThrow);
 }
 
 
