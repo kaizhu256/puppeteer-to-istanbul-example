@@ -315,47 +315,6 @@ class Sender {
     }
 
     /**
-      * Frames a piece of data according to the HyBi WebSocket protocol.
-      *
-      * @param {Buffer} data The data to frame
-      * @param {Object} options Options object
-      * @param {Number} options.opcode The opcode
-      * @param {Boolean} options.readOnly Specifies whether `data` can be modified
-      * @param {Boolean} options.fin Specifies whether or not to set the FIN bit
-      * @param {Boolean} options.mask Specifies whether or not to mask `data`
-      * @param {Boolean} options.rsv1 Specifies whether or not to set the RSV1 bit
-      * @return {Buffer[]} The framed data as a list of `Buffer` instances
-      * @public
-      */
-    static frame(data, opt) {
-        const merge = opt.mask && opt.readOnly;
-        var offset = 6;
-        var payloadLength = data.length;
-        offset += 2;
-        payloadLength = 126;
-        const target = Buffer.allocUnsafe(offset);
-        target[0] = opt.opcode | 0x80;
-        target[1] = payloadLength;
-        target.writeUInt16BE(data.length, 2);
-        const mask = crypto.randomBytes(4);
-        target[1] |= 0x80;
-        target[offset - 4] = mask[0];
-        target[offset - 3] = mask[1];
-        target[offset - 2] = mask[2];
-        target[offset - 1] = mask[3];
-        // mask data
-        var ii;
-        ii = data.length;
-        while (ii > 0) {
-            ii -= 1;
-            data[ii] = data[ii] ^ mask[ii & 3];
-        }
-        return [
-            target, data
-        ];
-    }
-
-    /**
       * Sends a data message to the other peer.
       *
       * @param {*} data The message to send
@@ -378,7 +337,44 @@ class Sender {
             mask: opt.mask,
             readOnly: false
         };
-        list = Sender.frame(data, opt);
+        /**
+          * Frames a piece of data according to the HyBi WebSocket protocol.
+          *
+          * @param {Buffer} data The data to frame
+          * @param {Object} options Options object
+          * @param {Number} options.opcode The opcode
+          * @param {Boolean} options.readOnly Specifies whether `data` can be modified
+          * @param {Boolean} options.fin Specifies whether or not to set the FIN bit
+          * @param {Boolean} options.mask Specifies whether or not to mask `data`
+          * @param {Boolean} options.rsv1 Specifies whether or not to set the RSV1 bit
+          * @return {Buffer[]} The framed data as a list of `Buffer` instances
+          * @public
+          */
+        const merge = opt.mask && opt.readOnly;
+        var offset = 6;
+        var payloadLength = data.length;
+        offset += 2;
+        payloadLength = 126;
+        const target = Buffer.allocUnsafe(offset);
+        target[0] = opt.opcode | 0x80;
+        target[1] = payloadLength;
+        target.writeUInt16BE(data.length, 2);
+        const mask = crypto.randomBytes(4);
+        target[1] |= 0x80;
+        target[offset - 4] = mask[0];
+        target[offset - 3] = mask[1];
+        target[offset - 2] = mask[2];
+        target[offset - 1] = mask[3];
+        // mask data
+        var ii;
+        ii = data.length;
+        while (ii > 0) {
+            ii -= 1;
+            data[ii] = data[ii] ^ mask[ii & 3];
+        }
+        list = [
+            target, data
+        ];
         sender1._socket.cork();
         sender1._socket.write(list[0]);
         sender1._socket.write(list[1]);
