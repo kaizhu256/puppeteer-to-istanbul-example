@@ -121,22 +121,43 @@ receiver1 = new stream.Writable();
       * @param {Function} cb Callback
       */
     receiver1._write = function (chunk, encoding, cb) {
+        var buf;
+        var err;
+        var num;
         receiver1._bufferedBytes += chunk.length;
         receiver1._buffers.push(chunk);
-        var err;
         receiver1._loop = true;
         do {
+            err = null;
             switch (receiver1._state) {
+            // Reads the first two bytes of a frame.
             case GET_INFO:
-                err = receiver1.getInfo();
+                if (receiver1._bufferedBytes < 2) {
+                    receiver1._loop = false;
+                    break;
+                }
+                buf = receiver1.consume(2);
+                receiver1._fin = (buf[0] & 0x80) === 0x80;
+                receiver1._opcode = buf[0] & 0x0f;
+                receiver1._payloadLength = buf[1] & 0x7f;
+                receiver1._masked = (buf[1] & 0x80) === 0x80;
+                if (receiver1._payloadLength === 126) {
+                    receiver1._state = GET_PAYLOAD_LENGTH_16
+                } else if (receiver1._payloadLength === 127) {
+                    receiver1._state = GET_PAYLOAD_LENGTH_64;
+                } else {
+                    err = receiver1.haveLength();
+                }
                 break;
+            // Gets extended payload length (7+16).
             case GET_PAYLOAD_LENGTH_16:
                 receiver1._payloadLength = receiver1.consume(2).readUInt16BE(0);
                 err = receiver1.haveLength();
                 break;
+            // Gets extended payload length (7+64).
             case GET_PAYLOAD_LENGTH_64:
-                const buf = receiver1.consume(8);
-                const num = buf.readUInt32BE(0);
+                buf = receiver1.consume(8);
+                num = buf.readUInt32BE(0);
                 receiver1._payloadLength = num * Math.pow(2, 32) + buf.readUInt32BE(4);
                 err = receiver1.haveLength();
                 break;
@@ -178,37 +199,6 @@ receiver1 = new stream.Writable();
     }
 
     /**
-      * Reads the first two bytes of a frame.
-      *
-      * @return {(RangeError|undefined)} A possible error
-      * @private
-      */
-    receiver1.getInfo = function () {
-        if (receiver1._bufferedBytes < 2) {
-            receiver1._loop = false;
-            return;
-        }
-
-        const buf = receiver1.consume(2);
-
-        const compressed = (buf[0] & 0x40) === 0x40;
-
-        receiver1._fin = (buf[0] & 0x80) === 0x80;
-        receiver1._opcode = buf[0] & 0x0f;
-        receiver1._payloadLength = buf[1] & 0x7f;
-
-        receiver1._masked = (buf[1] & 0x80) === 0x80;
-
-        if (receiver1._payloadLength === 126) {
-            receiver1._state = GET_PAYLOAD_LENGTH_16
-        } else if (receiver1._payloadLength === 127) {
-            receiver1._state = GET_PAYLOAD_LENGTH_64;
-        } else {
-            return receiver1.haveLength();
-        }
-    }
-
-    /**
       * Payload length has been read.
       *
       * @return {(RangeError|undefined)} A possible error
@@ -219,6 +209,7 @@ receiver1 = new stream.Writable();
         receiver1._state = GET_DATA;
     }
 
+    receiver1.getData = function (cb) {
     /**
       * Reads data bytes.
       *
@@ -226,7 +217,6 @@ receiver1 = new stream.Writable();
       * @return {(Error|RangeError|undefined)} A possible error
       * @private
       */
-    receiver1.getData = function (cb) {
         if (receiver1._bufferedBytes < receiver1._payloadLength) {
             receiver1._loop = false;
             return;
@@ -238,16 +228,6 @@ receiver1 = new stream.Writable();
         //
         receiver1._messageLength = receiver1._totalPayloadLength;
         receiver1._fragments.push(data);
-        return receiver1.dataMessage();
-    }
-
-    /**
-      * Handles a data message.
-      *
-      * @return {(Error|undefined)} A possible error
-      * @private
-      */
-    receiver1.dataMessage = function () {
         const messageLength = receiver1._messageLength;
         const fragments = receiver1._fragments;
         receiver1._totalPayloadLength = 0;
