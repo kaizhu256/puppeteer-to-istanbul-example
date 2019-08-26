@@ -1364,32 +1364,33 @@ class Page extends EventEmitter {
       */
     constructor(client, target) {
         super();
-        this._closed = false;
-        this._client = client;
-        this._target = target;
+        page1 = this;
+        page1._closed = false;
+        page1._client = client;
+        page1._target = target;
         /** @type {!FrameManager} */
-        this._frameManager = new FrameManager(client, this);
+        page1._frameManager = new FrameManager(client, page1);
         /** @type {!Map<string, Function>} */
-        this._pageBindings = new Map();
-        this._javascriptEnabled = true;
+        page1._pageBindings = new Map();
+        page1._javascriptEnabled = true;
 
         /** @type {!Map<string, Worker>} */
-        this._workers = new Map();
+        page1._workers = new Map();
 
-        this._frameManager.on(Events.FrameManager.FrameNavigated, event => this.emit(Events.Page.FrameNavigated, event));
+        page1._frameManager.on(Events.FrameManager.FrameNavigated, event => page1.emit(Events.Page.FrameNavigated, event));
 
-        const networkManager = this._frameManager._networkManager;
-        networkManager.on(Events.NetworkManager.Request, event => this.emit(Events.Page.Request, event));
-        networkManager.on(Events.NetworkManager.Response, event => this.emit(Events.Page.Response, event));
-        networkManager.on(Events.NetworkManager.RequestFinished, event => this.emit(Events.Page.RequestFinished, event));
-        this._fileChooserInterceptionIsDisabled = false;
-        this._fileChooserInterceptors = new Set();
+        const networkManager = page1._frameManager._networkManager;
+        networkManager.on(Events.NetworkManager.Request, event => page1.emit(Events.Page.Request, event));
+        networkManager.on(Events.NetworkManager.Response, event => page1.emit(Events.Page.Response, event));
+        networkManager.on(Events.NetworkManager.RequestFinished, event => page1.emit(Events.Page.RequestFinished, event));
+        page1._fileChooserInterceptionIsDisabled = false;
+        page1._fileChooserInterceptors = new Set();
 
-        client.on("Page.domContentEventFired", event => this.emit(Events.Page.DOMContentLoaded));
-        client.on("Page.loadEventFired", event => this.emit(Events.Page.Load));
+        client.on("Page.domContentEventFired", event => page1.emit(Events.Page.DOMContentLoaded));
+        client.on("Page.loadEventFired", event => page1.emit(Events.Page.Load));
         var that;
-        that = this;
-        this._target._isClosedPromise.then(function () {
+        that = page1;
+        page1._target._isClosedPromise.then(function () {
             that.emit(Events.Page.Close);
             that._closed = true;
         });
@@ -1397,11 +1398,11 @@ class Page extends EventEmitter {
 
     async _initialize() {
         await Promise.all([
-            this._frameManager.initialize(),
-            this._client.send("Target.setAutoAttach", {
+            page1._frameManager.initialize(),
+            page1._client.send("Target.setAutoAttach", {
                 autoAttach: true, waitForDebuggerOnStart: false, flatten: true}),
-            this._client.send("Performance.enable", {}),
-            this._client.send("Log.enable", {}),
+            page1._client.send("Performance.enable", {}),
+            page1._client.send("Log.enable", {}),
         ]);
     }
 }
