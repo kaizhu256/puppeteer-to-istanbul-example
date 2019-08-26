@@ -71,7 +71,6 @@ var framemanager1;
 var networkmanager1;
 var page1;
 var websocketReceiver;
-var session1;
 var websocket1;
 var websocketSend;
 
@@ -483,8 +482,6 @@ var websocketOnMessage = function (message) {
     }
 }
 
-    session1 = new EventEmitter();
-
 
 
 /*
@@ -710,7 +707,7 @@ class FrameManager extends EventEmitter {
             frame1._id = framePayload.id;
         } else {
             // Initial main frame navigation.
-            frame1 = new Frame(framemanager1, session1, null, framePayload.id);
+            frame1 = new Frame(framemanager1, null, null, framePayload.id);
         }
         // Update frame payload.
         frame1._navigated(framePayload);
@@ -746,7 +743,7 @@ class FrameManager extends EventEmitter {
         if (contextPayload.auxData && contextPayload.auxData["type"] === "isolated")
             framemanager1._isolatedWorlds.add(contextPayload.name);
         /** @type {!ExecutionContext} */
-        const context = new ExecutionContext(session1, contextPayload, world);
+        const context = new ExecutionContext(null, contextPayload, world);
         world._setContext(context);
         framemanager1._contextIdToContext.set(contextPayload.id, context);
     }
@@ -960,7 +957,7 @@ class NetworkManager extends EventEmitter {
             networkmanager1._handleRequestRedirect(request, event.redirectResponse);
             redirectChain = request._redirectChain;
         }
-        const request = new Request(session1, frame1, interceptionId, networkmanager1._userRequestInterceptionEnabled, event, redirectChain);
+        const request = new Request(null, frame1, interceptionId, networkmanager1._userRequestInterceptionEnabled, event, redirectChain);
         networkmanager1._requestIdToRequest.set(event.requestId, request);
         networkmanager1.emit(Events.NetworkManager.Request, request);
     }
@@ -978,7 +975,7 @@ class NetworkManager extends EventEmitter {
       * @param {!Protocol.Network.Response} responsePayload
       */
     _handleRequestRedirect(request, responsePayload) {
-        const response = new Response(session1, request, responsePayload);
+        const response = new Response(null, request, responsePayload);
         request._response = response;
         request._redirectChain.push(request);
         response._bodyLoadedPromiseFulfill.call(null, new Error("Response body is unavailable for redirect responses"));
@@ -993,7 +990,7 @@ class NetworkManager extends EventEmitter {
       */
     _onResponseReceived(event) {
         const request = networkmanager1._requestIdToRequest.get(event.requestId);
-        const response = new Response(session1, request, event.response);
+        const response = new Response(null, request, event.response);
         request._response = response;
         networkmanager1.emit(Events.NetworkManager.Response, response);
     }
@@ -1140,7 +1137,6 @@ LifecycleWatcher,
 Page,
 domworld2,
 initAsClient,
-session1,
 websocketSend
 };
 /*
