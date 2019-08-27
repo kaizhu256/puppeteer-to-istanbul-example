@@ -423,9 +423,7 @@ class Browser extends EventEmitter {
   */
 var wsOnMessage = function (message) {
     var callback;
-    var method;
     var params;
-    var sessionId;
     message = JSON.parse(message);
     callback = wsCallbackDict[message.id];
     if (callback) {
@@ -436,7 +434,6 @@ var wsOnMessage = function (message) {
         return;
     }
     params = message.params;
-    sessionId = message.sessionId;
     switch (message.method) {
     case "Network.requestWillBeSent":
         networkmanager1._onRequestWillBeSent(params);
