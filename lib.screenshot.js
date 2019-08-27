@@ -158,7 +158,7 @@ var wsRead = function (chunk) {
             if (!consume(2)) {
                 return;
             }
-            wsRead.byteLength = bff.readUInt16BE(0);
+            wsRead.payloadLength = bff.readUInt16BE(0);
             wsRead.state = "4_GET_DATA";
             break;
         // Gets extended payload length (7+64).
@@ -166,14 +166,14 @@ var wsRead = function (chunk) {
             if (!consume(8)) {
                 return;
             }
-            wsRead.byteLength = (
+            wsRead.payloadLength = (
                 0x100000000 * bff.readUInt32BE(0)
                 + bff.readUInt32BE(4)
             );
             wsRead.state = "4_GET_DATA";
             break;
         case "4_GET_DATA":
-            if (!consume(wsRead.byteLength)) {
+            if (!consume(wsRead.payloadLength)) {
                 return;
             }
             wsRead.state = "0_GET_INFO";
@@ -185,8 +185,8 @@ var wsRead = function (chunk) {
             if (!consume(2)) {
                 return;
             }
-            wsRead.byteLength = bff[1] & 0x7f;
-            switch (wsRead.byteLength) {
+            wsRead.payloadLength = bff[1] & 0x7f;
+            switch (wsRead.payloadLength) {
             case 126:
                 wsRead.state = "1_GET_PAYLOAD_LENGTH_16"
                 break;
@@ -194,7 +194,6 @@ var wsRead = function (chunk) {
                 wsRead.state = "2_GET_PAYLOAD_LENGTH_64";
                 break;
             default:
-                wsRead.byteLengthTotal += wsRead.byteLength;
                 wsRead.state = "4_GET_DATA";
             }
         }
