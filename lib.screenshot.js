@@ -105,7 +105,6 @@ wsCreate = function (wsUrl, onError) {
         websocket1._bufferedBytes = 0;
         websocket1._buffers = [];
         websocket1._fragments = [];
-        websocket1._loop = false;
         websocket1._messageLength = 0;
         websocket1._payloadLength = 0;
         wsGotoState = GET_INFO;
@@ -124,19 +123,15 @@ wsOnData = function (chunk) {
     var num;
     websocket1._bufferedBytes += chunk.length;
     websocket1._buffers.push(chunk);
-    websocket1._loop = true;
-    do {
+    while (true) {
         switch (wsGotoState) {
         // Reads the first two bytes of a frame.
         case GET_INFO:
             if (websocket1._bufferedBytes < 2) {
-                websocket1._loop = false;
-                break;
+                return;
             }
             bff = wsOnDataConsume(2);
-            websocket1._opcode = bff[0] & 0x0f;
             websocket1._payloadLength = bff[1] & 0x7f;
-            websocket1._masked = (bff[1] & 0x80) === 0x80;
             if (websocket1._payloadLength === 126) {
                 wsGotoState = GET_PAYLOAD_LENGTH_16
             } else if (websocket1._payloadLength === 127) {
@@ -162,8 +157,7 @@ wsOnData = function (chunk) {
             break;
         case GET_DATA:
             if (websocket1._bufferedBytes < websocket1._payloadLength) {
-                websocket1._loop = false;
-                break;
+                return;
             }
             data = wsOnDataConsume(websocket1._payloadLength);
             websocket1._messageLength = websocket1._totalPayloadLength;
@@ -178,7 +172,7 @@ wsOnData = function (chunk) {
             wsOnMessage(bff.toString());
             break;
         }
-    } while (websocket1._loop);
+    }
 }
 
 wsSend = function (method, params = {}) {
