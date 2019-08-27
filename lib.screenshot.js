@@ -74,6 +74,7 @@ var websocket1;
 var websocketSend;
 var wsCallbackCounter;
 var wsCallbackDict;
+var wsOnData;
 var wsSessionId;
 
 var wsCallbackCounter = 0;
@@ -105,14 +106,7 @@ websocketReceiver._fragments = [];
 websocketReceiver._state = GET_INFO;
 websocketReceiver._loop = false;
 
-/**
-  * Implements `Writable.prototype._write()`.
-  *
-  * @param {Buffer} chunk The chunk of data to write
-  * @param {String} encoding The character encoding of `chunk`
-  * @param {Function} cb Callback
-  */
-websocketReceiver.write = function (chunk) {
+wsOnData = function (chunk) {
     var bff;
     var data;
     var fragments;
@@ -218,7 +212,7 @@ function initAsClient(socket) {
     websocket1 = socket;
     websocket1.setTimeout(0);
     websocket1.setNoDelay();
-    websocket1.on("data", websocketReceiver.write);
+    websocket1.on("data", wsOnData);
     websocket1.on("error", local.assertThrow);
 }
 
