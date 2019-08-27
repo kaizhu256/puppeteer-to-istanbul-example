@@ -152,21 +152,21 @@ var browser1;
 var child_process;
 var chromeKillSync;
 var chromeProcess;
-var crypto;
+//!! var crypto;
 var framemanager1;
 var fs;
 var fsWriteFile;
 var gotoNext;
-var gotoNextData;
+//!! var gotoNextData;
 var gotoState;
-var http;
+//!! var http;
 var onDataUrlInspect;
 var onReject;
 var onResolve;
 var page1;
 var path;
 var tmp;
-var url;
+//!! var url;
 var urlWebsocket;
 var util;
 var wsSend;
@@ -178,14 +178,14 @@ local.nop(assert, path, util);
 assert = require("assert");
 //!! EventEmitter = require("events");
 child_process = require("child_process");
-crypto = require("crypto");
+//!! crypto = require("crypto");
 fs = require("fs");
-http = require("http");
+//!! http = require("http");
 //!! https = require("https");
 //!! net = require("net");
 //!! os = require("os");
 path = require("path");
-url = require("url");
+//!! url = require("url");
 util = require("util");
 module.exports = require("./lib.screenshot.js");
 wsSend = module.exports.wsSend;
@@ -219,9 +219,9 @@ fsWriteFile = function (file, data) {
         });
     });
 };
-gotoNextData = function (data, meta) {
-    gotoNext(null, data, meta);
-};
+//!! gotoNextData = function (data, meta) {
+    //!! gotoNext(null, data, meta);
+//!! };
 onDataUrlInspect = function (data) {
     urlWebsocket += String(data);
     urlWebsocket.replace((
