@@ -397,13 +397,8 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         websocket1.uncork();
         // resolve
         ii = websocket1.ii;
-        return new Promise(function (resolve, reject) {
-            callbackDict[ii] = {
-                resolve,
-                reject,
-                error: new Error(),
-                method
-            };
+        return new Promise(function (resolve) {
+            callbackDict[ii] = resolve;
         });
     }
 
@@ -425,7 +420,7 @@ var websocketOnMessage = function (message) {
         if (id && callbackDict[id]) {
             const callback = callbackDict[id];
             delete callbackDict[id];
-            callback.resolve(result);
+            callback(result);
         } else {
             assert(!id);
         }
@@ -433,7 +428,7 @@ var websocketOnMessage = function (message) {
         const callback = callbackDict[id];
         // Callbacks could be all rejected if someone has called `.dispose()`.
         delete callbackDict[id];
-        callback.resolve(result);
+        callback(result);
         return;
     }
     switch (method) {
@@ -665,8 +660,11 @@ class FrameManager extends EventEmitter {
 
     async initialize() {
         const [
-            ,{
-                frameTree}] = await Promise.all([
+            ,
+            {
+                frameTree
+            }
+        ] = await Promise.all([
             websocketSend("Page.enable"),
             websocketSend("Page.getFrameTree"),
         ]);
