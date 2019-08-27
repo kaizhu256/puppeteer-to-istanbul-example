@@ -107,7 +107,6 @@ wsCreate = function (wsUrl, onError) {
         websocket1._fragments = [];
         websocket1._messageLength = 0;
         websocket1._payloadLength = 0;
-        wsReadState = "0_GET_INFO";
         websocket1._totalPayloadLength = 0;
         onError();
     });
@@ -125,22 +124,6 @@ wsRead = function (chunk) {
     websocket1._buffers.push(chunk);
     while (true) {
         switch (wsReadState) {
-        // Reads the first two bytes of a frame.
-        case "0_GET_INFO":
-            if (websocket1._bufferedBytes < 2) {
-                return;
-            }
-            bff = wsReadConsume(2);
-            websocket1._payloadLength = bff[1] & 0x7f;
-            if (websocket1._payloadLength === 126) {
-                wsReadState = "1_GET_PAYLOAD_LENGTH_16"
-            } else if (websocket1._payloadLength === 127) {
-                wsReadState = "2_GET_PAYLOAD_LENGTH_64";
-            } else {
-                websocket1._totalPayloadLength += websocket1._payloadLength;
-                wsReadState = "4_GET_DATA";
-            }
-            break;
         // Gets extended payload length (7+16).
         case "1_GET_PAYLOAD_LENGTH_16":
             websocket1._payloadLength = wsReadConsume(2).readUInt16BE(0);
@@ -171,6 +154,24 @@ wsRead = function (chunk) {
             wsReadState = "0_GET_INFO";
             wsOnMessage(bff.toString());
             break;
+        // 0_GET_INFO
+        // Reads the first two bytes of a frame.
+        default:
+            if (websocket1._bufferedBytes < 2) {
+                return;
+            }
+            bff = wsReadConsume(2);
+            websocket1._payloadLength = bff[1] & 0x7f;
+            if (websocket1._payloadLength === 126) {
+                wsReadState = "1_GET_PAYLOAD_LENGTH_16"
+                break;
+            }
+            if (websocket1._payloadLength === 127) {
+                wsReadState = "2_GET_PAYLOAD_LENGTH_64";
+                break;
+            }
+            websocket1._totalPayloadLength += websocket1._payloadLength;
+            wsReadState = "4_GET_DATA";
         }
     }
 }
