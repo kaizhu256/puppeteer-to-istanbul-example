@@ -121,7 +121,7 @@ var wsRead = function (chunk) {
       * @private
       */
         bffLength = wsRead.bffList.reduce(function (nn, aa) {
-            return nn + aa;
+            return nn + aa.length;
         }, 0);
         if (nn > bffLength) {
             return;
@@ -156,14 +156,18 @@ var wsRead = function (chunk) {
         switch (wsRead.state) {
         // Gets extended payload length (7+16).
         case "1_GET_PAYLOAD_LENGTH_16":
-            consume(2);
+            if (!consume(2)) {
+                return;
+            }
             wsRead.byteLength = bff.readUInt16BE(0);
             wsRead.byteLengthTotal += wsRead.byteLength;
             wsRead.state = "4_GET_DATA";
             break;
         // Gets extended payload length (7+64).
         case "2_GET_PAYLOAD_LENGTH_64":
-            consume(8);
+            if (!consume(8)) {
+                return;
+            }
             wsRead.byteLength = (
                 0x100000000 * bff.readUInt32BE(0)
                 + bff.readUInt32BE(4)
@@ -172,10 +176,9 @@ var wsRead = function (chunk) {
             wsRead.state = "4_GET_DATA";
             break;
         case "4_GET_DATA":
-            if (wsRead.bufferedBytes < wsRead.byteLength) {
+            if (!consume(wsRead.byteLength)) {
                 return;
             }
-            consume(wsRead.byteLength);
             wsRead.byteLengthTotal = 0;
             wsRead.state = "0_GET_INFO";
             wsOnMessage(bff.toString());
@@ -183,10 +186,9 @@ var wsRead = function (chunk) {
         // 0_GET_INFO
         // Reads the first two bytes of a frame.
         default:
-            if (wsRead.bufferedBytes < 2) {
+            if (!consume(2)) {
                 return;
             }
-            consume(2);
             wsRead.byteLength = bff[1] & 0x7f;
             switch (wsRead.byteLength) {
             case 126:
