@@ -72,6 +72,10 @@ var page1;
 var websocketReceiver;
 var websocket1;
 var websocketSend;
+var wsCallbackCounter;
+var wsCallbackDict;
+var wsSessionId;
+
 var wsCallbackCounter = 0;
 var wsCallbackDict = {};
 
@@ -335,7 +339,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         data = {
             method,
             params,
-            sessionId: websocket1._sessionId
+            sessionId: wsSessionId
         };
         data.id = wsCallbackCounter;
         data = Buffer.from(JSON.stringify(data));
@@ -374,15 +378,19 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
   * @param {string} message
   */
 var wsOnMessage = function (message) {
-    let {
-        id,
-        method,
-        params,
-        result,
-        sessionId
-    } = JSON.parse(message);
+    var id;
+    var method;
+    var params;
+    var result;
+    var sessionId;
+    message = JSON.parse(message);
+    id = message.id;
+    method = message.method;
+    params = message.params;
+    result = message.result;
+    sessionId = message.sessionId;
     if (method === "Target.attachedToTarget") {
-        websocket1._sessionId = params.sessionId;
+        wsSessionId = params.sessionId;
     }
     if (sessionId) {
         if (id && wsCallbackDict[id]) {
