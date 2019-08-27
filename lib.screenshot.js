@@ -71,14 +71,62 @@ var networkmanager1;
 var page1;
 var websocketReceiver;
 var websocket1;
-var websocketSend;
 var wsCallbackCounter;
 var wsCallbackDict;
 var wsOnData;
+var wsSend;
 var wsSessionId;
 
-var wsCallbackCounter = 0;
-var wsCallbackDict = {};
+wsCallbackCounter = 0;
+wsCallbackDict = {};
+wsSend = function (method, params = {}) {
+/*
+ * this function will convert <data> to websocket-masked-frame and send it
+ * https://tools.ietf.org/html/rfc6455
+ */
+    var data;
+    var header;
+    var ii;
+    var mask;
+    wsCallbackCounter += 1;
+    data = {
+        method,
+        params,
+        sessionId: wsSessionId
+    };
+    data.id = wsCallbackCounter;
+    data = Buffer.from(JSON.stringify(data));
+    // init header
+    header = Buffer.allocUnsafe(8);
+    // init field-opcode
+    header[0] = 0x81;
+    // init field-size
+    header[1] = 0xfe;
+    header.writeUInt16BE(data.length, 2);
+    // init field-mask
+    mask = crypto.randomBytes(4);
+    header[4] = mask[0];
+    header[5] = mask[1];
+    header[6] = mask[2];
+    header[7] = mask[3];
+    // send header
+    websocket1.cork();
+    websocket1.write(header);
+    // mask data
+    ii = data.length;
+    while (ii > 0) {
+        ii -= 1;
+        data[ii] = data[ii] ^ mask[ii & 3];
+    }
+    // send data
+    websocket1.write(data);
+    websocket1.uncork();
+    // resolve
+    return new Promise(function (resolve) {
+        wsCallbackDict[wsCallbackCounter] = resolve;
+    });
+}
+
 
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
@@ -229,7 +277,7 @@ class Browser extends EventEmitter {
       */
     static async create(connection, contextIds, process, closeCallback) {
         browser1 = new Browser(connection, contextIds, process, closeCallback);
-        await websocketSend("Target.setDiscoverTargets", {
+        await wsSend("Target.setDiscoverTargets", {
             discover: true
         });
         return browser1;
@@ -311,62 +359,6 @@ class Browser extends EventEmitter {
 }
 
 
-
-/*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
-*/
-    /**
-      * @param {string} method
-      * @param {!Object=} params
-      * @return {!Promise<?Object>}
-      */
-    websocketSend = function (method, params = {}) {
-    /*
-     * this function will convert <data> to websocket-masked-frame and send it
-     * https://tools.ietf.org/html/rfc6455
-     */
-        var data;
-        var header;
-        var ii;
-        var mask;
-        wsCallbackCounter += 1;
-        data = {
-            method,
-            params,
-            sessionId: wsSessionId
-        };
-        data.id = wsCallbackCounter;
-        data = Buffer.from(JSON.stringify(data));
-        // init header
-        header = Buffer.allocUnsafe(8);
-        // init field-opcode
-        header[0] = 0x81;
-        // init field-size
-        header[1] = 0xfe;
-        header.writeUInt16BE(data.length, 2);
-        // init field-mask
-        mask = crypto.randomBytes(4);
-        header[4] = mask[0];
-        header[5] = mask[1];
-        header[6] = mask[2];
-        header[7] = mask[3];
-        // send header
-        websocket1.cork();
-        websocket1.write(header);
-        // mask data
-        ii = data.length;
-        while (ii > 0) {
-            ii -= 1;
-            data[ii] = data[ii] ^ mask[ii & 3];
-        }
-        // send data
-        websocket1.write(data);
-        websocket1.uncork();
-        // resolve
-        return new Promise(function (resolve) {
-            wsCallbackDict[wsCallbackCounter] = resolve;
-        });
-    }
 
 /**
   * @param {string} message
@@ -592,7 +584,7 @@ class ExecutionContext {
         let functionText = pageFunction.toString();
         new Function("(" + functionText + ")");
         let callFunctionOnPromise;
-        callFunctionOnPromise = websocketSend("Runtime.callFunctionOn", {
+        callFunctionOnPromise = wsSend("Runtime.callFunctionOn", {
             functionDeclaration: functionText + "\n" + suffix + "\n",
             executionContextId: this._contextId,
             returnByValue,
@@ -635,15 +627,15 @@ class FrameManager extends EventEmitter {
                 frameTree
             }
         ] = await Promise.all([
-            websocketSend("Page.enable"),
-            websocketSend("Page.getFrameTree"),
+            wsSend("Page.enable"),
+            wsSend("Page.getFrameTree"),
         ]);
         framemanager1._onFrameNavigated(frameTree.frame);
         await Promise.all([
-            websocketSend("Page.setLifecycleEventsEnabled", {
+            wsSend("Page.setLifecycleEventsEnabled", {
                 enabled: true
             }),
-            websocketSend("Runtime.enable").then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
+            wsSend("Runtime.enable").then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
             framemanager1._networkManager.initialize(),
         ]);
     }
@@ -687,11 +679,11 @@ class FrameManager extends EventEmitter {
       */
     async _ensureIsolatedWorld(name) {
         framemanager1._isolatedWorlds.add(name);
-        await websocketSend("Page.addScriptToEvaluateOnNewDocument", {
+        await wsSend("Page.addScriptToEvaluateOnNewDocument", {
             source: `//# sourceURL=${EVALUATION_SCRIPT_URL}`,
             worldName: name,
         }),
-        await websocketSend("Page.createIsolatedWorld", {
+        await wsSend("Page.createIsolatedWorld", {
             frameId: frame1._id,
             grantUniveralAccess: true,
             worldName: name
@@ -895,7 +887,7 @@ class NetworkManager extends EventEmitter {
     }
 
     async initialize() {
-        await websocketSend("Network.enable");
+        await wsSend("Network.enable");
     }
 
     /**
@@ -1089,13 +1081,13 @@ class Page extends EventEmitter {
     async _initialize() {
         await Promise.all([
             framemanager1.initialize(),
-            websocketSend("Target.setAutoAttach", {
+            wsSend("Target.setAutoAttach", {
                 autoAttach: true,
                 waitForDebuggerOnStart: false,
                 flatten: true
             }),
-            websocketSend("Performance.enable"),
-            websocketSend("Log.enable"),
+            wsSend("Performance.enable"),
+            wsSend("Log.enable"),
         ]);
     }
 }
@@ -1105,7 +1097,7 @@ LifecycleWatcher,
 Page,
 domworld2,
 initAsClient,
-websocketSend
+wsSend
 };
 /*
 file none
