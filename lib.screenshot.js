@@ -101,26 +101,27 @@ wsCreate = function (wsUrl, onError) {
         websocket1.setTimeout(0);
         websocket1.setNoDelay();
         websocket1.on("data", wsRead);
-        websocket1._bufferedBytes = 0;
-        websocket1._buffers = [];
-        websocket1._fragments = [];
-        websocket1._messageLength = 0;
         onError();
     });
 };
 wsRead = function (chunk) {
 /*
- * this function will handle websocket1's "data" evt
+ * this function will read <chunk> from websocket1
  */
     var bff;
     var data;
     var fragments;
     var messageLength;
     var num;
-    wsRead.byteLength |= 0;
-    wsRead.byteLengthTotal |= 0;
-    websocket1._bufferedBytes += chunk.length;
-    websocket1._buffers.push(chunk);
+    // init
+    wsRead.byteLength = wsRead.byteLength || 0;
+    wsRead.byteLengthTotal = wsRead.byteLengthTotal || 0;
+    wsRead.bufferedBytes = wsRead.bufferedBytes || 0;
+    wsRead.bffList = wsRead.bffList || [];
+    wsRead.fragments = wsRead.fragments || [];
+    wsRead.messageLength = wsRead.messageLength || 0;
+    wsRead.bufferedBytes += chunk.length;
+    wsRead.bffList.push(chunk);
     while (true) {
         switch (wsRead.state) {
         // Gets extended payload length (7+16).
@@ -138,17 +139,17 @@ wsRead = function (chunk) {
             wsRead.state = "4_GET_DATA";
             break;
         case "4_GET_DATA":
-            if (websocket1._bufferedBytes < wsRead.byteLength) {
+            if (wsRead.bufferedBytes < wsRead.byteLength) {
                 return;
             }
             data = wsReadConsume(wsRead.byteLength);
-            websocket1._messageLength = wsRead.byteLengthTotal;
-            websocket1._fragments.push(data);
-            messageLength = websocket1._messageLength;
-            fragments = websocket1._fragments;
+            wsRead.messageLength = wsRead.byteLengthTotal;
+            wsRead.fragments.push(data);
+            messageLength = wsRead.messageLength;
+            fragments = wsRead.fragments;
             wsRead.byteLengthTotal = 0;
-            websocket1._messageLength = 0;
-            websocket1._fragments = [];
+            wsRead.messageLength = 0;
+            wsRead.fragments = [];
             bff = fragments[0];
             wsRead.state = "0_GET_INFO";
             wsOnMessage(bff.toString());
@@ -156,7 +157,7 @@ wsRead = function (chunk) {
         // 0_GET_INFO
         // Reads the first two bytes of a frame.
         default:
-            if (websocket1._bufferedBytes < 2) {
+            if (wsRead.bufferedBytes < 2) {
                 return;
             }
             bff = wsReadConsume(2);
@@ -174,7 +175,112 @@ wsRead = function (chunk) {
         }
     }
 }
+wsReadConsume = function (n) {
+/**
+  * Consumes `n` bytes from the buffered data.
+  *
+  * @param {Number} n The number of bytes to consume
+  * @return {Buffer} The consumed bytes
+  * @private
+  */
+    var bff;
+    var dst;
+    wsRead.bufferedBytes -= n;
+    if (n === wsRead.bffList[0].length) {
+        return wsRead.bffList.shift();
+    }
+    if (n < wsRead.bffList[0].length) {
+        bff = wsRead.bffList[0];
+        wsRead.bffList[0] = bff.slice(n);
+        return bff.slice(0, n);
+    }
+    dst = Buffer.allocUnsafe(n);
+    do {
+        const bff = wsRead.bffList[0];
+        wsRead.bffList.shift().copy(dst, dst.length - n);
+        n -= bff.length;
+    } while (n > 0);
+    return dst;
+}
+var wsRead2 = function (chunk) {
+/*
+ * this function will read <chunk> from websocket1
+ */
+    //!! var bff;
+    //!! var data;
+    //!! var fragments;
+    //!! var messageLength;
+    //!! var num;
 
+    // init
+    wsRead.bff = (
+        wsRead.bff
+        ? Buffer.concat(wsRead.bff, chunk)
+        : chunk
+    );
+
+    // init
+    wsRead.byteLength = wsRead.byteLength || 0;
+    wsRead.byteLengthTotal = wsRead.byteLengthTotal || 0;
+    wsRead.bufferedBytes = wsRead.bufferedBytes || 0;
+    wsRead.bffList = wsRead.bffList || [];
+    wsRead.fragments = wsRead.fragments || [];
+    wsRead.messageLength = wsRead.messageLength || 0;
+    wsRead.bufferedBytes += chunk.length;
+    wsRead.bffList.push(chunk);
+    while (true) {
+        switch (wsRead.state) {
+        // Gets extended payload length (7+16).
+        case "1_GET_PAYLOAD_LENGTH_16":
+            wsRead.byteLength = wsReadConsume(2).readUInt16BE(0);
+            wsRead.byteLengthTotal += wsRead.byteLength;
+            wsRead.state = "4_GET_DATA";
+            break;
+        // Gets extended payload length (7+64).
+        case "2_GET_PAYLOAD_LENGTH_64":
+            bff = wsReadConsume(8);
+            num = bff.readUInt32BE(0);
+            wsRead.byteLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
+            wsRead.byteLengthTotal += wsRead.byteLength;
+            wsRead.state = "4_GET_DATA";
+            break;
+        case "4_GET_DATA":
+            if (wsRead.bufferedBytes < wsRead.byteLength) {
+                return;
+            }
+            data = wsReadConsume(wsRead.byteLength);
+            wsRead.messageLength = wsRead.byteLengthTotal;
+            wsRead.fragments.push(data);
+            messageLength = wsRead.messageLength;
+            fragments = wsRead.fragments;
+            wsRead.byteLengthTotal = 0;
+            wsRead.messageLength = 0;
+            wsRead.fragments = [];
+            bff = fragments[0];
+            wsRead.state = "0_GET_INFO";
+            wsOnMessage(bff.toString());
+            break;
+        // 0_GET_INFO
+        // Reads the first two bytes of a frame.
+        default:
+            if (wsRead.bufferedBytes < 2) {
+                return;
+            }
+            bff = wsReadConsume(2);
+            wsRead.byteLength = bff[1] & 0x7f;
+            if (wsRead.byteLength === 126) {
+                wsRead.state = "1_GET_PAYLOAD_LENGTH_16"
+                break;
+            }
+            if (wsRead.byteLength === 127) {
+                wsRead.state = "2_GET_PAYLOAD_LENGTH_64";
+                break;
+            }
+            wsRead.byteLengthTotal += wsRead.byteLength;
+            wsRead.state = "4_GET_DATA";
+        }
+    }
+}
 wsWrite = function (method, params) {
 /*
  * this function will convert <data> to websocket-masked-frame and send it
@@ -221,45 +327,6 @@ wsWrite = function (method, params) {
     return new Promise(function (resolve) {
         wsCallbackDict[wsCallbackCounter] = resolve;
     });
-}
-
-/*
-lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
-*/
-"use strict";
-
-/**
-  * HyBi Receiver implementation.
-  *
-  * @extends stream.Writable
-  */
-wsReadConsume = function (n) {
-/**
-  * Consumes `n` bytes from the buffered data.
-  *
-  * @param {Number} n The number of bytes to consume
-  * @return {Buffer} The consumed bytes
-  * @private
-  */
-    var bff;
-    var dst;
-    websocket1._bufferedBytes -= n;
-    if (n === websocket1._buffers[0].length) {
-        return websocket1._buffers.shift();
-    }
-    if (n < websocket1._buffers[0].length) {
-        bff = websocket1._buffers[0];
-        websocket1._buffers[0] = bff.slice(n);
-        return bff.slice(0, n);
-    }
-    dst = Buffer.allocUnsafe(n);
-    do {
-        const bff = websocket1._buffers[0];
-        websocket1._buffers.shift().copy(dst, dst.length - n);
-        n -= bff.length;
-    } while (n > 0);
-
-    return dst;
 }
 
 /*
