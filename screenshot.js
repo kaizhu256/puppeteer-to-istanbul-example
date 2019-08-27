@@ -169,7 +169,7 @@ var tmp;
 //!! var url;
 var urlWebsocket;
 var util;
-var wsSend;
+var wsWrite;
 local.nop(assert, path, util);
 
 
@@ -188,7 +188,7 @@ path = require("path");
 //!! url = require("url");
 util = require("util");
 module.exports = require("./lib.screenshot.js");
-wsSend = module.exports.wsSend;
+wsWrite = module.exports.wsWrite;
 
 
 
@@ -306,11 +306,11 @@ await new Promise(function (resolve, reject) {
 
 
 
-tmp = await wsSend("Target.createTarget", {
+tmp = await wsWrite("Target.createTarget", {
     url: "about:blank"
 });
 tmp = await browser1.targetDict[tmp.targetId];
-await wsSend("Target.attachToTarget", {
+await wsWrite("Target.attachToTarget", {
     flatten: true,
     targetId: tmp._targetInfo.targetId
 });
@@ -328,7 +328,7 @@ const watcher = new module.exports.LifecycleWatcher(
     ]
 );
 await new Promise(function (resolve) {
-    wsSend("Page.navigate", {
+    wsWrite("Page.navigate", {
         url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
         referer: framemanager1._networkManager.extraHTTPHeaders().referer,
         frameId: module.exports.frame1._id
@@ -351,10 +351,10 @@ await Promise.all([
     // screenshot - png
     (async function () {
         var result;
-        await wsSend("Target.activateTarget", {
+        await wsWrite("Target.activateTarget", {
             targetId: page1._target._targetId
         });
-        result = await wsSend("Page.captureScreenshot", {
+        result = await wsWrite("Page.captureScreenshot", {
             format: "png"
         });
         await fsWriteFile("tmp/aa.png", Buffer.from(result.data, "base64"));
@@ -382,7 +382,7 @@ return html.trim()` + " + \"\\n\""
 ]);
 
 // Attempt to close chrome gracefully
-wsSend("Browser.close").catch(function (err) {
+wsWrite("Browser.close").catch(function (err) {
     console.error(err);
     chromeKillSync();
 });

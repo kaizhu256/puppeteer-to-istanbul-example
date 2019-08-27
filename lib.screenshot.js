@@ -74,9 +74,9 @@ var wsCallbackCounter;
 var wsCallbackDict;
 var wsCreate;
 var wsGotoState;
-var wsOnData;
-var wsOnDataConsume;
-var wsSend;
+var wsRead;
+var wsReadConsume;
+var wsWrite;
 var wsSessionId;
 
 //!! throwError
@@ -101,7 +101,7 @@ wsCreate = function (wsUrl, onError) {
         websocket1 = socket;
         websocket1.setTimeout(0);
         websocket1.setNoDelay();
-        websocket1.on("data", wsOnData);
+        websocket1.on("data", wsRead);
         websocket1._bufferedBytes = 0;
         websocket1._buffers = [];
         websocket1._fragments = [];
@@ -112,7 +112,7 @@ wsCreate = function (wsUrl, onError) {
         onError();
     });
 };
-wsOnData = function (chunk) {
+wsRead = function (chunk) {
 /*
  * this function will handle websocket1's "data" evt
  */
@@ -130,7 +130,7 @@ wsOnData = function (chunk) {
             if (websocket1._bufferedBytes < 2) {
                 return;
             }
-            bff = wsOnDataConsume(2);
+            bff = wsReadConsume(2);
             websocket1._payloadLength = bff[1] & 0x7f;
             if (websocket1._payloadLength === 126) {
                 wsGotoState = GET_PAYLOAD_LENGTH_16
@@ -143,13 +143,13 @@ wsOnData = function (chunk) {
             break;
         // Gets extended payload length (7+16).
         case GET_PAYLOAD_LENGTH_16:
-            websocket1._payloadLength = wsOnDataConsume(2).readUInt16BE(0);
+            websocket1._payloadLength = wsReadConsume(2).readUInt16BE(0);
             websocket1._totalPayloadLength += websocket1._payloadLength;
             wsGotoState = GET_DATA;
             break;
         // Gets extended payload length (7+64).
         case GET_PAYLOAD_LENGTH_64:
-            bff = wsOnDataConsume(8);
+            bff = wsReadConsume(8);
             num = bff.readUInt32BE(0);
             websocket1._payloadLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
             websocket1._totalPayloadLength += websocket1._payloadLength;
@@ -159,7 +159,7 @@ wsOnData = function (chunk) {
             if (websocket1._bufferedBytes < websocket1._payloadLength) {
                 return;
             }
-            data = wsOnDataConsume(websocket1._payloadLength);
+            data = wsReadConsume(websocket1._payloadLength);
             websocket1._messageLength = websocket1._totalPayloadLength;
             websocket1._fragments.push(data);
             messageLength = websocket1._messageLength;
@@ -175,7 +175,7 @@ wsOnData = function (chunk) {
     }
 }
 
-wsSend = function (method, params = {}) {
+wsWrite = function (method, params = {}) {
 /*
  * this function will convert <data> to websocket-masked-frame and send it
  * https://tools.ietf.org/html/rfc6455
@@ -239,7 +239,7 @@ const INFLATING = 5;
   *
   * @extends stream.Writable
   */
-wsOnDataConsume = function (n) {
+wsReadConsume = function (n) {
 /**
   * Consumes `n` bytes from the buffered data.
   *
@@ -279,7 +279,7 @@ class Browser extends EventEmitter {
       */
     static async create(connection, contextIds, process, closeCallback) {
         browser1 = new Browser(connection, contextIds, process, closeCallback);
-        await wsSend("Target.setDiscoverTargets", {
+        await wsWrite("Target.setDiscoverTargets", {
             discover: true
         });
         return browser1;
@@ -586,7 +586,7 @@ class ExecutionContext {
         let functionText = pageFunction.toString();
         new Function("(" + functionText + ")");
         let callFunctionOnPromise;
-        callFunctionOnPromise = wsSend("Runtime.callFunctionOn", {
+        callFunctionOnPromise = wsWrite("Runtime.callFunctionOn", {
             functionDeclaration: functionText + "\n" + suffix + "\n",
             executionContextId: this._contextId,
             returnByValue,
@@ -629,15 +629,15 @@ class FrameManager extends EventEmitter {
                 frameTree
             }
         ] = await Promise.all([
-            wsSend("Page.enable"),
-            wsSend("Page.getFrameTree"),
+            wsWrite("Page.enable"),
+            wsWrite("Page.getFrameTree"),
         ]);
         framemanager1._onFrameNavigated(frameTree.frame);
         await Promise.all([
-            wsSend("Page.setLifecycleEventsEnabled", {
+            wsWrite("Page.setLifecycleEventsEnabled", {
                 enabled: true
             }),
-            wsSend("Runtime.enable").then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
+            wsWrite("Runtime.enable").then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
             framemanager1._networkManager.initialize(),
         ]);
     }
@@ -681,11 +681,11 @@ class FrameManager extends EventEmitter {
       */
     async _ensureIsolatedWorld(name) {
         framemanager1._isolatedWorlds.add(name);
-        await wsSend("Page.addScriptToEvaluateOnNewDocument", {
+        await wsWrite("Page.addScriptToEvaluateOnNewDocument", {
             source: `//# sourceURL=${EVALUATION_SCRIPT_URL}`,
             worldName: name,
         }),
-        await wsSend("Page.createIsolatedWorld", {
+        await wsWrite("Page.createIsolatedWorld", {
             frameId: frame1._id,
             grantUniveralAccess: true,
             worldName: name
@@ -889,7 +889,7 @@ class NetworkManager extends EventEmitter {
     }
 
     async initialize() {
-        await wsSend("Network.enable");
+        await wsWrite("Network.enable");
     }
 
     /**
@@ -1083,13 +1083,13 @@ class Page extends EventEmitter {
     async _initialize() {
         await Promise.all([
             framemanager1.initialize(),
-            wsSend("Target.setAutoAttach", {
+            wsWrite("Target.setAutoAttach", {
                 autoAttach: true,
                 waitForDebuggerOnStart: false,
                 flatten: true
             }),
-            wsSend("Performance.enable"),
-            wsSend("Log.enable"),
+            wsWrite("Performance.enable"),
+            wsWrite("Log.enable"),
         ]);
     }
 }
@@ -1099,7 +1099,7 @@ LifecycleWatcher,
 Page,
 domworld2,
 wsCreate,
-wsSend
+wsWrite
 };
 /*
 file none
