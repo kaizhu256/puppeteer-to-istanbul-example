@@ -229,50 +229,51 @@ var wsRead2 = function (chunk) {
     chunk = chunk || Buffer.allocUnsafe(0);
     wsRead.bff = wsRead.bff || chunk;
     wsRead.bff = Buffer.concat([wsRead.bff, chunk]);
-    switch (debugInline(wsRead.state | 0)) {
-    // Reads the first two bytes of a frame.
-    case 0:
-        switch (debugInline(wsRead.bff[1] & 0x7f)) {
+    while (true) {
+        switch (wsRead.state | 0) {
+        // Reads the first two bytes of a frame.
         case 0:
-            return;
-        // Gets extended payload length (7+16) bits.
-        case 126:
-            if (wsRead.bff.length < (2 + 2)) {
+            switch (wsRead.bff[1] & 0x7f) {
+            case 0:
+                return;
+            // Gets extended payload length (7+16) bits.
+            case 126:
+                if (wsRead.bff.length < (2 + 2)) {
+                    return;
+                }
+                wsRead.payloadLength = wsRead.bff.readUInt16BE(2);
+                wsRead.bff = wsRead.bff.slice(2 + 2);
+                break;
+            // Gets extended payload length (7+64) bits.
+            case 127:
+                if (wsRead.bff.length < (2 + 8)) {
+                    return;
+                }
+                wsRead.payloadLength = (
+                    wsRead.bff.readUInt32BE(2) * 0x100000000
+                    + wsRead.bff.readUInt32BE(6)
+                );
+                wsRead.bff = wsRead.bff.slice(2 + 8);
+                break;
+            // Gets payload length (7) bits.
+            default:
+                wsRead.payloadLength = wsRead.bff[1];
+                wsRead.bff = wsRead.bff.slice(2);
+            }
+            wsRead.state = 1;
+            break;
+        // Reads data bytes.
+        case 1:
+            //!! debugInline([wsRead.bff.length, wsRead.payloadLength]);
+            if (wsRead.bff.length < wsRead.payloadLength) {
                 return;
             }
-            wsRead.payloadLength = wsRead.bff.readUInt16BE(2);
-            wsRead.bff = wsRead.bff.slice(2 + 2);
+            wsRead.state = 0;
+            bff = wsRead.bff.slice(0, wsRead.payloadLength);
+            wsRead.bff = wsRead.bff.slice(wsRead.payloadLength);
+            wsOnMessage(bff.toString());
             break;
-        // Gets extended payload length (7+64) bits.
-        case 127:
-            if (wsRead.bff.length < (2 + 8)) {
-                return;
-            }
-            wsRead.payloadLength = (
-                wsRead.bff.readUInt32BE(2) * 0x100000000
-                + wsRead.bff.readUInt32BE(6)
-            );
-            wsRead.bff = wsRead.bff.slice(2 + 8);
-            break;
-        // Gets payload length (7) bits.
-        default:
-            wsRead.payloadLength = wsRead.bff[1];
-            wsRead.bff = wsRead.bff.slice(2);
         }
-        wsRead.state = 1;
-        wsRead();
-        break;
-    // Reads data bytes.
-    case 1:
-        debugInline([wsRead.bff.length, wsRead.payloadLength]);
-        if (wsRead.bff.length < wsRead.payloadLength) {
-            return;
-        }
-        wsRead.state = 0;
-        bff = wsRead.bff.slice(0, wsRead.payloadLength);
-        wsRead.bff = wsRead.bff.slice(wsRead.payloadLength);
-        wsOnMessage(debugInline(bff.toString()));
-        break;
     }
 };
 wsWrite = function (method, params) {
@@ -421,13 +422,12 @@ class Browser extends EventEmitter {
   * @param {string} message
   */
 var wsOnMessage = function (message) {
-    var id;
+    var callback;
     var method;
     var params;
     var result;
     var sessionId;
     message = JSON.parse(message);
-    id = message.id;
     method = message.method;
     params = message.params;
     result = message.result;
@@ -436,21 +436,35 @@ var wsOnMessage = function (message) {
         wsSessionId = params.sessionId;
     }
     if (sessionId) {
-        if (id && wsCallbackDict[id]) {
-            const callback = wsCallbackDict[id];
-            delete wsCallbackDict[id];
+        if (message.id && wsCallbackDict[message.id]) {
+            callback = wsCallbackDict[message.id];
+            delete wsCallbackDict[message.id];
             callback(result);
         } else {
-            assert(!id);
+            assert(!message.id);
         }
-    } else if (id) {
-        const callback = wsCallbackDict[id];
+    } else if (message.id) {
+        callback = wsCallbackDict[message.id];
         // Callbacks could be all rejected if someone has called `.dispose()`.
-        delete wsCallbackDict[id];
+        delete wsCallbackDict[message.id];
         callback(result);
         return;
     }
     switch (method) {
+    //!! message = JSON.parse(message);
+    //!! callback = message.id && wsCallbackDict[message.id];
+    //!! if (!callback) {
+        //!! return;
+    //!! }
+    //!! delete wsCallbackDict[message.id];
+    //!! method = message.method;
+    //!! params = message.params;
+    //!! result = message.result;
+    //!! sessionId = message.sessionId;
+    //!! if (method === "Target.attachedToTarget") {
+        //!! wsSessionId = params.sessionId;
+    //!! }
+    //!! switch (message.method) {
     case "Network.requestWillBeSent":
         networkmanager1._onRequestWillBeSent(params);
         break;
