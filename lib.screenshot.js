@@ -104,7 +104,7 @@ wsCreate = function (wsUrl, onError) {
         onError();
     });
 };
-wsRead2 = function (chunk) {
+var wsRead = function (chunk) {
 /*
  * this function will read <chunk> from websocket1
  */
@@ -161,13 +161,12 @@ wsRead2 = function (chunk) {
                 return;
             }
             bff = wsReadConsume(2);
-            wsRead.byteLength = bff[1] & 0x7f;
-            if (wsRead.byteLength === 126) {
+            switch(bff[1] & 0x7f) {
+            case 126:
                 wsRead.state = "1_GET_PAYLOAD_LENGTH_16"
                 break;
-            }
-            if (wsRead.byteLength === 127) {
-                wsRead.state = "2_GET_PAYLOAD_LENGTH_64";
+            case 127:
+                wsRead.state = "2_GET_PAYLOAD_LENGTH_64"
                 break;
             }
             wsRead.byteLengthTotal += wsRead.byteLength;
@@ -202,7 +201,7 @@ wsReadConsume = function (n) {
     } while (n > 0);
     return dst;
 }
-var wsRead = function (chunk) {
+var wsRead2 = function (chunk) {
 /*
  * this function will read <chunk> from websocket1
  */
@@ -210,11 +209,11 @@ var wsRead = function (chunk) {
     // init bff
     chunk = chunk || Buffer.allocUnsafe(0);
     wsRead.bff = wsRead.bff || chunk;
-    wsRead.bff = Buffer.concat(wsRead.bff, chunk);
-    switch (wsRead.state | 0) {
+    wsRead.bff = Buffer.concat([wsRead.bff, chunk]);
+    switch (debugInline(wsRead.state | 0)) {
     // Reads the first two bytes of a frame.
     case 0:
-        switch (wsRead.bff[1] & 0x7f) {
+        switch (debugInline(wsRead.bff[1] & 0x7f)) {
         case 0:
             return;
         // Gets extended payload length (7+16) bits.
@@ -226,7 +225,7 @@ var wsRead = function (chunk) {
             wsRead.bff = wsRead.bff.slice(2 + 2);
             break;
         // Gets extended payload length (7+64) bits.
-        case 127
+        case 127:
             if (wsRead.bff.length < (2 + 8)) {
                 return;
             }
@@ -246,13 +245,14 @@ var wsRead = function (chunk) {
         break;
     // Reads data bytes.
     case 1:
-        if (bff.length < wsRead.payloadLength) {
+        debugInline([wsRead.bff.length, wsRead.payloadLength]);
+        if (wsRead.bff.length < wsRead.payloadLength) {
             return;
         }
         wsRead.state = 0;
         bff = wsRead.bff.slice(0, wsRead.payloadLength);
         wsRead.bff = wsRead.bff.slice(wsRead.payloadLength);
-        wsOnMessage(bff.toString());
+        wsOnMessage(debugInline(bff.toString()));
         break;
     }
 };
