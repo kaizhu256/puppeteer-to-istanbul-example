@@ -101,6 +101,14 @@ wsCreate = function (wsUrl, onError) {
         websocket1.setTimeout(0);
         websocket1.setNoDelay();
         websocket1.on("data", wsOnData);
+        websocket1._bufferedBytes = 0;
+        websocket1._buffers = [];
+        websocket1._fragments = [];
+        websocket1._loop = false;
+        websocket1._messageLength = 0;
+        websocket1._payloadLength = 0;
+        websocket1._state = GET_INFO;
+        websocket1._totalPayloadLength = 0;
         onError();
     });
 };
@@ -234,14 +242,6 @@ const INFLATING = 5;
   * @extends stream.Writable
   */
 websocketReceiver = {};
-websocket1._bufferedBytes = 0;
-websocket1._buffers = [];
-websocket1._payloadLength = 0;
-websocket1._totalPayloadLength = 0;
-websocket1._messageLength = 0;
-websocket1._fragments = [];
-websocket1._state = GET_INFO;
-websocket1._loop = false;
 
 websocketReceiver.consume = function (n) {
 /**
