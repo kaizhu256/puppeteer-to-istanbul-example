@@ -110,7 +110,6 @@ var wsRead = function (chunk) {
  */
     var bff;
     var consume;
-    var messageLength;
     var num;
     consume = function (nn) {
     /**
@@ -157,8 +156,10 @@ var wsRead = function (chunk) {
         // Gets extended payload length (7+64).
         case "2_GET_PAYLOAD_LENGTH_64":
             bff = consume(8);
-            num = bff.readUInt32BE(0);
-            wsRead.byteLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
+            wsRead.byteLength = (
+                0x100000000 * bff.readUInt32BE(0)
+                + bff.readUInt32BE(4)
+            );
             wsRead.byteLengthTotal += wsRead.byteLength;
             wsRead.state = "4_GET_DATA";
             break;
