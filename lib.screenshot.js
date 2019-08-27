@@ -73,6 +73,7 @@ var websocket1;
 var wsCallbackCounter;
 var wsCallbackDict;
 var wsCreate;
+var wsGotoState;
 var wsOnData;
 var wsOnDataConsume;
 var wsSend;
@@ -107,7 +108,7 @@ wsCreate = function (wsUrl, onError) {
         websocket1._loop = false;
         websocket1._messageLength = 0;
         websocket1._payloadLength = 0;
-        websocket1._state = GET_INFO;
+        wsGotoState = GET_INFO;
         websocket1._totalPayloadLength = 0;
         onError();
     });
@@ -125,7 +126,7 @@ wsOnData = function (chunk) {
     websocket1._buffers.push(chunk);
     websocket1._loop = true;
     do {
-        switch (websocket1._state) {
+        switch (wsGotoState) {
         // Reads the first two bytes of a frame.
         case GET_INFO:
             if (websocket1._bufferedBytes < 2) {
@@ -137,19 +138,19 @@ wsOnData = function (chunk) {
             websocket1._payloadLength = bff[1] & 0x7f;
             websocket1._masked = (bff[1] & 0x80) === 0x80;
             if (websocket1._payloadLength === 126) {
-                websocket1._state = GET_PAYLOAD_LENGTH_16
+                wsGotoState = GET_PAYLOAD_LENGTH_16
             } else if (websocket1._payloadLength === 127) {
-                websocket1._state = GET_PAYLOAD_LENGTH_64;
+                wsGotoState = GET_PAYLOAD_LENGTH_64;
             } else {
                 websocket1._totalPayloadLength += websocket1._payloadLength;
-                websocket1._state = GET_DATA;
+                wsGotoState = GET_DATA;
             }
             break;
         // Gets extended payload length (7+16).
         case GET_PAYLOAD_LENGTH_16:
             websocket1._payloadLength = wsOnDataConsume(2).readUInt16BE(0);
             websocket1._totalPayloadLength += websocket1._payloadLength;
-            websocket1._state = GET_DATA;
+            wsGotoState = GET_DATA;
             break;
         // Gets extended payload length (7+64).
         case GET_PAYLOAD_LENGTH_64:
@@ -157,7 +158,7 @@ wsOnData = function (chunk) {
             num = bff.readUInt32BE(0);
             websocket1._payloadLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
             websocket1._totalPayloadLength += websocket1._payloadLength;
-            websocket1._state = GET_DATA;
+            wsGotoState = GET_DATA;
             break;
         case GET_DATA:
             if (websocket1._bufferedBytes < websocket1._payloadLength) {
@@ -173,7 +174,7 @@ wsOnData = function (chunk) {
             websocket1._messageLength = 0;
             websocket1._fragments = [];
             bff = fragments[0];
-            websocket1._state = GET_INFO;
+            wsGotoState = GET_INFO;
             wsOnMessage(bff.toString());
             break;
         }
