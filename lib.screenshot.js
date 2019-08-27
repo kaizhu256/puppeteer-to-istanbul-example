@@ -141,20 +141,23 @@ wsOnData = function (chunk) {
             } else if (websocket1._payloadLength === 127) {
                 websocket1._state = GET_PAYLOAD_LENGTH_64;
             } else {
-                websocketReceiver.haveLength();
+                websocket1._totalPayloadLength += websocket1._payloadLength;
+                websocket1._state = GET_DATA;
             }
             break;
         // Gets extended payload length (7+16).
         case GET_PAYLOAD_LENGTH_16:
             websocket1._payloadLength = websocketReceiver.consume(2).readUInt16BE(0);
-            websocketReceiver.haveLength();
+            websocket1._totalPayloadLength += websocket1._payloadLength;
+            websocket1._state = GET_DATA;
             break;
         // Gets extended payload length (7+64).
         case GET_PAYLOAD_LENGTH_64:
             bff = websocketReceiver.consume(8);
             num = bff.readUInt32BE(0);
             websocket1._payloadLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
-            websocketReceiver.haveLength();
+            websocket1._totalPayloadLength += websocket1._payloadLength;
+            websocket1._state = GET_DATA;
             break;
         case GET_DATA:
             if (websocket1._bufferedBytes < websocket1._payloadLength) {
@@ -271,17 +274,6 @@ websocketReceiver.consume = function (n) {
 
     return dst;
 }
-
-    /**
-      * Payload length has been read.
-      *
-      * @return {(RangeError|undefined)} A possible error
-      * @private
-      */
-    websocketReceiver.haveLength = function () {
-        websocket1._totalPayloadLength += websocket1._payloadLength;
-        websocket1._state = GET_DATA;
-    }
 
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
