@@ -425,13 +425,10 @@ var wsOnMessage = function (message) {
     var callback;
     var params;
     message = JSON.parse(message);
-    callback = wsCallbackDict[message.id];
-    if (callback) {
+    if (message.id) {
+        callback = wsCallbackDict[message.id];
         delete wsCallbackDict[message.id];
         callback(message.result);
-    }
-    if (message.id) {
-        return;
     }
     params = message.params;
     switch (message.method) {
