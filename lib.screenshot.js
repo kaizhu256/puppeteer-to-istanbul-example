@@ -122,7 +122,7 @@ var wsRead = function (chunk) {
       */
         if (nn === 0) {
             bff = Buffer.allocUnsafe(nn);
-            return 0;
+            return true;
         }
         bffLength = wsRead.bffList.reduce(function (nn, aa) {
             return nn + aa.length;
