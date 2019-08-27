@@ -109,7 +109,6 @@ var wsRead = function (chunk) {
  * this function will read <chunk> from websocket1
  */
     var bff;
-    var bff0;
     var consume;
     var data;
     var fragments;
@@ -123,22 +122,24 @@ var wsRead = function (chunk) {
       * @return {Buffer} The consumed bytes
       * @private
       */
+        var bff;
+        var dst;
         wsRead.bufferedBytes -= n;
         if (n === wsRead.bffList[0].length) {
             return wsRead.bffList.shift();
         }
         if (n < wsRead.bffList[0].length) {
-            bff0 = wsRead.bffList[0];
-            wsRead.bffList[0] = bff0.slice(n);
-            return bff0.slice(0, n);
+            bff = wsRead.bffList[0];
+            wsRead.bffList[0] = bff.slice(n);
+            return bff.slice(0, n);
         }
-        bff = Buffer.allocUnsafe(n);
+        dst = Buffer.allocUnsafe(n);
         do {
-            const bff0 = wsRead.bffList[0];
-            wsRead.bffList.shift().copy(bff, bff.length - n);
-            n -= bff0.length;
+            const bff = wsRead.bffList[0];
+            wsRead.bffList.shift().copy(dst, dst.length - n);
+            n -= bff.length;
         } while (n > 0);
-        return bff;
+        return dst;
     };
     // init
     wsRead.byteLength = wsRead.byteLength || 0;
