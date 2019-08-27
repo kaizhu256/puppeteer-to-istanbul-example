@@ -81,7 +81,6 @@ lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
 const GET_INFO = 0;
 const GET_PAYLOAD_LENGTH_16 = 1;
 const GET_PAYLOAD_LENGTH_64 = 2;
-const GET_MASK = 3;
 const GET_DATA = 4;
 const INFLATING = 5;
 
@@ -93,13 +92,7 @@ const INFLATING = 5;
 websocketReceiver = new stream.Writable();
 websocketReceiver._bufferedBytes = 0;
 websocketReceiver._buffers = [];
-websocketReceiver._compressed = false;
 websocketReceiver._payloadLength = 0;
-websocketReceiver._mask = undefined;
-websocketReceiver._fragmented = 0;
-websocketReceiver._masked = false;
-websocketReceiver._fin = false;
-websocketReceiver._opcode = 0;
 websocketReceiver._totalPayloadLength = 0;
 websocketReceiver._messageLength = 0;
 websocketReceiver._fragments = [];
@@ -131,7 +124,6 @@ websocketReceiver._write = function (chunk, encoding, cb) {
                 break;
             }
             bff = websocketReceiver.consume(2);
-            websocketReceiver._fin = (bff[0] & 0x80) === 0x80;
             websocketReceiver._opcode = bff[0] & 0x0f;
             websocketReceiver._payloadLength = bff[1] & 0x7f;
             websocketReceiver._masked = (bff[1] & 0x80) === 0x80;
@@ -167,7 +159,6 @@ websocketReceiver._write = function (chunk, encoding, cb) {
             fragments = websocketReceiver._fragments;
             websocketReceiver._totalPayloadLength = 0;
             websocketReceiver._messageLength = 0;
-            websocketReceiver._fragmented = 0;
             websocketReceiver._fragments = [];
             bff = fragments[0];
             websocketReceiver._state = GET_INFO;
