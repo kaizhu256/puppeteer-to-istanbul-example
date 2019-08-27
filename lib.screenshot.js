@@ -110,35 +110,33 @@ var wsRead = function (chunk) {
  */
     var bff;
     var consume;
-    var data;
-    var fragments;
     var messageLength;
     var num;
-    consume = function (n) {
+    consume = function (nn) {
     /**
-      * Consumes `n` bytes from the buffered data.
+      * Consumes `nn` bytes from the buffered data.
       *
-      * @param {Number} n The number of bytes to consume
+      * @param {Number} nn The number of bytes to consume
       * @return {Buffer} The consumed bytes
       * @private
       */
         var bff;
         var dst;
-        wsRead.bufferedBytes -= n;
-        if (n === wsRead.bffList[0].length) {
+        wsRead.bufferedBytes -= nn;
+        if (nn === wsRead.bffList[0].length) {
             return wsRead.bffList.shift();
         }
-        if (n < wsRead.bffList[0].length) {
+        if (nn < wsRead.bffList[0].length) {
             bff = wsRead.bffList[0];
-            wsRead.bffList[0] = bff.slice(n);
-            return bff.slice(0, n);
+            wsRead.bffList[0] = bff.slice(nn);
+            return bff.slice(0, nn);
         }
-        dst = Buffer.allocUnsafe(n);
+        dst = Buffer.allocUnsafe(nn);
         do {
             const bff = wsRead.bffList[0];
-            wsRead.bffList.shift().copy(dst, dst.length - n);
-            n -= bff.length;
-        } while (n > 0);
+            wsRead.bffList.shift().copy(dst, dst.length - nn);
+            nn -= bff.length;
+        } while (nn > 0);
         return dst;
     };
     // init
@@ -146,8 +144,6 @@ var wsRead = function (chunk) {
     wsRead.byteLengthTotal = wsRead.byteLengthTotal || 0;
     wsRead.bufferedBytes = wsRead.bufferedBytes || 0;
     wsRead.bffList = wsRead.bffList || [];
-    wsRead.fragments = wsRead.fragments || [];
-    wsRead.messageLength = wsRead.messageLength || 0;
     wsRead.bufferedBytes += chunk.length;
     wsRead.bffList.push(chunk);
     while (true) {
@@ -170,15 +166,8 @@ var wsRead = function (chunk) {
             if (wsRead.bufferedBytes < wsRead.byteLength) {
                 return;
             }
-            data = consume(wsRead.byteLength);
-            wsRead.messageLength = wsRead.byteLengthTotal;
-            wsRead.fragments.push(data);
-            messageLength = wsRead.messageLength;
-            fragments = wsRead.fragments;
+            bff = consume(wsRead.byteLength);
             wsRead.byteLengthTotal = 0;
-            wsRead.messageLength = 0;
-            wsRead.fragments = [];
-            bff = fragments[0];
             wsRead.state = "0_GET_INFO";
             wsOnMessage(bff.toString());
             break;
