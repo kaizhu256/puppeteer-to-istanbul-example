@@ -89,7 +89,7 @@ const INFLATING = 5;
   *
   * @extends stream.Writable
   */
-websocketReceiver = new stream.Writable();
+websocketReceiver = {};
 websocketReceiver._bufferedBytes = 0;
 websocketReceiver._buffers = [];
 websocketReceiver._payloadLength = 0;
@@ -106,7 +106,7 @@ websocketReceiver._loop = false;
   * @param {String} encoding The character encoding of `chunk`
   * @param {Function} cb Callback
   */
-websocketReceiver._write = function (chunk, encoding, cb) {
+websocketReceiver.write = function (chunk) {
     var bff;
     var data;
     var fragments;
@@ -166,7 +166,6 @@ websocketReceiver._write = function (chunk, encoding, cb) {
             break;
         }
     } while (websocketReceiver._loop);
-    cb();
 }
 
 websocketReceiver.consume = function (n) {
@@ -213,14 +212,9 @@ function initAsClient(socket) {
     websocket1 = socket;
     websocket1._cbDict = {};
     websocket1._cbCounter = 0;
-    websocketReceiver.on("drain", websocket1.resume.bind(websocket1));
     websocket1.setTimeout(0);
     websocket1.setNoDelay();
-    websocket1.on("data", function (chunk) {
-        if (!websocketReceiver.write(chunk)) {
-            websocket1.pause();
-        }
-    });
+    websocket1.on("data",websocketReceiver.write);
     websocket1.on("error", local.assertThrow);
 }
 
