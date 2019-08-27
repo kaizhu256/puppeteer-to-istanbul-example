@@ -429,19 +429,12 @@ var wsOnMessage = function (message) {
     message = JSON.parse(message);
     params = message.params;
     sessionId = message.sessionId;
-    if (sessionId) {
-        if (message.id && wsCallbackDict[message.id]) {
-            callback = wsCallbackDict[message.id];
-            delete wsCallbackDict[message.id];
-            callback(message.result);
-        } else {
-            assert(!message.id);
-        }
-    } else if (message.id) {
+    if (message.id && wsCallbackDict[message.id]) {
         callback = wsCallbackDict[message.id];
-        // Callbacks could be all rejected if someone has called `.dispose()`.
         delete wsCallbackDict[message.id];
         callback(message.result);
+    }
+    if (message.id) {
         return;
     }
     switch (message.method) {
