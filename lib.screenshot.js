@@ -63,7 +63,6 @@ local.nop(
 
 /* jslint ignore:start */
 var browser1;
-var callbackDict;
 var domworld1;
 var domworld2;
 var frame1;
@@ -74,7 +73,6 @@ var websocketReceiver;
 var websocket1;
 var websocketSend;
 
-callbackDict = {};
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
 */
@@ -220,24 +218,10 @@ websocketReceiver.consume = function (n) {
         websocketReceiver._state = GET_DATA;
     }
 
-/*
-lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
-*/
-"use strict";
-
-/**
-  * Initialize a WebSocket client.
-  *
-  * @param {(String|url.Url|url.URL)} address The URL to which to connect
-  * @param {String} protocols The subprotocols
-  * @param {(Boolean|Object)} options.perMessageDeflate Enable/disable
-  *     permessage-deflate
-  * @param {String} options.origin Value of the `Origin` or
-  *     `Sec-WebSocket-Origin` header
-  * @private
-  */
 function initAsClient(socket) {
     websocket1 = socket;
+    websocket1._cbDict = {};
+    websocket1._cbCounter = 0;
     websocketReceiver.on("drain", websocket1.resume.bind(websocket1));
     websocket1.setTimeout(0);
     websocket1.setNoDelay();
@@ -362,13 +346,13 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         var header;
         var ii;
         var mask;
-        websocket1.ii = (websocket1.ii | 0) + 1;
+        websocket1._cbCounter += 1;
         data = {
             method,
             params,
             sessionId: websocket1._sessionId
         };
-        data.id = websocket1.ii;
+        data.id = websocket1._cbCounter;
         data = Buffer.from(JSON.stringify(data));
         // init header
         header = Buffer.allocUnsafe(8);
@@ -396,9 +380,8 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         websocket1.write(data);
         websocket1.uncork();
         // resolve
-        ii = websocket1.ii;
         return new Promise(function (resolve) {
-            callbackDict[ii] = resolve;
+            websocket1._cbDict[websocket1._cbCounter] = resolve;
         });
     }
 
@@ -417,17 +400,17 @@ var websocketOnMessage = function (message) {
         websocket1._sessionId = params.sessionId;
     }
     if (sessionId) {
-        if (id && callbackDict[id]) {
-            const callback = callbackDict[id];
-            delete callbackDict[id];
+        if (id && websocket1._cbDict[id]) {
+            const callback = websocket1._cbDict[id];
+            delete websocket1._cbDict[id];
             callback(result);
         } else {
             assert(!id);
         }
     } else if (id) {
-        const callback = callbackDict[id];
+        const callback = websocket1._cbDict[id];
         // Callbacks could be all rejected if someone has called `.dispose()`.
-        delete callbackDict[id];
+        delete websocket1._cbDict[id];
         callback(result);
         return;
     }
