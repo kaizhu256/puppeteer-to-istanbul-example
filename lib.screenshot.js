@@ -109,7 +109,6 @@ var wsRead = function (chunk) {
  * this function will read <chunk> from websocket1
  */
     var bff;
-    var dst;
     var consume;
     consume = function (nn) {
     /**
@@ -119,23 +118,23 @@ var wsRead = function (chunk) {
       * @return {Buffer} The consumed bytes
       * @private
       */
-        var bff;
+        var tmp;
         wsRead.bufferedBytes -= nn;
         if (nn === wsRead.bffList[0].length) {
-            dst = wsRead.bffList.shift();
+            bff = wsRead.bffList.shift();
             return;
         }
         if (nn < wsRead.bffList[0].length) {
-            bff = wsRead.bffList[0];
-            wsRead.bffList[0] = bff.slice(nn);
-            dst = bff.slice(0, nn);
+            tmp = wsRead.bffList[0];
+            wsRead.bffList[0] = tmp.slice(nn);
+            bff = tmp.slice(0, nn);
             return;
         }
-        dst = Buffer.allocUnsafe(nn);
+        bff = Buffer.allocUnsafe(nn);
         do {
-            const bff = wsRead.bffList[0];
-            wsRead.bffList.shift().copy(dst, dst.length - nn);
-            nn -= bff.length;
+            const tmp = wsRead.bffList[0];
+            wsRead.bffList.shift().copy(bff, bff.length - nn);
+            nn -= tmp.length;
         } while (nn > 0);
     };
     // init
@@ -150,14 +149,13 @@ var wsRead = function (chunk) {
         // Gets extended payload length (7+16).
         case "1_GET_PAYLOAD_LENGTH_16":
             consume(2);
-            wsRead.byteLength = dst.readUInt16BE(0);
+            wsRead.byteLength = bff.readUInt16BE(0);
             wsRead.byteLengthTotal += wsRead.byteLength;
             wsRead.state = "4_GET_DATA";
             break;
         // Gets extended payload length (7+64).
         case "2_GET_PAYLOAD_LENGTH_64":
             consume(8);
-            bff = dst;
             wsRead.byteLength = (
                 0x100000000 * bff.readUInt32BE(0)
                 + bff.readUInt32BE(4)
@@ -170,7 +168,6 @@ var wsRead = function (chunk) {
                 return;
             }
             consume(wsRead.byteLength);
-            bff = dst;
             wsRead.byteLengthTotal = 0;
             wsRead.state = "0_GET_INFO";
             wsOnMessage(bff.toString());
@@ -182,7 +179,6 @@ var wsRead = function (chunk) {
                 return;
             }
             consume(2);
-            bff = dst;
             wsRead.byteLength = bff[1] & 0x7f;
             switch (wsRead.byteLength) {
             case 126:
