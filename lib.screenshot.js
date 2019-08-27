@@ -75,7 +75,6 @@ var wsCallbackDict;
 var wsCreate;
 var wsRead;
 var wsReadConsume;
-var wsReadState;
 var wsWrite;
 var wsSessionId;
 
@@ -106,8 +105,6 @@ wsCreate = function (wsUrl, onError) {
         websocket1._buffers = [];
         websocket1._fragments = [];
         websocket1._messageLength = 0;
-        websocket1._payloadLength = 0;
-        websocket1._totalPayloadLength = 0;
         onError();
     });
 };
@@ -120,38 +117,40 @@ wsRead = function (chunk) {
     var fragments;
     var messageLength;
     var num;
+    wsRead.byteLength |= 0;
+    wsRead.byteLengthTotal |= 0;
     websocket1._bufferedBytes += chunk.length;
     websocket1._buffers.push(chunk);
     while (true) {
-        switch (wsReadState) {
+        switch (wsRead.state) {
         // Gets extended payload length (7+16).
         case "1_GET_PAYLOAD_LENGTH_16":
-            websocket1._payloadLength = wsReadConsume(2).readUInt16BE(0);
-            websocket1._totalPayloadLength += websocket1._payloadLength;
-            wsReadState = "4_GET_DATA";
+            wsRead.byteLength = wsReadConsume(2).readUInt16BE(0);
+            wsRead.byteLengthTotal += wsRead.byteLength;
+            wsRead.state = "4_GET_DATA";
             break;
         // Gets extended payload length (7+64).
         case "2_GET_PAYLOAD_LENGTH_64":
             bff = wsReadConsume(8);
             num = bff.readUInt32BE(0);
-            websocket1._payloadLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
-            websocket1._totalPayloadLength += websocket1._payloadLength;
-            wsReadState = "4_GET_DATA";
+            wsRead.byteLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
+            wsRead.byteLengthTotal += wsRead.byteLength;
+            wsRead.state = "4_GET_DATA";
             break;
         case "4_GET_DATA":
-            if (websocket1._bufferedBytes < websocket1._payloadLength) {
+            if (websocket1._bufferedBytes < wsRead.byteLength) {
                 return;
             }
-            data = wsReadConsume(websocket1._payloadLength);
-            websocket1._messageLength = websocket1._totalPayloadLength;
+            data = wsReadConsume(wsRead.byteLength);
+            websocket1._messageLength = wsRead.byteLengthTotal;
             websocket1._fragments.push(data);
             messageLength = websocket1._messageLength;
             fragments = websocket1._fragments;
-            websocket1._totalPayloadLength = 0;
+            wsRead.byteLengthTotal = 0;
             websocket1._messageLength = 0;
             websocket1._fragments = [];
             bff = fragments[0];
-            wsReadState = "0_GET_INFO";
+            wsRead.state = "0_GET_INFO";
             wsOnMessage(bff.toString());
             break;
         // 0_GET_INFO
@@ -161,17 +160,17 @@ wsRead = function (chunk) {
                 return;
             }
             bff = wsReadConsume(2);
-            websocket1._payloadLength = bff[1] & 0x7f;
-            if (websocket1._payloadLength === 126) {
-                wsReadState = "1_GET_PAYLOAD_LENGTH_16"
+            wsRead.byteLength = bff[1] & 0x7f;
+            if (wsRead.byteLength === 126) {
+                wsRead.state = "1_GET_PAYLOAD_LENGTH_16"
                 break;
             }
-            if (websocket1._payloadLength === 127) {
-                wsReadState = "2_GET_PAYLOAD_LENGTH_64";
+            if (wsRead.byteLength === 127) {
+                wsRead.state = "2_GET_PAYLOAD_LENGTH_64";
                 break;
             }
-            websocket1._totalPayloadLength += websocket1._payloadLength;
-            wsReadState = "4_GET_DATA";
+            wsRead.byteLengthTotal += wsRead.byteLength;
+            wsRead.state = "4_GET_DATA";
         }
     }
 }
