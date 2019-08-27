@@ -113,13 +113,9 @@ var wsRead = function (chunk) {
     var ii;
     var tmp;
     consume = function (nn) {
-    /**
-      * Consumes `nn` bytes from the buffered data.
-      *
-      * @param {Number} nn The number of bytes to consume
-      * @return {Buffer} The consumed bytes
-      * @private
-      */
+    /*
+     * this function will consume <nn> bytes from chunkList
+     */
         tmp = 0;
         ii = wsRead.chunkList.length;
         while (ii > 0) {
@@ -149,12 +145,12 @@ var wsRead = function (chunk) {
             }
         }
     };
-    // init
+    // init chunkList
     wsRead.chunkList = wsRead.chunkList || [];
     wsRead.chunkList.push(chunk);
     while (true) {
         switch (wsRead.state) {
-        // Gets extended payload length (7+16).
+        // init payloadLength from next 2 bytes
         case "1_GET_PAYLOAD_LENGTH_16":
             if (consume(2)) {
                 return;
@@ -162,7 +158,7 @@ var wsRead = function (chunk) {
             wsRead.payloadLength = data.readUInt16BE(0);
             wsRead.state = "4_GET_DATA";
             break;
-        // Gets extended payload length (7+64).
+        // init payloadLength from next 8 bytes
         case "2_GET_PAYLOAD_LENGTH_64":
             if (consume(8)) {
                 return;
@@ -180,8 +176,8 @@ var wsRead = function (chunk) {
             wsRead.state = "0_GET_INFO";
             wsOnMessage(data.toString());
             break;
+        // init payloadLength from first 2 bytes
         // 0_GET_INFO
-        // Reads the first two bytes of a frame.
         default:
             if (consume(2)) {
                 return;
