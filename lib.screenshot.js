@@ -70,11 +70,11 @@ var framemanager1;
 var networkmanager1;
 var page1;
 var websocket1;
-var websocketReceiver;
 var wsCallbackCounter;
 var wsCallbackDict;
 var wsCreate;
 var wsOnData;
+var wsOnDataConsume;
 var wsSend;
 var wsSessionId;
 
@@ -132,7 +132,7 @@ wsOnData = function (chunk) {
                 websocket1._loop = false;
                 break;
             }
-            bff = websocketReceiver.consume(2);
+            bff = wsOnDataConsume(2);
             websocket1._opcode = bff[0] & 0x0f;
             websocket1._payloadLength = bff[1] & 0x7f;
             websocket1._masked = (bff[1] & 0x80) === 0x80;
@@ -147,13 +147,13 @@ wsOnData = function (chunk) {
             break;
         // Gets extended payload length (7+16).
         case GET_PAYLOAD_LENGTH_16:
-            websocket1._payloadLength = websocketReceiver.consume(2).readUInt16BE(0);
+            websocket1._payloadLength = wsOnDataConsume(2).readUInt16BE(0);
             websocket1._totalPayloadLength += websocket1._payloadLength;
             websocket1._state = GET_DATA;
             break;
         // Gets extended payload length (7+64).
         case GET_PAYLOAD_LENGTH_64:
-            bff = websocketReceiver.consume(8);
+            bff = wsOnDataConsume(8);
             num = bff.readUInt32BE(0);
             websocket1._payloadLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
             websocket1._totalPayloadLength += websocket1._payloadLength;
@@ -164,7 +164,7 @@ wsOnData = function (chunk) {
                 websocket1._loop = false;
                 break;
             }
-            data = websocketReceiver.consume(websocket1._payloadLength);
+            data = wsOnDataConsume(websocket1._payloadLength);
             websocket1._messageLength = websocket1._totalPayloadLength;
             websocket1._fragments.push(data);
             messageLength = websocket1._messageLength;
@@ -244,9 +244,7 @@ const INFLATING = 5;
   *
   * @extends stream.Writable
   */
-websocketReceiver = {};
-
-websocketReceiver.consume = function (n) {
+wsOnDataConsume = function (n) {
 /**
   * Consumes `n` bytes from the buffered data.
   *
