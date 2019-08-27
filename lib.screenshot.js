@@ -69,92 +69,45 @@ var frame1;
 var framemanager1;
 var networkmanager1;
 var page1;
-var websocketReceiver;
 var websocket1;
+var websocketReceiver;
 var wsCallbackCounter;
 var wsCallbackDict;
+var wsCreate;
 var wsOnData;
 var wsSend;
 var wsSessionId;
 
+throwError
 wsCallbackCounter = 0;
 wsCallbackDict = {};
-wsSend = function (method, params = {}) {
+wsCreate = function (wsUrl) {
 /*
- * this function will convert <data> to websocket-masked-frame and send it
- * https://tools.ietf.org/html/rfc6455
+ * this function will create websocket1 from <wsUrl>
  */
-    var data;
-    var header;
-    var ii;
-    var mask;
-    wsCallbackCounter += 1;
-    data = {
-        method,
-        params,
-        sessionId: wsSessionId
-    };
-    data.id = wsCallbackCounter;
-    data = Buffer.from(JSON.stringify(data));
-    // init header
-    header = Buffer.allocUnsafe(8);
-    // init field-opcode
-    header[0] = 0x81;
-    // init field-size
-    header[1] = 0xfe;
-    header.writeUInt16BE(data.length, 2);
-    // init field-mask
-    mask = crypto.randomBytes(4);
-    header[4] = mask[0];
-    header[5] = mask[1];
-    header[6] = mask[2];
-    header[7] = mask[3];
-    // send header
-    websocket1.cork();
-    websocket1.write(header);
-    // mask data
-    ii = data.length;
-    while (ii > 0) {
-        ii -= 1;
-        data[ii] = data[ii] ^ mask[ii & 3];
-    }
-    // send data
-    websocket1.write(data);
-    websocket1.uncork();
-    // resolve
-    return new Promise(function (resolve) {
-        wsCallbackDict[wsCallbackCounter] = resolve;
+    wsUrl = new url.URL(wsUrl);
+    http.get({
+        headers: {
+            "Sec-WebSocket-Version": 13,
+            "Sec-WebSocket-Key": crypto.randomBytes(16).toString("base64"),
+            "Connection": "Upgrade",
+            "Upgrade": "websocket"
+        },
+        host: "127.0.0.1",
+        path: wsUrl.pathname,
+        port: wsUrl.port
+    }).on("upgrade", function (ignore, socket) {
+        websocket1 = socket;
+        websocket1.setTimeout(0);
+        websocket1.setNoDelay();
+        websocket1.on("data", wsOnData);
+        websocket1.on("error", local.assertThrow);
     });
-}
-
-
-/*
-lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
-*/
-"use strict";
-
-const GET_INFO = 0;
-const GET_PAYLOAD_LENGTH_16 = 1;
-const GET_PAYLOAD_LENGTH_64 = 2;
-const GET_DATA = 4;
-const INFLATING = 5;
-
-/**
-  * HyBi Receiver implementation.
-  *
-  * @extends stream.Writable
-  */
-websocketReceiver = {};
-websocketReceiver._bufferedBytes = 0;
-websocketReceiver._buffers = [];
-websocketReceiver._payloadLength = 0;
-websocketReceiver._totalPayloadLength = 0;
-websocketReceiver._messageLength = 0;
-websocketReceiver._fragments = [];
-websocketReceiver._state = GET_INFO;
-websocketReceiver._loop = false;
-
+};
 wsOnData = function (chunk) {
+/*
+ * this function will handle websocket1's "data" evt
+ */
     var bff;
     var data;
     var fragments;
@@ -215,6 +168,80 @@ wsOnData = function (chunk) {
         }
     } while (websocketReceiver._loop);
 }
+
+wsSend = function (method, params = {}) {
+/*
+ * this function will convert <data> to websocket-masked-frame and send it
+ * https://tools.ietf.org/html/rfc6455
+ */
+    var data;
+    var header;
+    var ii;
+    var mask;
+    wsCallbackCounter += 1;
+    data = {
+        method,
+        params,
+        sessionId: wsSessionId
+    };
+    data.id = wsCallbackCounter;
+    data = Buffer.from(JSON.stringify(data));
+    // init header
+    header = Buffer.allocUnsafe(8);
+    // init field-opcode
+    header[0] = 0x81;
+    // init field-size
+    header[1] = 0xfe;
+    header.writeUInt16BE(data.length, 2);
+    // init field-mask
+    mask = crypto.randomBytes(4);
+    header[4] = mask[0];
+    header[5] = mask[1];
+    header[6] = mask[2];
+    header[7] = mask[3];
+    // send header
+    websocket1.cork();
+    websocket1.write(header);
+    // mask data
+    ii = data.length;
+    while (ii > 0) {
+        ii -= 1;
+        data[ii] = data[ii] ^ mask[ii & 3];
+    }
+    // send data
+    websocket1.write(data);
+    websocket1.uncork();
+    // resolve
+    return new Promise(function (resolve) {
+        wsCallbackDict[wsCallbackCounter] = resolve;
+    });
+}
+
+/*
+lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
+*/
+"use strict";
+
+const GET_INFO = 0;
+const GET_PAYLOAD_LENGTH_16 = 1;
+const GET_PAYLOAD_LENGTH_64 = 2;
+const GET_DATA = 4;
+const INFLATING = 5;
+
+/**
+  * HyBi Receiver implementation.
+  *
+  * @extends stream.Writable
+  */
+websocketReceiver = {};
+websocketReceiver._bufferedBytes = 0;
+websocketReceiver._buffers = [];
+websocketReceiver._payloadLength = 0;
+websocketReceiver._totalPayloadLength = 0;
+websocketReceiver._messageLength = 0;
+websocketReceiver._fragments = [];
+websocketReceiver._state = GET_INFO;
+websocketReceiver._loop = false;
 
 websocketReceiver.consume = function (n) {
 /**
