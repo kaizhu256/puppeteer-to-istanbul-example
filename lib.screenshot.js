@@ -427,16 +427,16 @@ var wsOnMessage = function (message) {
     var params;
     var sessionId;
     message = JSON.parse(message);
-    params = message.params;
-    sessionId = message.sessionId;
-    if (message.id && wsCallbackDict[message.id]) {
-        callback = wsCallbackDict[message.id];
+    callback = wsCallbackDict[message.id];
+    if (callback) {
         delete wsCallbackDict[message.id];
         callback(message.result);
     }
     if (message.id) {
         return;
     }
+    params = message.params;
+    sessionId = message.sessionId;
     switch (message.method) {
     case "Network.requestWillBeSent":
         networkmanager1._onRequestWillBeSent(params);
