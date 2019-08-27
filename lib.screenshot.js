@@ -111,7 +111,6 @@ var wsRead = function (chunk) {
     var bff;
     var consume;
     var ii;
-    var jj;
     var tmp;
     consume = function (nn) {
     /**
@@ -138,29 +137,17 @@ var wsRead = function (chunk) {
             bff = wsRead.bffList.shift();
             return;
         }
-
-        //!! bff = Buffer.allocUnsafe(nn);
-        //!! while (nn) {
-            //!! tmp = wsRead.bffList[0];
-            //!! nn -= Math.min(nn, tmp.length);
-            //!! tmp.copy(bff, f
-            //!! if (tmp.length > nn) {
-                //!! return;
-            //!! }
-        //!! }
-
-        if (nn < wsRead.bffList[0].length) {
-            tmp = wsRead.bffList[0];
-            wsRead.bffList[0] = tmp.slice(nn);
-            bff = tmp.slice(0, nn);
-            return;
-        }
         bff = Buffer.allocUnsafe(nn);
-        do {
-            const tmp = wsRead.bffList[0];
-            wsRead.bffList.shift().copy(bff, bff.length - nn);
-            nn -= tmp.length;
-        } while (nn > 0);
+        ii = 0;
+        while (ii < bff.length) {
+            tmp = wsRead.bffList.shift();
+            nn = tmp.copy(bff, ii);
+            ii += nn;
+            if (nn < tmp.length) {
+                tmp = tmp.slice(nn);
+                wsRead.bffList.unshift(tmp);
+            }
+        }
     };
     // init
     wsRead.bffList = wsRead.bffList || [];
