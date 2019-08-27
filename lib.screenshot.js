@@ -422,13 +422,12 @@ class Browser extends EventEmitter {
   * @param {string} message
   */
 var wsOnMessage = function (message) {
-    var callback;
     var params;
     message = JSON.parse(message);
     if (message.id) {
-        callback = wsCallbackDict[message.id];
+        params = wsCallbackDict[message.id];
         delete wsCallbackDict[message.id];
-        callback(message.result);
+        params(message.result);
     }
     params = message.params;
     switch (message.method) {
