@@ -175,7 +175,7 @@ wsRead = function (chunk) {
     }
 }
 
-wsWrite = function (method, params = {}) {
+wsWrite = function (method, params) {
 /*
  * this function will convert <data> to websocket-masked-frame and send it
  * https://tools.ietf.org/html/rfc6455
@@ -184,12 +184,12 @@ wsWrite = function (method, params = {}) {
     var header;
     var ii;
     var mask;
-    wsCallbackCounter += 1;
     data = {
         method,
         params,
         sessionId: wsSessionId
     };
+    wsCallbackCounter += 1;
     data.id = wsCallbackCounter;
     data = Buffer.from(JSON.stringify(data));
     // init header
@@ -629,15 +629,15 @@ class FrameManager extends EventEmitter {
                 frameTree
             }
         ] = await Promise.all([
-            wsWrite("Page.enable"),
-            wsWrite("Page.getFrameTree"),
+            wsWrite("Page.enable", {}),
+            wsWrite("Page.getFrameTree", {}),
         ]);
         framemanager1._onFrameNavigated(frameTree.frame);
         await Promise.all([
             wsWrite("Page.setLifecycleEventsEnabled", {
                 enabled: true
             }),
-            wsWrite("Runtime.enable").then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
+            wsWrite("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
             framemanager1._networkManager.initialize(),
         ]);
     }
@@ -889,7 +889,7 @@ class NetworkManager extends EventEmitter {
     }
 
     async initialize() {
-        await wsWrite("Network.enable");
+        await wsWrite("Network.enable", {});
     }
 
     /**
@@ -1088,8 +1088,8 @@ class Page extends EventEmitter {
                 waitForDebuggerOnStart: false,
                 flatten: true
             }),
-            wsWrite("Performance.enable"),
-            wsWrite("Log.enable"),
+            wsWrite("Performance.enable", {}),
+            wsWrite("Log.enable", {}),
         ]);
     }
 }

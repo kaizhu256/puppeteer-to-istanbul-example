@@ -382,7 +382,7 @@ return html.trim()` + " + \"\\n\""
 ]);
 
 // Attempt to close chrome gracefully
-wsWrite("Browser.close").catch(function (err) {
+wsWrite("Browser.close", {}).catch(function (err) {
     console.error(err);
     chromeKillSync();
 });
