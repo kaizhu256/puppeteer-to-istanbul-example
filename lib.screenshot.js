@@ -104,7 +104,7 @@ wsCreate = function (wsUrl, onError) {
         onError();
     });
 };
-wsRead = function (chunk) {
+wsRead2 = function (chunk) {
 /*
  * this function will read <chunk> from websocket1
  */
@@ -202,85 +202,60 @@ wsReadConsume = function (n) {
     } while (n > 0);
     return dst;
 }
-var wsRead2 = function (chunk) {
+var wsRead = function (chunk) {
 /*
  * this function will read <chunk> from websocket1
  */
-    //!! var bff;
-    //!! var data;
-    //!! var fragments;
-    //!! var messageLength;
-    //!! var num;
-
-    // init
-    wsRead.bff = (
-        wsRead.bff
-        ? Buffer.concat(wsRead.bff, chunk)
-        : chunk
-    );
-
-    // init
-    wsRead.byteLength = wsRead.byteLength || 0;
-    wsRead.byteLengthTotal = wsRead.byteLengthTotal || 0;
-    wsRead.bufferedBytes = wsRead.bufferedBytes || 0;
-    wsRead.bffList = wsRead.bffList || [];
-    wsRead.fragments = wsRead.fragments || [];
-    wsRead.messageLength = wsRead.messageLength || 0;
-    wsRead.bufferedBytes += chunk.length;
-    wsRead.bffList.push(chunk);
-    while (true) {
-        switch (wsRead.state) {
-        // Gets extended payload length (7+16).
-        case "1_GET_PAYLOAD_LENGTH_16":
-            wsRead.byteLength = wsReadConsume(2).readUInt16BE(0);
-            wsRead.byteLengthTotal += wsRead.byteLength;
-            wsRead.state = "4_GET_DATA";
-            break;
-        // Gets extended payload length (7+64).
-        case "2_GET_PAYLOAD_LENGTH_64":
-            bff = wsReadConsume(8);
-            num = bff.readUInt32BE(0);
-            wsRead.byteLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
-            wsRead.byteLengthTotal += wsRead.byteLength;
-            wsRead.state = "4_GET_DATA";
-            break;
-        case "4_GET_DATA":
-            if (wsRead.bufferedBytes < wsRead.byteLength) {
+    var bff;
+    // init bff
+    chunk = chunk || Buffer.allocUnsafe(0);
+    wsRead.bff = wsRead.bff || chunk;
+    wsRead.bff = Buffer.concat(wsRead.bff, chunk);
+    switch (wsRead.state | 0) {
+    // Reads the first two bytes of a frame.
+    case 0:
+        switch (wsRead.bff[1] & 0x7f) {
+        case 0:
+            return;
+        // Gets extended payload length (7+16) bits.
+        case 126:
+            if (wsRead.bff.length < (2 + 2)) {
                 return;
             }
-            data = wsReadConsume(wsRead.byteLength);
-            wsRead.messageLength = wsRead.byteLengthTotal;
-            wsRead.fragments.push(data);
-            messageLength = wsRead.messageLength;
-            fragments = wsRead.fragments;
-            wsRead.byteLengthTotal = 0;
-            wsRead.messageLength = 0;
-            wsRead.fragments = [];
-            bff = fragments[0];
-            wsRead.state = "0_GET_INFO";
-            wsOnMessage(bff.toString());
+            wsRead.payloadLength = wsRead.bff.readUInt16BE(2);
+            wsRead.bff = wsRead.bff.slice(2 + 2);
             break;
-        // 0_GET_INFO
-        // Reads the first two bytes of a frame.
+        // Gets extended payload length (7+64) bits.
+        case 127
+            if (wsRead.bff.length < (2 + 8)) {
+                return;
+            }
+            wsRead.payloadLength = (
+                wsRead.bff.readUInt32BE(2) * 0x100000000
+                + wsRead.bff.readUInt32BE(6)
+            );
+            wsRead.bff = wsRead.bff.slice(2 + 8);
+            break;
+        // Gets payload length (7) bits.
         default:
-            if (wsRead.bufferedBytes < 2) {
-                return;
-            }
-            bff = wsReadConsume(2);
-            wsRead.byteLength = bff[1] & 0x7f;
-            if (wsRead.byteLength === 126) {
-                wsRead.state = "1_GET_PAYLOAD_LENGTH_16"
-                break;
-            }
-            if (wsRead.byteLength === 127) {
-                wsRead.state = "2_GET_PAYLOAD_LENGTH_64";
-                break;
-            }
-            wsRead.byteLengthTotal += wsRead.byteLength;
-            wsRead.state = "4_GET_DATA";
+            wsRead.payloadLength = wsRead.bff[1];
+            wsRead.bff = wsRead.bff.slice(2);
         }
+        wsRead.state = 1;
+        wsRead();
+        break;
+    // Reads data bytes.
+    case 1:
+        if (bff.length < wsRead.payloadLength) {
+            return;
+        }
+        wsRead.state = 0;
+        bff = wsRead.bff.slice(0, wsRead.payloadLength);
+        wsRead.bff = wsRead.bff.slice(wsRead.payloadLength);
+        wsOnMessage(bff.toString());
+        break;
     }
-}
+};
 wsWrite = function (method, params) {
 /*
  * this function will convert <data> to websocket-masked-frame and send it
