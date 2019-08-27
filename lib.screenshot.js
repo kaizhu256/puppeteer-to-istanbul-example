@@ -72,6 +72,8 @@ var page1;
 var websocketReceiver;
 var websocket1;
 var websocketSend;
+var wsCallbackCounter = 0;
+var wsCallbackDict = {};
 
 /*
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
@@ -162,7 +164,7 @@ websocketReceiver.write = function (chunk) {
             websocketReceiver._fragments = [];
             bff = fragments[0];
             websocketReceiver._state = GET_INFO;
-            websocketOnMessage(bff.toString());
+            wsOnMessage(bff.toString());
             break;
         }
     } while (websocketReceiver._loop);
@@ -210,11 +212,9 @@ websocketReceiver.consume = function (n) {
 
 function initAsClient(socket) {
     websocket1 = socket;
-    websocket1._cbDict = {};
-    websocket1._cbCounter = 0;
     websocket1.setTimeout(0);
     websocket1.setNoDelay();
-    websocket1.on("data",websocketReceiver.write);
+    websocket1.on("data", websocketReceiver.write);
     websocket1.on("error", local.assertThrow);
 }
 
@@ -331,13 +331,13 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         var header;
         var ii;
         var mask;
-        websocket1._cbCounter += 1;
+        wsCallbackCounter += 1;
         data = {
             method,
             params,
             sessionId: websocket1._sessionId
         };
-        data.id = websocket1._cbCounter;
+        data.id = wsCallbackCounter;
         data = Buffer.from(JSON.stringify(data));
         // init header
         header = Buffer.allocUnsafe(8);
@@ -366,14 +366,14 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
         websocket1.uncork();
         // resolve
         return new Promise(function (resolve) {
-            websocket1._cbDict[websocket1._cbCounter] = resolve;
+            wsCallbackDict[wsCallbackCounter] = resolve;
         });
     }
 
 /**
   * @param {string} message
   */
-var websocketOnMessage = function (message) {
+var wsOnMessage = function (message) {
     let {
         id,
         method,
@@ -385,17 +385,17 @@ var websocketOnMessage = function (message) {
         websocket1._sessionId = params.sessionId;
     }
     if (sessionId) {
-        if (id && websocket1._cbDict[id]) {
-            const callback = websocket1._cbDict[id];
-            delete websocket1._cbDict[id];
+        if (id && wsCallbackDict[id]) {
+            const callback = wsCallbackDict[id];
+            delete wsCallbackDict[id];
             callback(result);
         } else {
             assert(!id);
         }
     } else if (id) {
-        const callback = websocket1._cbDict[id];
+        const callback = wsCallbackDict[id];
         // Callbacks could be all rejected if someone has called `.dispose()`.
-        delete websocket1._cbDict[id];
+        delete wsCallbackDict[id];
         callback(result);
         return;
     }
