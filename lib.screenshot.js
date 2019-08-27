@@ -161,17 +161,36 @@ var wsRead = function (chunk) {
                 return;
             }
             bff = wsReadConsume(2);
-            switch(bff[1] & 0x7f) {
+            wsRead.byteLength = bff[1] & 0x7f;
+            switch (wsRead.byteLength) {
             case 126:
                 wsRead.state = "1_GET_PAYLOAD_LENGTH_16"
                 break;
             case 127:
-                wsRead.state = "2_GET_PAYLOAD_LENGTH_64"
+                wsRead.state = "2_GET_PAYLOAD_LENGTH_64";
                 break;
+            default:
+                wsRead.byteLengthTotal += wsRead.byteLength;
+                wsRead.state = "4_GET_DATA";
             }
-            wsRead.byteLengthTotal += wsRead.byteLength;
-            wsRead.state = "4_GET_DATA";
         }
+        //!! // 0_GET_INFO
+        //!! // Reads the first two bytes of a frame.
+        //!! default:
+            //!! bff = wsReadConsume(2);
+            //!! switch(bff[1] & 0x7f) {
+            //!! case 0:
+                //!! return;
+            //!! case 126:
+                //!! wsRead.state = "1_GET_PAYLOAD_LENGTH_16"
+                //!! break;
+            //!! case 127:
+                //!! wsRead.state = "2_GET_PAYLOAD_LENGTH_64"
+                //!! break;
+            //!! default:
+                //!! wsRead.byteLengthTotal += bff[1] & 0x7f;
+                //!! wsRead.state = "4_GET_DATA";
+            //!! }
     }
 }
 wsReadConsume = function (n) {
