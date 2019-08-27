@@ -235,7 +235,7 @@ onDataUrlInspect = function (data) {
 
 
 
-gotoNext = async function (err, data, meta) {
+gotoNext = async function (err, data) {
     gotoState += 1;
     if (err) {
         onReject(err);
@@ -283,21 +283,9 @@ gotoNext = async function (err, data, meta) {
         chromeProcess.stderr.on("data", onDataUrlInspect);
         break;
     case 2:
-        data = new url.URL(urlWebsocket);
-        http.get({
-            headers: {
-                "Sec-WebSocket-Version": 13,
-                "Sec-WebSocket-Key": crypto.randomBytes(16).toString("base64"),
-                "Connection": "Upgrade",
-                "Upgrade": "websocket"
-            },
-            host: "127.0.0.1",
-            path: data.pathname,
-            port: data.port
-        }).on("upgrade", gotoNextData);
+        module.exports.wsCreate(urlWebsocket, gotoNext);
         break;
     case 3:
-        module.exports.initAsClient(meta);
         browser1 = await module.exports.Browser.create(
             null,
             [],

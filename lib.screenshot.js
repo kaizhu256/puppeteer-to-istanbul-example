@@ -78,10 +78,10 @@ var wsOnData;
 var wsSend;
 var wsSessionId;
 
-throwError
+//!! throwError
 wsCallbackCounter = 0;
 wsCallbackDict = {};
-wsCreate = function (wsUrl) {
+wsCreate = function (wsUrl, onError) {
 /*
  * this function will create websocket1 from <wsUrl>
  */
@@ -101,7 +101,7 @@ wsCreate = function (wsUrl) {
         websocket1.setTimeout(0);
         websocket1.setNoDelay();
         websocket1.on("data", wsOnData);
-        websocket1.on("error", local.assertThrow);
+        onError();
     });
 };
 wsOnData = function (chunk) {
@@ -282,16 +282,6 @@ websocketReceiver.consume = function (n) {
         websocketReceiver._totalPayloadLength += websocketReceiver._payloadLength;
         websocketReceiver._state = GET_DATA;
     }
-
-function initAsClient(socket) {
-    websocket1 = socket;
-    websocket1.setTimeout(0);
-    websocket1.setNoDelay();
-    websocket1.on("data", wsOnData);
-    websocket1.on("error", local.assertThrow);
-}
-
-
 
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
@@ -1123,7 +1113,7 @@ Browser,
 LifecycleWatcher,
 Page,
 domworld2,
-initAsClient,
+wsCreate,
 wsSend
 };
 /*
