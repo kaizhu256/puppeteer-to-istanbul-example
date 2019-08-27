@@ -425,21 +425,15 @@ var wsOnMessage = function (message) {
     var callback;
     var method;
     var params;
-    var result;
     var sessionId;
     message = JSON.parse(message);
-    method = message.method;
     params = message.params;
-    result = message.result;
     sessionId = message.sessionId;
-    if (method === "Target.attachedToTarget") {
-        wsSessionId = params.sessionId;
-    }
     if (sessionId) {
         if (message.id && wsCallbackDict[message.id]) {
             callback = wsCallbackDict[message.id];
             delete wsCallbackDict[message.id];
-            callback(result);
+            callback(message.result);
         } else {
             assert(!message.id);
         }
@@ -447,24 +441,10 @@ var wsOnMessage = function (message) {
         callback = wsCallbackDict[message.id];
         // Callbacks could be all rejected if someone has called `.dispose()`.
         delete wsCallbackDict[message.id];
-        callback(result);
+        callback(message.result);
         return;
     }
-    switch (method) {
-    //!! message = JSON.parse(message);
-    //!! callback = message.id && wsCallbackDict[message.id];
-    //!! if (!callback) {
-        //!! return;
-    //!! }
-    //!! delete wsCallbackDict[message.id];
-    //!! method = message.method;
-    //!! params = message.params;
-    //!! result = message.result;
-    //!! sessionId = message.sessionId;
-    //!! if (method === "Target.attachedToTarget") {
-        //!! wsSessionId = params.sessionId;
-    //!! }
-    //!! switch (message.method) {
+    switch (message.method) {
     case "Network.requestWillBeSent":
         networkmanager1._onRequestWillBeSent(params);
         break;
@@ -497,6 +477,9 @@ var wsOnMessage = function (message) {
         break;
     case "Runtime.executionContextDestroyed":
         framemanager1._onExecutionContextDestroyed(params.executionContextId);
+        break;
+    case "Target.attachedToTarget":
+        wsSessionId = params.sessionId;
         break;
     case "Target.targetCreated":
         browser1._targetCreated(params);
