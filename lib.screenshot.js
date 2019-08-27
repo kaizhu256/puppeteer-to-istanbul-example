@@ -120,13 +120,16 @@ var wsRead = function (chunk) {
       * @return {Buffer} The consumed bytes
       * @private
       */
+        if (nn === 0) {
+            bff = Buffer.allocUnsafe(nn);
+            return 0;
+        }
         bffLength = wsRead.bffList.reduce(function (nn, aa) {
             return nn + aa.length;
         }, 0);
         if (nn > bffLength) {
             return;
         }
-        wsRead.bufferedBytes -= nn;
         if (nn === wsRead.bffList[0].length) {
             bff = wsRead.bffList.shift();
             return true;
@@ -146,11 +149,7 @@ var wsRead = function (chunk) {
         return true;
     };
     // init
-    wsRead.byteLength = wsRead.byteLength || 0;
-    wsRead.byteLengthTotal = wsRead.byteLengthTotal || 0;
-    wsRead.bufferedBytes = wsRead.bufferedBytes || 0;
     wsRead.bffList = wsRead.bffList || [];
-    wsRead.bufferedBytes += chunk.length;
     wsRead.bffList.push(chunk);
     while (true) {
         switch (wsRead.state) {
@@ -160,7 +159,6 @@ var wsRead = function (chunk) {
                 return;
             }
             wsRead.byteLength = bff.readUInt16BE(0);
-            wsRead.byteLengthTotal += wsRead.byteLength;
             wsRead.state = "4_GET_DATA";
             break;
         // Gets extended payload length (7+64).
@@ -172,14 +170,12 @@ var wsRead = function (chunk) {
                 0x100000000 * bff.readUInt32BE(0)
                 + bff.readUInt32BE(4)
             );
-            wsRead.byteLengthTotal += wsRead.byteLength;
             wsRead.state = "4_GET_DATA";
             break;
         case "4_GET_DATA":
             if (!consume(wsRead.byteLength)) {
                 return;
             }
-            wsRead.byteLengthTotal = 0;
             wsRead.state = "0_GET_INFO";
             wsOnMessage(bff.toString());
             break;
