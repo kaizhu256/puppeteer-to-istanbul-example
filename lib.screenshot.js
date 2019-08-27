@@ -73,9 +73,9 @@ var websocket1;
 var wsCallbackCounter;
 var wsCallbackDict;
 var wsCreate;
-var wsGotoState;
 var wsRead;
 var wsReadConsume;
+var wsReadState;
 var wsWrite;
 var wsSessionId;
 
@@ -107,7 +107,7 @@ wsCreate = function (wsUrl, onError) {
         websocket1._fragments = [];
         websocket1._messageLength = 0;
         websocket1._payloadLength = 0;
-        wsGotoState = GET_INFO;
+        wsReadState = "0_GET_INFO";
         websocket1._totalPayloadLength = 0;
         onError();
     });
@@ -124,38 +124,38 @@ wsRead = function (chunk) {
     websocket1._bufferedBytes += chunk.length;
     websocket1._buffers.push(chunk);
     while (true) {
-        switch (wsGotoState) {
+        switch (wsReadState) {
         // Reads the first two bytes of a frame.
-        case GET_INFO:
+        case "0_GET_INFO":
             if (websocket1._bufferedBytes < 2) {
                 return;
             }
             bff = wsReadConsume(2);
             websocket1._payloadLength = bff[1] & 0x7f;
             if (websocket1._payloadLength === 126) {
-                wsGotoState = GET_PAYLOAD_LENGTH_16
+                wsReadState = "1_GET_PAYLOAD_LENGTH_16"
             } else if (websocket1._payloadLength === 127) {
-                wsGotoState = GET_PAYLOAD_LENGTH_64;
+                wsReadState = "2_GET_PAYLOAD_LENGTH_64";
             } else {
                 websocket1._totalPayloadLength += websocket1._payloadLength;
-                wsGotoState = GET_DATA;
+                wsReadState = "4_GET_DATA";
             }
             break;
         // Gets extended payload length (7+16).
-        case GET_PAYLOAD_LENGTH_16:
+        case "1_GET_PAYLOAD_LENGTH_16":
             websocket1._payloadLength = wsReadConsume(2).readUInt16BE(0);
             websocket1._totalPayloadLength += websocket1._payloadLength;
-            wsGotoState = GET_DATA;
+            wsReadState = "4_GET_DATA";
             break;
         // Gets extended payload length (7+64).
-        case GET_PAYLOAD_LENGTH_64:
+        case "2_GET_PAYLOAD_LENGTH_64":
             bff = wsReadConsume(8);
             num = bff.readUInt32BE(0);
             websocket1._payloadLength = num * Math.pow(2, 32) + bff.readUInt32BE(4);
             websocket1._totalPayloadLength += websocket1._payloadLength;
-            wsGotoState = GET_DATA;
+            wsReadState = "4_GET_DATA";
             break;
-        case GET_DATA:
+        case "4_GET_DATA":
             if (websocket1._bufferedBytes < websocket1._payloadLength) {
                 return;
             }
@@ -168,7 +168,7 @@ wsRead = function (chunk) {
             websocket1._messageLength = 0;
             websocket1._fragments = [];
             bff = fragments[0];
-            wsGotoState = GET_INFO;
+            wsReadState = "0_GET_INFO";
             wsOnMessage(bff.toString());
             break;
         }
@@ -227,12 +227,6 @@ wsWrite = function (method, params) {
 lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
 */
 "use strict";
-
-const GET_INFO = 0;
-const GET_PAYLOAD_LENGTH_16 = 1;
-const GET_PAYLOAD_LENGTH_64 = 2;
-const GET_DATA = 4;
-const INFLATING = 5;
 
 /**
   * HyBi Receiver implementation.
