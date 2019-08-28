@@ -79,6 +79,8 @@ var wsOnEventDict;
 var wsRead;
 var wsSessionId;
 var wsWrite;
+networkmanager1 = {};
+networkmanager1._requestIdToRequest = new Map();
 
 Domworld = null;
 Request = null;
@@ -88,7 +90,6 @@ domworld1 = null;
 domworld2 = null;
 frame1 = null;
 framemanager1 = null;
-networkmanager1 = null;
 watcher1 = null;
 
 local.nop(browser1);
@@ -96,7 +97,6 @@ local.nop(domworld1);
 local.nop(domworld2);
 local.nop(frame1);
 local.nop(framemanager1);
-local.nop(networkmanager1);
 local.nop(watcher1);
 local.nop(wsCreate);
 local.nop(wsWrite);
@@ -539,7 +539,7 @@ class ExecutionContext {
 
 
 
-framemanager1 = new EventEmitter();
+framemanager1 = {};
 /** @type {!Map<number, !ExecutionContext>} */
 framemanager1._contextIdToContext = new Map();
 /** @type {!Set<string>} */
@@ -597,42 +597,14 @@ framemanager1._ensureIsolatedWorld = async function (name) {
 
 
 
-networkmanager1 = new EventEmitter();
-/** @type {!Map<string, !Request>} */
-networkmanager1._requestIdToRequest = new Map();
-/** @type {!Map<string, !Protocol.Network.requestWillBeSentPayload>} */
-networkmanager1._requestIdToRequestWillBeSentEvent = new Map();
-/** @type {!Object<string, string>} */
-networkmanager1._extraHTTPHeaders = {};
-
-networkmanager1._offline = false;
-
-/** @type {?{username: string, password: string}} */
-networkmanager1._credentials = null;
-/** @type {!Set<string>} */
-networkmanager1._userRequestInterceptionEnabled = false;
-networkmanager1._protocolRequestInterceptionEnabled = false;
-networkmanager1._userCacheDisabled = false;
-/** @type {!Map<string, string>} */
-
-/**
-  * @return {!Object<string, string>}
-  */
-networkmanager1.extraHTTPHeaders = function () {
-    return Object.assign({}, networkmanager1._extraHTTPHeaders);
-}
-
 class Request0 {
     /**
       * @param {!Puppeteer.CDPSession} client
-      * @param {boolean} allowInterception
-      * @param {!Protocol.Network.requestWillBeSentPayload} evt
       * @param {!Array<!Request>} redirectChain
       */
     constructor(evt, redirectChain) {
         this._requestId = evt.requestId;
         this._isNavigationRequest = evt.requestId === evt.loaderId && evt.type === "Document";
-        this._allowInterception = networkmanager1._userRequestInterceptionEnabled;
         this._interceptionHandled = false;
         this._response = null;
         this._failureText = null;
@@ -737,7 +709,6 @@ var pageCreate = async function () {
     await new Promise(function (resolve) {
         wsWrite("Page.navigate", {
             url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
-            referer: networkmanager1.extraHTTPHeaders().referer,
             frameId: frame1._id
         }).then(resolve);
     });
