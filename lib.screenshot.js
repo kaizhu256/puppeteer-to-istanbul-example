@@ -86,10 +86,7 @@ frame1 = null;
 framemanager1 = null;
 networkmanager1 = null;
 page1 = null;
-wsCreate = null;
 wsReadConsume = null;
-wsSessionId = null;
-wsWrite = null;
 
 local.nop(browser1);
 local.nop(domworld1);
@@ -99,7 +96,6 @@ local.nop(framemanager1);
 local.nop(networkmanager1);
 local.nop(page1);
 local.nop(wsCreate);
-local.nop(wsRead);
 local.nop(wsReadConsume);
 local.nop(wsWrite);
 
