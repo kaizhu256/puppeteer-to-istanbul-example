@@ -281,7 +281,7 @@ wsOnMessageDict["Page.lifecycleEvent"] = function (evt) {
 };
 wsOnMessageDict["Runtime.executionContextCreated"] = function (evt) {
     let world = null;
-    if (evt.context.auxData && Boolean(evt.context.auxDat.isDefault)) {
+    if (evt.context.auxData && Boolean(evt.context.auxData.isDefault)) {
         world = domworld1;
     } else if (
         evt.context.name === "__puppeteer_utility_world__"
@@ -619,7 +619,6 @@ class ExecutionContext {
       * @param {?Puppeteer.Domworld} world
       */
     constructor(client, contextPayload, world) {
-        debugInline();
         this._world = world;
         this._contextId = contextPayload.id;
     }
