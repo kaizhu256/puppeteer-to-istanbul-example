@@ -61,7 +61,6 @@ local.nop(
 
 
 
-/* jslint ignore:start */
 var browser1;
 var domworld1;
 var domworld2;
@@ -73,10 +72,37 @@ var websocket1;
 var wsCallbackCounter;
 var wsCallbackDict;
 var wsCreate;
+var wsOnMessage;
 var wsRead;
 var wsReadConsume;
-var wsWrite;
 var wsSessionId;
+var wsWrite;
+
+browser1 = null;
+domworld1 = null;
+domworld2 = null;
+frame1 = null;
+framemanager1 = null;
+networkmanager1 = null;
+page1 = null;
+wsCreate = null;
+wsReadConsume = null;
+wsSessionId = null;
+wsWrite = null;
+
+local.nop(browser1);
+local.nop(domworld1);
+local.nop(domworld2);
+local.nop(frame1);
+local.nop(framemanager1);
+local.nop(networkmanager1);
+local.nop(page1);
+local.nop(wsCreate);
+local.nop(wsRead);
+local.nop(wsReadConsume);
+local.nop(wsWrite);
+
+
 
 //!! throwError
 wsCallbackCounter = 0;
@@ -104,7 +130,62 @@ wsCreate = function (wsUrl, onError) {
         onError();
     });
 };
-var wsRead = function (chunk) {
+wsOnMessage = function (message) {
+    var params;
+    message = JSON.parse(message);
+    if (wsCallbackDict[message.id]) {
+        wsCallbackDict[message.id](message.result);
+    }
+    params = message.params;
+    switch (message.method) {
+    case "Network.requestWillBeSent":
+        networkmanager1._onRequestWillBeSent(params);
+        break;
+    case "Network.requestServedFromCache":
+        networkmanager1._onRequestServedFromCache(params);
+        break;
+    case "Network.responseReceived":
+        networkmanager1._onResponseReceived(params);
+        break;
+    case "Network.loadingFinished":
+        networkmanager1._onLoadingFinished(params);
+        break;
+    case "Page.domContentEventFired":
+        page1.emit(Events.Page.DOMContentLoaded);
+        break;
+    case "Page.loadEventFired":
+        page1.emit(Events.Page.Load);
+        break;
+    case "Page.frameNavigated":
+        framemanager1._onFrameNavigated(params.frame);
+        break;
+    case "Page.frameStoppedLoading":
+        framemanager1._onFrameStoppedLoading(params.frameId);
+        break;
+    case "Page.lifecycleEvent":
+        framemanager1._onLifecycleEvent(params);
+        break;
+    case "Runtime.executionContextCreated":
+        framemanager1._onExecutionContextCreated(params.context);
+        break;
+    case "Runtime.executionContextDestroyed":
+        framemanager1._onExecutionContextDestroyed(params.executionContextId);
+        break;
+    case "Target.attachedToTarget":
+        wsSessionId = params.sessionId;
+        break;
+    case "Target.targetCreated":
+        browser1._targetCreated(params);
+        break;
+    case "Target.targetDestroyed":
+        browser1._targetDestroyed(params);
+        break;
+    case "Target.targetInfoChanged":
+        browser1._targetInfoChanged(params);
+        break;
+    }
+}
+wsRead = function (chunk) {
 /*
  * this function will read <chunk> from websocket1
  */
@@ -185,7 +266,7 @@ var wsRead = function (chunk) {
             wsRead.payloadLength = data[1] & 0x7f;
             switch (wsRead.payloadLength) {
             case 126:
-                wsRead.state = "1_GET_PAYLOAD_LENGTH_16"
+                wsRead.state = "1_GET_PAYLOAD_LENGTH_16";
                 break;
             case 127:
                 wsRead.state = "2_GET_PAYLOAD_LENGTH_64";
@@ -195,7 +276,7 @@ var wsRead = function (chunk) {
             }
         }
     }
-}
+};
 wsWrite = function (method, params) {
 /*
  * this function will convert <data> to websocket-masked-frame and send it
@@ -238,12 +319,18 @@ wsWrite = function (method, params) {
     // send data
     websocket1.write(data);
     websocket1.uncork();
+    // cleanup
+    ii = wsCallbackCounter;
+    setTimeout(function () {
+        delete wsCallbackDict[ii];
+    }, 30000);
     // resolve
     return new Promise(function (resolve) {
-        wsCallbackDict[wsCallbackCounter] = resolve;
+        wsCallbackDict[ii] = resolve;
     });
-}
+};
 
+/* jslint ignore:start */
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
 */
@@ -333,69 +420,6 @@ class Browser extends EventEmitter {
             target._initializedCallback(true);
             return;
         }
-    }
-}
-
-
-
-/**
-  * @param {string} message
-  */
-var wsOnMessage = function (message) {
-    var params;
-    message = JSON.parse(message);
-    if (message.id) {
-        params = wsCallbackDict[message.id];
-        delete wsCallbackDict[message.id];
-        params(message.result);
-    }
-    params = message.params;
-    switch (message.method) {
-    case "Network.requestWillBeSent":
-        networkmanager1._onRequestWillBeSent(params);
-        break;
-    case "Network.requestServedFromCache":
-        networkmanager1._onRequestServedFromCache(params);
-        break;
-    case "Network.responseReceived":
-        networkmanager1._onResponseReceived(params);
-        break;
-    case "Network.loadingFinished":
-        networkmanager1._onLoadingFinished(params);
-        break;
-    case "Page.domContentEventFired":
-        page1.emit(Events.Page.DOMContentLoaded);
-        break;
-    case "Page.loadEventFired":
-        page1.emit(Events.Page.Load);
-        break;
-    case "Page.frameNavigated":
-        framemanager1._onFrameNavigated(params.frame);
-        break;
-    case "Page.frameStoppedLoading":
-        framemanager1._onFrameStoppedLoading(params.frameId);
-        break;
-    case "Page.lifecycleEvent":
-        framemanager1._onLifecycleEvent(params);
-        break;
-    case "Runtime.executionContextCreated":
-        framemanager1._onExecutionContextCreated(params.context);
-        break;
-    case "Runtime.executionContextDestroyed":
-        framemanager1._onExecutionContextDestroyed(params.executionContextId);
-        break;
-    case "Target.attachedToTarget":
-        wsSessionId = params.sessionId;
-        break;
-    case "Target.targetCreated":
-        browser1._targetCreated(params);
-        break;
-    case "Target.targetDestroyed":
-        browser1._targetDestroyed(params);
-        break;
-    case "Target.targetInfoChanged":
-        browser1._targetInfoChanged(params);
-        break;
     }
 }
 
