@@ -73,6 +73,7 @@ var wsCallbackCounter;
 var wsCallbackDict;
 var wsCreate;
 var wsOnMessage;
+var wsOnMessageDict;
 var wsRead;
 var wsReadConsume;
 var wsSessionId;
@@ -193,7 +194,7 @@ wsOnMessage = function (message) {
     params = message.params;
     switch (message.method) {
     case "Network.loadingFinished":
-        networkmanager1._onLoadingFinished(params);
+        wsOnMessageDict[message.method](message.params);
         break;
     case "Network.requestServedFromCache":
         networkmanager1._onRequestServedFromCache(params);
@@ -232,6 +233,15 @@ wsOnMessage = function (message) {
         browser1._targetInfoChanged(params);
         break;
     }
+};
+wsOnMessageDict = {};
+wsOnMessageDict["Network.loadingFinished"] = function (evt) {
+    const request = networkmanager1._requestIdToRequest.get(evt.requestId);
+    // Under certain conditions we never get the Network.responseReceived
+    // evt from protocol. @see https://crbug.com/883475
+    request._response._bodyLoadedPromiseFulfill.call(null);
+    networkmanager1._requestIdToRequest.delete(request._requestId);
+    networkmanager1._attemptedAuthentications.delete(request._interceptionId);
 };
 wsRead = function (chunk) {
 /*
@@ -414,10 +424,10 @@ class Browser extends EventEmitter {
     }
 
     /**
-      * @param {!Protocol.Target.targetCreatedPayload} event
+      * @param {!Protocol.Target.targetCreatedPayload} evt
       */
-    async _targetCreated(event) {
-        const targetInfo = event.targetInfo;
+    async _targetCreated(evt) {
+        const targetInfo = evt.targetInfo;
         const target = {};
         target._targetInfo = targetInfo;
         target._targetId = targetInfo.targetId;
@@ -440,28 +450,28 @@ class Browser extends EventEmitter {
             target._initializedCallback(true);
         }
 
-        browser1.targetDict[event.targetInfo.targetId] = target;
+        browser1.targetDict[evt.targetInfo.targetId] = target;
     }
 
     /**
-      * @param {{targetId: string}} event
+      * @param {{targetId: string}} evt
       */
-    async _targetDestroyed(event) {
-        const target = browser1.targetDict[event.targetId];
+    async _targetDestroyed(evt) {
+        const target = browser1.targetDict[evt.targetId];
         target._initializedCallback(false);
-        delete browser1.targetDict[event.targetId];
+        delete browser1.targetDict[evt.targetId];
         target._closedCallback();
     }
 
     /**
-      * @param {!Protocol.Target.targetInfoChangedPayload} event
+      * @param {!Protocol.Target.targetInfoChangedPayload} evt
       */
-    _targetInfoChanged(event) {
-        const target = browser1.targetDict[event.targetInfo.targetId];
+    _targetInfoChanged(evt) {
+        const target = browser1.targetDict[evt.targetInfo.targetId];
         assert(target, "target should exist before targetInfoChanged");
         const previousURL = target._url;
         const wasInitialized = target._isInitialized;
-        target._targetInfo = event.targetInfo;
+        target._targetInfo = evt.targetInfo;
 
         if (!target._isInitialized && (target._targetInfo.type !== "page" || target._targetInfo.url !== "")) {
             target._isInitialized = true;
@@ -479,7 +489,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DOMWorld.js
 class DOMWorld {
     /**
       * @param {!Puppeteer.FrameManager} frameManager
-      * @param {!Puppeteer.Frame} frame
       */
     constructor() {
         this._frame = frame1;
@@ -582,7 +591,7 @@ framemanager1._contextIdToContext = new Map();
 framemanager1._isolatedWorlds = new Set();
 
 /**
-  * @param {!Protocol.Page.lifecycleEventPayload} event
+  * @param {!Protocol.Page.lifecycleEventPayload} evt
   */
 framemanager1._onLifecycleEvent = function (evt) {
     if (evt.name === "init") {
@@ -602,14 +611,10 @@ framemanager1._onFrameStoppedLoading = function (frameId) {
     framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
 }
 
-/**
-  * @param {!Protocol.Page.Frame} framePayload
-  */
 framemanager1._onFrameNavigated = function (framePayload) {
     // Update or create main frame.
     if (!frame1) {
         // Initial main frame navigation.
-        //!! frame1 = new Frame(framePayload.id);
         frame1 = {};
         frame1._id = framePayload.id;
         frame1._url = "";
@@ -683,7 +688,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/LifecycleWatcher.js
 class LifecycleWatcher {
     /**
       * @param {!Puppeteer.FrameManager} frameManager
-      * @param {!Puppeteer.Frame} frame
       * @param {string|!Array<string>} waitUntil
       * @param {number} timeout
       */
@@ -738,13 +742,12 @@ class LifecycleWatcher {
             return;
         this._newDocumentNavigationCompleteCallback();
         /**
-          * @param {!Puppeteer.Frame} frame
           * @param {!Array<string>} expectedLifecycle
           * @return {boolean}
           */
         function checkLifecycle(frame, expectedLifecycle) {
-            for (const event of expectedLifecycle) {
-                if (!frame._lifecycleEvents.has(event))
+            for (const evt of expectedLifecycle) {
+                if (!frame._lifecycleEvents.has(evt))
                     return false;
             }
             return true;
@@ -789,35 +792,35 @@ networkmanager1.extraHTTPHeaders = function () {
 }
 
 /**
-  * @param {!Protocol.Network.requestWillBeSentPayload} event
+  * @param {!Protocol.Network.requestWillBeSentPayload} evt
   */
-networkmanager1._onRequestWillBeSent = function (event) {
+networkmanager1._onRequestWillBeSent = function (evt) {
     // Request interception doesn't happen for data URLs with Network Service.
-    networkmanager1._onRequest(event, null);
+    networkmanager1._onRequest(evt, null);
 }
 
 /**
-  * @param {!Protocol.Network.requestWillBeSentPayload} event
+  * @param {!Protocol.Network.requestWillBeSentPayload} evt
   * @param {?string} interceptionId
   */
-networkmanager1._onRequest = function (event, interceptionId) {
+networkmanager1._onRequest = function (evt, interceptionId) {
     let redirectChain = [];
-    if (event.redirectResponse) {
-        const request = networkmanager1._requestIdToRequest.get(event.requestId);
-        // If we connect late to the target, we could have missed the requestWillBeSent event.
-        networkmanager1._handleRequestRedirect(request, event.redirectResponse);
+    if (evt.redirectResponse) {
+        const request = networkmanager1._requestIdToRequest.get(evt.requestId);
+        // If we connect late to the target, we could have missed the requestWillBeSent evt.
+        networkmanager1._handleRequestRedirect(request, evt.redirectResponse);
         redirectChain = request._redirectChain;
     }
-    const request = new Request(null, frame1, interceptionId, networkmanager1._userRequestInterceptionEnabled, event, redirectChain);
-    networkmanager1._requestIdToRequest.set(event.requestId, request);
+    const request = new Request(null, frame1, interceptionId, networkmanager1._userRequestInterceptionEnabled, evt, redirectChain);
+    networkmanager1._requestIdToRequest.set(evt.requestId, request);
     networkmanager1.emit(Events.NetworkManager.Request, request);
 }
 
 /**
-  * @param {!Protocol.Network.requestServedFromCachePayload} event
+  * @param {!Protocol.Network.requestServedFromCachePayload} evt
   */
-networkmanager1._onRequestServedFromCache = function (event) {
-    const request = networkmanager1._requestIdToRequest.get(event.requestId);
+networkmanager1._onRequestServedFromCache = function (evt) {
+    const request = networkmanager1._requestIdToRequest.get(evt.requestId);
     request._fromMemoryCache = true;
 }
 
@@ -835,53 +838,46 @@ networkmanager1._handleRequestRedirect = function (request, responsePayload) {
 }
 
 /**
-  * @param {!Protocol.Network.responseReceivedPayload} event
+  * @param {!Protocol.Network.responseReceivedPayload} evt
   */
-networkmanager1._onResponseReceived = function (event) {
-    const request = networkmanager1._requestIdToRequest.get(event.requestId);
-    const response = new Response(null, request, event.response);
+networkmanager1._onResponseReceived = function (evt) {
+    const request = networkmanager1._requestIdToRequest.get(evt.requestId);
+    const response = new Response(null, request, evt.response);
     request._response = response;
 }
 
 /**
-  * @param {!Protocol.Network.loadingFinishedPayload} event
+  * @param {!Protocol.Network.loadingFinishedPayload} evt
   */
-networkmanager1._onLoadingFinished = function (event) {
-    const request = networkmanager1._requestIdToRequest.get(event.requestId);
-    // Under certain conditions we never get the Network.responseReceived
-    // event from protocol. @see https://crbug.com/883475
-    request._response._bodyLoadedPromiseFulfill.call(null);
-    networkmanager1._requestIdToRequest.delete(request._requestId);
-    networkmanager1._attemptedAuthentications.delete(request._interceptionId);
+networkmanager1._onLoadingFinished = function (evt) {
 }
 
 class Request {
     /**
       * @param {!Puppeteer.CDPSession} client
-      * @param {?Puppeteer.Frame} frame
       * @param {string} interceptionId
       * @param {boolean} allowInterception
-      * @param {!Protocol.Network.requestWillBeSentPayload} event
+      * @param {!Protocol.Network.requestWillBeSentPayload} evt
       * @param {!Array<!Request>} redirectChain
       */
-    constructor(client, frame, interceptionId, allowInterception, event, redirectChain) {
-        this._requestId = event.requestId;
-        this._isNavigationRequest = event.requestId === event.loaderId && event.type === "Document";
+    constructor(client, frame, interceptionId, allowInterception, evt, redirectChain) {
+        this._requestId = evt.requestId;
+        this._isNavigationRequest = evt.requestId === evt.loaderId && evt.type === "Document";
         this._interceptionId = interceptionId;
         this._allowInterception = allowInterception;
         this._interceptionHandled = false;
         this._response = null;
         this._failureText = null;
 
-        this._url = event.request.url;
-        this._resourceType = event.type.toLowerCase();
-        this._method = event.request.method;
-        this._postData = event.request.postData;
+        this._url = evt.request.url;
+        this._resourceType = evt.type.toLowerCase();
+        this._method = evt.request.method;
+        this._postData = evt.request.postData;
         this._headers = {};
         this._frame = frame;
         this._redirectChain = redirectChain;
-        for (const key of Object.keys(event.request.headers))
-            this._headers[key.toLowerCase()] = event.request.headers[key];
+        for (const key of Object.keys(evt.request.headers))
+            this._headers[key.toLowerCase()] = evt.request.headers[key];
 
         this._fromMemoryCache = false;
     }
