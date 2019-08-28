@@ -826,10 +826,6 @@ constructor() {
     networkmanager1._requestIdToInterceptionId = new Map();
 }
 
-async initialize() {
-    await wsWrite("Network.enable", {});
-}
-
 /**
   * @return {!Object<string, string>}
   */
@@ -973,11 +969,11 @@ var pageCreate = async function () {
         url: "about:blank"
     });
     target1 = browser1.targetDict[target1.targetId];
+    module.exports.target1 = target1;
     await wsWrite("Target.attachToTarget", {
         flatten: true,
         targetId: target1._targetInfo.targetId
     });
-    module.exports.target1 = target1;
 
 
 
@@ -994,14 +990,13 @@ var pageCreate = async function () {
 
 
 
-    new NetworkManager();
     await Promise.all([
         await Promise.all([
             wsWrite("Page.setLifecycleEventsEnabled", {
                 enabled: true
             }),
             wsWrite("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
-            networkmanager1.initialize(),
+            wsWrite("Network.enable", {});
         ]),
         wsWrite("Target.setAutoAttach", {
             autoAttach: true,
