@@ -62,7 +62,6 @@ local.nop(
 
 
 var Domworld;
-var Events;
 var Response;
 var browser1;
 var domworld1;
@@ -70,6 +69,7 @@ var domworld2;
 var frame1;
 var framemanager1;
 var networkmanager1;
+var watcher1;
 var websocket1;
 var wsCallbackCounter;
 var wsCallbackDict;
@@ -88,7 +88,6 @@ frame1 = null;
 framemanager1 = null;
 networkmanager1 = null;
 
-local.nop(Events);
 local.nop(browser1);
 local.nop(domworld1);
 local.nop(domworld2);
@@ -100,66 +99,6 @@ local.nop(wsWrite);
 
 
 
-Events = {
-    Page: {
-        Close: "close",
-        Console: "console",
-        Dialog: "dialog",
-        DOMContentLoaded: "domcontentloaded",
-        Error: "error",
-        // Can't use just 'error' due to node.js special treatment
-        // of error events.
-        // @see https://nodejs.org/api/events.html#events_error_events
-        PageError: "pageerror",
-        Request: "request",
-        Response: "response",
-        RequestFailed: "requestfailed",
-        RequestFinished: "requestfinished",
-        FrameAttached: "frameattached",
-        FrameDetached: "framedetached",
-        FrameNavigated: "framenavigated",
-        Load: "load",
-        Metrics: "metrics",
-        Popup: "popup",
-        WorkerCreated: "workercreated",
-        WorkerDestroyed: "workerdestroyed"
-    },
-    Browser: {
-        TargetCreated: "targetcreated",
-        TargetDestroyed: "targetdestroyed",
-        TargetChanged: "targetchanged",
-        Disconnected: "disconnected"
-    },
-    BrowserContext: {
-        TargetCreated: "targetcreated",
-        TargetDestroyed: "targetdestroyed",
-        TargetChanged: "targetchanged"
-    },
-    NetworkManager: {
-        Request: Symbol("Events.NetworkManager.Request"),
-        Response: Symbol("Events.NetworkManager.Response"),
-        RequestFailed: Symbol("Events.NetworkManager.RequestFailed"),
-        RequestFinished: Symbol("Events.NetworkManager.RequestFinished")
-    },
-    FrameManager: {
-        FrameAttached: Symbol("Events.FrameManager.FrameAttached"),
-        FrameNavigated: Symbol("Events.FrameManager.FrameNavigated"),
-        FrameDetached: Symbol("Events.FrameManager.FrameDetached"),
-        LifecycleEvent: Symbol("Events.FrameManager.LifecycleEvent"),
-        ExecutionContextCreated: Symbol(
-            "Events.FrameManager.ExecutionContextCreated"
-        ),
-        ExecutionContextDestroyed: Symbol(
-            "Events.FrameManager.ExecutionContextDestroyed"
-        )
-    },
-    Connection: {
-        Disconnected: Symbol("Events.Connection.Disconnected")
-    },
-    CDPSession: {
-        Disconnected: Symbol("Events.CDPSession.Disconnected")
-    }
-};
 wsCallbackCounter = 0;
 wsCallbackDict = {};
 wsCreate = function (wsUrl, onError) {
@@ -236,7 +175,7 @@ wsOnEventDict["Page.frameNavigated"] = function (evt) {
 wsOnEventDict["Page.frameStoppedLoading"] = function () {
     frame1._lifecycleEvents.add("DOMContentLoaded");
     frame1._lifecycleEvents.add("load");
-    framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
+    watcher1._checkLifecycleComplete(frame1);
 };
 wsOnEventDict["Page.lifecycleEvent"] = function (evt) {
     if (evt.name === "init") {
@@ -244,7 +183,9 @@ wsOnEventDict["Page.lifecycleEvent"] = function (evt) {
         frame1._lifecycleEvents.clear();
     }
     frame1._lifecycleEvents.add(evt.name);
-    framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
+    if (watcher1) {
+        watcher1._checkLifecycleComplete(frame1);
+    }
 };
 wsOnEventDict["Runtime.executionContextCreated"] = function (evt) {
     let world = null;
@@ -480,7 +421,6 @@ wsWrite = function (method, params) {
 
 /* jslint ignore:start */
 
-    var watcher1;
     browser1 = {};
     browser1._contexts = new Map();
     browser1.targetDict = {};
@@ -530,12 +470,6 @@ class Domworld0 {
     }
 }
 Domworld = Domworld0;
-
-
-
-/*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Events.js
-*/
 
 
 
@@ -621,18 +555,11 @@ class LifecycleWatcher {
         watcher1 = this;
         watcher1._expectedLifecycle = [
             "load"
-        ].map(value => {
-            const protocolEvent = puppeteerToProtocolLifecycle[value];
-            assert(protocolEvent, "Unknown value for options.waitUntil: " + value);
-            return protocolEvent;
-        });
-
+        ];
         watcher1._frame = frame1;
         watcher1._initialLoaderId = frame1._loaderId;
         /** @type {?Puppeteer.Request} */
         watcher1._navigationRequest = null;
-        framemanager1.on(Events.FrameManager.LifecycleEvent, watcher1._checkLifecycleComplete.bind(watcher1));
-        networkmanager1.on(Events.NetworkManager.Request, watcher1._onRequest.bind(watcher1));
         watcher1._sameDocumentNavigationPromise = new Promise(fulfill => {
             watcher1._sameDocumentNavigationCompleteCallback = fulfill;
         });
@@ -682,13 +609,6 @@ class LifecycleWatcher {
     }
 }
 
-const puppeteerToProtocolLifecycle = {
-    "load": "load",
-    "domcontentloaded": "DOMContentLoaded",
-    "networkidle0": "networkIdle",
-    "networkidle2": "networkAlmostIdle",
-};
-
 
 
 networkmanager1 = new EventEmitter();
@@ -732,7 +652,7 @@ networkmanager1._onRequest = function (evt, interceptionId) {
     }
     const request = new Request(null, frame1, interceptionId, networkmanager1._userRequestInterceptionEnabled, evt, redirectChain);
     networkmanager1._requestIdToRequest.set(evt.requestId, request);
-    networkmanager1.emit(Events.NetworkManager.Request, request);
+    watcher1._onRequest(request);
 }
 
 /**
