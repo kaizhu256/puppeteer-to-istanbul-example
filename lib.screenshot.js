@@ -582,7 +582,7 @@ class FrameManager extends EventEmitter {
     constructor(client, page) {
         super();
         framemanager1 = this;
-        module.exports.framemanager1 = this;
+        module.exports.framemanager1 = framemanager1;
         framemanager1._networkManager = new NetworkManager(client);
         /** @type {!Map<number, !ExecutionContext>} */
         framemanager1._contextIdToContext = new Map();
