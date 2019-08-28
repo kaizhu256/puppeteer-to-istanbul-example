@@ -61,6 +61,7 @@ local.nop(
 
 
 
+var Events;
 var browser1;
 var domworld1;
 var domworld2;
@@ -104,7 +105,67 @@ local.nop(wsWrite);
 
 
 
-//!! throwError
+Events = {
+    Page: {
+        Close: "close",
+        Console: "console",
+        Dialog: "dialog",
+        DOMContentLoaded: "domcontentloaded",
+        Error: "error",
+        // Can't use just 'error' due to node.js special treatment of error events.
+        // @see https://nodejs.org/api/events.html#events_error_events
+        PageError: "pageerror",
+        Request: "request",
+        Response: "response",
+        RequestFailed: "requestfailed",
+        RequestFinished: "requestfinished",
+        FrameAttached: "frameattached",
+        FrameDetached: "framedetached",
+        FrameNavigated: "framenavigated",
+        Load: "load",
+        Metrics: "metrics",
+        Popup: "popup",
+        WorkerCreated: "workercreated",
+        WorkerDestroyed: "workerdestroyed",
+    },
+
+    Browser: {
+        TargetCreated: "targetcreated",
+        TargetDestroyed: "targetdestroyed",
+        TargetChanged: "targetchanged",
+        Disconnected: "disconnected"
+    },
+
+    BrowserContext: {
+        TargetCreated: "targetcreated",
+        TargetDestroyed: "targetdestroyed",
+        TargetChanged: "targetchanged",
+    },
+
+    NetworkManager: {
+        Request: Symbol("Events.NetworkManager.Request"),
+        Response: Symbol("Events.NetworkManager.Response"),
+        RequestFailed: Symbol("Events.NetworkManager.RequestFailed"),
+        RequestFinished: Symbol("Events.NetworkManager.RequestFinished"),
+    },
+
+    FrameManager: {
+        FrameAttached: Symbol("Events.FrameManager.FrameAttached"),
+        FrameNavigated: Symbol("Events.FrameManager.FrameNavigated"),
+        FrameDetached: Symbol("Events.FrameManager.FrameDetached"),
+        LifecycleEvent: Symbol("Events.FrameManager.LifecycleEvent"),
+        ExecutionContextCreated: Symbol("Events.FrameManager.ExecutionContextCreated"),
+        ExecutionContextDestroyed: Symbol("Events.FrameManager.ExecutionContextDestroyed"),
+    },
+
+    Connection: {
+        Disconnected: Symbol("Events.Connection.Disconnected"),
+    },
+
+    CDPSession: {
+        Disconnected: Symbol("Events.CDPSession.Disconnected"),
+    },
+};
 wsCallbackCounter = 0;
 wsCallbackDict = {};
 wsCreate = function (wsUrl, onError) {
@@ -138,23 +199,20 @@ wsOnMessage = function (message) {
     }
     params = message.params;
     switch (message.method) {
-    case "Network.requestWillBeSent":
-        networkmanager1._onRequestWillBeSent(params);
+    case "Network.loadingFinished":
+        networkmanager1._onLoadingFinished(params);
         break;
     case "Network.requestServedFromCache":
         networkmanager1._onRequestServedFromCache(params);
         break;
+    case "Network.requestWillBeSent":
+        networkmanager1._onRequestWillBeSent(params);
+        break;
     case "Network.responseReceived":
         networkmanager1._onResponseReceived(params);
         break;
-    case "Network.loadingFinished":
-        networkmanager1._onLoadingFinished(params);
-        break;
     case "Page.domContentEventFired":
         page1.emit(Events.Page.DOMContentLoaded);
-        break;
-    case "Page.loadEventFired":
-        page1.emit(Events.Page.Load);
         break;
     case "Page.frameNavigated":
         framemanager1._onFrameNavigated(params.frame);
@@ -164,6 +222,9 @@ wsOnMessage = function (message) {
         break;
     case "Page.lifecycleEvent":
         framemanager1._onLifecycleEvent(params);
+        break;
+    case "Page.loadEventFired":
+        page1.emit(Events.Page.Load);
         break;
     case "Runtime.executionContextCreated":
         framemanager1._onExecutionContextCreated(params.context);
@@ -184,7 +245,7 @@ wsOnMessage = function (message) {
         browser1._targetInfoChanged(params);
         break;
     }
-}
+};
 wsRead = function (chunk) {
 /*
  * this function will read <chunk> from websocket1
@@ -474,67 +535,6 @@ class DOMWorld {
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Events.js
 */
-const Events = {
-    Page: {
-        Close: "close",
-        Console: "console",
-        Dialog: "dialog",
-        DOMContentLoaded: "domcontentloaded",
-        Error: "error",
-        // Can't use just 'error' due to node.js special treatment of error events.
-        // @see https://nodejs.org/api/events.html#events_error_events
-        PageError: "pageerror",
-        Request: "request",
-        Response: "response",
-        RequestFailed: "requestfailed",
-        RequestFinished: "requestfinished",
-        FrameAttached: "frameattached",
-        FrameDetached: "framedetached",
-        FrameNavigated: "framenavigated",
-        Load: "load",
-        Metrics: "metrics",
-        Popup: "popup",
-        WorkerCreated: "workercreated",
-        WorkerDestroyed: "workerdestroyed",
-    },
-
-    Browser: {
-        TargetCreated: "targetcreated",
-        TargetDestroyed: "targetdestroyed",
-        TargetChanged: "targetchanged",
-        Disconnected: "disconnected"
-    },
-
-    BrowserContext: {
-        TargetCreated: "targetcreated",
-        TargetDestroyed: "targetdestroyed",
-        TargetChanged: "targetchanged",
-    },
-
-    NetworkManager: {
-        Request: Symbol("Events.NetworkManager.Request"),
-        Response: Symbol("Events.NetworkManager.Response"),
-        RequestFailed: Symbol("Events.NetworkManager.RequestFailed"),
-        RequestFinished: Symbol("Events.NetworkManager.RequestFinished"),
-    },
-
-    FrameManager: {
-        FrameAttached: Symbol("Events.FrameManager.FrameAttached"),
-        FrameNavigated: Symbol("Events.FrameManager.FrameNavigated"),
-        FrameDetached: Symbol("Events.FrameManager.FrameDetached"),
-        LifecycleEvent: Symbol("Events.FrameManager.LifecycleEvent"),
-        ExecutionContextCreated: Symbol("Events.FrameManager.ExecutionContextCreated"),
-        ExecutionContextDestroyed: Symbol("Events.FrameManager.ExecutionContextDestroyed"),
-    },
-
-    Connection: {
-        Disconnected: Symbol("Events.Connection.Disconnected"),
-    },
-
-    CDPSession: {
-        Disconnected: Symbol("Events.CDPSession.Disconnected"),
-    },
-};
 
 
 
