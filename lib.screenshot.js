@@ -112,7 +112,8 @@ Events = {
         Dialog: "dialog",
         DOMContentLoaded: "domcontentloaded",
         Error: "error",
-        // Can't use just 'error' due to node.js special treatment of error events.
+        // Can't use just 'error' due to node.js special treatment
+        // of error events.
         // @see https://nodejs.org/api/events.html#events_error_events
         PageError: "pageerror",
         Request: "request",
@@ -126,45 +127,43 @@ Events = {
         Metrics: "metrics",
         Popup: "popup",
         WorkerCreated: "workercreated",
-        WorkerDestroyed: "workerdestroyed",
+        WorkerDestroyed: "workerdestroyed"
     },
-
     Browser: {
         TargetCreated: "targetcreated",
         TargetDestroyed: "targetdestroyed",
         TargetChanged: "targetchanged",
         Disconnected: "disconnected"
     },
-
     BrowserContext: {
         TargetCreated: "targetcreated",
         TargetDestroyed: "targetdestroyed",
-        TargetChanged: "targetchanged",
+        TargetChanged: "targetchanged"
     },
-
     NetworkManager: {
         Request: Symbol("Events.NetworkManager.Request"),
         Response: Symbol("Events.NetworkManager.Response"),
         RequestFailed: Symbol("Events.NetworkManager.RequestFailed"),
-        RequestFinished: Symbol("Events.NetworkManager.RequestFinished"),
+        RequestFinished: Symbol("Events.NetworkManager.RequestFinished")
     },
-
     FrameManager: {
         FrameAttached: Symbol("Events.FrameManager.FrameAttached"),
         FrameNavigated: Symbol("Events.FrameManager.FrameNavigated"),
         FrameDetached: Symbol("Events.FrameManager.FrameDetached"),
         LifecycleEvent: Symbol("Events.FrameManager.LifecycleEvent"),
-        ExecutionContextCreated: Symbol("Events.FrameManager.ExecutionContextCreated"),
-        ExecutionContextDestroyed: Symbol("Events.FrameManager.ExecutionContextDestroyed"),
+        ExecutionContextCreated: Symbol(
+            "Events.FrameManager.ExecutionContextCreated"
+        ),
+        ExecutionContextDestroyed: Symbol(
+            "Events.FrameManager.ExecutionContextDestroyed"
+        )
     },
-
     Connection: {
-        Disconnected: Symbol("Events.Connection.Disconnected"),
+        Disconnected: Symbol("Events.Connection.Disconnected")
     },
-
     CDPSession: {
-        Disconnected: Symbol("Events.CDPSession.Disconnected"),
-    },
+        Disconnected: Symbol("Events.CDPSession.Disconnected")
+    }
 };
 wsCallbackCounter = 0;
 wsCallbackDict = {};
