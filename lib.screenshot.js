@@ -88,6 +88,7 @@ networkmanager1 = null;
 page1 = null;
 wsReadConsume = null;
 
+local.nop(Events);
 local.nop(browser1);
 local.nop(domworld1);
 local.nop(domworld2);
@@ -998,28 +999,9 @@ class Response {
 
 
 
-/*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Page.js
-*/
-class Page extends EventEmitter {
-    /**
-      * @param {!Puppeteer.CDPSession} client
-      * @param {!Puppeteer.Target} target
-      * @return {!Promise<!Page>}
-      */
-    static async create(client, target) {
-        page1 = new Page(client, target);
-        await page1._initialize();
-        return page1;
-    }
+page1 = {};
 
-    /**
-      * @param {!Puppeteer.CDPSession} client
-      * @param {!Puppeteer.Target} target
-      */
-    constructor(client, target) {
-        super();
-        page1 = this;
+    page1.create = async function (client, target) {
         page1._target = target;
         /** @type {!FrameManager} */
         new FrameManager(client, page1);
@@ -1033,9 +1015,6 @@ class Page extends EventEmitter {
         const networkManager = framemanager1._networkManager;
         page1._fileChooserInterceptionIsDisabled = false;
         page1._fileChooserInterceptors = new Set();
-    }
-
-    async _initialize() {
         await Promise.all([
             framemanager1.initialize(),
             wsWrite("Target.setAutoAttach", {
@@ -1047,11 +1026,11 @@ class Page extends EventEmitter {
             wsWrite("Log.enable", {}),
         ]);
     }
-}
+
 module.exports = {
 Browser,
 LifecycleWatcher,
-Page,
+page1,
 wsCreate,
 wsWrite
 };

@@ -314,7 +314,8 @@ await wsWrite("Target.attachToTarget", {
     flatten: true,
     targetId: tmp._targetInfo.targetId
 });
-page1 = await module.exports.Page.create(null, tmp);
+page1 = module.exports.page1;
+await page1.create(null, tmp);
 
 
 
