@@ -581,26 +581,6 @@ framemanager1._contextIdToContext = new Map();
 /** @type {!Set<string>} */
 framemanager1._isolatedWorlds = new Set();
 
-framemanager1.initialize = async function () {
-    const [
-        ,
-        {
-            frameTree
-        }
-    ] = await Promise.all([
-        wsWrite("Page.enable", {}),
-        wsWrite("Page.getFrameTree", {}),
-    ]);
-    framemanager1._onFrameNavigated(frameTree.frame);
-    await Promise.all([
-        wsWrite("Page.setLifecycleEventsEnabled", {
-            enabled: true
-        }),
-        wsWrite("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
-        networkmanager1.initialize(),
-    ]);
-}
-
 /**
   * @param {!Protocol.Page.lifecycleEventPayload} event
   */
@@ -999,9 +979,30 @@ var pageCreate = async function () {
     });
     module.exports.target1 = target1;
 
+
+
+    const [
+        ,
+        {
+            frameTree
+        }
+    ] = await Promise.all([
+        wsWrite("Page.enable", {}),
+        wsWrite("Page.getFrameTree", {}),
+    ]);
+    framemanager1._onFrameNavigated(frameTree.frame);
+
+
+
     new NetworkManager();
     await Promise.all([
-        framemanager1.initialize(),
+        await Promise.all([
+            wsWrite("Page.setLifecycleEventsEnabled", {
+                enabled: true
+            }),
+            wsWrite("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
+            networkmanager1.initialize(),
+        ]),
         wsWrite("Target.setAutoAttach", {
             autoAttach: true,
             waitForDebuggerOnStart: false,

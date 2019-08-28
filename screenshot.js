@@ -170,16 +170,9 @@ local.nop(assert, path, util);
 
 // require module
 assert = require("assert");
-//!! EventEmitter = require("events");
 child_process = require("child_process");
-//!! crypto = require("crypto");
 fs = require("fs");
-//!! http = require("http");
-//!! https = require("https");
-//!! net = require("net");
-//!! os = require("os");
 path = require("path");
-//!! url = require("url");
 util = require("util");
 module.exports = require("./lib.screenshot.js");
 wsWrite = module.exports.wsWrite;
