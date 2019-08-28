@@ -576,7 +576,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/FrameManager.js
 const UTILITY_WORLD_NAME = "__puppeteer_utility_world__";
 
 framemanager1 = new EventEmitter();
-module.exports.framemanager1 = framemanager1;
 /** @type {!Map<number, !ExecutionContext>} */
 framemanager1._contextIdToContext = new Map();
 /** @type {!Set<string>} */
@@ -670,7 +669,6 @@ class Frame {
       */
     constructor(frameId) {
         frame1 = this;
-        module.exports.frame1 = this;
         frame1._url = "";
         frame1._id = frameId;
         frame1._detached = false;
@@ -683,7 +681,6 @@ class Frame {
         module.exports.domworld1 = domworld1;
         /** @type {!DOMWorld} */
         domworld2 = new DOMWorld();
-        module.exports.domworld2 = domworld2;
     }
 
     /**
@@ -796,7 +793,6 @@ const puppeteerToProtocolLifecycle = {
 
 
 networkmanager1 = new EventEmitter();
-module.exports.networkmanager1 = networkmanager1;
 /** @type {!Map<string, !Request>} */
 networkmanager1._requestIdToRequest = new Map();
 /** @type {!Map<string, !Protocol.Network.requestWillBeSentPayload>} */
