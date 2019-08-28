@@ -1000,32 +1000,31 @@ class Response {
 
 
 page1 = {};
+page1.create = async function (client, target) {
+    page1._target = target;
+    /** @type {!FrameManager} */
+    new FrameManager(client, page1);
+    /** @type {!Map<string, Function>} */
+    page1._pageBindings = new Map();
+    page1._javascriptEnabled = true;
 
-    page1.create = async function (client, target) {
-        page1._target = target;
-        /** @type {!FrameManager} */
-        new FrameManager(client, page1);
-        /** @type {!Map<string, Function>} */
-        page1._pageBindings = new Map();
-        page1._javascriptEnabled = true;
+    /** @type {!Map<string, Worker>} */
+    page1._workers = new Map();
 
-        /** @type {!Map<string, Worker>} */
-        page1._workers = new Map();
-
-        const networkManager = framemanager1._networkManager;
-        page1._fileChooserInterceptionIsDisabled = false;
-        page1._fileChooserInterceptors = new Set();
-        await Promise.all([
-            framemanager1.initialize(),
-            wsWrite("Target.setAutoAttach", {
-                autoAttach: true,
-                waitForDebuggerOnStart: false,
-                flatten: true
-            }),
-            wsWrite("Performance.enable", {}),
-            wsWrite("Log.enable", {}),
-        ]);
-    }
+    const networkManager = framemanager1._networkManager;
+    page1._fileChooserInterceptionIsDisabled = false;
+    page1._fileChooserInterceptors = new Set();
+    await Promise.all([
+        framemanager1.initialize(),
+        wsWrite("Target.setAutoAttach", {
+            autoAttach: true,
+            waitForDebuggerOnStart: false,
+            flatten: true
+        }),
+        wsWrite("Performance.enable", {}),
+        wsWrite("Log.enable", {}),
+    ]);
+}
 
 module.exports = {
 Browser,

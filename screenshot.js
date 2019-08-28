@@ -309,7 +309,7 @@ await new Promise(function (resolve, reject) {
 tmp = await wsWrite("Target.createTarget", {
     url: "about:blank"
 });
-tmp = await browser1.targetDict[tmp.targetId];
+tmp = browser1.targetDict[tmp.targetId];
 await wsWrite("Target.attachToTarget", {
     flatten: true,
     targetId: tmp._targetInfo.targetId
