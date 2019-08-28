@@ -70,7 +70,6 @@ var domworld2;
 var frame1;
 var framemanager1;
 var networkmanager1;
-var watcher1;
 var websocket1;
 var wsCallbackCounter;
 var wsCallbackDict;
@@ -481,6 +480,7 @@ wsWrite = function (method, params) {
 
 /* jslint ignore:start */
 
+    var watcher1;
     browser1 = {};
     browser1._contexts = new Map();
     browser1.targetDict = {};
@@ -618,7 +618,8 @@ class LifecycleWatcher {
       * @param {number} timeout
       */
     constructor() {
-        this._expectedLifecycle = [
+        watcher1 = this;
+        watcher1._expectedLifecycle = [
             "load"
         ].map(value => {
             const protocolEvent = puppeteerToProtocolLifecycle[value];
@@ -626,48 +627,47 @@ class LifecycleWatcher {
             return protocolEvent;
         });
 
-        this._frame = frame1;
-        this._initialLoaderId = frame1._loaderId;
-        this._timeout = timeout;
+        watcher1._frame = frame1;
+        watcher1._initialLoaderId = frame1._loaderId;
         /** @type {?Puppeteer.Request} */
-        this._navigationRequest = null;
-        framemanager1.on(Events.FrameManager.LifecycleEvent, this._checkLifecycleComplete.bind(this));
-        networkmanager1.on(Events.NetworkManager.Request, this._onRequest.bind(this));
-        this._sameDocumentNavigationPromise = new Promise(fulfill => {
-            this._sameDocumentNavigationCompleteCallback = fulfill;
+        watcher1._navigationRequest = null;
+        framemanager1.on(Events.FrameManager.LifecycleEvent, watcher1._checkLifecycleComplete.bind(watcher1));
+        networkmanager1.on(Events.NetworkManager.Request, watcher1._onRequest.bind(watcher1));
+        watcher1._sameDocumentNavigationPromise = new Promise(fulfill => {
+            watcher1._sameDocumentNavigationCompleteCallback = fulfill;
         });
 
-        this._lifecyclePromise = new Promise(fulfill => {
-            this._lifecycleCallback = fulfill;
+        watcher1._lifecyclePromise = new Promise(fulfill => {
+            watcher1._lifecycleCallback = fulfill;
         });
 
-        this._newDocumentNavigationPromise = new Promise(fulfill => {
-            this._newDocumentNavigationCompleteCallback = fulfill;
+        watcher1._newDocumentNavigationPromise = new Promise(fulfill => {
+            watcher1._newDocumentNavigationCompleteCallback = fulfill;
         });
 
-        this._terminationPromise = new Promise(fulfill => {
-            this._terminationCallback = fulfill;
+        watcher1._terminationPromise = new Promise(fulfill => {
+            watcher1._terminationCallback = fulfill;
         });
-        this._checkLifecycleComplete();
+        watcher1._checkLifecycleComplete();
     }
 
     /**
       * @param {!Puppeteer.Request} request
       */
     _onRequest(request) {
-        if (request._frame !== this._frame || !request._isNavigationRequest)
+        if (request._frame !== watcher1._frame || !request._isNavigationRequest)
             return;
-        this._navigationRequest = request;
+        watcher1._navigationRequest = request;
     }
 
     _checkLifecycleComplete() {
         // We expect navigation to commit.
-        if (!checkLifecycle(this._frame, this._expectedLifecycle))
+        if (!checkLifecycle(watcher1._frame, watcher1._expectedLifecycle))
             return;
-        this._lifecycleCallback();
-        if (this._frame._loaderId === this._initialLoaderId && !this._hasSameDocumentNavigation)
+        watcher1._lifecycleCallback();
+        if (watcher1._frame._loaderId === watcher1._initialLoaderId && !watcher1._hasSameDocumentNavigation)
             return;
-        this._newDocumentNavigationCompleteCallback();
+        watcher1._newDocumentNavigationCompleteCallback();
         /**
           * @param {!Array<string>} expectedLifecycle
           * @return {boolean}
@@ -860,7 +860,7 @@ var pageCreate = async function () {
 
 
     // browser - load url
-    watcher1 = new LifecycleWatcher();
+    new LifecycleWatcher();
     await new Promise(function (resolve) {
         wsWrite("Page.navigate", {
             url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
