@@ -70,6 +70,7 @@ var domworld2;
 var frame1;
 var framemanager1;
 var networkmanager1;
+var watcher1;
 var websocket1;
 var wsCallbackCounter;
 var wsCallbackDict;
@@ -616,16 +617,17 @@ class LifecycleWatcher {
       * @param {string|!Array<string>} waitUntil
       * @param {number} timeout
       */
-    constructor(frameManager, frame, waitUntil, timeout) {
-        waitUntil = waitUntil.slice();
-        this._expectedLifecycle = waitUntil.map(value => {
+    constructor() {
+        this._expectedLifecycle = [
+            "load"
+        ].map(value => {
             const protocolEvent = puppeteerToProtocolLifecycle[value];
             assert(protocolEvent, "Unknown value for options.waitUntil: " + value);
             return protocolEvent;
         });
 
-        this._frame = frame;
-        this._initialLoaderId = frame._loaderId;
+        this._frame = frame1;
+        this._initialLoaderId = frame1._loaderId;
         this._timeout = timeout;
         /** @type {?Puppeteer.Request} */
         this._navigationRequest = null;
@@ -858,13 +860,7 @@ var pageCreate = async function () {
 
 
     // browser - load url
-    const watcher1 = new LifecycleWatcher(
-        framemanager1,
-        frame1,
-        [
-            "load"
-        ]
-    );
+    watcher1 = new LifecycleWatcher();
     await new Promise(function (resolve) {
         wsWrite("Page.navigate", {
             url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
