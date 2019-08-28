@@ -606,9 +606,6 @@ class Request0 {
         this._requestId = evt.requestId;
         this._isNavigationRequest = evt.requestId === evt.loaderId && evt.type === "Document";
         this._interceptionHandled = false;
-        this._response = null;
-        this._failureText = null;
-
         this._url = evt.request.url;
         this._resourceType = evt.type.toLowerCase();
         this._method = evt.request.method;
