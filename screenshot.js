@@ -148,7 +148,6 @@
 
 // init var
 var assert;
-var browser1;
 var child_process;
 var chromeKillSync;
 var chromeProcess;
@@ -281,7 +280,7 @@ gotoNext = async function (err, data) {
         module.exports.wsCreate(urlWebsocket, gotoNext);
         break;
     case 3:
-        browser1 = await module.exports.Browser.create(
+        await module.exports.Browser.create(
             null,
             [],
             chromeProcess
