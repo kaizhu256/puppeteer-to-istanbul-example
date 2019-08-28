@@ -546,22 +546,14 @@ framemanager1._ensureIsolatedWorld = async function (name) {
         watcher1._expectedLifecycle = [
             "load"
         ];
-        /** @type {?Puppeteer.Request} */
-        watcher1._navigationRequest = null;
         watcher1._sameDocumentNavigationPromise = new Promise(fulfill => {
             watcher1._sameDocumentNavigationCompleteCallback = fulfill;
         });
-
         watcher1._lifecyclePromise = new Promise(fulfill => {
             watcher1._lifecycleCallback = fulfill;
         });
-
         watcher1._newDocumentNavigationPromise = new Promise(fulfill => {
             watcher1._newDocumentNavigationCompleteCallback = fulfill;
-        });
-
-        watcher1._terminationPromise = new Promise(fulfill => {
-            watcher1._terminationCallback = fulfill;
         });
 
     /**
