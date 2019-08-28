@@ -584,12 +584,12 @@ framemanager1._isolatedWorlds = new Set();
 /**
   * @param {!Protocol.Page.lifecycleEventPayload} event
   */
-framemanager1._onLifecycleEvent = function (event) {
-    if (event.name === "init") {
-        frame1._loaderId = event.loaderId;
+framemanager1._onLifecycleEvent = function (evt) {
+    if (evt.name === "init") {
+        frame1._loaderId = evt.loaderId;
         frame1._lifecycleEvents.clear();
     }
-    frame1._lifecycleEvents.add(event.name);
+    frame1._lifecycleEvents.add(evt.name);
     framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
 }
 
@@ -606,6 +606,23 @@ framemanager1._onFrameStoppedLoading = function (frameId) {
   * @param {!Protocol.Page.Frame} framePayload
   */
 framemanager1._onFrameNavigated = function (framePayload) {
+    // Update or create main frame.
+    if (!frame1) {
+        // Initial main frame navigation.
+        //!! frame1 = new Frame(framePayload.id);
+        frame1 = {};
+        frame1._id = framePayload.id;
+        frame1._url = "";
+        frame1._detached = false;
+        frame1._loaderId = "";
+        /** @type {!Set<string>} */
+        frame1._lifecycleEvents = new Set();
+        /** @type {!DOMWorld} */
+        domworld1 = new DOMWorld();
+        module.exports.domworld1 = domworld1;
+        /** @type {!DOMWorld} */
+        domworld2 = new DOMWorld();
+    }
     // Update frame id to retain frame identity on cross-process navigation.
     frame1._id = framePayload.id;
     // Update frame payload.
@@ -657,18 +674,6 @@ framemanager1._onExecutionContextDestroyed = function (executionContextId) {
     framemanager1._contextIdToContext.delete(executionContextId);
     context._world._setContext(null);
 }
-
-        frame1 = {};
-        frame1._url = "";
-        frame1._detached = false;
-        frame1._loaderId = "";
-        /** @type {!Set<string>} */
-        frame1._lifecycleEvents = new Set();
-        /** @type {!DOMWorld} */
-        domworld1 = new DOMWorld();
-        module.exports.domworld1 = domworld1;
-        /** @type {!DOMWorld} */
-        domworld2 = new DOMWorld();
 
 
 
