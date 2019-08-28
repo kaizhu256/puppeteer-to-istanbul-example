@@ -190,23 +190,13 @@ wsCreate = function (wsUrl, onError) {
     });
 };
 wsOnMessage = function (message) {
-    var params;
     message = JSON.parse(message);
     if (wsCallbackDict[message.id]) {
         wsCallbackDict[message.id](message.result);
     }
-    params = message.params;
     if (wsOnMessageDict.hasOwnProperty(message.method)) {
         wsOnMessageDict[message.method](message.params);
         return;
-    }
-    switch (message.method) {
-    case "Target.targetDestroyed":
-        browser1._targetDestroyed(params);
-        break;
-    case "Target.targetInfoChanged":
-        browser1._targetInfoChanged(params);
-        break;
     }
 };
 wsOnMessageDict = {};
@@ -313,21 +303,40 @@ wsOnMessageDict["Target.targetCreated"] = function (evt) {
     target._initializedPromise = new Promise(function (fulfill) {
         target._initializedCallback = fulfill;
         return fulfill;
-    }).then(async function (success) {
+    }).then(async function () {
         return true;
     });
     target._isClosedPromise = new Promise(function (fulfill) {
         target._closedCallback = fulfill;
         return fulfill;
     });
-    target._isInitialized = target._targetInfo.type !== "page" || target._targetInfo.url !== "";
+    target._isInitialized = (
+        target._targetInfo.type !== "page"
+        || target._targetInfo.url !== ""
+    );
     if (target._isInitialized) {
         target._initializedCallback(true);
     }
     browser1.targetDict[evt.targetInfo.targetId] = target;
 };
-wsOnMessageDict["aa"] = function (evt) {
-    return evt;
+wsOnMessageDict["Target.targetDestroyed"] = function (evt) {
+    const target = browser1.targetDict[evt.targetId];
+    target._initializedCallback(false);
+    delete browser1.targetDict[evt.targetId];
+    target._closedCallback();
+};
+wsOnMessageDict["Target.targetInfoChanged"] = function (evt) {
+    const target = browser1.targetDict[evt.targetInfo.targetId];
+    assert(target, "target should exist before targetInfoChanged");
+    target._targetInfo = evt.targetInfo;
+    if (
+        !target._isInitialized
+        && (target._targetInfo.type !== "page" || target._targetInfo.url !== "")
+    ) {
+        target._isInitialized = true;
+        target._initializedCallback(true);
+        return;
+    }
 };
 wsRead = function (chunk) {
 /*
@@ -507,33 +516,6 @@ class Browser extends EventEmitter {
         browser1._contexts = new Map();
         /** @type {Map<string, Target>} */
         browser1.targetDict = {};
-    }
-
-    /**
-      * @param {{targetId: string}} evt
-      */
-    async _targetDestroyed(evt) {
-        const target = browser1.targetDict[evt.targetId];
-        target._initializedCallback(false);
-        delete browser1.targetDict[evt.targetId];
-        target._closedCallback();
-    }
-
-    /**
-      * @param {!Protocol.Target.targetInfoChangedPayload} evt
-      */
-    _targetInfoChanged(evt) {
-        const target = browser1.targetDict[evt.targetInfo.targetId];
-        assert(target, "target should exist before targetInfoChanged");
-        const previousURL = target._url;
-        const wasInitialized = target._isInitialized;
-        target._targetInfo = evt.targetInfo;
-
-        if (!target._isInitialized && (target._targetInfo.type !== "page" || target._targetInfo.url !== "")) {
-            target._isInitialized = true;
-            target._initializedCallback(true);
-            return;
-        }
     }
 }
 
