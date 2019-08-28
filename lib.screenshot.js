@@ -68,7 +68,6 @@ var domworld2;
 var frame1;
 var framemanager1;
 var networkmanager1;
-var page1;
 var websocket1;
 var wsCallbackCounter;
 var wsCallbackDict;
@@ -85,7 +84,6 @@ domworld2 = null;
 frame1 = null;
 framemanager1 = null;
 networkmanager1 = null;
-page1 = null;
 wsReadConsume = null;
 
 local.nop(Events);
@@ -95,7 +93,6 @@ local.nop(domworld2);
 local.nop(frame1);
 local.nop(framemanager1);
 local.nop(networkmanager1);
-local.nop(page1);
 local.nop(wsCreate);
 local.nop(wsReadConsume);
 local.nop(wsWrite);
@@ -1000,12 +997,10 @@ class Response {
 
 
 
-page1 = {};
-page1.create = async function () {
+var pageCreate = async function () {
     target1 = module.exports.target1;
-    page1._target = target1;
     /** @type {!FrameManager} */
-    new FrameManager(null, page1);
+    new FrameManager(null, {});
     const networkManager = framemanager1._networkManager;
     await Promise.all([
         framemanager1.initialize(),
@@ -1022,7 +1017,7 @@ page1.create = async function () {
 module.exports = {
 Browser,
 LifecycleWatcher,
-page1,
+pageCreate,
 wsCreate,
 wsWrite
 };

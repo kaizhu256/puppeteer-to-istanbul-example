@@ -161,7 +161,6 @@ var gotoState;
 var onDataUrlInspect;
 var onReject;
 var onResolve;
-var page1;
 var path;
 var target1;
 var urlWebsocket;
@@ -312,8 +311,7 @@ await wsWrite("Target.attachToTarget", {
     flatten: true,
     targetId: target1._targetInfo.targetId
 });
-page1 = module.exports.page1;
-await page1.create();
+await module.exports.pageCreate();
 
 
 
