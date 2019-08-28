@@ -201,12 +201,6 @@ wsOnMessage = function (message) {
         return;
     }
     switch (message.method) {
-    case "Page.lifecycleEvent":
-        framemanager1._onLifecycleEvent(params);
-        break;
-    case "Runtime.executionContextCreated":
-        framemanager1._onExecutionContextCreated(params.context);
-        break;
     case "Runtime.executionContextDestroyed":
         framemanager1._onExecutionContextDestroyed(params.executionContextId);
         break;
@@ -277,11 +271,30 @@ wsOnMessageDict["Page.frameStoppedLoading"] = function () {
     frame1._lifecycleEvents.add("load");
     framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
 };
-wsOnMessageDict["aa"] = function (evt) {
-    return evt;
+wsOnMessageDict["Page.lifecycleEvent"] = function (evt) {
+    if (evt.name === "init") {
+        frame1._loaderId = evt.loaderId;
+        frame1._lifecycleEvents.clear();
+    }
+    frame1._lifecycleEvents.add(evt.name);
+    framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
 };
-wsOnMessageDict["aa"] = function (evt) {
-    return evt;
+wsOnMessageDict["Runtime.executionContextCreated"] = function (evt) {
+    let world = null;
+    if (evt.context.auxData && !!evt.context.auxData["isDefault"]) {
+        world = domworld1;
+    } else if (evt.context.name === UTILITY_WORLD_NAME && !domworld2._hasContext()) {
+        // In case of multiple sessions to the same target, there's a race between
+        // connections so we might end up creating multiple isolated worlds.
+        // We can use either.
+        world = domworld2;
+    }
+    if (evt.context.auxData && evt.context.auxData["type"] === "isolated")
+        framemanager1._isolatedWorlds.add(evt.context.name);
+    /** @type {!ExecutionContext} */
+    const context = new ExecutionContext(null, evt.context, world);
+    world._setContext(context);
+    framemanager1._contextIdToContext.set(evt.context.id, context);
 };
 wsOnMessageDict["aa"] = function (evt) {
     return evt;
@@ -644,18 +657,6 @@ framemanager1._contextIdToContext = new Map();
 framemanager1._isolatedWorlds = new Set();
 
 /**
-  * @param {!Protocol.Page.lifecycleEventPayload} evt
-  */
-framemanager1._onLifecycleEvent = function (evt) {
-    if (evt.name === "init") {
-        frame1._loaderId = evt.loaderId;
-        frame1._lifecycleEvents.clear();
-    }
-    frame1._lifecycleEvents.add(evt.name);
-    framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
-}
-
-/**
   * @param {string} name
   */
 framemanager1._ensureIsolatedWorld = async function (name) {
@@ -669,24 +670,6 @@ framemanager1._ensureIsolatedWorld = async function (name) {
         grantUniveralAccess: true,
         worldName: name
     }).catch(console.error); // frames might be removed before we send this
-}
-
-framemanager1._onExecutionContextCreated = function (contextPayload) {
-    let world = null;
-    if (contextPayload.auxData && !!contextPayload.auxData["isDefault"]) {
-        world = domworld1;
-    } else if (contextPayload.name === UTILITY_WORLD_NAME && !domworld2._hasContext()) {
-        // In case of multiple sessions to the same target, there's a race between
-        // connections so we might end up creating multiple isolated worlds.
-        // We can use either.
-        world = domworld2;
-    }
-    if (contextPayload.auxData && contextPayload.auxData["type"] === "isolated")
-        framemanager1._isolatedWorlds.add(contextPayload.name);
-    /** @type {!ExecutionContext} */
-    const context = new ExecutionContext(null, contextPayload, world);
-    world._setContext(context);
-    framemanager1._contextIdToContext.set(contextPayload.id, context);
 }
 
 /**
