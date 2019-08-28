@@ -61,7 +61,9 @@ local.nop(
 
 
 
+var Domworld;
 var Events;
+var Response;
 var browser1;
 var domworld1;
 var domworld2;
@@ -79,6 +81,8 @@ var wsReadConsume;
 var wsSessionId;
 var wsWrite;
 
+Domworld = null;
+Response = null;
 browser1 = null;
 domworld1 = null;
 domworld2 = null;
@@ -197,9 +201,6 @@ wsOnMessage = function (message) {
         return;
     }
     switch (message.method) {
-    case "Page.frameStoppedLoading":
-        framemanager1._onFrameStoppedLoading(params.frameId);
-        break;
     case "Page.lifecycleEvent":
         framemanager1._onLifecycleEvent(params);
         break;
@@ -256,22 +257,25 @@ wsOnMessageDict["Page.frameNavigated"] = function (evt) {
         frame1._loaderId = "";
         /** @type {!Set<string>} */
         frame1._lifecycleEvents = new Set();
-        /** @type {!DOMWorld} */
-        domworld1 = new DOMWorld();
+        /** @type {!Domworld} */
+        domworld1 = new Domworld();
         module.exports.domworld1 = domworld1;
-        /** @type {!DOMWorld} */
-        domworld2 = new DOMWorld();
+        /** @type {!Domworld} */
+        domworld2 = new Domworld();
     }
     // Update frame id to retain frame identity on cross-process navigation.
     frame1._id = evt.frame.id;
     // Update frame payload.
     frame1._name = evt.frame.name;
-    // TODO(lushnikov): remove this once requestInterception has loaderId exposed.
+    // TO-DO (lushnikov): remove this once requestInterception
+    // has loaderId exposed.
     frame1._navigationURL = evt.frame.url;
     frame1._url = evt.frame.url;
 };
-wsOnMessageDict["aa"] = function (evt) {
-    return evt;
+wsOnMessageDict["Page.frameStoppedLoading"] = function () {
+    frame1._lifecycleEvents.add("DOMContentLoaded");
+    frame1._lifecycleEvents.add("load");
+    framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
 };
 wsOnMessageDict["aa"] = function (evt) {
     return evt;
@@ -532,9 +536,9 @@ class Browser extends EventEmitter {
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DOMWorld.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Domworld.js
 */
-class DOMWorld {
+class Domworld0 {
     /**
       * @param {!Puppeteer.FrameManager} frameManager
       */
@@ -573,6 +577,7 @@ class DOMWorld {
         return !this._contextResolveCallback;
     }
 }
+Domworld = Domworld0;
 
 
 
@@ -594,7 +599,7 @@ class ExecutionContext {
     /**
       * @param {!Puppeteer.CDPSession} client
       * @param {!Protocol.Runtime.ExecutionContextDescription} contextPayload
-      * @param {?Puppeteer.DOMWorld} world
+      * @param {?Puppeteer.Domworld} world
       */
     constructor(client, contextPayload, world) {
         this._world = world;
@@ -647,15 +652,6 @@ framemanager1._onLifecycleEvent = function (evt) {
         frame1._lifecycleEvents.clear();
     }
     frame1._lifecycleEvents.add(evt.name);
-    framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
-}
-
-/**
-  * @param {string} frameId
-  */
-framemanager1._onFrameStoppedLoading = function (frameId) {
-    frame1._lifecycleEvents.add("DOMContentLoaded");
-    frame1._lifecycleEvents.add("load");
     framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
 }
 
@@ -886,7 +882,7 @@ class Request {
     }
 }
 
-class Response {
+class Response0 {
     /**
       * @param {!Puppeteer.CDPSession} client
       * @param {!Request} request
@@ -914,6 +910,7 @@ class Response {
             this._headers[key.toLowerCase()] = responsePayload.headers[key];
     }
 }
+Response = Response0;
 
 
 
