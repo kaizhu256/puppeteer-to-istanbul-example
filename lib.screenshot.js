@@ -201,12 +201,6 @@ wsOnMessage = function (message) {
         return;
     }
     switch (message.method) {
-    case "Target.attachedToTarget":
-        wsSessionId = params.sessionId;
-        break;
-    case "Target.targetCreated":
-        browser1._targetCreated(params);
-        break;
     case "Target.targetDestroyed":
         browser1._targetDestroyed(params);
         break;
@@ -304,11 +298,33 @@ wsOnMessageDict["Runtime.executionContextDestroyed"] = function (evt) {
     framemanager1._contextIdToContext.delete(evt.executionContextId);
     context._world._setContext(null);
 };
-wsOnMessageDict["aa"] = function (evt) {
-    return evt;
+wsOnMessageDict["Target.attachedToTarget"] = function (evt) {
+    wsSessionId = evt.sessionId;
 };
-wsOnMessageDict["aa"] = function (evt) {
-    return evt;
+wsOnMessageDict["Target.targetCreated"] = function (evt) {
+    const targetInfo = evt.targetInfo;
+    const target = {};
+    target._targetInfo = targetInfo;
+    target._targetId = targetInfo.targetId;
+    /** @type {?Promise<!Puppeteer.Page>} */
+    target._pagePromise = null;
+    /** @type {?Promise<!Worker>} */
+    target._workerPromise = null;
+    target._initializedPromise = new Promise(function (fulfill) {
+        target._initializedCallback = fulfill;
+        return fulfill;
+    }).then(async function (success) {
+        return true;
+    });
+    target._isClosedPromise = new Promise(function (fulfill) {
+        target._closedCallback = fulfill;
+        return fulfill;
+    });
+    target._isInitialized = target._targetInfo.type !== "page" || target._targetInfo.url !== "";
+    if (target._isInitialized) {
+        target._initializedCallback(true);
+    }
+    browser1.targetDict[evt.targetInfo.targetId] = target;
 };
 wsOnMessageDict["aa"] = function (evt) {
     return evt;
@@ -491,36 +507,6 @@ class Browser extends EventEmitter {
         browser1._contexts = new Map();
         /** @type {Map<string, Target>} */
         browser1.targetDict = {};
-    }
-
-    /**
-      * @param {!Protocol.Target.targetCreatedPayload} evt
-      */
-    async _targetCreated(evt) {
-        const targetInfo = evt.targetInfo;
-        const target = {};
-        target._targetInfo = targetInfo;
-        target._targetId = targetInfo.targetId;
-        /** @type {?Promise<!Puppeteer.Page>} */
-        target._pagePromise = null;
-        /** @type {?Promise<!Worker>} */
-        target._workerPromise = null;
-        target._initializedPromise = new Promise(function (fulfill) {
-            target._initializedCallback = fulfill;
-            return fulfill;
-        }).then(async function (success) {
-            return true;
-        });
-        target._isClosedPromise = new Promise(function (fulfill) {
-            target._closedCallback = fulfill;
-            return fulfill;
-        });
-        target._isInitialized = target._targetInfo.type !== "page" || target._targetInfo.url !== "";
-        if (target._isInitialized) {
-            target._initializedCallback(true);
-        }
-
-        browser1.targetDict[evt.targetInfo.targetId] = target;
     }
 
     /**
