@@ -281,16 +281,20 @@ wsOnMessageDict["Page.lifecycleEvent"] = function (evt) {
 };
 wsOnMessageDict["Runtime.executionContextCreated"] = function (evt) {
     let world = null;
-    if (evt.context.auxData && !!evt.context.auxData["isDefault"]) {
+    if (evt.context.auxData && Boolean(evt.context.auxDat.isDefault)) {
         world = domworld1;
-    } else if (evt.context.name === UTILITY_WORLD_NAME && !domworld2._hasContext()) {
-        // In case of multiple sessions to the same target, there's a race between
-        // connections so we might end up creating multiple isolated worlds.
-        // We can use either.
+    } else if (
+        evt.context.name === "__puppeteer_utility_world__"
+        && !domworld2._hasContext()
+    ) {
+        // In case of multiple sessions to the same target,
+        // there's a race between connections so we might end up creating
+        // multiple isolated worlds. We can use either.
         world = domworld2;
     }
-    if (evt.context.auxData && evt.context.auxData["type"] === "isolated")
+    if (evt.context.auxData && evt.context.auxData.type === "isolated") {
         framemanager1._isolatedWorlds.add(evt.context.name);
+    }
     /** @type {!ExecutionContext} */
     const context = new ExecutionContext(null, evt.context, world);
     world._setContext(context);
@@ -615,6 +619,7 @@ class ExecutionContext {
       * @param {?Puppeteer.Domworld} world
       */
     constructor(client, contextPayload, world) {
+        debugInline();
         this._world = world;
         this._contextId = contextPayload.id;
     }
@@ -644,11 +649,6 @@ class ExecutionContext {
 }
 
 
-
-/*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/FrameManager.js
-*/
-const UTILITY_WORLD_NAME = "__puppeteer_utility_world__";
 
 framemanager1 = new EventEmitter();
 /** @type {!Map<number, !ExecutionContext>} */
@@ -928,7 +928,7 @@ var pageCreate = async function () {
             wsWrite("Page.setLifecycleEventsEnabled", {
                 enabled: true
             }),
-            wsWrite("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
+            wsWrite("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld("__puppeteer_utility_world__")),
             wsWrite("Network.enable", {}),
         ]),
         wsWrite("Target.setAutoAttach", {
