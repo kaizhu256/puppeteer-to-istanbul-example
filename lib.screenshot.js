@@ -141,11 +141,12 @@ wsOnEventDict["Network.requestWillBeSent"] = function (evt) {
     let redirectChain = [];
     if (evt.redirectResponse) {
         const request = networkmanager1._requestIdToRequest.get(evt.requestId);
-        // If we connect late to the target, we could have missed the requestWillBeSent evt.
+        // If we connect late to the target,
+        // we could have missed the requestWillBeSent evt.
         networkmanager1._handleRequestRedirect(request, evt.redirectResponse);
         redirectChain = request._redirectChain;
     }
-    const request = new Request(null, frame1, networkmanager1._userRequestInterceptionEnabled, evt, redirectChain);
+    const request = new Request(evt, redirectChain);
     networkmanager1._requestIdToRequest.set(evt.requestId, request);
     if (request._isNavigationRequest) {
         watcher1._navigationRequest = request;
@@ -628,10 +629,10 @@ class Request {
       * @param {!Protocol.Network.requestWillBeSentPayload} evt
       * @param {!Array<!Request>} redirectChain
       */
-    constructor(client, frame, allowInterception, evt, redirectChain) {
+    constructor(evt, redirectChain) {
         this._requestId = evt.requestId;
         this._isNavigationRequest = evt.requestId === evt.loaderId && evt.type === "Document";
-        this._allowInterception = allowInterception;
+        this._allowInterception = networkmanager1._userRequestInterceptionEnabled;
         this._interceptionHandled = false;
         this._response = null;
         this._failureText = null;
