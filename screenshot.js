@@ -151,8 +151,6 @@ var assert;
 var child_process;
 var chromeKillSync;
 var chromeProcess;
-//!! var crypto;
-var framemanager1;
 var fs;
 var fsWriteFile;
 var gotoNext;
@@ -294,27 +292,6 @@ await new Promise(function (resolve, reject) {
 
 
 await module.exports.pageCreate();
-
-
-
-// browser - load url
-framemanager1 = module.exports.framemanager1;
-const watcher = new module.exports.LifecycleWatcher(
-    framemanager1,
-    module.exports.frame1,
-    [
-        "load"
-    ]
-);
-await new Promise(function (resolve) {
-    wsWrite("Page.navigate", {
-        url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
-        referer: module.exports.networkmanager1.extraHTTPHeaders().referer,
-        frameId: module.exports.frame1._id
-    }).then(resolve);
-});
-await local.identity(watcher._newDocumentNavigationPromise);
-await local.identity(watcher._navigationRequest._response);
 
 
 

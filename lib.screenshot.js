@@ -995,13 +995,33 @@ var pageCreate = async function () {
         wsWrite("Performance.enable", {}),
         wsWrite("Log.enable", {}),
     ]);
+
+
+
+    // browser - load url
+    const watcher = new LifecycleWatcher(
+        framemanager1,
+        frame1,
+        [
+            "load"
+        ]
+    );
+    await new Promise(function (resolve) {
+        wsWrite("Page.navigate", {
+            url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
+            referer: networkmanager1.extraHTTPHeaders().referer,
+            frameId: frame1._id
+        }).then(resolve);
+    });
+    await local.identity(watcher._newDocumentNavigationPromise);
+    await local.identity(watcher._navigationRequest._response);
 }
+
+
 
 module.exports = {
 Browser,
 LifecycleWatcher,
-framemanager1,
-networkmanager1,
 pageCreate,
 wsCreate,
 wsWrite
