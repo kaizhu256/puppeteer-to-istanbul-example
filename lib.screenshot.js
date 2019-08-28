@@ -131,7 +131,6 @@ wsOnEventDict["Network.loadingFinished"] = function (evt) {
     // evt from protocol. @see https://crbug.com/883475
     request._response._bodyLoadedPromiseFulfill.call(null);
     networkmanager1._requestIdToRequest.delete(request._requestId);
-    networkmanager1._attemptedAuthentications.delete(request._interceptionId);
 };
 wsOnEventDict["Network.requestServedFromCache"] = function (evt) {
     const request = networkmanager1._requestIdToRequest.get(evt.requestId);
@@ -139,7 +138,18 @@ wsOnEventDict["Network.requestServedFromCache"] = function (evt) {
 };
 wsOnEventDict["Network.requestWillBeSent"] = function (evt) {
     // Request interception doesn't happen for data URLs with Network Service.
-    networkmanager1._onRequest(evt, null);
+    let redirectChain = [];
+    if (evt.redirectResponse) {
+        const request = networkmanager1._requestIdToRequest.get(evt.requestId);
+        // If we connect late to the target, we could have missed the requestWillBeSent evt.
+        networkmanager1._handleRequestRedirect(request, evt.redirectResponse);
+        redirectChain = request._redirectChain;
+    }
+    const request = new Request(null, frame1, networkmanager1._userRequestInterceptionEnabled, evt, redirectChain);
+    networkmanager1._requestIdToRequest.set(evt.requestId, request);
+    if (request._isNavigationRequest) {
+        watcher1._navigationRequest = request;
+    }
 };
 wsOnEventDict["Network.responseReceived"] = function (evt) {
     const request = networkmanager1._requestIdToRequest.get(evt.requestId);
@@ -551,15 +561,6 @@ framemanager1._ensureIsolatedWorld = async function (name) {
             watcher1._newDocumentNavigationCompleteCallback = fulfill;
         });
 
-    /**
-      * @param {!Puppeteer.Request} request
-      */
-    watcher1._onRequest = function (request) {
-        if (request._isNavigationRequest) {
-            watcher1._navigationRequest = request;
-        }
-    };
-
     watcher1._checkLifecycleComplete = function () {
         // We expect navigation to commit.
         if (!checkLifecycle(frame1, watcher1._expectedLifecycle))
@@ -596,35 +597,16 @@ networkmanager1._offline = false;
 /** @type {?{username: string, password: string}} */
 networkmanager1._credentials = null;
 /** @type {!Set<string>} */
-networkmanager1._attemptedAuthentications = new Set();
 networkmanager1._userRequestInterceptionEnabled = false;
 networkmanager1._protocolRequestInterceptionEnabled = false;
 networkmanager1._userCacheDisabled = false;
 /** @type {!Map<string, string>} */
-networkmanager1._requestIdToInterceptionId = new Map();
 
 /**
   * @return {!Object<string, string>}
   */
 networkmanager1.extraHTTPHeaders = function () {
     return Object.assign({}, networkmanager1._extraHTTPHeaders);
-}
-
-/**
-  * @param {!Protocol.Network.requestWillBeSentPayload} evt
-  * @param {?string} interceptionId
-  */
-networkmanager1._onRequest = function (evt, interceptionId) {
-    let redirectChain = [];
-    if (evt.redirectResponse) {
-        const request = networkmanager1._requestIdToRequest.get(evt.requestId);
-        // If we connect late to the target, we could have missed the requestWillBeSent evt.
-        networkmanager1._handleRequestRedirect(request, evt.redirectResponse);
-        redirectChain = request._redirectChain;
-    }
-    const request = new Request(null, frame1, interceptionId, networkmanager1._userRequestInterceptionEnabled, evt, redirectChain);
-    networkmanager1._requestIdToRequest.set(evt.requestId, request);
-    watcher1._onRequest(request);
 }
 
 /**
@@ -637,21 +619,18 @@ networkmanager1._handleRequestRedirect = function (request, responsePayload) {
     request._redirectChain.push(request);
     response._bodyLoadedPromiseFulfill.call(null, new Error("Response body is unavailable for redirect responses"));
     networkmanager1._requestIdToRequest.delete(request._requestId);
-    networkmanager1._attemptedAuthentications.delete(request._interceptionId);
 }
 
 class Request {
     /**
       * @param {!Puppeteer.CDPSession} client
-      * @param {string} interceptionId
       * @param {boolean} allowInterception
       * @param {!Protocol.Network.requestWillBeSentPayload} evt
       * @param {!Array<!Request>} redirectChain
       */
-    constructor(client, frame, interceptionId, allowInterception, evt, redirectChain) {
+    constructor(client, frame, allowInterception, evt, redirectChain) {
         this._requestId = evt.requestId;
         this._isNavigationRequest = evt.requestId === evt.loaderId && evt.type === "Document";
-        this._interceptionId = interceptionId;
         this._allowInterception = allowInterception;
         this._interceptionHandled = false;
         this._response = null;
