@@ -201,9 +201,6 @@ wsOnMessage = function (message) {
         return;
     }
     switch (message.method) {
-    case "Runtime.executionContextDestroyed":
-        framemanager1._onExecutionContextDestroyed(params.executionContextId);
-        break;
     case "Target.attachedToTarget":
         wsSessionId = params.sessionId;
         break;
@@ -296,12 +293,16 @@ wsOnMessageDict["Runtime.executionContextCreated"] = function (evt) {
         framemanager1._isolatedWorlds.add(evt.context.name);
     }
     /** @type {!ExecutionContext} */
-    const context = new ExecutionContext(null, evt.context, world);
+    const context = new ExecutionContext(null, evt.context, world); // jslint ignore:line
     world._setContext(context);
     framemanager1._contextIdToContext.set(evt.context.id, context);
 };
-wsOnMessageDict["aa"] = function (evt) {
-    return evt;
+wsOnMessageDict["Runtime.executionContextDestroyed"] = function (evt) {
+    const context = framemanager1._contextIdToContext.get(
+        evt.executionContextId
+    );
+    framemanager1._contextIdToContext.delete(evt.executionContextId);
+    context._world._setContext(null);
 };
 wsOnMessageDict["aa"] = function (evt) {
     return evt;
@@ -669,15 +670,6 @@ framemanager1._ensureIsolatedWorld = async function (name) {
         grantUniveralAccess: true,
         worldName: name
     }).catch(console.error); // frames might be removed before we send this
-}
-
-/**
-  * @param {number} executionContextId
-  */
-framemanager1._onExecutionContextDestroyed = function (executionContextId) {
-    const context = framemanager1._contextIdToContext.get(executionContextId);
-    framemanager1._contextIdToContext.delete(executionContextId);
-    context._world._setContext(null);
 }
 
 
