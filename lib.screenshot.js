@@ -183,7 +183,7 @@ wsOnEventDict["Page.lifecycleEvent"] = function (evt) {
         frame1._lifecycleEvents.clear();
     }
     frame1._lifecycleEvents.add(evt.name);
-    if (watcher1) {
+    if (frame1._loaderId) {
         watcher1._checkLifecycleComplete(frame1);
     }
 };
@@ -542,22 +542,10 @@ framemanager1._ensureIsolatedWorld = async function (name) {
 
 
 
-/*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/LifecycleWatcher.js
-*/
-class LifecycleWatcher {
-    /**
-      * @param {!Puppeteer.FrameManager} frameManager
-      * @param {string|!Array<string>} waitUntil
-      * @param {number} timeout
-      */
-    constructor() {
-        watcher1 = this;
+        watcher1 = {};
         watcher1._expectedLifecycle = [
             "load"
         ];
-        watcher1._frame = frame1;
-        watcher1._initialLoaderId = frame1._loaderId;
         /** @type {?Puppeteer.Request} */
         watcher1._navigationRequest = null;
         watcher1._sameDocumentNavigationPromise = new Promise(fulfill => {
@@ -575,19 +563,17 @@ class LifecycleWatcher {
         watcher1._terminationPromise = new Promise(fulfill => {
             watcher1._terminationCallback = fulfill;
         });
-        watcher1._checkLifecycleComplete();
-    }
 
     /**
       * @param {!Puppeteer.Request} request
       */
-    _onRequest(request) {
+    watcher1._onRequest = function (request) {
         if (request._frame !== watcher1._frame || !request._isNavigationRequest)
             return;
         watcher1._navigationRequest = request;
-    }
+    };
 
-    _checkLifecycleComplete() {
+    watcher1._checkLifecycleComplete = function () {
         // We expect navigation to commit.
         if (!checkLifecycle(watcher1._frame, watcher1._expectedLifecycle))
             return;
@@ -606,8 +592,7 @@ class LifecycleWatcher {
             }
             return true;
         }
-    }
-}
+    };
 
 
 
@@ -780,7 +765,9 @@ var pageCreate = async function () {
 
 
     // browser - load url
-    new LifecycleWatcher();
+    watcher1._frame = frame1;
+    watcher1._initialLoaderId = frame1._loaderId;
+    watcher1._checkLifecycleComplete();
     await new Promise(function (resolve) {
         wsWrite("Page.navigate", {
             url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
