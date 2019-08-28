@@ -62,6 +62,7 @@ local.nop(
 
 
 var Domworld;
+var Request;
 var Response;
 var browser1;
 var domworld1;
@@ -80,6 +81,7 @@ var wsSessionId;
 var wsWrite;
 
 Domworld = null;
+Request = null;
 Response = null;
 browser1 = null;
 domworld1 = null;
@@ -87,6 +89,7 @@ domworld2 = null;
 frame1 = null;
 framemanager1 = null;
 networkmanager1 = null;
+watcher1 = null;
 
 local.nop(browser1);
 local.nop(domworld1);
@@ -94,6 +97,7 @@ local.nop(domworld2);
 local.nop(frame1);
 local.nop(framemanager1);
 local.nop(networkmanager1);
+local.nop(watcher1);
 local.nop(wsCreate);
 local.nop(wsWrite);
 
@@ -144,7 +148,14 @@ wsOnEventDict["Network.requestWillBeSent"] = function (evt) {
         request = networkmanager1._requestIdToRequest.get(evt.requestId);
         // If we connect late to the target,
         // we could have missed the requestWillBeSent evt.
-        networkmanager1._handleRequestRedirect(request, evt.redirectResponse);
+        const response = new Response(null, request, evt.redirectResponse);
+        request._response = response;
+        request._redirectChain.push(request);
+        response._bodyLoadedPromiseFulfill.call(
+            null,
+            new Error("Response body is unavailable for redirect responses")
+        );
+        networkmanager1._requestIdToRequest.delete(request._requestId);
         redirectChain = request._redirectChain;
     }
     request = new Request(evt, redirectChain);
@@ -611,19 +622,7 @@ networkmanager1.extraHTTPHeaders = function () {
     return Object.assign({}, networkmanager1._extraHTTPHeaders);
 }
 
-/**
-  * @param {!Request} request
-  * @param {!Protocol.Network.Response} responsePayload
-  */
-networkmanager1._handleRequestRedirect = function (request, responsePayload) {
-    const response = new Response(null, request, responsePayload);
-    request._response = response;
-    request._redirectChain.push(request);
-    response._bodyLoadedPromiseFulfill.call(null, new Error("Response body is unavailable for redirect responses"));
-    networkmanager1._requestIdToRequest.delete(request._requestId);
-}
-
-class Request {
+class Request0 {
     /**
       * @param {!Puppeteer.CDPSession} client
       * @param {boolean} allowInterception
@@ -650,6 +649,7 @@ class Request {
         this._fromMemoryCache = false;
     }
 }
+Request = Request0;
 
 class Response0 {
     /**
