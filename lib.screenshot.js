@@ -192,16 +192,11 @@ wsOnMessage = function (message) {
         wsCallbackDict[message.id](message.result);
     }
     params = message.params;
-    switch (message.method) {
-    case "Network.loadingFinished":
+    if (wsOnMessageDict.hasOwnProperty(message.method)) {
         wsOnMessageDict[message.method](message.params);
-        break;
-    case "Network.requestServedFromCache":
-        networkmanager1._onRequestServedFromCache(params);
-        break;
-    case "Network.requestWillBeSent":
-        networkmanager1._onRequestWillBeSent(params);
-        break;
+        return;
+    }
+    switch (message.method) {
     case "Network.responseReceived":
         networkmanager1._onResponseReceived(params);
         break;
@@ -242,6 +237,41 @@ wsOnMessageDict["Network.loadingFinished"] = function (evt) {
     request._response._bodyLoadedPromiseFulfill.call(null);
     networkmanager1._requestIdToRequest.delete(request._requestId);
     networkmanager1._attemptedAuthentications.delete(request._interceptionId);
+};
+wsOnMessageDict["Network.requestServedFromCache"] = function (evt) {
+    const request = networkmanager1._requestIdToRequest.get(evt.requestId);
+    request._fromMemoryCache = true;
+};
+wsOnMessageDict["Network.requestWillBeSent"] = function (evt) {
+    // Request interception doesn't happen for data URLs with Network Service.
+    networkmanager1._onRequest(evt, null);
+};
+wsOnMessageDict["aa"] = function (evt) {
+    return evt;
+};
+wsOnMessageDict["aa"] = function (evt) {
+    return evt;
+};
+wsOnMessageDict["aa"] = function (evt) {
+    return evt;
+};
+wsOnMessageDict["aa"] = function (evt) {
+    return evt;
+};
+wsOnMessageDict["aa"] = function (evt) {
+    return evt;
+};
+wsOnMessageDict["aa"] = function (evt) {
+    return evt;
+};
+wsOnMessageDict["aa"] = function (evt) {
+    return evt;
+};
+wsOnMessageDict["aa"] = function (evt) {
+    return evt;
+};
+wsOnMessageDict["aa"] = function (evt) {
+    return evt;
 };
 wsRead = function (chunk) {
 /*
@@ -793,14 +823,6 @@ networkmanager1.extraHTTPHeaders = function () {
 
 /**
   * @param {!Protocol.Network.requestWillBeSentPayload} evt
-  */
-networkmanager1._onRequestWillBeSent = function (evt) {
-    // Request interception doesn't happen for data URLs with Network Service.
-    networkmanager1._onRequest(evt, null);
-}
-
-/**
-  * @param {!Protocol.Network.requestWillBeSentPayload} evt
   * @param {?string} interceptionId
   */
 networkmanager1._onRequest = function (evt, interceptionId) {
@@ -820,8 +842,6 @@ networkmanager1._onRequest = function (evt, interceptionId) {
   * @param {!Protocol.Network.requestServedFromCachePayload} evt
   */
 networkmanager1._onRequestServedFromCache = function (evt) {
-    const request = networkmanager1._requestIdToRequest.get(evt.requestId);
-    request._fromMemoryCache = true;
 }
 
 /**
