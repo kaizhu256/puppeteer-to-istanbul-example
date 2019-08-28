@@ -585,7 +585,11 @@ framemanager1._isolatedWorlds = new Set();
   * @param {!Protocol.Page.lifecycleEventPayload} event
   */
 framemanager1._onLifecycleEvent = function (event) {
-    frame1._onLifecycleEvent(event.loaderId, event.name);
+    if (event.name === "init") {
+        frame1._loaderId = event.loaderId;
+        frame1._lifecycleEvents.clear();
+    }
+    frame1._lifecycleEvents.add(event.name);
     framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
 }
 
@@ -602,16 +606,13 @@ framemanager1._onFrameStoppedLoading = function (frameId) {
   * @param {!Protocol.Page.Frame} framePayload
   */
 framemanager1._onFrameNavigated = function (framePayload) {
-    // Update or create main frame.
-    if (frame1) {
-        // Update frame id to retain frame identity on cross-process navigation.
-        frame1._id = framePayload.id;
-    } else {
-        // Initial main frame navigation.
-        frame1 = new Frame(framePayload.id);
-    }
+    // Update frame id to retain frame identity on cross-process navigation.
+    frame1._id = framePayload.id;
     // Update frame payload.
-    frame1._navigated(framePayload);
+    frame1._name = framePayload.name;
+    // TODO(lushnikov): remove this once requestInterception has loaderId exposed.
+    frame1._navigationURL = framePayload.url;
+    frame1._url = framePayload.url;
 }
 
 /**
@@ -657,22 +658,9 @@ framemanager1._onExecutionContextDestroyed = function (executionContextId) {
     context._world._setContext(null);
 }
 
-/**
-  * @unrestricted
-  */
-class Frame {
-    /**
-      * @param {!FrameManager} frameManager
-      * @param {!Puppeteer.CDPSession} client
-      * @param {?Frame} parentFrame
-      * @param {string} frameId
-      */
-    constructor(frameId) {
-        frame1 = this;
+        frame1 = {};
         frame1._url = "";
-        frame1._id = frameId;
         frame1._detached = false;
-
         frame1._loaderId = "";
         /** @type {!Set<string>} */
         frame1._lifecycleEvents = new Set();
@@ -681,30 +669,6 @@ class Frame {
         module.exports.domworld1 = domworld1;
         /** @type {!DOMWorld} */
         domworld2 = new DOMWorld();
-    }
-
-    /**
-      * @param {!Protocol.Page.Frame} framePayload
-      */
-    _navigated(framePayload) {
-        frame1._name = framePayload.name;
-        // TODO(lushnikov): remove this once requestInterception has loaderId exposed.
-        frame1._navigationURL = framePayload.url;
-        frame1._url = framePayload.url;
-    }
-
-    /**
-      * @param {string} loaderId
-      * @param {string} name
-      */
-    _onLifecycleEvent(loaderId, name) {
-        if (name === "init") {
-            frame1._loaderId = loaderId;
-            frame1._lifecycleEvents.clear();
-        }
-        frame1._lifecycleEvents.add(name);
-    }
-}
 
 
 
