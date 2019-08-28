@@ -382,6 +382,7 @@ wsWrite = function (method, params) {
 };
 
 /* jslint ignore:start */
+var target1;
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
 */

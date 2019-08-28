@@ -157,16 +157,13 @@ var framemanager1;
 var fs;
 var fsWriteFile;
 var gotoNext;
-//!! var gotoNextData;
 var gotoState;
-//!! var http;
 var onDataUrlInspect;
 var onReject;
 var onResolve;
 var page1;
 var path;
-var tmp;
-//!! var url;
+var target1;
 var urlWebsocket;
 var util;
 var wsWrite;
@@ -306,16 +303,17 @@ await new Promise(function (resolve, reject) {
 
 
 
-tmp = await wsWrite("Target.createTarget", {
+target1 = await wsWrite("Target.createTarget", {
     url: "about:blank"
 });
-tmp = browser1.targetDict[tmp.targetId];
+target1 = browser1.targetDict[target1.targetId];
+module.exports.target1 = target1;
 await wsWrite("Target.attachToTarget", {
     flatten: true,
-    targetId: tmp._targetInfo.targetId
+    targetId: target1._targetInfo.targetId
 });
 page1 = module.exports.page1;
-await page1.create(null, tmp);
+await page1.create(null, target1);
 
 
 
