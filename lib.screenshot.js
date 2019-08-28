@@ -574,117 +574,107 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/FrameManager.js
 */
 const UTILITY_WORLD_NAME = "__puppeteer_utility_world__";
 
-class FrameManager extends EventEmitter {
-    /**
-      * @param {!Puppeteer.CDPSession} client
-      * @param {!Puppeteer.Page} page
-      */
-    constructor(client, page) {
-        super();
-        framemanager1 = this;
-        module.exports.framemanager1 = framemanager1;
-        framemanager1._networkManager = new NetworkManager(client);
-        /** @type {!Map<number, !ExecutionContext>} */
-        framemanager1._contextIdToContext = new Map();
-        /** @type {!Set<string>} */
-        framemanager1._isolatedWorlds = new Set();
-    }
+framemanager1 = new EventEmitter();
+module.exports.framemanager1 = framemanager1;
+/** @type {!Map<number, !ExecutionContext>} */
+framemanager1._contextIdToContext = new Map();
+/** @type {!Set<string>} */
+framemanager1._isolatedWorlds = new Set();
 
-    async initialize() {
-        const [
-            ,
-            {
-                frameTree
-            }
-        ] = await Promise.all([
-            wsWrite("Page.enable", {}),
-            wsWrite("Page.getFrameTree", {}),
-        ]);
-        framemanager1._onFrameNavigated(frameTree.frame);
-        await Promise.all([
-            wsWrite("Page.setLifecycleEventsEnabled", {
-                enabled: true
-            }),
-            wsWrite("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
-            framemanager1._networkManager.initialize(),
-        ]);
-    }
-
-    /**
-      * @param {!Protocol.Page.lifecycleEventPayload} event
-      */
-    _onLifecycleEvent(event) {
-        frame1._onLifecycleEvent(event.loaderId, event.name);
-        framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
-    }
-
-    /**
-      * @param {string} frameId
-      */
-    _onFrameStoppedLoading(frameId) {
-        frame1._lifecycleEvents.add("DOMContentLoaded");
-        frame1._lifecycleEvents.add("load");
-        framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
-    }
-
-    /**
-      * @param {!Protocol.Page.Frame} framePayload
-      */
-    _onFrameNavigated(framePayload) {
-        // Update or create main frame.
-        if (frame1) {
-            // Update frame id to retain frame identity on cross-process navigation.
-            frame1._id = framePayload.id;
-        } else {
-            // Initial main frame navigation.
-            frame1 = new Frame(framemanager1, null, null, framePayload.id);
+framemanager1.initialize = async function () {
+    const [
+        ,
+        {
+            frameTree
         }
-        // Update frame payload.
-        frame1._navigated(framePayload);
-    }
-
-    /**
-      * @param {string} name
-      */
-    async _ensureIsolatedWorld(name) {
-        framemanager1._isolatedWorlds.add(name);
-        await wsWrite("Page.addScriptToEvaluateOnNewDocument", {
-            source: `//# sourceURL=${EVALUATION_SCRIPT_URL}`,
-            worldName: name,
+    ] = await Promise.all([
+        wsWrite("Page.enable", {}),
+        wsWrite("Page.getFrameTree", {}),
+    ]);
+    framemanager1._onFrameNavigated(frameTree.frame);
+    await Promise.all([
+        wsWrite("Page.setLifecycleEventsEnabled", {
+            enabled: true
         }),
-        await wsWrite("Page.createIsolatedWorld", {
-            frameId: frame1._id,
-            grantUniveralAccess: true,
-            worldName: name
-        }).catch(console.error); // frames might be removed before we send this
-    }
+        wsWrite("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
+        framemanager1._networkManager.initialize(),
+    ]);
+}
 
-    _onExecutionContextCreated(contextPayload) {
-        let world = null;
-        if (contextPayload.auxData && !!contextPayload.auxData["isDefault"]) {
-            world = domworld1;
-        } else if (contextPayload.name === UTILITY_WORLD_NAME && !domworld2._hasContext()) {
-            // In case of multiple sessions to the same target, there's a race between
-            // connections so we might end up creating multiple isolated worlds.
-            // We can use either.
-            world = domworld2;
-        }
-        if (contextPayload.auxData && contextPayload.auxData["type"] === "isolated")
-            framemanager1._isolatedWorlds.add(contextPayload.name);
-        /** @type {!ExecutionContext} */
-        const context = new ExecutionContext(null, contextPayload, world);
-        world._setContext(context);
-        framemanager1._contextIdToContext.set(contextPayload.id, context);
-    }
+/**
+  * @param {!Protocol.Page.lifecycleEventPayload} event
+  */
+framemanager1._onLifecycleEvent = function (event) {
+    frame1._onLifecycleEvent(event.loaderId, event.name);
+    framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
+}
 
-    /**
-      * @param {number} executionContextId
-      */
-    _onExecutionContextDestroyed(executionContextId) {
-        const context = framemanager1._contextIdToContext.get(executionContextId);
-        framemanager1._contextIdToContext.delete(executionContextId);
-        context._world._setContext(null);
+/**
+  * @param {string} frameId
+  */
+framemanager1._onFrameStoppedLoading = function (frameId) {
+    frame1._lifecycleEvents.add("DOMContentLoaded");
+    frame1._lifecycleEvents.add("load");
+    framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
+}
+
+/**
+  * @param {!Protocol.Page.Frame} framePayload
+  */
+framemanager1._onFrameNavigated = function (framePayload) {
+    // Update or create main frame.
+    if (frame1) {
+        // Update frame id to retain frame identity on cross-process navigation.
+        frame1._id = framePayload.id;
+    } else {
+        // Initial main frame navigation.
+        frame1 = new Frame(framemanager1, null, null, framePayload.id);
     }
+    // Update frame payload.
+    frame1._navigated(framePayload);
+}
+
+/**
+  * @param {string} name
+  */
+framemanager1._ensureIsolatedWorld = async function (name) {
+    framemanager1._isolatedWorlds.add(name);
+    await wsWrite("Page.addScriptToEvaluateOnNewDocument", {
+        source: `//# sourceURL=${EVALUATION_SCRIPT_URL}`,
+        worldName: name,
+    }),
+    await wsWrite("Page.createIsolatedWorld", {
+        frameId: frame1._id,
+        grantUniveralAccess: true,
+        worldName: name
+    }).catch(console.error); // frames might be removed before we send this
+}
+
+framemanager1._onExecutionContextCreated = function (contextPayload) {
+    let world = null;
+    if (contextPayload.auxData && !!contextPayload.auxData["isDefault"]) {
+        world = domworld1;
+    } else if (contextPayload.name === UTILITY_WORLD_NAME && !domworld2._hasContext()) {
+        // In case of multiple sessions to the same target, there's a race between
+        // connections so we might end up creating multiple isolated worlds.
+        // We can use either.
+        world = domworld2;
+    }
+    if (contextPayload.auxData && contextPayload.auxData["type"] === "isolated")
+        framemanager1._isolatedWorlds.add(contextPayload.name);
+    /** @type {!ExecutionContext} */
+    const context = new ExecutionContext(null, contextPayload, world);
+    world._setContext(context);
+    framemanager1._contextIdToContext.set(contextPayload.id, context);
+}
+
+/**
+  * @param {number} executionContextId
+  */
+framemanager1._onExecutionContextDestroyed = function (executionContextId) {
+    const context = framemanager1._contextIdToContext.get(executionContextId);
+    framemanager1._contextIdToContext.delete(executionContextId);
+    context._world._setContext(null);
 }
 
 /**
@@ -832,7 +822,7 @@ class NetworkManager extends EventEmitter {
     /**
       * @param {!Puppeteer.CDPSession} client
       */
-    constructor(client) {
+    constructor() {
         super();
         networkmanager1 = this;
         /** @type {!Map<string, !Request>} */
@@ -999,8 +989,7 @@ class Response {
 
 var pageCreate = async function () {
     target1 = module.exports.target1;
-    /** @type {!FrameManager} */
-    new FrameManager(null, {});
+    framemanager1._networkManager = new NetworkManager();
     const networkManager = framemanager1._networkManager;
     await Promise.all([
         framemanager1.initialize(),
@@ -1017,6 +1006,7 @@ var pageCreate = async function () {
 module.exports = {
 Browser,
 LifecycleWatcher,
+framemanager1,
 pageCreate,
 wsCreate,
 wsWrite
