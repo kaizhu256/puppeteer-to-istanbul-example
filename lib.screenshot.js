@@ -597,7 +597,7 @@ framemanager1.initialize = async function () {
             enabled: true
         }),
         wsWrite("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
-        framemanager1._networkManager.initialize(),
+        networkmanager1.initialize(),
     ]);
 }
 
@@ -755,7 +755,7 @@ class LifecycleWatcher {
         /** @type {?Puppeteer.Request} */
         this._navigationRequest = null;
         framemanager1.on(Events.FrameManager.LifecycleEvent, this._checkLifecycleComplete.bind(this));
-        framemanager1._networkManager.on(Events.NetworkManager.Request, this._onRequest.bind(this));
+        networkmanager1.on(Events.NetworkManager.Request, this._onRequest.bind(this));
         this._sameDocumentNavigationPromise = new Promise(fulfill => {
             this._sameDocumentNavigationCompleteCallback = fulfill;
         });
@@ -825,6 +825,7 @@ class NetworkManager extends EventEmitter {
 constructor() {
     super();
     networkmanager1 = this;
+    module.exports.networkmanager1 = networkmanager1;
     /** @type {!Map<string, !Request>} */
     networkmanager1._requestIdToRequest = new Map();
     /** @type {!Map<string, !Protocol.Network.requestWillBeSentPayload>} */
@@ -989,8 +990,7 @@ class Response {
 
 var pageCreate = async function () {
     target1 = module.exports.target1;
-    framemanager1._networkManager = new NetworkManager();
-    const networkManager = framemanager1._networkManager;
+    new NetworkManager();
     await Promise.all([
         framemanager1.initialize(),
         wsWrite("Target.setAutoAttach", {

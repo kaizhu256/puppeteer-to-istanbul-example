@@ -327,7 +327,7 @@ const watcher = new module.exports.LifecycleWatcher(
 await new Promise(function (resolve) {
     wsWrite("Page.navigate", {
         url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
-        referer: framemanager1._networkManager.extraHTTPHeaders().referer,
+        referer: module.exports.networkmanager1.extraHTTPHeaders().referer,
         frameId: module.exports.frame1._id
     }).then(resolve);
 });
