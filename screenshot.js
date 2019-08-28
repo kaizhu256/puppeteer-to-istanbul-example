@@ -270,14 +270,6 @@ gotoNext = async function (err, data) {
     case 2:
         module.exports.wsCreate(urlWebsocket, gotoNext);
         break;
-    case 3:
-        await module.exports.Browser.create(
-            null,
-            [],
-            chromeProcess
-        );
-        gotoNext();
-        break;
     default:
         onResolve(data);
     }

@@ -484,7 +484,6 @@ wsWrite = function (method, params) {
 };
 
 /* jslint ignore:start */
-var target1;
 var watcher1;
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
@@ -511,7 +510,6 @@ class Browser extends EventEmitter {
     constructor(connection, contextIds, process, closeCallback) {
         super();
         browser1 = this;
-        browser1._process = process;
         browser1._closeCallback = closeCallback;
         browser1._contexts = new Map();
         /** @type {Map<string, Target>} */
@@ -857,7 +855,11 @@ Response = Response0;
 
 
 var pageCreate = async function () {
-    target1 = await wsWrite("Target.createTarget", {
+    await module.exports.Browser.create(
+        null,
+        []
+    );
+    var target1 = await wsWrite("Target.createTarget", {
         url: "about:blank"
     });
     target1 = browser1.targetDict[target1.targetId];
