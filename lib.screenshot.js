@@ -197,12 +197,6 @@ wsOnMessage = function (message) {
         return;
     }
     switch (message.method) {
-    case "Network.responseReceived":
-        networkmanager1._onResponseReceived(params);
-        break;
-    case "Page.frameNavigated":
-        framemanager1._onFrameNavigated(params.frame);
-        break;
     case "Page.frameStoppedLoading":
         framemanager1._onFrameStoppedLoading(params.frameId);
         break;
@@ -246,11 +240,35 @@ wsOnMessageDict["Network.requestWillBeSent"] = function (evt) {
     // Request interception doesn't happen for data URLs with Network Service.
     networkmanager1._onRequest(evt, null);
 };
-wsOnMessageDict["aa"] = function (evt) {
-    return evt;
+wsOnMessageDict["Network.responseReceived"] = function (evt) {
+    const request = networkmanager1._requestIdToRequest.get(evt.requestId);
+    const response = new Response(null, request, evt.response);
+    request._response = response;
 };
-wsOnMessageDict["aa"] = function (evt) {
-    return evt;
+wsOnMessageDict["Page.frameNavigated"] = function (evt) {
+    // Update or create main frame.
+    if (!frame1) {
+        // Initial main frame navigation.
+        frame1 = {};
+        frame1._id = evt.frame.id;
+        frame1._url = "";
+        frame1._detached = false;
+        frame1._loaderId = "";
+        /** @type {!Set<string>} */
+        frame1._lifecycleEvents = new Set();
+        /** @type {!DOMWorld} */
+        domworld1 = new DOMWorld();
+        module.exports.domworld1 = domworld1;
+        /** @type {!DOMWorld} */
+        domworld2 = new DOMWorld();
+    }
+    // Update frame id to retain frame identity on cross-process navigation.
+    frame1._id = evt.frame.id;
+    // Update frame payload.
+    frame1._name = evt.frame.name;
+    // TODO(lushnikov): remove this once requestInterception has loaderId exposed.
+    frame1._navigationURL = evt.frame.url;
+    frame1._url = evt.frame.url;
 };
 wsOnMessageDict["aa"] = function (evt) {
     return evt;
@@ -641,32 +659,6 @@ framemanager1._onFrameStoppedLoading = function (frameId) {
     framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
 }
 
-framemanager1._onFrameNavigated = function (framePayload) {
-    // Update or create main frame.
-    if (!frame1) {
-        // Initial main frame navigation.
-        frame1 = {};
-        frame1._id = framePayload.id;
-        frame1._url = "";
-        frame1._detached = false;
-        frame1._loaderId = "";
-        /** @type {!Set<string>} */
-        frame1._lifecycleEvents = new Set();
-        /** @type {!DOMWorld} */
-        domworld1 = new DOMWorld();
-        module.exports.domworld1 = domworld1;
-        /** @type {!DOMWorld} */
-        domworld2 = new DOMWorld();
-    }
-    // Update frame id to retain frame identity on cross-process navigation.
-    frame1._id = framePayload.id;
-    // Update frame payload.
-    frame1._name = framePayload.name;
-    // TODO(lushnikov): remove this once requestInterception has loaderId exposed.
-    frame1._navigationURL = framePayload.url;
-    frame1._url = framePayload.url;
-}
-
 /**
   * @param {string} name
   */
@@ -839,12 +831,6 @@ networkmanager1._onRequest = function (evt, interceptionId) {
 }
 
 /**
-  * @param {!Protocol.Network.requestServedFromCachePayload} evt
-  */
-networkmanager1._onRequestServedFromCache = function (evt) {
-}
-
-/**
   * @param {!Request} request
   * @param {!Protocol.Network.Response} responsePayload
   */
@@ -861,9 +847,6 @@ networkmanager1._handleRequestRedirect = function (request, responsePayload) {
   * @param {!Protocol.Network.responseReceivedPayload} evt
   */
 networkmanager1._onResponseReceived = function (evt) {
-    const request = networkmanager1._requestIdToRequest.get(evt.requestId);
-    const response = new Response(null, request, evt.response);
-    request._response = response;
 }
 
 /**
@@ -956,7 +939,7 @@ var pageCreate = async function () {
         wsWrite("Page.enable", {}),
         wsWrite("Page.getFrameTree", {}),
     ]);
-    framemanager1._onFrameNavigated(frameTree.frame);
+    wsOnMessageDict["Page.frameNavigated"](frameTree);
 
 
 
