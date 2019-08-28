@@ -990,13 +990,14 @@ var pageCreate = async function () {
 
 
 
+    new NetworkManager();
     await Promise.all([
         await Promise.all([
             wsWrite("Page.setLifecycleEventsEnabled", {
                 enabled: true
             }),
             wsWrite("Runtime.enable", {}).then(() => framemanager1._ensureIsolatedWorld(UTILITY_WORLD_NAME)),
-            wsWrite("Network.enable", {});
+            wsWrite("Network.enable", {}),
         ]),
         wsWrite("Target.setAutoAttach", {
             autoAttach: true,
