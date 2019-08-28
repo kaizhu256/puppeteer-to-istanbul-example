@@ -206,9 +206,6 @@ wsOnMessage = function (message) {
     case "Network.responseReceived":
         networkmanager1._onResponseReceived(params);
         break;
-    case "Page.domContentEventFired":
-        page1.emit(Events.Page.DOMContentLoaded);
-        break;
     case "Page.frameNavigated":
         framemanager1._onFrameNavigated(params.frame);
         break;
@@ -217,9 +214,6 @@ wsOnMessage = function (message) {
         break;
     case "Page.lifecycleEvent":
         framemanager1._onLifecycleEvent(params);
-        break;
-    case "Page.loadEventFired":
-        page1.emit(Events.Page.Load);
         break;
     case "Runtime.executionContextCreated":
         framemanager1._onExecutionContextCreated(params.context);
@@ -1043,18 +1037,9 @@ class Page extends EventEmitter {
         /** @type {!Map<string, Worker>} */
         page1._workers = new Map();
 
-        framemanager1.on(Events.FrameManager.FrameNavigated, event => page1.emit(Events.Page.FrameNavigated, event));
-
         const networkManager = framemanager1._networkManager;
-        networkManager.on(Events.NetworkManager.Request, event => page1.emit(Events.Page.Request, event));
-        networkManager.on(Events.NetworkManager.Response, event => page1.emit(Events.Page.Response, event));
-        networkManager.on(Events.NetworkManager.RequestFinished, event => page1.emit(Events.Page.RequestFinished, event));
         page1._fileChooserInterceptionIsDisabled = false;
         page1._fileChooserInterceptors = new Set();
-
-        page1._target._isClosedPromise.then(function () {
-            page1.emit(Events.Page.Close);
-        });
     }
 
     async _initialize() {
