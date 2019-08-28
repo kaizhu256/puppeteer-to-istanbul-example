@@ -441,7 +441,6 @@ class Browser extends EventEmitter {
         }
 
         browser1.targetDict[event.targetInfo.targetId] = target;
-        browser1.emit(Events.Browser.TargetCreated, target);
     }
 
     /**
@@ -452,7 +451,6 @@ class Browser extends EventEmitter {
         target._initializedCallback(false);
         delete browser1.targetDict[event.targetId];
         target._closedCallback();
-        browser1.emit(Events.Browser.TargetDestroyed, target);
     }
 
     /**
