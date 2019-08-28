@@ -795,48 +795,38 @@ const puppeteerToProtocolLifecycle = {
 
 
 
-/*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/NetworkManager.js
-*/
-class NetworkManager extends EventEmitter {
-/**
-  * @param {!Puppeteer.CDPSession} client
-  */
-constructor() {
-    super();
-    networkmanager1 = this;
-    module.exports.networkmanager1 = networkmanager1;
-    /** @type {!Map<string, !Request>} */
-    networkmanager1._requestIdToRequest = new Map();
-    /** @type {!Map<string, !Protocol.Network.requestWillBeSentPayload>} */
-    networkmanager1._requestIdToRequestWillBeSentEvent = new Map();
-    /** @type {!Object<string, string>} */
-    networkmanager1._extraHTTPHeaders = {};
+networkmanager1 = new EventEmitter();
+module.exports.networkmanager1 = networkmanager1;
+/** @type {!Map<string, !Request>} */
+networkmanager1._requestIdToRequest = new Map();
+/** @type {!Map<string, !Protocol.Network.requestWillBeSentPayload>} */
+networkmanager1._requestIdToRequestWillBeSentEvent = new Map();
+/** @type {!Object<string, string>} */
+networkmanager1._extraHTTPHeaders = {};
 
-    networkmanager1._offline = false;
+networkmanager1._offline = false;
 
-    /** @type {?{username: string, password: string}} */
-    networkmanager1._credentials = null;
-    /** @type {!Set<string>} */
-    networkmanager1._attemptedAuthentications = new Set();
-    networkmanager1._userRequestInterceptionEnabled = false;
-    networkmanager1._protocolRequestInterceptionEnabled = false;
-    networkmanager1._userCacheDisabled = false;
-    /** @type {!Map<string, string>} */
-    networkmanager1._requestIdToInterceptionId = new Map();
-}
+/** @type {?{username: string, password: string}} */
+networkmanager1._credentials = null;
+/** @type {!Set<string>} */
+networkmanager1._attemptedAuthentications = new Set();
+networkmanager1._userRequestInterceptionEnabled = false;
+networkmanager1._protocolRequestInterceptionEnabled = false;
+networkmanager1._userCacheDisabled = false;
+/** @type {!Map<string, string>} */
+networkmanager1._requestIdToInterceptionId = new Map();
 
 /**
   * @return {!Object<string, string>}
   */
-extraHTTPHeaders() {
+networkmanager1.extraHTTPHeaders = function () {
     return Object.assign({}, networkmanager1._extraHTTPHeaders);
 }
 
 /**
   * @param {!Protocol.Network.requestWillBeSentPayload} event
   */
-_onRequestWillBeSent(event) {
+networkmanager1._onRequestWillBeSent = function (event) {
     // Request interception doesn't happen for data URLs with Network Service.
     networkmanager1._onRequest(event, null);
 }
@@ -845,7 +835,7 @@ _onRequestWillBeSent(event) {
   * @param {!Protocol.Network.requestWillBeSentPayload} event
   * @param {?string} interceptionId
   */
-_onRequest(event, interceptionId) {
+networkmanager1._onRequest = function (event, interceptionId) {
     let redirectChain = [];
     if (event.redirectResponse) {
         const request = networkmanager1._requestIdToRequest.get(event.requestId);
@@ -861,7 +851,7 @@ _onRequest(event, interceptionId) {
 /**
   * @param {!Protocol.Network.requestServedFromCachePayload} event
   */
-_onRequestServedFromCache(event) {
+networkmanager1._onRequestServedFromCache = function (event) {
     const request = networkmanager1._requestIdToRequest.get(event.requestId);
     request._fromMemoryCache = true;
 }
@@ -870,7 +860,7 @@ _onRequestServedFromCache(event) {
   * @param {!Request} request
   * @param {!Protocol.Network.Response} responsePayload
   */
-_handleRequestRedirect(request, responsePayload) {
+networkmanager1._handleRequestRedirect = function (request, responsePayload) {
     const response = new Response(null, request, responsePayload);
     request._response = response;
     request._redirectChain.push(request);
@@ -882,7 +872,7 @@ _handleRequestRedirect(request, responsePayload) {
 /**
   * @param {!Protocol.Network.responseReceivedPayload} event
   */
-_onResponseReceived(event) {
+networkmanager1._onResponseReceived = function (event) {
     const request = networkmanager1._requestIdToRequest.get(event.requestId);
     const response = new Response(null, request, event.response);
     request._response = response;
@@ -891,14 +881,13 @@ _onResponseReceived(event) {
 /**
   * @param {!Protocol.Network.loadingFinishedPayload} event
   */
-_onLoadingFinished(event) {
+networkmanager1._onLoadingFinished = function (event) {
     const request = networkmanager1._requestIdToRequest.get(event.requestId);
     // Under certain conditions we never get the Network.responseReceived
     // event from protocol. @see https://crbug.com/883475
     request._response._bodyLoadedPromiseFulfill.call(null);
     networkmanager1._requestIdToRequest.delete(request._requestId);
     networkmanager1._attemptedAuthentications.delete(request._interceptionId);
-}
 }
 
 class Request {
@@ -990,7 +979,6 @@ var pageCreate = async function () {
 
 
 
-    new NetworkManager();
     await Promise.all([
         await Promise.all([
             wsWrite("Page.setLifecycleEventsEnabled", {
@@ -1013,6 +1001,7 @@ module.exports = {
 Browser,
 LifecycleWatcher,
 framemanager1,
+networkmanager1,
 pageCreate,
 wsCreate,
 wsWrite
