@@ -989,7 +989,16 @@ class Response {
 
 
 var pageCreate = async function () {
-    target1 = module.exports.target1;
+    target1 = await wsWrite("Target.createTarget", {
+        url: "about:blank"
+    });
+    target1 = browser1.targetDict[target1.targetId];
+    await wsWrite("Target.attachToTarget", {
+        flatten: true,
+        targetId: target1._targetInfo.targetId
+    });
+    module.exports.target1 = target1;
+
     new NetworkManager();
     await Promise.all([
         framemanager1.initialize(),

@@ -162,7 +162,6 @@ var onDataUrlInspect;
 var onReject;
 var onResolve;
 var path;
-var target1;
 var urlWebsocket;
 var util;
 var wsWrite;
@@ -302,15 +301,6 @@ await new Promise(function (resolve, reject) {
 
 
 
-target1 = await wsWrite("Target.createTarget", {
-    url: "about:blank"
-});
-target1 = browser1.targetDict[target1.targetId];
-module.exports.target1 = target1;
-await wsWrite("Target.attachToTarget", {
-    flatten: true,
-    targetId: target1._targetInfo.targetId
-});
 await module.exports.pageCreate();
 
 
@@ -349,7 +339,7 @@ await Promise.all([
     (async function () {
         var result;
         await wsWrite("Target.activateTarget", {
-            targetId: target1._targetId
+            targetId: module.exports.target1._targetId
         });
         result = await wsWrite("Page.captureScreenshot", {
             format: "png"
