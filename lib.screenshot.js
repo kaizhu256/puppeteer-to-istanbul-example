@@ -642,7 +642,6 @@ class FrameManager extends EventEmitter {
         }
         // Update frame payload.
         frame1._navigated(framePayload);
-        framemanager1.emit(Events.FrameManager.FrameNavigated, frame1);
     }
 
     /**
@@ -912,8 +911,6 @@ class NetworkManager extends EventEmitter {
         response._bodyLoadedPromiseFulfill.call(null, new Error("Response body is unavailable for redirect responses"));
         networkmanager1._requestIdToRequest.delete(request._requestId);
         networkmanager1._attemptedAuthentications.delete(request._interceptionId);
-        networkmanager1.emit(Events.NetworkManager.Response, response);
-        networkmanager1.emit(Events.NetworkManager.RequestFinished, request);
     }
 
     /**
@@ -923,7 +920,6 @@ class NetworkManager extends EventEmitter {
         const request = networkmanager1._requestIdToRequest.get(event.requestId);
         const response = new Response(null, request, event.response);
         request._response = response;
-        networkmanager1.emit(Events.NetworkManager.Response, response);
     }
 
     /**
@@ -936,7 +932,6 @@ class NetworkManager extends EventEmitter {
         request._response._bodyLoadedPromiseFulfill.call(null);
         networkmanager1._requestIdToRequest.delete(request._requestId);
         networkmanager1._attemptedAuthentications.delete(request._interceptionId);
-        networkmanager1.emit(Events.NetworkManager.RequestFinished, request);
     }
 }
 
