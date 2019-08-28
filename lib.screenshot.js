@@ -380,6 +380,7 @@ wsWrite = function (method, params) {
 
 /* jslint ignore:start */
 var target1;
+var watcher1;
 /*
 lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
 */
@@ -999,7 +1000,7 @@ var pageCreate = async function () {
 
 
     // browser - load url
-    const watcher = new LifecycleWatcher(
+    const watcher1 = new LifecycleWatcher(
         framemanager1,
         frame1,
         [
@@ -1013,15 +1014,14 @@ var pageCreate = async function () {
             frameId: frame1._id
         }).then(resolve);
     });
-    await local.identity(watcher._newDocumentNavigationPromise);
-    await local.identity(watcher._navigationRequest._response);
+    await watcher1._newDocumentNavigationPromise;
+    await watcher1._navigationRequest._response;
 }
 
 
 
 module.exports = {
 Browser,
-LifecycleWatcher,
 pageCreate,
 wsCreate,
 wsWrite
