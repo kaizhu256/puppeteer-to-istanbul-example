@@ -1001,10 +1001,11 @@ class Response {
 
 
 page1 = {};
-page1.create = async function (client, target) {
-    page1._target = target;
+page1.create = async function () {
+    target1 = module.exports.target1;
+    page1._target = target1;
     /** @type {!FrameManager} */
-    new FrameManager(client, page1);
+    new FrameManager(null, page1);
     const networkManager = framemanager1._networkManager;
     await Promise.all([
         framemanager1.initialize(),

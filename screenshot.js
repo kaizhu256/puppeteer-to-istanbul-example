@@ -313,7 +313,7 @@ await wsWrite("Target.attachToTarget", {
     targetId: target1._targetInfo.targetId
 });
 page1 = module.exports.page1;
-await page1.create(null, target1);
+await page1.create();
 
 
 
