@@ -139,14 +139,15 @@ wsOnEventDict["Network.requestServedFromCache"] = function (evt) {
 wsOnEventDict["Network.requestWillBeSent"] = function (evt) {
     // Request interception doesn't happen for data URLs with Network Service.
     let redirectChain = [];
+    var request;
     if (evt.redirectResponse) {
-        const request = networkmanager1._requestIdToRequest.get(evt.requestId);
+        request = networkmanager1._requestIdToRequest.get(evt.requestId);
         // If we connect late to the target,
         // we could have missed the requestWillBeSent evt.
         networkmanager1._handleRequestRedirect(request, evt.redirectResponse);
         redirectChain = request._redirectChain;
     }
-    const request = new Request(evt, redirectChain);
+    request = new Request(evt, redirectChain);
     networkmanager1._requestIdToRequest.set(evt.requestId, request);
     if (request._isNavigationRequest) {
         watcher1._navigationRequest = request;
