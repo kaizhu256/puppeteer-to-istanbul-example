@@ -1074,7 +1074,6 @@ module.exports = {
 Browser,
 LifecycleWatcher,
 Page,
-domworld2,
 wsCreate,
 wsWrite
 };
