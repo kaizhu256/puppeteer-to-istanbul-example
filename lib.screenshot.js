@@ -74,10 +74,8 @@ var websocket1;
 var wsCallbackCounter;
 var wsCallbackDict;
 var wsCreate;
-var wsOnMessage;
-var wsOnMessageDict;
+var wsOnEventDict;
 var wsRead;
-var wsReadConsume;
 var wsSessionId;
 var wsWrite;
 
@@ -89,7 +87,6 @@ domworld2 = null;
 frame1 = null;
 framemanager1 = null;
 networkmanager1 = null;
-wsReadConsume = null;
 
 local.nop(Events);
 local.nop(browser1);
@@ -99,7 +96,6 @@ local.nop(frame1);
 local.nop(framemanager1);
 local.nop(networkmanager1);
 local.nop(wsCreate);
-local.nop(wsReadConsume);
 local.nop(wsWrite);
 
 
@@ -189,18 +185,8 @@ wsCreate = function (wsUrl, onError) {
         onError();
     });
 };
-wsOnMessage = function (message) {
-    message = JSON.parse(message);
-    if (wsCallbackDict[message.id]) {
-        wsCallbackDict[message.id](message.result);
-    }
-    if (wsOnMessageDict.hasOwnProperty(message.method)) {
-        wsOnMessageDict[message.method](message.params);
-        return;
-    }
-};
-wsOnMessageDict = {};
-wsOnMessageDict["Network.loadingFinished"] = function (evt) {
+wsOnEventDict = {};
+wsOnEventDict["Network.loadingFinished"] = function (evt) {
     const request = networkmanager1._requestIdToRequest.get(evt.requestId);
     // Under certain conditions we never get the Network.responseReceived
     // evt from protocol. @see https://crbug.com/883475
@@ -208,20 +194,20 @@ wsOnMessageDict["Network.loadingFinished"] = function (evt) {
     networkmanager1._requestIdToRequest.delete(request._requestId);
     networkmanager1._attemptedAuthentications.delete(request._interceptionId);
 };
-wsOnMessageDict["Network.requestServedFromCache"] = function (evt) {
+wsOnEventDict["Network.requestServedFromCache"] = function (evt) {
     const request = networkmanager1._requestIdToRequest.get(evt.requestId);
     request._fromMemoryCache = true;
 };
-wsOnMessageDict["Network.requestWillBeSent"] = function (evt) {
+wsOnEventDict["Network.requestWillBeSent"] = function (evt) {
     // Request interception doesn't happen for data URLs with Network Service.
     networkmanager1._onRequest(evt, null);
 };
-wsOnMessageDict["Network.responseReceived"] = function (evt) {
+wsOnEventDict["Network.responseReceived"] = function (evt) {
     const request = networkmanager1._requestIdToRequest.get(evt.requestId);
     const response = new Response(null, request, evt.response);
     request._response = response;
 };
-wsOnMessageDict["Page.frameNavigated"] = function (evt) {
+wsOnEventDict["Page.frameNavigated"] = function (evt) {
     // Update or create main frame.
     if (!frame1) {
         // Initial main frame navigation.
@@ -247,12 +233,12 @@ wsOnMessageDict["Page.frameNavigated"] = function (evt) {
     frame1._navigationURL = evt.frame.url;
     frame1._url = evt.frame.url;
 };
-wsOnMessageDict["Page.frameStoppedLoading"] = function () {
+wsOnEventDict["Page.frameStoppedLoading"] = function () {
     frame1._lifecycleEvents.add("DOMContentLoaded");
     frame1._lifecycleEvents.add("load");
     framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
 };
-wsOnMessageDict["Page.lifecycleEvent"] = function (evt) {
+wsOnEventDict["Page.lifecycleEvent"] = function (evt) {
     if (evt.name === "init") {
         frame1._loaderId = evt.loaderId;
         frame1._lifecycleEvents.clear();
@@ -260,7 +246,7 @@ wsOnMessageDict["Page.lifecycleEvent"] = function (evt) {
     frame1._lifecycleEvents.add(evt.name);
     framemanager1.emit(Events.FrameManager.LifecycleEvent, frame1);
 };
-wsOnMessageDict["Runtime.executionContextCreated"] = function (evt) {
+wsOnEventDict["Runtime.executionContextCreated"] = function (evt) {
     let world = null;
     if (evt.context.auxData && Boolean(evt.context.auxData.isDefault)) {
         world = domworld1;
@@ -281,17 +267,17 @@ wsOnMessageDict["Runtime.executionContextCreated"] = function (evt) {
     world._setContext(context);
     framemanager1._contextIdToContext.set(evt.context.id, context);
 };
-wsOnMessageDict["Runtime.executionContextDestroyed"] = function (evt) {
+wsOnEventDict["Runtime.executionContextDestroyed"] = function (evt) {
     const context = framemanager1._contextIdToContext.get(
         evt.executionContextId
     );
     framemanager1._contextIdToContext.delete(evt.executionContextId);
     context._world._setContext(null);
 };
-wsOnMessageDict["Target.attachedToTarget"] = function (evt) {
+wsOnEventDict["Target.attachedToTarget"] = function (evt) {
     wsSessionId = evt.sessionId;
 };
-wsOnMessageDict["Target.targetCreated"] = function (evt) {
+wsOnEventDict["Target.targetCreated"] = function (evt) {
     const targetInfo = evt.targetInfo;
     const target = {};
     target._targetInfo = targetInfo;
@@ -319,13 +305,13 @@ wsOnMessageDict["Target.targetCreated"] = function (evt) {
     }
     browser1.targetDict[evt.targetInfo.targetId] = target;
 };
-wsOnMessageDict["Target.targetDestroyed"] = function (evt) {
+wsOnEventDict["Target.targetDestroyed"] = function (evt) {
     const target = browser1.targetDict[evt.targetId];
     target._initializedCallback(false);
     delete browser1.targetDict[evt.targetId];
     target._closedCallback();
 };
-wsOnMessageDict["Target.targetInfoChanged"] = function (evt) {
+wsOnEventDict["Target.targetInfoChanged"] = function (evt) {
     const target = browser1.targetDict[evt.targetInfo.targetId];
     assert(target, "target should exist before targetInfoChanged");
     target._targetInfo = evt.targetInfo;
@@ -342,6 +328,7 @@ wsRead = function (chunk) {
 /*
  * this function will read <chunk> from websocket1
  */
+    var callback;
     var consume;
     var data;
     var ii;
@@ -408,7 +395,18 @@ wsRead = function (chunk) {
                 return;
             }
             wsRead.state = "0_GET_INFO";
-            wsOnMessage(data.toString());
+            // pass message to callback with given id
+            tmp = JSON.parse(String(data));
+            callback = wsCallbackDict[tmp.id];
+            if (callback) {
+                delete wsCallbackDict[tmp.id];
+                callback(tmp.result);
+                break;
+            }
+            // pass message to evt-handler with given method
+            if (wsOnEventDict.hasOwnProperty(tmp.method)) {
+                wsOnEventDict[tmp.method](tmp.params);
+            }
             break;
         // init payloadLength from first 2 bytes
         // 0_GET_INFO
@@ -474,9 +472,6 @@ wsWrite = function (method, params) {
     websocket1.uncork();
     // cleanup
     ii = wsCallbackCounter;
-    setTimeout(function () {
-        delete wsCallbackDict[ii];
-    }, 30000);
     // resolve
     return new Promise(function (resolve) {
         wsCallbackDict[ii] = resolve;
@@ -751,18 +746,6 @@ networkmanager1._handleRequestRedirect = function (request, responsePayload) {
     networkmanager1._attemptedAuthentications.delete(request._interceptionId);
 }
 
-/**
-  * @param {!Protocol.Network.responseReceivedPayload} evt
-  */
-networkmanager1._onResponseReceived = function (evt) {
-}
-
-/**
-  * @param {!Protocol.Network.loadingFinishedPayload} evt
-  */
-networkmanager1._onLoadingFinished = function (evt) {
-}
-
 class Request {
     /**
       * @param {!Puppeteer.CDPSession} client
@@ -851,7 +834,7 @@ var pageCreate = async function () {
         wsWrite("Page.enable", {}),
         wsWrite("Page.getFrameTree", {}),
     ]);
-    wsOnMessageDict["Page.frameNavigated"](frameTree);
+    wsOnEventDict["Page.frameNavigated"](frameTree);
 
 
 
