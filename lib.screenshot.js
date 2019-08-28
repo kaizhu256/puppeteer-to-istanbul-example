@@ -435,8 +435,6 @@ class Domworld0 {
       * @param {!Puppeteer.FrameManager} frameManager
       */
     constructor() {
-        this._frame = frame1;
-
         /** @type {?Promise<!Puppeteer.ElementHandle>} */
         this._documentPromise = null;
         this._contextResolveCallback = null;
@@ -546,9 +544,6 @@ framemanager1._ensureIsolatedWorld = async function (name) {
         watcher1._expectedLifecycle = [
             "load"
         ];
-        watcher1._sameDocumentNavigationPromise = new Promise(fulfill => {
-            watcher1._sameDocumentNavigationCompleteCallback = fulfill;
-        });
         watcher1._lifecyclePromise = new Promise(fulfill => {
             watcher1._lifecycleCallback = fulfill;
         });
@@ -560,17 +555,17 @@ framemanager1._ensureIsolatedWorld = async function (name) {
       * @param {!Puppeteer.Request} request
       */
     watcher1._onRequest = function (request) {
-        if (request._frame !== watcher1._frame || !request._isNavigationRequest)
-            return;
-        watcher1._navigationRequest = request;
+        if (request._isNavigationRequest) {
+            watcher1._navigationRequest = request;
+        }
     };
 
     watcher1._checkLifecycleComplete = function () {
         // We expect navigation to commit.
-        if (!checkLifecycle(watcher1._frame, watcher1._expectedLifecycle))
+        if (!checkLifecycle(frame1, watcher1._expectedLifecycle))
             return;
         watcher1._lifecycleCallback();
-        if (watcher1._frame._loaderId === watcher1._initialLoaderId && !watcher1._hasSameDocumentNavigation)
+        if (frame1._loaderId === watcher1._initialLoaderId && !watcher1._hasSameDocumentNavigation)
             return;
         watcher1._newDocumentNavigationCompleteCallback();
         /**
@@ -667,7 +662,6 @@ class Request {
         this._method = evt.request.method;
         this._postData = evt.request.postData;
         this._headers = {};
-        this._frame = frame;
         this._redirectChain = redirectChain;
         for (const key of Object.keys(evt.request.headers))
             this._headers[key.toLowerCase()] = evt.request.headers[key];
@@ -757,7 +751,6 @@ var pageCreate = async function () {
 
 
     // browser - load url
-    watcher1._frame = frame1;
     watcher1._initialLoaderId = frame1._loaderId;
     watcher1._checkLifecycleComplete();
     await new Promise(function (resolve) {
