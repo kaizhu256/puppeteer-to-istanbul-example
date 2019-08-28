@@ -481,8 +481,8 @@ class DOMWorld {
       * @param {!Puppeteer.FrameManager} frameManager
       * @param {!Puppeteer.Frame} frame
       */
-    constructor(frameManager, frame) {
-        this._frame = frame;
+    constructor() {
+        this._frame = frame1;
 
         /** @type {?Promise<!Puppeteer.ElementHandle>} */
         this._documentPromise = null;
@@ -609,7 +609,7 @@ framemanager1._onFrameNavigated = function (framePayload) {
         frame1._id = framePayload.id;
     } else {
         // Initial main frame navigation.
-        frame1 = new Frame(framemanager1, null, null, framePayload.id);
+        frame1 = new Frame(framePayload.id);
     }
     // Update frame payload.
     frame1._navigated(framePayload);
@@ -668,10 +668,9 @@ class Frame {
       * @param {?Frame} parentFrame
       * @param {string} frameId
       */
-    constructor(frameManager, client, parentFrame, frameId) {
+    constructor(frameId) {
         frame1 = this;
         module.exports.frame1 = this;
-        frame1._parentFrame = parentFrame;
         frame1._url = "";
         frame1._id = frameId;
         frame1._detached = false;
@@ -680,10 +679,10 @@ class Frame {
         /** @type {!Set<string>} */
         frame1._lifecycleEvents = new Set();
         /** @type {!DOMWorld} */
-        domworld1 = new DOMWorld(frameManager, frame1);
+        domworld1 = new DOMWorld();
         module.exports.domworld1 = domworld1;
         /** @type {!DOMWorld} */
-        domworld2 = new DOMWorld(frameManager, frame1);
+        domworld2 = new DOMWorld();
         module.exports.domworld2 = domworld2;
     }
 
