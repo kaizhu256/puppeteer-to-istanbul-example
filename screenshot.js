@@ -351,7 +351,7 @@ await Promise.all([
     (async function () {
         var result;
         await wsWrite("Target.activateTarget", {
-            targetId: page1._target._targetId
+            targetId: target1._targetId
         });
         result = await wsWrite("Page.captureScreenshot", {
             format: "png"
