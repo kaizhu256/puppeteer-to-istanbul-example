@@ -5,8 +5,11 @@
   "main": "index.js",
   "scripts": {
     "precoverage": "rimraf coverage && rimraf .nyc_output",
-    "coverage": "node index.js",
-    "postcoverage": "nyc report --reporter=html && open coverage/index.html",
+    "coverage0": "node index.js",
+    "coverage": "npm_config_mode_coverage=node_modules ~/lib.utility2.sh shIstanbulCover index.js",
+    "postcoverage": "ls -l .; nyc report --reporter=html; ls -l coverage/",
+    "screenshot0": "rm -f tmp/aa.* && node screenshot.js && ls -l tmp/aa.*",
+    "screenshot": "rm -f tmp/aa.* && npm_config_mode_coverage=node_modules ~/lib.utility2.sh shIstanbulCover screenshot.js && ls -l tmp/aa.*",
     "test": "standard"
   },
   "keywords": [
@@ -18,6 +21,8 @@
   "author": "Ben Coe <ben@npmjs.com>",
   "license": "ISC",
   "dependencies": {
+    "c8": "^5.0.1",
+    "nyc": "^14.1.1",
     "puppeteer": "^1.1.1",
     "puppeteer-to-istanbul": "^1.2.2",
     "rimraf": "^2.6.2"
