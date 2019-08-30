@@ -8,9 +8,9 @@
 
 
 
-//!! /* istanbul instrument in package jslint */
-//!! /* istanbul ignore next */
-//!! /* jslint utility2:true */
+// /* istanbul instrument in package jslint */
+// /* istanbul ignore next */
+// /* jslint utility2:true */
 (function (globalThis) {
     "use strict";
     var consoleError;
@@ -63,7 +63,6 @@
             return;
         }
         err = (
-            // ternary-operator
             (
                 message
                 && typeof message.message === "string"
@@ -7740,6 +7739,8 @@ class ExecutionContext {
       throw new Error(`Expected to get |string| or |function| as the first argument, but got "${pageFunction}" instead.`);
 
     let functionText = pageFunction.toString();
+    // hack-istanbul - un-instrument
+    functionText = functionText.replace((/\b__cov_.*?\+\+/g), "0");
     try {
       new Function('(' + functionText + ')');
     } catch (e1) {
