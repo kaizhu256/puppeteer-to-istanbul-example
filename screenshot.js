@@ -8512,14 +8512,9 @@ class Launcher {
         /** @type {?Connection} */
         let connection = null;
         try {
-            if (true) {
-                const browserWSEndpoint = await waitForWSEndpoint(chromeProcess, timeout, this._preferredRevision);
-                const transport = await WebSocketTransport.create(browserWSEndpoint);
-                connection = new Connection(browserWSEndpoint, transport, slowMo);
-            } else {
-                const transport = new PipeTransport(/** @type {!NodeJS.WritableStream} */(chromeProcess.stdio[3]), /** @type {!NodeJS.ReadableStream} */ (chromeProcess.stdio[4]));
-                connection = new Connection('', transport, slowMo);
-            }
+            const browserWSEndpoint = await waitForWSEndpoint(chromeProcess, timeout, this._preferredRevision);
+            const transport = await WebSocketTransport.create(browserWSEndpoint);
+            connection = new Connection(browserWSEndpoint, transport, slowMo);
             const browser = await Browser.create(connection, [], ignoreHTTPSErrors, defaultViewport, chromeProcess, gracefullyCloseChrome);
             await browser.waitForTarget(t => t.type() === 'page');
             return browser;
