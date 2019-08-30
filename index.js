@@ -280,7 +280,8 @@ await Promise.all([
 ])
 
 // Navigate to page
-let url = 'file:///' + path.resolve('./index.html')
+//!! let url = 'file:///' + path.resolve('./index.html')
+let url = "https://m.youtube.com"
 await page.goto(url)
 
 

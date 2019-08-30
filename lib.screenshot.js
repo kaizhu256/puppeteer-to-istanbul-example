@@ -705,7 +705,7 @@ var pageCreate = async function () {
     watcher1._checkLifecycleComplete();
     await new Promise(function (resolve) {
         wsWrite("Page.navigate", {
-            url: "https://www.highcharts.com/stock/demo/stock-tools-gui",
+            url: "https://www.youtube.com",
             frameId: frame1._id
         }).then(resolve);
     });
