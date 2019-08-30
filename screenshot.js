@@ -12028,41 +12028,63 @@ file none
 
 
 (async function () {
-    // init var
-    var browser;
-    var fs;
-    var page;
-    // require modules
-    fs = require("fs");
+// init var
+var browser;
+var fs;
+var page;
+// require modules
+fs = require("fs");
 
-    browser = await module.exports.launch({
-        args: [
-            // "--no-sandbox", "--disable-setuid-sandbox"
-            "--disable-setuid-sandbox",
-            "--headless",
-            "--hide-scrollbars",
-            "--incognito",
-            "--mute-audio",
-            "--no-sandbox",
-            "--remote-debugging-port=0"
-        ],
-        executablePath: (
-            "node_modules/puppeteer/.local-chromium"
-            + "/linux-674921/chrome-linux/chrome"
-        )
-    });
-    page = await browser.newPage();
-    // browser - wait 2000 ms
-    await new Promise(function (resolve) {
-        setTimeout(resolve, 5000);
-    });
-    await page.goto("https://m.youtube.com");
-    // browser - screenshot png
-    await page.screenshot({
-        path: "tmp/aa.png"
-    });
-    // browser - screenshot html
-    fs.writeFileSync("tmp/aa.html", await page.content());
-    await browser.close();
+browser = await module.exports.launch({
+    args: [
+        // "--no-sandbox", "--disable-setuid-sandbox"
+        "--disable-setuid-sandbox",
+        "--headless",
+        "--hide-scrollbars",
+        "--incognito",
+        "--mute-audio",
+        "--no-sandbox",
+        "--remote-debugging-port=0"
+    ],
+    executablePath: (
+        "node_modules/puppeteer/.local-chromium"
+        + "/linux-674921/chrome-linux/chrome"
+    )
+});
+page = await browser.newPage();
+// Enable both JavaScript and CSS coverage
+await Promise.all([
+    page.coverage.startJSCoverage(),
+    page.coverage.startCSSCoverage()
+])
+// test undefined url
+try {
+    await page.goto("https://undefined");
+} catch (ignore) {}
+await page.goto("https://www.example.com");
+await page.goto("https://m.youtube.com");
+// browser - wait 5000 ms
+await new Promise(function (resolve) {
+    setTimeout(resolve, 5000);
+});
+// browser - screenshot png
+await page.screenshot({
+    path: "tmp/aa.png"
+});
+// browser - screenshot html
+fs.writeFileSync("tmp/aa.html", await page.content());
+
+
+
+// Disable JavaScript coverage
+var covPuppeteer = await page.coverage.stopJSCoverage();
+await page.coverage.stopCSSCoverage();
+covPuppeteer.forEach(function (file) {
+    console.error(file.url);
+});
+
+
+
+await browser.close();
 }());
 }(globalThis.globalLocal));

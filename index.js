@@ -280,8 +280,8 @@ await Promise.all([
 ])
 
 // Navigate to page
-let url = 'file:///' + path.resolve('./index.html')
-// let url = "https://m.youtube.com"
+var url = 'file:///' + path.resolve('./index.html')
+var url = "https://m.youtube.com"
 await page.goto(url)
 
 
@@ -302,6 +302,7 @@ child_process.spawnSync("mkdir", [
 });
 // Disable JavaScript coverage
 covPuppeteer = await page.coverage.stopJSCoverage();
+await page.coverage.stopCSSCoverage();
 // init covPuppeteer
 // output JavaScript bundled in puppeteer output to format
 // that can be eaten by Istanbul.
@@ -311,6 +312,7 @@ covPuppeteer = JSON.parse(JSON.stringify(covPuppeteer));
 fs.writeFileSync("tmp/aa.json", JSON.stringify(covPuppeteer, null, 4));
 iiInline = 0;
 covPuppeteer.forEach(function (file) {
+    console.error(file.url);
     // generate a new path relative to ./coverage/js.
     // this would be around where you'd use mkdirp.
     // Get the last element in the path name
