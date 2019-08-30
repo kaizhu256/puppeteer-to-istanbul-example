@@ -196,31 +196,6 @@ var mime = {
         }
     }
 };
-const removeFolder = function (dir, onError) {
-/*
- * this function will asynchronously "rm -fr" <dir>
- */
-    child_process.spawn("rm", [
-        "-fr", path.resolve(process.cwd(), dir)
-    ], {
-        stdio: [
-            "ignore", 1, 2
-        ]
-    }).on("exit", onError);
-};
-removeFolder.sync = function (dir) {
-/*
- * this function will synchronously "rm -fr" <dir>
- */
-    child_process.spawnSync("rm", [
-        "-fr", path.resolve(process.cwd(), dir)
-    ], {
-        stdio: [
-            "ignore", 1, 2
-        ]
-    });
-};
-const removeRecursive = removeFolder;
 
 
 
@@ -8428,7 +8403,6 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Launcher.js
 // const {TimeoutError} = require('./Errors');
 
 const mkdtempAsync = helper.promisify(fs.mkdtemp);
-const removeFolderAsync = helper.promisify(removeFolder);
 
 const CHROME_PROFILE_PATH = path.join(os.tmpdir(), 'puppeteer_dev_profile-');
 
@@ -8481,7 +8455,6 @@ class Launcher {
             ignoreDefaultArgs = false,
             args = [],
             dumpio = false,
-            executablePath = null,
             pipe = false,
             env = process.env,
             handleSIGINT = true,
@@ -8493,39 +8466,6 @@ class Launcher {
             timeout = 30000
         } = options;
 
-        const chromeArguments = [];
-        if (!ignoreDefaultArgs)
-            chromeArguments.push(...this.defaultArgs(options));
-        else if (Array.isArray(ignoreDefaultArgs))
-            chromeArguments.push(...this.defaultArgs(options).filter(arg => ignoreDefaultArgs.indexOf(arg) === -1));
-        else
-            chromeArguments.push(...args);
-
-        let temporaryUserDataDir = null;
-
-        if (!chromeArguments.some(argument => argument.startsWith('--remote-debugging-')))
-            chromeArguments.push(pipe ? '--remote-debugging-pipe' : '--remote-debugging-port=0');
-        if (!chromeArguments.some(arg => arg.startsWith('--user-data-dir'))) {
-            temporaryUserDataDir = await mkdtempAsync(CHROME_PROFILE_PATH);
-            chromeArguments.push(`--user-data-dir=${temporaryUserDataDir}`);
-        }
-
-        let chromeExecutable = executablePath;
-        if (!executablePath) {
-            const {missingText, executablePath} = this._resolveExecutablePath();
-            if (missingText)
-                throw new Error(missingText);
-            chromeExecutable = executablePath;
-        }
-
-        const usePipe = chromeArguments.includes('--remote-debugging-pipe');
-        /** @type {!Array<"ignore"|"pipe">} */
-        let stdio = ['pipe', 'pipe', 'pipe'];
-        if (usePipe) {
-            stdio = ['ignore', 'pipe', 'pipe', 'pipe', 'pipe'];
-        }
-        // hack-puppeteer
-        console.error(JSON.stringify([chromeExecutable, chromeArguments]));
         const chromeProcess = child_process.spawn(
             (
                 "node_modules/puppeteer/.local-chromium"
@@ -8558,13 +8498,7 @@ class Launcher {
             chromeProcess.once('exit', () => {
                 chromeClosed = true;
                 // Cleanup as processes exit.
-                if (temporaryUserDataDir) {
-                    removeFolderAsync(temporaryUserDataDir)
-                            .then(() => fulfill())
-                            .catch(err => console.error(err));
-                } else {
-                    fulfill();
-                }
+                fulfill();
             });
         });
 
@@ -8578,7 +8512,7 @@ class Launcher {
         /** @type {?Connection} */
         let connection = null;
         try {
-            if (!usePipe) {
+            if (true) {
                 const browserWSEndpoint = await waitForWSEndpoint(chromeProcess, timeout, this._preferredRevision);
                 const transport = await WebSocketTransport.create(browserWSEndpoint);
                 connection = new Connection(browserWSEndpoint, transport, slowMo);
@@ -8599,9 +8533,7 @@ class Launcher {
           */
         function gracefullyCloseChrome() {
             helper.removeEventListeners(listeners);
-            if (temporaryUserDataDir) {
-                killChrome();
-            } else if (connection) {
+            if (connection) {
                 // Attempt to close chrome gracefully
                 connection.send('Browser.close').catch(error => {
                     debugError(error);
@@ -8625,10 +8557,6 @@ class Launcher {
                     // the process might have already stopped
                 }
             }
-            // Attempt to remove temporary profile directory to avoid littering.
-            try {
-                removeFolder.sync(temporaryUserDataDir);
-            } catch (e) { }
         }
     }
 
