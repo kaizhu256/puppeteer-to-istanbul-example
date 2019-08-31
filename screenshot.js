@@ -151,22 +151,23 @@
 
 (function (local) {
 "use strict";
-local.nop(local);
+// require module
+const child_process = require("child_process");
+const path = require("path");
 /* jslint ignore:start */
 function PerMessageDeflate () {
     return;
 }
-// hack-puppeteer - module.exports
+// require module
+const assert = require("assert");
 const EventEmitter = require('events');
 const URL = require('url');
-const childProcess = require('child_process');
 const crypto = require('crypto');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const net = require('net');
 const os = require('os');
-const path = require('path');
 const readline = require('readline');
 const tls = require('tls');
 const url = require('url');
@@ -176,8 +177,6 @@ const { randomBytes } = require('crypto');
 
 
 
-const child_process = require('child_process');
-const debugError = console.error;
 const debugProtocol = function () {
     return;
 }
@@ -2983,7 +2982,7 @@ class Helper {
         await client.send('Runtime.releaseObject', {objectId: remoteObject.objectId}).catch(error => {
             // Exceptions might happen in case of a page been navigated or closed.
             // Swallow these since they are harmless and we don't leak anything in this case.
-            debugError(error);
+            console.error(error);
         });
     }
 
@@ -3149,15 +3148,6 @@ class Helper {
 const openAsync = Helper.promisify(fs.open);
 const writeAsync = Helper.promisify(fs.write);
 const closeAsync = Helper.promisify(fs.close);
-
-/**
-  * @param {*} value
-  * @param {string=} message
-  */
-function assert(value, message) {
-    if (!value)
-        throw new Error(message);
-}
 
 // hack-puppeteer - module.exports
 const helper = Helper;
@@ -4238,7 +4228,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Coverage.js
   * limitations under the License.
   */
 
-// const {helper, debugError, assert} = require('./helper');
+// const {helper, console.error, assert} = require('./helper');
 
 // const {EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
 
@@ -4349,7 +4339,7 @@ class JSCoverage {
             this._scriptSources.set(event.scriptId, response.scriptSource);
         } catch (e) {
             // This might happen if the page has already navigated away.
-            debugError(e);
+            console.error(e);
         }
     }
 
@@ -4440,7 +4430,7 @@ class CSSCoverage {
             this._stylesheetSources.set(header.styleSheetId, response.text);
         } catch (e) {
             // This might happen if the page has already navigated away.
-            debugError(e);
+            console.error(e);
         }
     }
 
@@ -6607,7 +6597,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/FrameManager.js
   * limitations under the License.
   */
 
-// const {helper, assert, debugError} = require('./helper');
+// const {helper, assert, console.error} = require('./helper');
 // const {Events} = require('./Events');
 // const {ExecutionContext, EVALUATION_SCRIPT_URL} = require('./ExecutionContext');
 // const {LifecycleWatcher} = require('./LifecycleWatcher');
@@ -6868,7 +6858,7 @@ class FrameManager extends EventEmitter {
             frameId: frame._id,
             grantUniveralAccess: true,
             worldName: name,
-        }).catch(debugError))); // frames might be removed before we send this
+        }).catch(console.error))); // frames might be removed before we send this
     }
 
     /**
@@ -7644,7 +7634,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/JSHandle.js
   * limitations under the License.
   */
 
-// const {helper, assert, debugError} = require('./helper');
+// const {helper, assert, console.error} = require('./helper');
 
 function createJSHandle(context, remoteObject) {
     const frame = context.frame();
@@ -7821,7 +7811,7 @@ class ElementHandle extends JSHandle {
         const [result, layoutMetrics] = await Promise.all([
             this._client.send('DOM.getContentQuads', {
                 objectId: this._remoteObject.objectId
-            }).catch(debugError),
+            }).catch(console.error),
             this._client.send('Page.getLayoutMetrics'),
         ]);
         if (!result || !result.quads.length)
@@ -7851,7 +7841,7 @@ class ElementHandle extends JSHandle {
     _getBoxModel() {
         return this._client.send('DOM.getBoxModel', {
             objectId: this._remoteObject.objectId
-        }).catch(error => debugError(error));
+        }).catch(error => console.error(error));
     }
 
     /**
@@ -8173,7 +8163,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Launcher.js
   */
 // const {Connection} = require('./Connection');
 // const {Browser} = require('./Browser');
-// const {helper, assert, debugError} = require('./helper');
+// const {helper, assert, console.error} = require('./helper');
 // const {TimeoutError} = require('./Errors');
 
 const mkdtempAsync = helper.promisify(fs.mkdtemp);
@@ -8305,7 +8295,7 @@ class Launcher {
             if (connection) {
                 // Attempt to close chrome gracefully
                 connection.send('Browser.close').catch(error => {
-                    debugError(error);
+                    console.error(error);
                     killChrome();
                 });
             }
@@ -8387,7 +8377,7 @@ class Launcher {
         }
 
         const {browserContextIds} = await connection.send('Target.getBrowserContexts');
-        return Browser.create(connection, browserContextIds, ignoreHTTPSErrors, defaultViewport, null, () => connection.send('Browser.close').catch(debugError));
+        return Browser.create(connection, browserContextIds, ignoreHTTPSErrors, defaultViewport, null, () => connection.send('Browser.close').catch(console.error));
     }
 }
 
@@ -8870,7 +8860,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/NetworkManager.js
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-// const {helper, assert, debugError} = require('./helper');
+// const {helper, assert, console.error} = require('./helper');
 // const {Events} = require('./Events');
 
 class NetworkManager extends EventEmitter {
@@ -9052,7 +9042,7 @@ class NetworkManager extends EventEmitter {
         this._client.send('Fetch.continueWithAuth', {
             requestId: event.requestId,
             authChallengeResponse: { response, username, password },
-        }).catch(debugError);
+        }).catch(console.error);
     }
 
     /**
@@ -9062,7 +9052,7 @@ class NetworkManager extends EventEmitter {
         if (!this._userRequestInterceptionEnabled && this._protocolRequestInterceptionEnabled) {
             this._client.send('Fetch.continueRequest', {
                 requestId: event.requestId
-            }).catch(debugError);
+            }).catch(console.error);
         }
 
         const requestId = event.networkId;
@@ -9302,7 +9292,7 @@ class Request {
         }).catch(error => {
             // In certain cases, protocol will return error if the request was already canceled
             // or the page was closed. We should tolerate these errors.
-            debugError(error);
+            console.error(error);
         });
     }
 
@@ -9339,7 +9329,7 @@ class Request {
         }).catch(error => {
             // In certain cases, protocol will return error if the request was already canceled
             // or the page was closed. We should tolerate these errors.
-            debugError(error);
+            console.error(error);
         });
     }
 
@@ -9361,7 +9351,7 @@ class Request {
         }).catch(error => {
             // In certain cases, protocol will return error if the request was already canceled
             // or the page was closed. We should tolerate these errors.
-            debugError(error);
+            console.error(error);
         });
     }
 }
@@ -9677,7 +9667,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Page.js
 // const {EmulationManager} = require('./EmulationManager');
 // const {FrameManager} = require('./FrameManager');
 // const {Keyboard, Mouse, Touchscreen} = require('./Input');
-// const {helper, debugError, assert} = require('./helper');
+// const {helper, console.error, assert} = require('./helper');
 // const {Coverage} = require('./Coverage');
 // const {Worker} = require('./Worker');
 // const {createJSHandle} = require('./JSHandle');
@@ -9738,7 +9728,7 @@ class Page extends EventEmitter {
                 // If we don't detach from service workers, they will never die.
                 client.send('Target.detachFromTarget', {
                     sessionId: event.sessionId
-                }).catch(debugError);
+                }).catch(console.error);
                 return;
             }
             const session = Connection.fromSession(client).session(event.sessionId);
@@ -9799,7 +9789,7 @@ class Page extends EventEmitter {
       */
     _onFileChooser(event) {
         if (!this._fileChooserInterceptors.size) {
-            this._client.send('Page.handleFileChooser', { action: 'fallback' }).catch(debugError);
+            this._client.send('Page.handleFileChooser', { action: 'fallback' }).catch(console.error);
             return;
         }
         const interceptors = Array.from(this._fileChooserInterceptors);
@@ -10095,7 +10085,7 @@ class Page extends EventEmitter {
         const expression = helper.evaluationString(addPageBinding, name);
         await this._client.send('Runtime.addBinding', {name: name});
         await this._client.send('Page.addScriptToEvaluateOnNewDocument', {source: expression});
-        await Promise.all(this.frames().map(frame => frame.evaluate(expression).catch(debugError)));
+        await Promise.all(this.frames().map(frame => frame.evaluate(expression).catch(console.error)));
 
         function addPageBinding(bindingName) {
             const binding = window[bindingName];
@@ -10217,7 +10207,7 @@ class Page extends EventEmitter {
             else
                 expression = helper.evaluationString(deliverErrorValue, name, seq, error);
         }
-        this._client.send('Runtime.evaluate', { expression, contextId: event.executionContextId }).catch(debugError);
+        this._client.send('Runtime.evaluate', { expression, contextId: event.executionContextId }).catch(console.error);
 
         /**
           * @param {string} name
@@ -11018,7 +11008,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/PipeTransport.js
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-// const {helper, debugError} = require('./helper');
+// const {helper, console.error} = require('./helper');
 
 /**
   * @implements {!Puppeteer.ConnectionTransport}
@@ -11037,8 +11027,8 @@ class PipeTransport {
                 if (this.onclose)
                     this.onclose.call(null);
             }),
-            helper.addEventListener(pipeRead, 'error', debugError),
-            helper.addEventListener(pipeWrite, 'error', debugError),
+            helper.addEventListener(pipeRead, 'error', console.error),
+            helper.addEventListener(pipeWrite, 'error', console.error),
         ];
         this.onmessage = null;
         this.onclose = null;
@@ -11860,7 +11850,7 @@ lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Worker.js
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-// const {debugError} = require('./helper');
+// const {console.error} = require('./helper');
 // const {ExecutionContext} = require('./ExecutionContext');
 // const {JSHandle} = require('./JSHandle');
 
@@ -11884,7 +11874,7 @@ class Worker extends EventEmitter {
             this._executionContextCallback(executionContext);
         });
         // This might fail if the target is closed before we recieve all execution contexts.
-        this._client.send('Runtime.enable', {}).catch(debugError);
+        this._client.send('Runtime.enable', {}).catch(console.error);
 
         this._client.on('Runtime.consoleAPICalled', event => consoleAPICalled(event.type, event.args.map(jsHandleFactory), event.stackTrace));
         this._client.on('Runtime.exceptionThrown', exception => exceptionThrown(exception.exceptionDetails));
@@ -12023,7 +12013,239 @@ module.exports.Browser = Browser;
 /*
 file none
 */
+// require builtin
+const moduleCjs = require ('module')
+
+
+
+/*
+require puppeteer-to-istanbul/lib/output-files.js
+*/
+// output JavaScript bundled in puppeteer output to format
+// that can be eaten by Istanbul.
+
+// TODO: Put function interfaces on this file
+
+const pathLib = path
+
+/*
+require v8-to-istanbul/lib/branch.js
+*/
+class CovBranch {
+    constructor (startLine, startCol, endLine, endCol, count) {
+        this.startLine = startLine
+        this.startCol = startCol
+        this.endLine = endLine
+        this.endCol = endCol
+        this.count = count
+    }
+    toIstanbul () {
+        const location = {
+            start: {
+                line: this.startLine.line,
+                column: this.startCol - this.startLine.startCol
+            },
+            end: {
+                line: this.endLine.line,
+                column: this.endCol - this.endLine.startCol
+            }
+        }
+        return {
+            type: 'branch',
+            line: this.line,
+            loc: location,
+            locations: [Object.assign({}, location)]
+        }
+    }
+}
+
+
+
+/*
+require v8-to-istanbul/lib/function.js
+*/
+class CovFunction {
+    constructor (name, startLine, startCol, endLine, endCol, count) {
+        this.name = name
+        this.startLine = startLine
+        this.startCol = startCol
+        this.endLine = endLine
+        this.endCol = endCol
+        this.count = count
+    }
+    toIstanbul () {
+        const loc = {
+            start: {
+                line: this.startLine.line,
+                column: this.startCol - this.startLine.startCol
+            },
+            end: {
+                line: this.endLine.line,
+                column: this.endCol - this.endLine.startCol
+            }
+        }
+        return {
+            name: this.name,
+            decl: loc,
+            loc: loc,
+            line: this.startLine.line
+        }
+    }
+}
+
+
+
+/*
+require v8-to-istanbul/lib/line.js
+*/
+class CovLine {
+    constructor (line, startCol, endCol) {
+        this.line = line
+        this.startCol = startCol
+        this.endCol = endCol
+        this.count = 0
+    }
+    toIstanbul () {
+        return {
+            start: {
+                line: this.line,
+                column: 0
+            },
+            end: {
+                line: this.line,
+                column: this.endCol - this.startCol
+            }
+        }
+    }
+}
+
+
+
+/*
+require v8-to-istanbul/lib/script.js
+*/
+// Node.js injects a header when executing a script.
+const cjsHeader = moduleCjs.wrapper[0]
+
+class CovScript {
+    constructor (scriptPath) {
+        assert(typeof scriptPath === 'string', 'scriptPath must be a string')
+        const { path, isESM } = parsePath(scriptPath)
+        const source = fs.readFileSync(path, 'utf8')
+        this.path = path
+        this.header = isESM ? '' : cjsHeader
+        this.lines = []
+        this.branches = []
+        this.functions = []
+        this.eof = -1
+        this._buildLines(source, this.lines)
+    }
+    _buildLines (source, lines) {
+        let position = 0
+        source.split('\n').forEach((lineStr, i) => {
+            this.eof = position + lineStr.length
+            lines.push(new CovLine(i + 1, position, this.eof))
+            position += lineStr.length + 1 // also add the \n.
+        })
+    }
+    applyCoverage (blocks) {
+        blocks.forEach(block => {
+            block.ranges.forEach(range => {
+                const startCol = Math.max(0, range.startOffset - this.header.length)
+                const endCol = Math.min(this.eof, range.endOffset - this.header.length)
+                const lines = this.lines.filter(line => {
+                    return startCol <= line.endCol && endCol >= line.startCol
+                })
+
+                if (block.isBlockCoverage && lines.length) {
+                    // record branches.
+                    this.branches.push(new CovBranch(
+                        lines[0],
+                        startCol,
+                        lines[lines.length - 1],
+                        endCol,
+                        range.count
+                    ))
+                } else if (block.functionName && lines.length) {
+                    // record functions.
+                    this.functions.push(new CovFunction(
+                        block.functionName,
+                        lines[0],
+                        startCol,
+                        lines[lines.length - 1],
+                        endCol,
+                        range.count
+                    ))
+                }
+
+                // record the lines (we record these as statements, such that we're
+                // compatible with Istanbul 2.0).
+                lines.forEach(line => {
+                    // make sure branch spans entire line; don't record 'goodbye'
+                    // branch in `const foo = true ? 'hello' : 'goodbye'` as a
+                    // 0 for line coverage.
+                    if (startCol <= line.startCol && endCol >= line.endCol) {
+                        line.count = range.count
+                    }
+                })
+            })
+        })
+    }
+    toIstanbul () {
+        const istanbulInner = Object.assign(
+            { path: this.path },
+            this._statementsToIstanbul(),
+            this._branchesToIstanbul(),
+            this._functionsToIstanbul()
+        )
+        const istanbulOuter = {}
+        istanbulOuter[this.path] = istanbulInner
+        return istanbulOuter
+    }
+    _statementsToIstanbul () {
+        const statements = {
+            statementMap: {},
+            s: {}
+        }
+        this.lines.forEach((line, index) => {
+            statements.statementMap[`${index}`] = line.toIstanbul()
+            statements.s[`${index}`] = line.count
+        })
+        return statements
+    }
+    _branchesToIstanbul () {
+        const branches = {
+            branchMap: {},
+            b: {}
+        }
+        this.branches.forEach((branch, index) => {
+            branches.branchMap[`${index}`] = branch.toIstanbul()
+            branches.b[`${index}`] = [branch.count]
+        })
+        return branches
+    }
+    _functionsToIstanbul () {
+        const functions = {
+            fnMap: {},
+            f: {}
+        }
+        this.functions.forEach((fn, index) => {
+            functions.fnMap[`${index}`] = fn.toIstanbul()
+            functions.f[`${index}`] = fn.count
+        })
+        return functions
+    }
+}
+
+function parsePath (scriptPath) {
+    return {
+        path: scriptPath.replace('file://', ''),
+        isESM: scriptPath.indexOf('file://') !== -1
+    }
+}
+module.exports.CovScript = CovScript;
 /* jslint ignore:end */
+local.nop(local);
 
 
 
@@ -12056,7 +12278,7 @@ page = await browser.newPage();
 await Promise.all([
     page.coverage.startJSCoverage(),
     page.coverage.startCSSCoverage()
-])
+]);
 // test undefined url
 try {
     await page.goto("https://undefined");
@@ -12076,12 +12298,130 @@ fs.writeFileSync("tmp/aa.html", await page.content());
 
 
 
-// Disable JavaScript coverage
-var covPuppeteer = await page.coverage.stopJSCoverage();
-await page.coverage.stopCSSCoverage();
-covPuppeteer.forEach(function (file) {
-    console.error(file.url);
+// browser - coverage
+var basename;
+var covPuppeteer;
+var iiInline;
+var storagePath;
+// mkdir -p storagePath
+storagePath = "./.nyc_output/js";
+child_process.spawnSync("mkdir", [
+    "-p", storagePath
+], {
+    stdio: [
+        "ignore", 1, 2
+    ]
 });
+// Disable JavaScript coverage
+covPuppeteer = await page.coverage.stopJSCoverage();
+await page.coverage.stopCSSCoverage();
+// init covPuppeteer
+// output JavaScript bundled in puppeteer output to format
+// that can be eaten by Istanbul.
+// Clone covPuppeteer to prevent mutating the passed in data
+covPuppeteer = JSON.parse(JSON.stringify(covPuppeteer));
+// debug
+fs.writeFileSync("tmp/aa.json", JSON.stringify(covPuppeteer, null, 4));
+iiInline = 0;
+var fsWriteFileWithMkdirpSync = function (file, data, mode) {
+/*
+ * this function will synchronously "mkdir -p" and write <data> to <file>
+ */
+    try {
+        if (
+            mode === "noWrite"
+            || typeof require("fs").writeFileSync !== "function"
+        ) {
+            return;
+        }
+    } catch (ignore) {
+        return;
+    }
+    // try to write to file
+    try {
+        require("fs").writeFileSync(file, data);
+    } catch (ignore) {
+        // mkdir -p
+        require("child_process").spawnSync(
+            "mkdir",
+            [
+                "-p", require("path").dirname(file)
+            ],
+            {
+                stdio: [
+                    "ignore", 1, 2
+                ]
+            }
+        );
+        // re-write to file
+        require("fs").writeFileSync(file, data);
+    }
+};
+covPuppeteer.forEach(function (file) {
+    // generate a new path relative to ./coverage/js.
+    // this would be around where you'd use mkdirp.
+    // Get the last element in the path name
+    basename = new url.URL(file.url).pathname.slice(1) || "index.html";
+    console.error(basename, file.url);
+    // Special case: when html present, strip and return specialized string
+    if (basename.includes(".html")) {
+        basename = path.resolve(storagePath, basename) + "puppeteerTemp-inline";
+    } else {
+        basename = basename.split(".js")[0];
+        basename = path.resolve(storagePath, basename);
+    }
+    if (fs.existsSync(basename + ".js")) {
+        iiInline += 1;
+        file.url = basename + "-" + iiInline + ".js";
+    } else {
+        file.url = basename + ".js";
+    }
+    fsWriteFileWithMkdirpSync(file.url, file.text);
+});
+// init cov8
+// Iterate through coverage info and create IDs
+// init covIstanbul
+var covIstanbul = {};
+covPuppeteer.map(function (file, ii) {
+    return {
+        scriptId: ii,
+        url: "file://" + file.url,
+        functions: [
+            {
+                ranges: file.ranges.map(function (range) {
+                    // Takes in a Puppeteer range object with start and end
+                    // properties and converts it to a V8 range
+                    // with startOffset, endOffset, and count properties
+                    return {
+                        startOffset: range.start,
+                        endOffset: range.end,
+                        count: 1
+                    };
+                }),
+                isBlockCoverage: true
+            }
+        ]
+    };
+}).forEach(function (jsFile) {
+    const script = new module.exports.CovScript(jsFile.url);
+    script.applyCoverage(jsFile.functions);
+    let istanbulCoverage = script.toIstanbul();
+    var key = Object.keys(istanbulCoverage)[0];
+    covIstanbul[key] = istanbulCoverage[key];
+});
+fs.writeFileSync(
+    "./.nyc_output/out.json",
+    JSON.stringify(covIstanbul, null, 4),
+    "utf8"
+);
+// create coverage-report
+process.argv = [
+    "/usr/bin/node",
+    "/root/Documents/puppeteer-to-istanbul-example/node_modules/.bin/nyc",
+    "report",
+    "--reporter=html"
+];
+require("./node_modules/nyc/bin/nyc.js");
 
 
 

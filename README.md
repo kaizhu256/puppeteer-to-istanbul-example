@@ -18,3 +18,7 @@ This will:
 2. output to disk in Istanbul format.
 3. run reports with [nyc](https://github.com/istanbuljs/nyc).
 4. open `coverage/index.html`, displaying the coverage information collected.
+
+## changelog
+- integrate and instrument .nyc code-coverage
+- replace function debugError with console.error
