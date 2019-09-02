@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for js/yts/jsbin/www-tampering-vflhVk4-k/www-tampering.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../../prettify.css" />
+    <link rel="stylesheet" href="../../../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../../../index.html">All files</a> / <a href="index.html">js/yts/jsbin/www-tampering-vflhVk4-k</a> www-tampering.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">19.1% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>17/89</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>39/39</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/0</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">19.1% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>17/89</span>
+      </div>
+    </div>
+    <p class="quiet">
+      Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+    </p>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >(function(){function n(a){var b=0;return function(){return b&lt;a.length?{done:!1,value:a[b++]}:{done:!0}}}</span>
+<span class="cstat-no" title="statement not covered" >function p(a){var b="undefined"!=typeof Symbol&amp;&amp;Symbol.iterator&amp;&amp;a[Symbol.iterator];return b?b.call(a):{next:n(a)}}</span>
+<span class="cstat-no" title="statement not covered" >function q(a){if(!(a instanceof Array)){a=p(a);for(var b,c=[];!(b=a.next()).done;)c.push(b.value);a=c}return a}</span>
+<span class="cstat-no" title="statement not covered" >var r="function"==typeof Object.defineProperties?Object.defineProperty:function(a,b,c){a!=Array.prototype&amp;&amp;a!=Object.prototype&amp;&amp;(a[b]=c.value)},u="undefined"!=typeof window&amp;&amp;window===this?this:"undefined"!=typeof global&amp;&amp;null!=global?global:this;</span>
+<span class="cstat-no" title="statement not covered" >function v(a,b){if(b){for(var c=u,g=a.split("."),h=0;h&lt;g.length-1;h++){var k=g[h];k in c||(c[k]={});c=c[k]}g=g[g.length-1];h=c[g];k=b(h);k!=h&amp;&amp;null!=k&amp;&amp;r(c,g,{configurable:!0,writable:!0,value:k})}}</span>
+<span class="cstat-no" title="statement not covered" >v("String.prototype.endsWith",function(a){return a?a:function(b,c){if(null==this)throw new TypeError("The 'this' value for String.prototype.endsWith must not be null or undefined");if(b instanceof RegExp)throw new TypeError("First argument to String.prototype.endsWith must not be a regular expression");var g=this+"";b+="";void 0===c&amp;&amp;(c=g.length);for(var h=Math.max(0,Math.min(c|0,g.length)),k=b.length;0&lt;k&amp;&amp;0&lt;h;)if(g[--h]!=b[--k])return!1;return 0&gt;=k}});</span>
+<span class="cstat-no" title="statement not covered" >function w(a,b){return Object.prototype.hasOwnProperty.call(a,b)}</span>
+<span class="cstat-no" title="statement not covered" >function y(){y=function(){};</span>
+<span class="cstat-no" title="statement not covered" >u.Symbol||(u.Symbol=z)}</span>
+<span class="cstat-no" title="statement not covered" >function A(a,b){this.a=a;r(this,"description",{configurable:!0,writable:!0,value:b})}</span>
+<span class="cstat-no" title="statement not covered" >A.prototype.toString=function(){return this.a};</span>
+<span class="cstat-no" title="statement not covered" >var z=function(){function a(c){if(this instanceof a)throw new TypeError("Symbol is not a constructor");return new A("jscomp_symbol_"+(c||"")+"_"+b++,c)}</span>
+var b=0;return a}();
+<span class="cstat-no" title="statement not covered" >function B(){y();var a=u.Symbol.iterator;a||(a=u.Symbol.iterator=u.Symbol("Symbol.iterator"));"function"!=typeof Array.prototype[a]&amp;&amp;r(Array.prototype,a,{configurable:!0,writable:!0,value:function(){return C(n(this))}});</span>
+<span class="cstat-no" title="statement not covered" >B=function(){}}</span>
+<span class="cstat-no" title="statement not covered" >function C(a){B();a={next:a};a[u.Symbol.iterator]=function(){return this};</span>
+<span class="cstat-no" title="statement not covered" >return a}</span>
+<span class="cstat-no" title="statement not covered" >v("WeakMap",function(a){function b(d){this.a=(f+=Math.random()+1).toString();if(d){d=p(d);for(var e;!(e=d.next()).done;)e=e.value,this.set(e[0],e[1])}}</span>
+<span class="cstat-no" title="statement not covered" >function c(){}</span>
+<span class="cstat-no" title="statement not covered" >function g(d){var e=typeof d;return"object"===e&amp;&amp;null!==d||"function"===e}</span>
+<span class="cstat-no" title="statement not covered" >function h(d){if(!w(d,m)){var e=new c;r(d,m,{value:e})}}</span>
+<span class="cstat-no" title="statement not covered" >function k(d){var e=Object[d];e&amp;&amp;(Object[d]=function(l){if(l instanceof c)return l;h(l);return e(l)})}</span>
+<span class="cstat-no" title="statement not covered" >if(function(){if(!a||!Object.seal)return!1;try{var d=Object.seal({}),e=Object.seal({}),l=new a([[d,2],[e,3]]);if(2!=l.get(d)||3!=l.get(e))return!1;l["delete"](d);l.set(e,4);return!l.has(d)&amp;&amp;4==l.get(e)}catch(t){return!1}}())return a;</span>
+<span class="cstat-no" title="statement not covered" >var m="$jscomp_hidden_"+Math.random();k("freeze");k("preventExtensions");k("seal");var f=0;b.prototype.set=function(d,e){if(!g(d))throw Error("Invalid WeakMap key");h(d);if(!w(d,m))throw Error("WeakMap key fail: "+d);d[m][this.a]=e;return this};</span>
+<span class="cstat-no" title="statement not covered" >b.prototype.get=function(d){return g(d)&amp;&amp;w(d,m)?d[m][this.a]:void 0};</span>
+<span class="cstat-no" title="statement not covered" >b.prototype.has=function(d){return g(d)&amp;&amp;w(d,m)&amp;&amp;w(d[m],this.a)};</span>
+<span class="cstat-no" title="statement not covered" >b.prototype["delete"]=function(d){return g(d)&amp;&amp;w(d,m)&amp;&amp;w(d[m],this.a)?delete d[m][this.a]:!1};</span>
+<span class="cstat-no" title="statement not covered" >return b});</span>
+<span class="cstat-no" title="statement not covered" >v("Map",function(a){function b(){var f={};return f.previous=f.next=f.head=f}</span>
+<span class="cstat-no" title="statement not covered" >function c(f,d){var e=f.a;return C(function(){if(e){for(;e.head!=f.a;)e=e.previous;for(;e.next!=e.head;)return e=e.next,{done:!1,value:d(e)};e=null}return{done:!0,value:void 0}})}</span>
+<span class="cstat-no" title="statement not covered" >function g(f,d){var e=d&amp;&amp;typeof d;"object"==e||"function"==e?k.has(d)?e=k.get(d):(e=""+ ++m,k.set(d,e)):e="p_"+d;var l=f.f[e];if(l&amp;&amp;w(f.f,e))for(var t=0;t&lt;l.length;t++){var x=l[t];if(d!==d&amp;&amp;x.key!==x.key||d===x.key)return{id:e,list:l,index:t,b:x}}return{id:e,list:l,index:-1,b:void 0}}</span>
+<span class="cstat-no" title="statement not covered" >function h(f){this.f={};this.a=b();this.size=0;if(f){f=p(f);for(var d;!(d=f.next()).done;)d=d.value,this.set(d[0],d[1])}}</span>
+<span class="cstat-no" title="statement not covered" >if(function(){if(!a||"function"!=typeof a||!a.prototype.entries||"function"!=typeof Object.seal)return!1;try{var f=Object.seal({x:4}),d=new a(p([[f,"s"]]));if("s"!=d.get(f)||1!=d.size||d.get({x:4})||d.set({x:4},"t")!=d||2!=d.size)return!1;var e=d.entries(),l=e.next();if(l.done||l.value[0]!=f||"s"!=l.value[1])return!1;l=e.next();return l.done||4!=l.value[0].x||"t"!=l.value[1]||!e.next().done?!1:!0}catch(t){return!1}}())return a;</span>
+<span class="cstat-no" title="statement not covered" >B();var k=new WeakMap;h.prototype.set=function(f,d){f=0===f?0:f;var e=g(this,f);e.list||(e.list=this.f[e.id]=[]);e.b?e.b.value=d:(e.b={next:this.a,previous:this.a.previous,head:this.a,key:f,value:d},e.list.push(e.b),this.a.previous.next=e.b,this.a.previous=e.b,this.size++);return this};</span>
+<span class="cstat-no" title="statement not covered" >h.prototype["delete"]=function(f){f=g(this,f);return f.b&amp;&amp;f.list?(f.list.splice(f.index,1),f.list.length||delete this.f[f.id],f.b.previous.next=f.b.next,f.b.next.previous=f.b.previous,f.b.head=null,this.size--,!0):!1};</span>
+<span class="cstat-no" title="statement not covered" >h.prototype.clear=function(){this.f={};this.a=this.a.previous=b();this.size=0};</span>
+<span class="cstat-no" title="statement not covered" >h.prototype.has=function(f){return!!g(this,f).b};</span>
+<span class="cstat-no" title="statement not covered" >h.prototype.get=function(f){return(f=g(this,f).b)&amp;&amp;f.value};</span>
+<span class="cstat-no" title="statement not covered" >h.prototype.entries=function(){return c(this,function(f){return[f.key,f.value]})};</span>
+<span class="cstat-no" title="statement not covered" >h.prototype.keys=function(){return c(this,function(f){return f.key})};</span>
+<span class="cstat-no" title="statement not covered" >h.prototype.values=function(){return c(this,function(f){return f.value})};</span>
+<span class="cstat-no" title="statement not covered" >h.prototype.forEach=function(f,d){for(var e=this.entries(),l;!(l=e.next()).done;)l=l.value,f.call(d,l[1],l[0],this)};</span>
+<span class="cstat-no" title="statement not covered" >h.prototype[Symbol.iterator]=h.prototype.entries;var m=0;return h});</span>
+<span class="cstat-no" title="statement not covered" >v("Set",function(a){function b(c){this.a=new Map;if(c){c=p(c);for(var g;!(g=c.next()).done;)this.add(g.value)}this.size=this.a.size}</span>
+<span class="cstat-no" title="statement not covered" >if(function(){if(!a||"function"!=typeof a||!a.prototype.entries||"function"!=typeof Object.seal)return!1;try{var c=Object.seal({x:4}),g=new a(p([c]));if(!g.has(c)||1!=g.size||g.add(c)!=g||1!=g.size||g.add({x:4})!=g||2!=g.size)return!1;var h=g.entries(),k=h.next();if(k.done||k.value[0]!=c||k.value[1]!=c)return!1;k=h.next();return k.done||k.value[0]==c||4!=k.value[0].x||k.value[1]!=k.value[0]?!1:h.next().done}catch(m){return!1}}())return a;</span>
+<span class="cstat-no" title="statement not covered" >B();b.prototype.add=function(c){c=0===c?0:c;this.a.set(c,c);this.size=this.a.size;return this};</span>
+<span class="cstat-no" title="statement not covered" >b.prototype["delete"]=function(c){c=this.a["delete"](c);this.size=this.a.size;return c};</span>
+<span class="cstat-no" title="statement not covered" >b.prototype.clear=function(){this.a.clear();this.size=0};</span>
+<span class="cstat-no" title="statement not covered" >b.prototype.has=function(c){return this.a.has(c)};</span>
+<span class="cstat-no" title="statement not covered" >b.prototype.entries=function(){return this.a.entries()};</span>
+<span class="cstat-no" title="statement not covered" >b.prototype.values=function(){return this.a.values()};</span>
+<span class="cstat-no" title="statement not covered" >b.prototype.keys=b.prototype.values;b.prototype[Symbol.iterator]=b.prototype.values;b.prototype.forEach=function(c,g){var h=this;this.a.forEach(function(k){return c.call(g,k,k,h)})};</span>
+<span class="cstat-no" title="statement not covered" >return b});</span>
+<span class="cstat-no" title="statement not covered" >var D=this||self;function E(a,b){var c=a.split("."),g=D;c[0]in g||"undefined"==typeof g.execScript||g.execScript("var "+c[0]);for(var h;c.length&amp;&amp;(h=c.shift());)c.length||void 0===b?g[h]&amp;&amp;g[h]!==Object.prototype[h]?g=g[h]:g=g[h]={}:g[h]=b}</span>
+<span class="cstat-no" title="statement not covered" >;var F=/^(?:([^:/?#.]+):)?(?:\/\/(?:([^/?#]*)@)?([^/#?]*?)(?::([0-9]+))?(?=[/#?]|$))?([^?#]+)?(?:\?([^#]*))?(?:#([\s\S]*))?$/;function G(a){return a?decodeURI(a):a}</span>
+;/*
+ Copyright (c) Microsoft Corporation. All rights reserved.
+ Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+ this file except in compliance with the License. You may obtain a copy of the
+ License at http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+ THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+ WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+ MERCHANTABLITY OR NON-INFRINGEMENT.
+&nbsp;
+ See the Apache Version 2.0 License for specific language governing permissions
+ and limitations under the License.
+*/
+<span class="cstat-no" title="statement not covered" >var H=window.yt&amp;&amp;window.yt.config_||window.ytcfg&amp;&amp;window.ytcfg.data_||{};E("yt.config_",H);function I(){var a=[];return"CSS_CLASS_WHITELIST"in H?H.CSS_CLASS_WHITELIST:a}</span>
+;var J=Object.freeze(["js-httpswwwgoogleanalyticscomanalyticsjs","js-chromeextensionpkedcjkdefgpdelpbcmbmeomcjbeemfm","video-","js-http","css-http"]),K=Object.freeze("document.appendChild document.body.appendChild document.querySelector document.querySelectorAll history.back history.go".split(" ")),L=Object.freeze("fonts.googleapis.com s0.2mdn.net securepubads.g.doubleclick.net ssl.google-analytics.com static.doubleclick.net www.google-analytics.com www.googletagservices.com www.youtube.com youtube.com".split(" ")),
+<span class="cstat-no" title="statement not covered" >M=Object.freeze(["pkedcjkdefgpdelpbcmbmeomcjbeemfm","fjhoaacokmgbjemoflkofnenfaiekifl","enhhojjnijigcajfphajepfemndkmdlo"]),N=Object.freeze(".corp.google.com .googlevideo.com .ytimg.com .google.com .googlesyndication.com .gstatic.com .prod.google.com .google.ru".split(" ")),O=Object.freeze(["chrome-extension","safari-extension","safari-resource","opera"]);function P(){return K.map(function(a){return Q(a)}).filter(function(a){return!!a})}</span>
+<span class="cstat-no" title="statement not covered" >function Q(a){var b=a.split(".");a=b[b.length-1];b=b.reduce(function(c,g){return c&amp;&amp;c[g]},window);</span>
+<span class="cstat-no" title="statement not covered" >if(!b)return a+" is missing";b=Function.prototype.toString.call(b).replace(/\n/g," ").replace(/  +/g," ");return b!="function "+a+"() { [native code] }"?a+" is not native, prologue: "+b.slice(0,50):null}</span>
+<span class="cstat-no" title="statement not covered" >function R(a){var b=a.match(F)[1]||null;return O.some(function(c){return b==c})}</span>
+<span class="cstat-no" title="statement not covered" >function S(a){var b=G(a.match(F)[3]||null);return!b||R(a)?!0:L.some(function(c){return b==c})||N.some(function(c){return b.endsWith(c)})}</span>
+<span class="cstat-no" title="statement not covered" >function T(a){if(!R(a))return null;var b=G(a.match(F)[3]||null);return b?M.some(function(c){return b==c})?null:b:null}</span>
+<span class="cstat-no" title="statement not covered" >function U(){var a=new Set;[].concat(q(document.querySelectorAll("script"))).forEach(function(b){b.src&amp;&amp;!S(b.src)&amp;&amp;a.add(b.src)});</span>
+<span class="cstat-no" title="statement not covered" >[].concat(q(document.querySelectorAll("link[href]"))).forEach(function(b){"alternate"==b.rel||S(b.href)||a.add(b.href)});</span>
+<span class="cstat-no" title="statement not covered" >return[].concat(q(a)).sort()}</span>
+<span class="cstat-no" title="statement not covered" >function V(){var a=new Set;[].concat(q(document.querySelectorAll("script"))).forEach(function(b){b.src&amp;&amp;(b=T(b.src))&amp;&amp;a.add(b)});</span>
+<span class="cstat-no" title="statement not covered" >return[].concat(q(a)).sort()}</span>
+<span class="cstat-no" title="statement not covered" >function W(){var a=new Set;[].concat(q(window.document.querySelectorAll("*"))).forEach(function(b){[].concat(q(b.classList)).forEach(function(c){X()||a.add(c)})});</span>
+<span class="cstat-no" title="statement not covered" >return a}</span>
+<span class="cstat-no" title="statement not covered" >function X(){return J.some(function(){})}</span>
+<span class="cstat-no" title="statement not covered" >function Y(){var a=new Set(I());if(!a.size)return[];var b=new Set;W().forEach(function(h){a.has(h)||X()||b.add(h)});</span>
+<span class="cstat-no" title="statement not covered" >var c=[].concat(q(b)).sort();c=c.slice(0,15);var g=b.size-15;0&lt;g&amp;&amp;c.push("...and "+g+" more.");return c}</span>
+<span class="cstat-no" title="statement not covered" >;E("ytbin.polymer.shared.lib.tampering.info",function(){var a=Y(),b=U(),c=P(),g=V(),h=[];g.length&amp;&amp;h.push("extensions",g);a.length&amp;&amp;h.push("suspiciousClasses",a);b.length&amp;&amp;h.push("suspiciousIncludes",b);c.length&amp;&amp;h.push("suspiciousApis",c);return h.length?h:null});}).call(this);</span>
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Sun Sep 01 2019 01:31:37 GMT+0000 (UTC)
+</div>
+</div>
+<script src="../../../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../../../sorter.js"></script>
+<script src="../../../../block-navigation.js"></script>
+</body>
+</html>

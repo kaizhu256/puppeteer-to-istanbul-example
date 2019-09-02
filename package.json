@@ -4,10 +4,8 @@
   "description": "example of using puppeteer-to-istanbul to output istanbul reports from puppeteer coverage",
   "main": "index.js",
   "scripts": {
-    "precoverage": "rimraf coverage && rimraf .nyc_output",
     "coverage0": "node index.js",
     "coverage": "npm_config_mode_coverage=node_modules ~/lib.utility2.sh shIstanbulCover index.js",
-    "postcoverage": "ls -l .; nyc report --reporter=html; ls -l coverage/",
     "screenshot0": "rm -f tmp/aa.* && node screenshot.js && ls -l tmp/aa.*",
     "screenshot": "rm -f tmp/aa.* && npm_config_mode_coverage=node_modules ~/lib.utility2.sh shIstanbulCover screenshot.js && ls -l tmp/aa.*",
     "test": "standard"
@@ -25,7 +23,8 @@
     "nyc": "^14.1.1",
     "puppeteer": "^1.19.0",
     "puppeteer-to-istanbul": "^1.2.2",
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.6.2",
+    "v8-to-istanbul": "^3.2.3"
   },
   "devDependencies": {
     "standard": "^11.0.0"

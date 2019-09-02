@@ -16,12 +16,7 @@
     var consoleError;
     var local;
     // init globalThis
-    (function () {
-        try {
-            globalThis = Function("return this")(); // jslint ignore:line
-        } catch (ignore) {}
-    }());
-    globalThis.globalThis = globalThis;
+    globalThis.globalThis = globalThis.globalThis || globalThis;
     // init debug_inline
     if (!globalThis["debug\u0049nline"]) {
         consoleError = console.error;
@@ -79,6 +74,54 @@
             )
         );
         throw err;
+    };
+    local.fsRmrfSync = function (dir) {
+    /*
+     * this function will sync "rm -rf" <dir>
+     */
+        var child_process;
+        try {
+            child_process = require("child_process");
+        } catch (ignore) {
+            return;
+        }
+        child_process.spawnSync("rm", [
+            "-rf", dir
+        ], {
+            stdio: [
+                "ignore", 1, 2
+            ]
+        });
+    };
+    local.fsWriteFileWithMkdirpSync = function (file, data) {
+    /*
+     * this function will sync write <data> to <file> with "mkdir -p"
+     */
+        var fs;
+        try {
+            fs = require("fs");
+        } catch (ignore) {
+            return;
+        }
+        // try to write file
+        try {
+            fs.writeFileSync(file, data);
+        } catch (ignore) {
+            // mkdir -p
+            require("child_process").spawnSync(
+                "mkdir",
+                [
+                    "-p", require("path").dirname(file)
+                ],
+                {
+                    stdio: [
+                        "ignore", 1, 2
+                    ]
+                }
+            );
+            // rewrite file
+            fs.writeFileSync(file, data);
+        }
     };
     local.functionOrNop = function (fnc) {
     /*
@@ -148,7 +191,9 @@
         local.vm = require("vm");
         local.zlib = require("zlib");
     }
-}(this));
+}((typeof globalThis === "object" && globalThis) || (function () {
+    return Function("return this")(); // jslint ignore:line
+}())));
 
 
 
@@ -179,7 +224,8 @@ const debugError = console.error;
 const debugProtocol = function () {
     return;
 }
-var mime = {
+const PerMessageDeflate = {};
+const mime = {
     getType: function (file) {
         file = path.extname(String(file).toLowerCase());
         switch (file) {
@@ -198,107 +244,11 @@ const removeFolder = function (dir, onError) {
 /*
  * this function will asynchronously "rm -fr" <dir>
  */
-    child_process.spawn("rm", [
-        "-fr", path.resolve(process.cwd(), dir)
-    ], {
-        stdio: [
-            "ignore", 1, 2
-        ]
-    }).on("exit", onError);
+    local.fsRmrfSync(dir);
+    onError();
 };
-removeFolder.sync = function (dir) {
-/*
- * this function will synchronously "rm -fr" <dir>
- */
-    child_process.spawnSync("rm", [
-        "-fr", path.resolve(process.cwd(), dir)
-    ], {
-        stdio: [
-            "ignore", 1, 2
-        ]
-    });
-};
+removeFolder.sync = local.fsRmrfSync;
 const removeRecursive = removeFolder;
-
-
-
-/*
-file https://github.com/STRML/async-limiter/tree/v1.0.1
-*/
-
-
-
-/*
-lib https://github.com/STRML/async-limiter/blob/v1.0.1/index.js
-*/
-'use strict';
-
-function Queue(options) {
-  if (!(this instanceof Queue)) {
-    return new Queue(options);
-  }
-
-  options = options || {};
-  this.concurrency = options.concurrency || Infinity;
-  this.pending = 0;
-  this.jobs = [];
-  this.cbs = [];
-  this._done = done.bind(this);
-}
-
-var arrayAddMethods = [
-  'push',
-  'unshift',
-  'splice'
-];
-
-arrayAddMethods.forEach(function(method) {
-  Queue.prototype[method] = function() {
-    var methodResult = Array.prototype[method].apply(this.jobs, arguments);
-    this._run();
-    return methodResult;
-  };
-});
-
-Object.defineProperty(Queue.prototype, 'length', {
-  get: function() {
-    return this.pending + this.jobs.length;
-  }
-});
-
-Queue.prototype._run = function() {
-  if (this.pending === this.concurrency) {
-    return;
-  }
-  if (this.jobs.length) {
-    var job = this.jobs.shift();
-    this.pending++;
-    job(this._done);
-    this._run();
-  }
-
-  if (this.pending === 0) {
-    while (this.cbs.length !== 0) {
-      var cb = this.cbs.pop();
-      process.nextTick(cb);
-    }
-  }
-};
-
-Queue.prototype.onDone = function(cb) {
-  if (typeof cb === 'function') {
-    this.cbs.push(cb);
-    this._run();
-  }
-};
-
-function done() {
-  this.pending--;
-  this._run();
-}
-
-// hack-puppeteer - module.exports
-const Limiter = Queue;
 
 
 
@@ -341,7 +291,7 @@ file https://github.com/websockets/ws/tree/6.2.1
 
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/validation.js
+lib https://github.com/websockets/ws/blob/6.2.1/lib/validation.js
 */
 'use strict';
 
@@ -370,7 +320,7 @@ const isValidStatusCode = (code) => {
 
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/buffer-util.js
+lib https://github.com/websockets/ws/blob/6.2.1/lib/buffer-util.js
 */
 'use strict';
 
@@ -499,7 +449,7 @@ const unmask = _mask;
 
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/constants.js
+lib https://github.com/websockets/ws/blob/6.2.1/lib/constants.js
 */
 'use strict';
 
@@ -524,7 +474,7 @@ const {
 
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/event-target.js
+lib https://github.com/websockets/ws/blob/6.2.1/lib/event-target.js
 */
 'use strict';
 
@@ -703,7 +653,7 @@ const removeEventListener = EventTarget.removeEventListener;
 
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/extension.js
+lib https://github.com/websockets/ws/blob/6.2.1/lib/extension.js
 */
 'use strict';
 
@@ -931,515 +881,7 @@ module.exports = { format, parse };
 
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/permessage-deflate.js
-*/
-'use strict';
-
-// const Limiter = require('async-limiter');
-// const zlib = require('zlib');
-
-// const bufferUtil = require('./buffer-util');
-// const { kStatusCode, NOOP } = require('./constants');
-
-const TRAILER = Buffer.from([0x00, 0x00, 0xff, 0xff]);
-const EMPTY_BLOCK = Buffer.from([0x00]);
-
-const kPerMessageDeflate = Symbol('permessage-deflate');
-const kTotalLength = Symbol('total-length');
-const kCallback = Symbol('callback');
-const kBuffers = Symbol('buffers');
-const kError = Symbol('error');
-
-//
-// We limit zlib concurrency, which prevents severe memory fragmentation
-// as documented in https://github.com/nodejs/node/issues/8871#issuecomment-250915913
-// and https://github.com/websockets/ws/issues/1202
-//
-// Intentionally global; it's the global thread pool that's an issue.
-//
-let zlibLimiter;
-
-/**
- * permessage-deflate implementation.
- */
-class PerMessageDeflate {
-  /**
-   * Creates a PerMessageDeflate instance.
-   *
-   * @param {Object} options Configuration options
-   * @param {Boolean} options.serverNoContextTakeover Request/accept disabling
-   *     of server context takeover
-   * @param {Boolean} options.clientNoContextTakeover Advertise/acknowledge
-   *     disabling of client context takeover
-   * @param {(Boolean|Number)} options.serverMaxWindowBits Request/confirm the
-   *     use of a custom server window size
-   * @param {(Boolean|Number)} options.clientMaxWindowBits Advertise support
-   *     for, or request, a custom client window size
-   * @param {Object} options.zlibDeflateOptions Options to pass to zlib on deflate
-   * @param {Object} options.zlibInflateOptions Options to pass to zlib on inflate
-   * @param {Number} options.threshold Size (in bytes) below which messages
-   *     should not be compressed
-   * @param {Number} options.concurrencyLimit The number of concurrent calls to
-   *     zlib
-   * @param {Boolean} isServer Create the instance in either server or client
-   *     mode
-   * @param {Number} maxPayload The maximum allowed message length
-   */
-  constructor(options, isServer, maxPayload) {
-    this._maxPayload = maxPayload | 0;
-    this._options = options || {};
-    this._threshold =
-      this._options.threshold !== undefined ? this._options.threshold : 1024;
-    this._isServer = !!isServer;
-    this._deflate = null;
-    this._inflate = null;
-
-    this.params = null;
-
-    if (!zlibLimiter) {
-      const concurrency =
-        this._options.concurrencyLimit !== undefined
-          ? this._options.concurrencyLimit
-          : 10;
-      zlibLimiter = new Limiter({ concurrency });
-    }
-  }
-
-  /**
-   * @type {String}
-   */
-  static get extensionName() {
-    return 'permessage-deflate';
-  }
-
-  /**
-   * Create an extension negotiation offer.
-   *
-   * @return {Object} Extension parameters
-   * @public
-   */
-  offer() {
-    const params = {};
-
-    if (this._options.serverNoContextTakeover) {
-      params.server_no_context_takeover = true;
-    }
-    if (this._options.clientNoContextTakeover) {
-      params.client_no_context_takeover = true;
-    }
-    if (this._options.serverMaxWindowBits) {
-      params.server_max_window_bits = this._options.serverMaxWindowBits;
-    }
-    if (this._options.clientMaxWindowBits) {
-      params.client_max_window_bits = this._options.clientMaxWindowBits;
-    } else if (this._options.clientMaxWindowBits == null) {
-      params.client_max_window_bits = true;
-    }
-
-    return params;
-  }
-
-  /**
-   * Accept an extension negotiation offer/response.
-   *
-   * @param {Array} configurations The extension negotiation offers/reponse
-   * @return {Object} Accepted configuration
-   * @public
-   */
-  accept(configurations) {
-    configurations = this.normalizeParams(configurations);
-
-    this.params = this._isServer
-      ? this.acceptAsServer(configurations)
-      : this.acceptAsClient(configurations);
-
-    return this.params;
-  }
-
-  /**
-   * Releases all resources used by the extension.
-   *
-   * @public
-   */
-  cleanup() {
-    if (this._inflate) {
-      this._inflate.close();
-      this._inflate = null;
-    }
-
-    if (this._deflate) {
-      this._deflate.close();
-      this._deflate = null;
-    }
-  }
-
-  /**
-   *  Accept an extension negotiation offer.
-   *
-   * @param {Array} offers The extension negotiation offers
-   * @return {Object} Accepted configuration
-   * @private
-   */
-  acceptAsServer(offers) {
-    const opts = this._options;
-    const accepted = offers.find((params) => {
-      if (
-        (opts.serverNoContextTakeover === false &&
-          params.server_no_context_takeover) ||
-        (params.server_max_window_bits &&
-          (opts.serverMaxWindowBits === false ||
-            (typeof opts.serverMaxWindowBits === 'number' &&
-              opts.serverMaxWindowBits > params.server_max_window_bits))) ||
-        (typeof opts.clientMaxWindowBits === 'number' &&
-          !params.client_max_window_bits)
-      ) {
-        return false;
-      }
-
-      return true;
-    });
-
-    if (!accepted) {
-      throw new Error('None of the extension offers can be accepted');
-    }
-
-    if (opts.serverNoContextTakeover) {
-      accepted.server_no_context_takeover = true;
-    }
-    if (opts.clientNoContextTakeover) {
-      accepted.client_no_context_takeover = true;
-    }
-    if (typeof opts.serverMaxWindowBits === 'number') {
-      accepted.server_max_window_bits = opts.serverMaxWindowBits;
-    }
-    if (typeof opts.clientMaxWindowBits === 'number') {
-      accepted.client_max_window_bits = opts.clientMaxWindowBits;
-    } else if (
-      accepted.client_max_window_bits === true ||
-      opts.clientMaxWindowBits === false
-    ) {
-      delete accepted.client_max_window_bits;
-    }
-
-    return accepted;
-  }
-
-  /**
-   * Accept the extension negotiation response.
-   *
-   * @param {Array} response The extension negotiation response
-   * @return {Object} Accepted configuration
-   * @private
-   */
-  acceptAsClient(response) {
-    const params = response[0];
-
-    if (
-      this._options.clientNoContextTakeover === false &&
-      params.client_no_context_takeover
-    ) {
-      throw new Error('Unexpected parameter "client_no_context_takeover"');
-    }
-
-    if (!params.client_max_window_bits) {
-      if (typeof this._options.clientMaxWindowBits === 'number') {
-        params.client_max_window_bits = this._options.clientMaxWindowBits;
-      }
-    } else if (
-      this._options.clientMaxWindowBits === false ||
-      (typeof this._options.clientMaxWindowBits === 'number' &&
-        params.client_max_window_bits > this._options.clientMaxWindowBits)
-    ) {
-      throw new Error(
-        'Unexpected or invalid parameter "client_max_window_bits"'
-      );
-    }
-
-    return params;
-  }
-
-  /**
-   * Normalize parameters.
-   *
-   * @param {Array} configurations The extension negotiation offers/reponse
-   * @return {Array} The offers/response with normalized parameters
-   * @private
-   */
-  normalizeParams(configurations) {
-    configurations.forEach((params) => {
-      Object.keys(params).forEach((key) => {
-        var value = params[key];
-
-        if (value.length > 1) {
-          throw new Error(`Parameter "${key}" must have only a single value`);
-        }
-
-        value = value[0];
-
-        if (key === 'client_max_window_bits') {
-          if (value !== true) {
-            const num = +value;
-            if (!Number.isInteger(num) || num < 8 || num > 15) {
-              throw new TypeError(
-                `Invalid value for parameter "${key}": ${value}`
-              );
-            }
-            value = num;
-          } else if (!this._isServer) {
-            throw new TypeError(
-              `Invalid value for parameter "${key}": ${value}`
-            );
-          }
-        } else if (key === 'server_max_window_bits') {
-          const num = +value;
-          if (!Number.isInteger(num) || num < 8 || num > 15) {
-            throw new TypeError(
-              `Invalid value for parameter "${key}": ${value}`
-            );
-          }
-          value = num;
-        } else if (
-          key === 'client_no_context_takeover' ||
-          key === 'server_no_context_takeover'
-        ) {
-          if (value !== true) {
-            throw new TypeError(
-              `Invalid value for parameter "${key}": ${value}`
-            );
-          }
-        } else {
-          throw new Error(`Unknown parameter "${key}"`);
-        }
-
-        params[key] = value;
-      });
-    });
-
-    return configurations;
-  }
-
-  /**
-   * Decompress data. Concurrency limited by async-limiter.
-   *
-   * @param {Buffer} data Compressed data
-   * @param {Boolean} fin Specifies whether or not this is the last fragment
-   * @param {Function} callback Callback
-   * @public
-   */
-  decompress(data, fin, callback) {
-    zlibLimiter.push((done) => {
-      this._decompress(data, fin, (err, result) => {
-        done();
-        callback(err, result);
-      });
-    });
-  }
-
-  /**
-   * Compress data. Concurrency limited by async-limiter.
-   *
-   * @param {Buffer} data Data to compress
-   * @param {Boolean} fin Specifies whether or not this is the last fragment
-   * @param {Function} callback Callback
-   * @public
-   */
-  compress(data, fin, callback) {
-    zlibLimiter.push((done) => {
-      this._compress(data, fin, (err, result) => {
-        done();
-        callback(err, result);
-      });
-    });
-  }
-
-  /**
-   * Decompress data.
-   *
-   * @param {Buffer} data Compressed data
-   * @param {Boolean} fin Specifies whether or not this is the last fragment
-   * @param {Function} callback Callback
-   * @private
-   */
-  _decompress(data, fin, callback) {
-    const endpoint = this._isServer ? 'client' : 'server';
-
-    if (!this._inflate) {
-      const key = `${endpoint}_max_window_bits`;
-      const windowBits =
-        typeof this.params[key] !== 'number'
-          ? zlib.Z_DEFAULT_WINDOWBITS
-          : this.params[key];
-
-      this._inflate = zlib.createInflateRaw(
-        Object.assign({}, this._options.zlibInflateOptions, { windowBits })
-      );
-      this._inflate[kPerMessageDeflate] = this;
-      this._inflate[kTotalLength] = 0;
-      this._inflate[kBuffers] = [];
-      this._inflate.on('error', inflateOnError);
-      this._inflate.on('data', inflateOnData);
-    }
-
-    this._inflate[kCallback] = callback;
-
-    this._inflate.write(data);
-    if (fin) this._inflate.write(TRAILER);
-
-    this._inflate.flush(() => {
-      const err = this._inflate[kError];
-
-      if (err) {
-        this._inflate.close();
-        this._inflate = null;
-        callback(err);
-        return;
-      }
-
-      const data = bufferUtil.concat(
-        this._inflate[kBuffers],
-        this._inflate[kTotalLength]
-      );
-
-      if (fin && this.params[`${endpoint}_no_context_takeover`]) {
-        this._inflate.close();
-        this._inflate = null;
-      } else {
-        this._inflate[kTotalLength] = 0;
-        this._inflate[kBuffers] = [];
-      }
-
-      callback(null, data);
-    });
-  }
-
-  /**
-   * Compress data.
-   *
-   * @param {Buffer} data Data to compress
-   * @param {Boolean} fin Specifies whether or not this is the last fragment
-   * @param {Function} callback Callback
-   * @private
-   */
-  _compress(data, fin, callback) {
-    if (!data || data.length === 0) {
-      process.nextTick(callback, null, EMPTY_BLOCK);
-      return;
-    }
-
-    const endpoint = this._isServer ? 'server' : 'client';
-
-    if (!this._deflate) {
-      const key = `${endpoint}_max_window_bits`;
-      const windowBits =
-        typeof this.params[key] !== 'number'
-          ? zlib.Z_DEFAULT_WINDOWBITS
-          : this.params[key];
-
-      this._deflate = zlib.createDeflateRaw(
-        Object.assign({}, this._options.zlibDeflateOptions, { windowBits })
-      );
-
-      this._deflate[kTotalLength] = 0;
-      this._deflate[kBuffers] = [];
-
-      //
-      // An `'error'` event is emitted, only on Node.js < 10.0.0, if the
-      // `zlib.DeflateRaw` instance is closed while data is being processed.
-      // This can happen if `PerMessageDeflate#cleanup()` is called at the wrong
-      // time due to an abnormal WebSocket closure.
-      //
-      this._deflate.on('error', NOOP);
-      this._deflate.on('data', deflateOnData);
-    }
-
-    this._deflate.write(data);
-    this._deflate.flush(zlib.Z_SYNC_FLUSH, () => {
-      if (!this._deflate) {
-        //
-        // This `if` statement is only needed for Node.js < 10.0.0 because as of
-        // commit https://github.com/nodejs/node/commit/5e3f5164, the flush
-        // callback is no longer called if the deflate stream is closed while
-        // data is being processed.
-        //
-        return;
-      }
-
-      var data = bufferUtil.concat(
-        this._deflate[kBuffers],
-        this._deflate[kTotalLength]
-      );
-
-      if (fin) data = data.slice(0, data.length - 4);
-
-      if (fin && this.params[`${endpoint}_no_context_takeover`]) {
-        this._deflate.close();
-        this._deflate = null;
-      } else {
-        this._deflate[kTotalLength] = 0;
-        this._deflate[kBuffers] = [];
-      }
-
-      callback(null, data);
-    });
-  }
-}
-
-module.exports = PerMessageDeflate;
-
-/**
- * The listener of the `zlib.DeflateRaw` stream `'data'` event.
- *
- * @param {Buffer} chunk A chunk of data
- * @private
- */
-function deflateOnData(chunk) {
-  this[kBuffers].push(chunk);
-  this[kTotalLength] += chunk.length;
-}
-
-/**
- * The listener of the `zlib.InflateRaw` stream `'data'` event.
- *
- * @param {Buffer} chunk A chunk of data
- * @private
- */
-function inflateOnData(chunk) {
-  this[kTotalLength] += chunk.length;
-
-  if (
-    this[kPerMessageDeflate]._maxPayload < 1 ||
-    this[kTotalLength] <= this[kPerMessageDeflate]._maxPayload
-  ) {
-    this[kBuffers].push(chunk);
-    return;
-  }
-
-  this[kError] = new RangeError('Max payload size exceeded');
-  this[kError][kStatusCode] = 1009;
-  this.removeListener('data', inflateOnData);
-  this.reset();
-}
-
-/**
- * The listener of the `zlib.InflateRaw` stream `'error'` event.
- *
- * @param {Error} err The emitted error
- * @private
- */
-function inflateOnError(err) {
-  //
-  // There is no need to call `Zlib#close()` as the handle is automatically
-  // closed when an error is emitted.
-  //
-  this[kPerMessageDeflate]._inflate = null;
-  err[kStatusCode] = 1007;
-  this[kCallback](err);
-}
-
-
-
-/*
-lib https://github.com/websockets/ws/blob/6.2.1/receiver.js
+lib https://github.com/websockets/ws/blob/6.2.1/lib/receiver.js
 */
 'use strict';
 
@@ -1938,7 +1380,7 @@ function error(ErrorCtor, message, prefix, statusCode) {
 
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/sender.js
+lib https://github.com/websockets/ws/blob/6.2.1/lib/sender.js
 */
 'use strict';
 
@@ -2302,7 +1744,7 @@ module.exports = Sender;
 
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/websocket-server.js
+lib https://github.com/websockets/ws/blob/6.2.1/lib/websocket-server.js
 */
 'use strict';
 
@@ -2709,7 +2151,7 @@ function abortHandshake(socket, code, message, headers) {
 
 
 /*
-lib https://github.com/websockets/ws/blob/6.2.1/websocket.js
+lib https://github.com/websockets/ws/blob/6.2.1/lib/websocket.js
 */
 'use strict';
 
@@ -3802,7 +3244,7 @@ const packageJson = {
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/helper.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/helper.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -4087,7 +3529,7 @@ const helper = Helper;
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Accessibility.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Accessibility.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -4515,7 +3957,7 @@ module.exports = {Accessibility};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Browser.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Browser.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -4904,7 +4346,7 @@ module.exports = {Browser, BrowserContext};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/BrowserFetcher.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/BrowserFetcher.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -5230,7 +4672,7 @@ function httpRequest(url, method, response) {
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Connection.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Connection.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -5478,7 +4920,7 @@ module.exports = {Connection, CDPSession};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Coverage.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Coverage.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -5796,7 +5238,7 @@ function convertToDisjointRanges(nestedRanges) {
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DOMWorld.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/DOMWorld.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -6521,7 +5963,7 @@ module.exports = {DOMWorld};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/DeviceDescriptors.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/DeviceDescriptors.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -7377,7 +6819,7 @@ const DeviceDescriptors = module.exports;
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Dialog.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Dialog.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -7466,7 +6908,7 @@ module.exports = {Dialog};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/EmulationManager.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/EmulationManager.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -7526,7 +6968,7 @@ module.exports = {EmulationManager};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Errors.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Errors.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -7563,7 +7005,7 @@ const Errors = module.exports;
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Events.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Events.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -7649,7 +7091,7 @@ module.exports = { Events };
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/ExecutionContext.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/ExecutionContext.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -7860,7 +7302,7 @@ module.exports = {ExecutionContext, EVALUATION_SCRIPT_URL};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/FrameManager.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/FrameManager.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -8584,7 +8026,7 @@ module.exports = {FrameManager, Frame};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Input.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Input.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -8903,7 +8345,7 @@ module.exports = { Keyboard, Mouse, Touchscreen};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/JSHandle.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/JSHandle.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -9434,7 +8876,7 @@ module.exports = {createJSHandle, JSHandle, ElementHandle};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Launcher.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Launcher.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -9887,7 +9329,7 @@ module.exports = Launcher;
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/LifecycleWatcher.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/LifecycleWatcher.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -10091,7 +9533,7 @@ module.exports = {LifecycleWatcher};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Multimap.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Multimap.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -10233,7 +9675,7 @@ module.exports = Multimap;
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/NetworkManager.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/NetworkManager.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -11037,7 +10479,7 @@ module.exports = {Request, Response, NetworkManager, SecurityDetails};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Page.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Page.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -12393,7 +11835,7 @@ module.exports = {Page, ConsoleMessage, FileChooser};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/PipeTransport.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/PipeTransport.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -12479,7 +11921,7 @@ module.exports = PipeTransport;
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Puppeteer.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Puppeteer.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -12571,7 +12013,7 @@ const Puppeteer = module.exports;
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Target.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Target.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -12733,7 +12175,7 @@ module.exports = {Target};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/TaskQueue.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/TaskQueue.js
 */
 class TaskQueue {
   constructor() {
@@ -12756,7 +12198,7 @@ module.exports = {TaskQueue};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/TimeoutSettings.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/TimeoutSettings.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -12819,7 +12261,7 @@ module.exports = {TimeoutSettings};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Tracing.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Tracing.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -12897,7 +12339,7 @@ module.exports = Tracing;
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/USKeyboardLayout.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/USKeyboardLayout.js
 */
 /**
  * Copyright 2017 Google Inc. All rights reserved.
@@ -13193,7 +12635,7 @@ const USKeyboardLayout = module.exports;
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/WebSocketTransport.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/WebSocketTransport.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -13267,7 +12709,7 @@ module.exports = WebSocketTransport;
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/Worker.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/Worker.js
 */
 /**
  * Copyright 2018 Google Inc. All rights reserved.
@@ -13353,7 +12795,7 @@ module.exports = {Worker};
 
 
 /*
-lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/api.js
+lib https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/lib/api.js
 */
 /**
  * Copyright 2019 Google Inc. All rights reserved.
@@ -13443,9 +12885,7 @@ const preferredRevision = packageJson.puppeteer.chromium_revision;
 const isPuppeteerCore = packageJson.name === 'puppeteer-core';
 
 module.exports = new Puppeteer(__dirname, preferredRevision, isPuppeteerCore);
-module.exports.WebSocketTransport = WebSocketTransport;
-module.exports.Connection = Connection;
-module.exports.Browser = Browser;
+Object.assign(module.exports, local);
 
 
 

@@ -152,8 +152,9 @@
 (function (local) {
 "use strict";
 // require module
-const child_process = require("child_process");
-const path = require("path");
+const child_process = local.child_process;
+const path = local.path;
+const url = local.url;
 /* jslint ignore:start */
 function PerMessageDeflate () {
     return;
@@ -195,86 +196,6 @@ var mime = {
         }
     }
 };
-
-
-
-/*
-file https://github.com/STRML/async-limiter/tree/v1.0.1
-*/
-
-
-
-/*
-lib https://github.com/STRML/async-limiter/blob/v1.0.1/index.js
-*/
-'use strict';
-
-function Queue(options) {
-    if (!(this instanceof Queue)) {
-        return new Queue(options);
-    }
-
-    options = options || {};
-    this.concurrency = options.concurrency || Infinity;
-    this.pending = 0;
-    this.jobs = [];
-    this.cbs = [];
-    this._done = done.bind(this);
-}
-
-var arrayAddMethods = [
-    'push',
-    'unshift',
-    'splice'
-];
-
-arrayAddMethods.forEach(function(method) {
-    Queue.prototype[method] = function() {
-        var methodResult = Array.prototype[method].apply(this.jobs, arguments);
-        this._run();
-        return methodResult;
-    };
-});
-
-Object.defineProperty(Queue.prototype, 'length', {
-    get: function() {
-        return this.pending + this.jobs.length;
-    }
-});
-
-Queue.prototype._run = function() {
-    if (this.pending === this.concurrency) {
-        return;
-    }
-    if (this.jobs.length) {
-        var job = this.jobs.shift();
-        this.pending++;
-        job(this._done);
-        this._run();
-    }
-
-    if (this.pending === 0) {
-        while (this.cbs.length !== 0) {
-            var cb = this.cbs.pop();
-            process.nextTick(cb);
-        }
-    }
-};
-
-Queue.prototype.onDone = function(cb) {
-    if (typeof cb === 'function') {
-        this.cbs.push(cb);
-        this._run();
-    }
-};
-
-function done() {
-    this.pending--;
-    this._run();
-}
-
-// hack-puppeteer - module.exports
-const Limiter = Queue;
 
 
 
@@ -12279,6 +12200,9 @@ await Promise.all([
     page.coverage.startJSCoverage(),
     page.coverage.startCSSCoverage()
 ]);
+
+
+
 // test undefined url
 try {
     await page.goto("https://undefined");
@@ -12315,6 +12239,7 @@ child_process.spawnSync("mkdir", [
 // Disable JavaScript coverage
 covPuppeteer = await page.coverage.stopJSCoverage();
 await page.coverage.stopCSSCoverage();
+browser.close();
 // init covPuppeteer
 // output JavaScript bundled in puppeteer output to format
 // that can be eaten by Istanbul.
@@ -12362,7 +12287,6 @@ covPuppeteer.forEach(function (file) {
     // this would be around where you'd use mkdirp.
     // Get the last element in the path name
     basename = new url.URL(file.url).pathname.slice(1) || "index.html";
-    console.error(basename, file.url);
     // Special case: when html present, strip and return specialized string
     if (basename.includes(".html")) {
         basename = path.resolve(storagePath, basename) + "puppeteerTemp-inline";
@@ -12422,9 +12346,7 @@ process.argv = [
     "--reporter=html"
 ];
 require("./node_modules/nyc/bin/nyc.js");
-
-
-
-await browser.close();
+// require("./lib.istanbuljs.js");
+process.exit();
 }());
 }(globalThis.globalLocal));

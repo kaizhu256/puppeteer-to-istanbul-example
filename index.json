@@ -1,0 +1,122 @@
+{
+    "covV8": [
+        {
+            "url": "/root/Documents/puppeteer-to-istanbul-example/.nyc_output/js/index.htmlpuppeteerTemp-inline.js",
+            "ranges": [],
+            "text": "\nfunction foo() {\nif (0) {\naa = 1\n} else {\naa = 2\n}\n}\n"
+        }
+    ],
+    "puppeteerToV8Info": [
+        {
+            "scriptId": 0,
+            "url": "file:///root/Documents/puppeteer-to-istanbul-example/.nyc_output/js/index.htmlpuppeteerTemp-inline.js",
+            "functions": [
+                {
+                    "ranges": [],
+                    "isBlockCoverage": true
+                }
+            ]
+        }
+    ],
+    "fullJson": {
+        "/root/Documents/puppeteer-to-istanbul-example/.nyc_output/js/index.htmlpuppeteerTemp-inline.js": {
+            "path": "/root/Documents/puppeteer-to-istanbul-example/.nyc_output/js/index.htmlpuppeteerTemp-inline.js",
+            "statementMap": {
+                "0": {
+                    "start": {
+                        "line": 1,
+                        "column": 0
+                    },
+                    "end": {
+                        "line": 1,
+                        "column": 0
+                    }
+                },
+                "1": {
+                    "start": {
+                        "line": 2,
+                        "column": 0
+                    },
+                    "end": {
+                        "line": 2,
+                        "column": 16
+                    }
+                },
+                "2": {
+                    "start": {
+                        "line": 3,
+                        "column": 0
+                    },
+                    "end": {
+                        "line": 3,
+                        "column": 8
+                    }
+                },
+                "3": {
+                    "start": {
+                        "line": 4,
+                        "column": 0
+                    },
+                    "end": {
+                        "line": 4,
+                        "column": 6
+                    }
+                },
+                "4": {
+                    "start": {
+                        "line": 5,
+                        "column": 0
+                    },
+                    "end": {
+                        "line": 5,
+                        "column": 8
+                    }
+                },
+                "5": {
+                    "start": {
+                        "line": 6,
+                        "column": 0
+                    },
+                    "end": {
+                        "line": 6,
+                        "column": 6
+                    }
+                },
+                "6": {
+                    "start": {
+                        "line": 7,
+                        "column": 0
+                    },
+                    "end": {
+                        "line": 7,
+                        "column": 1
+                    }
+                },
+                "7": {
+                    "start": {
+                        "line": 8,
+                        "column": 0
+                    },
+                    "end": {
+                        "line": 8,
+                        "column": 1
+                    }
+                }
+            },
+            "s": {
+                "0": 1,
+                "1": 1,
+                "2": 1,
+                "3": 1,
+                "4": 1,
+                "5": 1,
+                "6": 1,
+                "7": 1
+            },
+            "branchMap": {},
+            "b": {},
+            "fnMap": {},
+            "f": {}
+        }
+    }
+}

@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for js/yts/jsbin/player_ias-vflt4leIo/en_US/captions.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../../../prettify.css" />
+    <link rel="stylesheet" href="../../../../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../../../../index.html">All files</a> / <a href="index.html">js/yts/jsbin/player_ias-vflt4leIo/en_US</a> captions.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">3.27% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>7/214</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>213/213</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/0</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">3.27% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>7/214</span>
+      </div>
+    </div>
+    <p class="quiet">
+      Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+    </p>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a>
+<a name='L157'></a><a href='#L157'>157</a>
+<a name='L158'></a><a href='#L158'>158</a>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a>
+<a name='L168'></a><a href='#L168'>168</a>
+<a name='L169'></a><a href='#L169'>169</a>
+<a name='L170'></a><a href='#L170'>170</a>
+<a name='L171'></a><a href='#L171'>171</a>
+<a name='L172'></a><a href='#L172'>172</a>
+<a name='L173'></a><a href='#L173'>173</a>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a>
+<a name='L192'></a><a href='#L192'>192</a>
+<a name='L193'></a><a href='#L193'>193</a>
+<a name='L194'></a><a href='#L194'>194</a>
+<a name='L195'></a><a href='#L195'>195</a>
+<a name='L196'></a><a href='#L196'>196</a>
+<a name='L197'></a><a href='#L197'>197</a>
+<a name='L198'></a><a href='#L198'>198</a>
+<a name='L199'></a><a href='#L199'>199</a>
+<a name='L200'></a><a href='#L200'>200</a>
+<a name='L201'></a><a href='#L201'>201</a>
+<a name='L202'></a><a href='#L202'>202</a>
+<a name='L203'></a><a href='#L203'>203</a>
+<a name='L204'></a><a href='#L204'>204</a>
+<a name='L205'></a><a href='#L205'>205</a>
+<a name='L206'></a><a href='#L206'>206</a>
+<a name='L207'></a><a href='#L207'>207</a>
+<a name='L208'></a><a href='#L208'>208</a>
+<a name='L209'></a><a href='#L209'>209</a>
+<a name='L210'></a><a href='#L210'>210</a>
+<a name='L211'></a><a href='#L211'>211</a>
+<a name='L212'></a><a href='#L212'>212</a>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >(function(g){var window=this;var N2=function(a){var b={languageCode:a.i,languageName:a.l,displayName:g.Ez(a),kind:a.o,name:a.u,id:a.H,is_servable:a.C,is_default:a.isDefault,is_translateable:a.D,vss_id:a.A};a.g&amp;&amp;(b.translationLanguage=a.g);return b},O2=function(a){return a.g?a.g.languageCode:a.i},Spa=function(a,b){var c=new g.Dz;</span>
+<span class="cstat-no" title="statement not covered" >c.i=a.i;c.l=a.l;c.u=a.u;c.o=a.o;c.isDefault=!1;c.C=a.C;c.D=a.D;c.A=a.A;c.F=a.F;c.g=b;return c},Tpa=function(){this.i=[];</span>
+<span class="cstat-no" title="statement not covered" >this.g=[]},P2=function(a,b){return b?a.g.concat(a.i):a.g},Q2=function(a,b){switch(b.o){case "asr":var c=a.i;</span>
+<span class="cstat-no" title="statement not covered" >g.Za(c,(0,g.x)(b.Yq,b))||c.push(b);break;default:c=a.g,g.Za(c,(0,g.x)(b.Yq,b))||c.push(b)}},R2=function(a){g.D.call(this);</span>
+<span class="cstat-no" title="statement not covered" >this.Wa=a;this.i=new Tpa;this.u=[]},S2=function(a,b,c){R2.call(this,a);</span>
+<span class="cstat-no" title="statement not covered" >this.g=null;this.u=b.xu;this.l=c},T2=function(){this.Ua=[]},U2=function(a,b,c,d,e,f){g.D.call(this);</span>
+<span class="cstat-no" title="statement not covered" >this.H=a;this.l=b;this.R=g.W(b);this.u=new T2;this.g=null;this.C=d;this.I=f;this.i=this.o=null;this.M=c;this.A=e||!1;this.D=new g.I(this.Yw,1E3,this);g.F(this,this.D);this.F=new g.ls(this);g.F(this,this.F);this.F.K(b,"SEEK_COMPLETE",this.Fx);this.Fx();this.Yw()},V2=function(a,b){b-=a.l.yb();</span>
+<span class="cstat-no" title="statement not covered" >var c=a.g;a.g=g.Xa(a.M.wf(b).g);c!=a.g&amp;&amp;a.I&amp;&amp;a.I()},W2=function(a,b){var c=g.Dv(g.Qv(b,a.H,{})),d={format:"RAW",</span>
+<span class="cstat-no" title="statement not covered" >withCredentials:!0};a.A&amp;&amp;(d.responseType="arraybuffer");a.i=g.yq(c,d,3,100).then((0,g.x)(a.HK,a));a.o=b;c=a.u;d=a.o.g[0].i;var e=g.qb(c.Ua,d);0&lt;=e||0&gt;e&amp;&amp;1==(-e-1)%2||(e=-e-1,0&lt;e&amp;&amp;1==d-c.Ua[e-1]&amp;&amp;e&lt;c.Ua.length&amp;&amp;1==c.Ua[e]-d?(g.eb(c.Ua,e),g.eb(c.Ua,e-1)):0&lt;e&amp;&amp;1==d-c.Ua[e-1]?c.Ua[e-1]=d:e&lt;c.Ua.length&amp;&amp;1==c.Ua[e]-d?c.Ua[e]=d:(g.nb(c.Ua,e,0,d),g.nb(c.Ua,e+1,0,d)))},X2=function(a,b){R2.call(this,g.W(b));</span>
+<span class="cstat-no" title="statement not covered" >this.g=a;this.C=b;this.l=null;this.o=!1;this.A=g.fz(g.W(this.C))&amp;&amp;!this.g.i},Y2=function(a,b){var c=[],d;</span>
+<span class="cstat-no" title="statement not covered" >for(d in a.g.g){var e=a.g.g[d];if(g.JO(e,b||null)){var f="en",k="English",l=".en",m="";if(e=e.info.captionTrack)f=e.languageCode,k=e.displayName,l=e.vssId,m=e.kind;c.push(new g.Dz({id:d,languageCode:f,languageName:k,is_servable:!0,is_default:!0,is_translateable:!1,vss_id:l,kind:m}))}}return c},Upa=function(a,b){return null!=b&amp;&amp;b in a.g.g?a.g.g[b]:null},Z2=function(a,b,c){var d=[],e;</span>
+<span class="cstat-no" title="statement not covered" >for(e in a.g.g){var f=a.g.g[e];if(g.JO(f,c||null)){var k=f.info.captionTrack;k&amp;&amp;k.languageCode==b&amp;&amp;d.push(f)}}return d.length?d[0]:null},$2=function(a,b,c,d,e){R2.call(this,e||null);</span>
+<span class="cstat-no" title="statement not covered" >c=c||g.Fp(a).hl||"";c=c.split("_").join("-");this.o=g.Hp(a,{hl:c});this.l=b;this.A=!!d;this.C={};this.g=null},a3=function(a){if(!Vpa.test(a))throw Error("'"+a+"' is not a valid hex color");</span>
+<span class="cstat-no" title="statement not covered" >4==a.length&amp;&amp;(a=a.replace(Wpa,"#$1$1$2$2$3$3"));a=a.toLowerCase();a=parseInt(a.substr(1),16);return[a&gt;&gt;16,a&gt;&gt;8&amp;255,a&amp;255]},b3=function(a,b,c,d,e,f,k){f=void 0===f?!1:f;</span>
+<span class="cstat-no" title="statement not covered" >k=void 0===k?null:k;g.RD.call(this,a,a+b,{priority:c,namespace:"captions"});this.windowId=d;this.text=e;this.l=f;this.g=k},c3=function(a,b,c,d,e){g.RD.call(this,a,a+b,{priority:c,</span>
+<span class="cstat-no" title="statement not covered" >namespace:"captions"});this.id=d;this.params=e;this.g=[]},e3=function(a){a=void 0===a?{}:a;</span>
+<span class="cstat-no" title="statement not covered" >var b="_"+d3++;return new c3(0,0x8000000000000,0,b,a)},g3=function(a,b,c,d,e,f){var k={};</span>
+<span class="cstat-no" title="statement not covered" >g.Sa(k,b);g.Sa(k,a.params);g.Sa(k,c);var l={};g.Sa(l,b.ub);a.params.ub&amp;&amp;g.Sa(l,a.params.ub);g.Sa(l,c.ub);k.ub=l;g.V.call(this,{B:"div",G:"caption-window",L:{id:"caption-window-"+a.id,dir:1==k.Ae?"rtl":"ltr",tabindex:"0","aria-live":"assertive",lang:k.lang},J:[{B:"span",G:"captions-text",L:{style:"word-wrap: normal; display: block;"}}]});this.C=[];this.P=!1;this.o=a;this.X=this.S=null;this.Pa=e;this.Na=f;this.D=null;this.Y=.96*e;this.wa=.96*f;this.l=k;this.Ia=c;this.A=this.i["captions-text"];this.Ca=</span>
+<span class="cstat-no" title="statement not covered" >null!=this.A.style["box-decoration-break"]||null!=this.A.style["-webkit-box-decoration-break"];this.W=d/360*16;this.type=0;this.la=this.W*f3(l);a=new g.ps(this.element,!0);g.F(this,a);a.subscribe("dragstart",this.XF,this);a.subscribe("dragmove",this.WF,this);a.subscribe("dragend",this.VF,this);this.va=this.na=0;b="";this.l.windowOpacity&amp;&amp;(a=a3(this.l.windowColor),b="rgba("+a[0]+","+a[1]+","+a[2]+","+this.l.windowOpacity+")");a={"background-color":b,display:!1===this.l.isVisible?"none":"","text-align":Xpa[this.l.textAlign]};</span>
+<span class="cstat-no" title="statement not covered" >this.Ca&amp;&amp;(a["border-radius"]=b?this.la/8+"px":"");if(this.u=2==this.o.params.Ae||3==this.o.params.Ae)b=this.element,c="vertical-rl",1==this.l.BA&amp;&amp;(c="vertical-lr"),g.Ld&amp;&amp;(c="vertical-lr"==c?"tb-lr":"tb-rl"),g.bg(b,"-o-writing-mode",c),g.bg(b,"-webkit-writing-mode",c),g.bg(b,"writing-mode",c),g.bg(b,"text-orientation","upright"),g.J(b,"ytp-vertical-caption"),3==this.o.params.Ae&amp;&amp;(g.bg(b,"text-orientation",""),g.bg(b,"transform","rotate(180deg)"));g.bg(this.element,a);switch(this.l.Sf){case 0:case 1:case 2:g.J(this.element,</span>
+<span class="cstat-no" title="statement not covered" >"ytp-caption-window-top");break;case 6:case 7:case 8:g.J(this.element,"ytp-caption-window-bottom")}},f3=function(a){var b=1+.25*(a.fontSizeIncrement||0);</span>
+<span class="cstat-no" title="statement not covered" >if(0==a.offset||2==a.offset)b*=.8;return b},h3=function(a,b){var c={},d=b.background?b.background:a.l.ub.background;</span>
+<span class="cstat-no" title="statement not covered" >if(null!=b.backgroundOpacity||b.background){var e=null!=b.backgroundOpacity?b.backgroundOpacity:a.l.ub.backgroundOpacity;d=a3(d);c.background="rgba("+d[0]+","+d[1]+","+d[2]+","+e+")";a.Ca&amp;&amp;(c["box-decoration-break"]="clone",c["border-radius"]=a.la/8+"px")}if(null!=b.fontSizeIncrement||null!=b.offset)c["font-size"]=a.W*f3(b)+"px";d=1;e=b.color||a.l.ub.color;if(b.color||null!=b.textOpacity)e=a3(e),d=null==b.textOpacity?a.l.ub.textOpacity:b.textOpacity,e="rgba("+e[0]+","+e[1]+","+e[2]+","+d+")",c.color=</span>
+<span class="cstat-no" title="statement not covered" >e,c.fill=e;var f=b.charEdgeStyle;0==f&amp;&amp;(f=null);if(f){e="rgba(34, 34, 34, "+d+")";var k="rgba(204, 204, 204, "+d+")";b.Fu&amp;&amp;(k=e=b.Fu);var l=a.W/16/2,m=Math.max(l,1),n=Math.max(2*l,1),q=Math.max(3*l,1),t=Math.max(5*l,1);d=[];switch(f){case 4:for(;q&lt;=t;q+=l)d.push(n+"px "+n+"px "+q+"px "+e);break;case 1:n=2&lt;=window.devicePixelRatio?.5:1;for(f=m;f&lt;=q;f+=n)d.push(f+"px "+f+"px "+e);break;case 2:d.push(m+"px "+m+"px "+k);d.push("-"+m+"px -"+m+"px "+e);break;case 3:for(q=0;5&gt;q;q++)d.push("0 0 "+n+"px "+</span>
+<span class="cstat-no" title="statement not covered" >e)}c["text-shadow"]=d.join(", ")}e="";switch(b.fontFamily){case 1:e='"Courier New", Courier, "Nimbus Mono L", "Cutive Mono", monospace';break;case 2:e='"Times New Roman", Times, Georgia, Cambria, "PT Serif Caption", serif';break;case 3:e='"Deja Vu Sans Mono", "Lucida Console", Monaco, Consolas, "PT Mono", monospace';break;case 5:e='"Comic Sans MS", Impact, Handlee, fantasy';break;case 6:e='"Monotype Corsiva", "URW Chancery L", "Apple Chancery", "Dancing Script", cursive';break;case 7:e=g.gq()?'"Carrois Gothic SC", sans-serif-smallcaps':</span>
+<span class="cstat-no" title="statement not covered" >'"Arial Unicode Ms", Arial, Helvetica, Verdana, "Marcellus SC", sans-serif';break;case 0:case 4:e='"YouTube Noto", Roboto, "Arial Unicode Ms", Arial, Helvetica, Verdana, "PT Sans Caption", sans-serif'}e&amp;&amp;(c["font-family"]=e);e=b.offset;null==e&amp;&amp;(e=a.l.ub.offset);switch(e){case 0:c["vertical-align"]="sub";break;case 2:c["vertical-align"]="super"}7==b.fontFamily&amp;&amp;(c["font-variant"]="small-caps");b.bold&amp;&amp;(c["font-weight"]="bold");b.Pe&amp;&amp;(c["font-style"]="italic");b.underline&amp;&amp;(c["text-decoration"]="underline");</span>
+<span class="cstat-no" title="statement not covered" >b.UD&amp;&amp;(c.visibility="hidden");1==b.WD&amp;&amp;a.u&amp;&amp;(c["text-combine-upright"]="all",c["text-orientation"]="mixed",e=g.kz||g.oz,3==a.o.params.Ae?c.transform=e?"rotate(90deg)":"rotate(180deg)":e&amp;&amp;(c.transform="rotate(-90deg)"));if(1==b.ze||2==b.ze||3==b.ze||4==b.ze||5==b.ze)if(g.kz)c["font-weight"]="bold";else switch(c["text-emphasis"]="filled circle",c["webkit-text-emphasis"]="filled circle",b.ze){case 4:case 3:c["text-emphasis-position"]="under left";c["webkit-text-emphasis-position"]="under left";break;</span>
+<span class="cstat-no" title="statement not covered" >case 5:case 2:c["text-emphasis-position"]="over right",c["webkit-text-emphasis-position"]="over right"}return c},i3=function(a){a.D=g.Rd("SPAN");</span>
+<span class="cstat-no" title="statement not covered" >g.bg(a.D,{display:"block"});g.J(a.D,"caption-visual-line");a.A.appendChild(a.D)},j3=function(a,b){var c=g.Rd("SPAN");</span>
+<span class="cstat-no" title="statement not covered" >g.bg(c,{display:"inline-block","white-space":"pre-wrap"});g.bg(c,h3(a,b));c.classList.add("ytp-caption-segment");a.D.appendChild(c);c.previousElementSibling&amp;&amp;(g.bg(c.previousElementSibling,{"border-top-right-radius":"0","border-bottom-right-radius":"0"}),g.bg(c,{"border-top-left-radius":"0","border-bottom-left-radius":"0"}));return c},k3=function(a,b,c){a.P=a.P||!!c;</span>
+<span class="cstat-no" title="statement not covered" >var d={};g.Sa(d,a.l.ub);g.Sa(d,c||b.g);g.Sa(d,a.Ia.ub);(c=!a.D)&amp;&amp;i3(a);for(var e=a.S&amp;&amp;a.X&amp;&amp;g.cc(d,a.X)?a.S:j3(a,d),f="string"===typeof b.text,k=f?b.text.split("\n"):[b.text],l=0;l&lt;k.length;l++){var m=0&lt;l||!b.l,n=k[l];m&amp;&amp;!c?(i3(a),e=j3(a,d)):m&amp;&amp;c&amp;&amp;(c=!1);n&amp;&amp;(e.appendChild(f?g.Sd(n):n),f||"RUBY"!=n.tagName||4!=n.childElementCount||g.kz||!g.fg(n.children[2],"text-emphasis")||(m=a.u?"padding-right":"padding-top",g.fg(n.children[2],"text-emphasis-position")&amp;&amp;(m=a.u?"padding-left":"padding-bottom"),g.Nd?</span>
+<span class="cstat-no" title="statement not covered" >g.bg(e,m,"1em"):g.bg(e,m,"0.5em")))}a.X=d;a.S=e;a.C.push(b)},l3=function(){},n3=function(){this.o=this.i=this.mode=this.l=0;</span>
+<span class="cstat-no" title="statement not covered" >this.u=new m3(this);this.A=new m3(this);this.g=[];this.clear()},Ypa=function(a,b,c){if(255==a&amp;&amp;255==b||!a&amp;&amp;!b)return{zl:a,</span>
+<span class="cstat-no" title="statement not covered" >Al:b,result:0};a=o3[a];b=o3[b];if(a&amp;128){if(!(b&amp;128)&amp;&amp;0!=c.g&amp;&amp;c.i==b)return{zl:a,Al:b,result:1}}else if(b&amp;128&amp;&amp;1&lt;=a&amp;&amp;31&gt;=a)return{zl:a,Al:b,result:2};return{zl:a,Al:b,result:3}},Zpa=function(a,b,c,d){255==b&amp;&amp;255==c||!b&amp;&amp;!c?(45==++a.o&amp;&amp;a.reset(),a.u.g.clear(),a.A.g.clear()):(a.o=0,p3(a.u,b,c,d))},$pa=function(a,b){a.g.sort(function(e,f){var k=e.time-f.time;</span>
+<span class="cstat-no" title="statement not covered" >return 0==k?e.order-f.order:k});</span>
+<span class="cstat-no" title="statement not covered" >for(var c=0;c&lt;a.g.length;c++){var d=a.g[c];a.i=d.time;0==d.type?Zpa(a,d.zu,d.Au,b):1==d.type&amp;&amp;a.l&amp;496&amp;&amp;p3(a.A,d.zu,d.Au,b)}a.g.length=0},q3=function(){this.g=0},r3=function(){this.i=this.l=this.g=0},s3=function(){this.timestamp=this.Ud=0},t3=function(a){this.l=[];</span>
+<span class="cstat-no" title="statement not covered" >for(var b=0;15&gt;=b;b++){this.l[b]=[];for(var c=0;32&gt;=c;c++)this.l[b][c]=new s3}this.g=this.i=this.row=0;this.style=new q3;this.u=a;this.o=0},u3=function(a,b){if(3==a.style.g){for(var c=0,d=0,e=a.u.i+0,f="",k="",l=e,m=1;15&gt;=m;++m){for(var n=!1,q=d?d:1;32&gt;=q;++q){var t=a.l[m][q];</span>
+<span class="cstat-no" title="statement not covered" >if(0!=t.Ud){0==c&amp;&amp;(c=m,d=q);n=String.fromCharCode(t.Ud);var w=t.timestamp;w&lt;e&amp;&amp;(e=w);t.timestamp=l;k&amp;&amp;(f+=k,k="");f+=n;n=!0}if((0==t.Ud||32==q)&amp;&amp;n){k="\n";break}else if(d&amp;&amp;!n)break}if(c&amp;&amp;!n)break}f&amp;&amp;b.u(c,d,e,l,f)}else for(d=c=0,f=e=a.u.i+0,k=1;15&gt;=k;++k)for(l="",m=1;32&gt;=m;++m)if(q=a.l[k][m],t=q.Ud,0!=t&amp;&amp;(0==c&amp;&amp;(c=k,d=m),n=String.fromCharCode(t),w=q.timestamp,w&lt;=e&amp;&amp;(e=w),l+=n,q.reset()),32==m||0==t)l&amp;&amp;b.u(c,d,e,f,l),e=f,l="",d=c=0},eqa=function(a,b){switch(a){case 0:return aqa[(b&amp;127)-32];</span>
+<span class="cstat-no" title="statement not covered" >case 1:return bqa[b&amp;15];case 2:return cqa[b&amp;31];case 3:return dqa[b&amp;31]}return 0},v3=function(a){return a.l[a.row][a.i]},w3=function(a,b,c){2&lt;=b&amp;&amp;1&lt;a.i&amp;&amp;(--a.i,v3(a).Ud=0);</span>
+<span class="cstat-no" title="statement not covered" >var d=v3(a);d.timestamp=a.u.i+0;d.Ud=eqa(b,c);32&gt;a.i&amp;&amp;a.i++},x3=function(a,b,c,d){for(var e=0;e&lt;d;e++)for(var f=0;32&gt;=f;f++)a.l[b+e][f].cg(a.l[c+e][f])},y3=function(a,b,c){for(var d=0;d&lt;c;d++)for(var e=0;32&gt;=e;e++)a.l[b+d][e].reset()},z3=function(a){a.row=0&lt;a.g?a.g:1;</span>
+<span class="cstat-no" title="statement not covered" >a.i=1;y3(a,0,15)},A3=function(a){this.o=a;</span>
+<span class="cstat-no" title="statement not covered" >this.u=0;this.style=new q3;this.A=new t3(a);this.C=new t3(a);this.D=new t3(a);this.i=this.A;this.l=this.C;this.g=this.i},B3=function(a,b,c){var d=a.i,e=!1;</span>
+<span class="cstat-no" title="statement not covered" >switch(a.style.get()){case 4:if(0&lt;d.g)break;case 1:case 2:u3(d,c),z3(a.i),z3(a.l),d.row=15,d.g=b,e=!0}a.style.set(3);a.g=d;a.g.style=a.style;a.o.mode=1&lt;&lt;d.o;e?d.i=1:d.g!=b&amp;&amp;(d.g&gt;b?(u3(d,c),y3(d,d.row-d.g,b)):d.row&lt;b&amp;&amp;(b=d.g),d.g=b)},C3=function(a){a.style.set(1);</span>
+<span class="cstat-no" title="statement not covered" >a.g=a.l;a.g.g=0;a.g.style=a.style;a.o.mode=1&lt;&lt;a.g.o},D3=function(a){a.style.set(4);</span>
+<span class="cstat-no" title="statement not covered" >a.g=a.D;a.g.style=a.style;a.o.mode=1&lt;&lt;a.g.o},m3=function(a){this.i=a;</span>
+<span class="cstat-no" title="statement not covered" >this.g=new r3;this.u=0;this.l=new A3(a);this.A=new A3(a);this.o=this.l},p3=function(a,b,c,d){a.g.update();</span>
+<span class="cstat-no" title="statement not covered" >b=Ypa(b,c,a.g);switch(b.result){case 0:return;case 1:case 2:return}var e=b.zl;c=b.Al;if(32&lt;=e||!e)a.i.mode&amp;a.i.l&amp;&amp;(b=e,b&amp;128&amp;&amp;(b=127),c&amp;128&amp;&amp;(c=127),a=a.o.g,b&amp;96&amp;&amp;w3(a,0,b),c&amp;96&amp;&amp;w3(a,0,c),0!=b&amp;&amp;0!=c&amp;&amp;3==a.style.g&amp;&amp;u3(a,d));else if(e&amp;16)a:if(!a.g.matches(e,c)&amp;&amp;(b=a.g,b.l=e,b.i=c,b.g=2,b=e&amp;8?a.A:a.l,a.o=b,a.i.mode=1&lt;&lt;(a.u&lt;&lt;2)+(b.u&lt;&lt;1)+(4==b.style.g?1:0),(a.i.mode|1&lt;&lt;(a.u&lt;&lt;2)+(b.u&lt;&lt;1)+(4!=b.style.g?1:0))&amp;a.i.l))if(c&amp;64){d=[11,11,1,2,3,4,12,13,14,15,5,6,7,8,9,10][(e&amp;7)&lt;&lt;1|c&gt;&gt;5&amp;1];a=c&amp;16?4*((c&amp;14)&gt;&gt;1):</span>
+<span class="cstat-no" title="statement not covered" >0;c=b.g;switch(b.style.get()){case 4:d=c.row;break;case 3:if(d!=c.row){if(d&lt;c.g&amp;&amp;(d=c.g,d==c.row))break;var f=1+c.row-c.g,k=1+d-c.g;x3(c,k,f,c.g);b=f;e=c.g;k&lt;f?(f=k+e-f,0&lt;f&amp;&amp;(b+=f,e-=f)):(f=f+e-k,0&lt;f&amp;&amp;(e-=f));y3(c,b,e)}}c.row=d;c.i=a+1}else switch(e&amp;7){case 1:switch(c&amp;112){case 32:w3(b.g,0,32);break a;case 48:57==c?(d=b.g,v3(d).Ud=0,32&gt;d.i&amp;&amp;d.i++):w3(b.g,1,c&amp;15)}break;case 2:c&amp;32&amp;&amp;w3(b.g,2,c&amp;31);break;case 3:c&amp;32&amp;&amp;w3(b.g,3,c&amp;31);break;case 4:case 5:if(32&lt;=c&amp;&amp;47&gt;=c)switch(c){case 32:C3(b);break;case 33:d=</span>
+<span class="cstat-no" title="statement not covered" >b.g;1&lt;d.i&amp;&amp;(--d.i,v3(d).Ud=0);break;case 36:d=b.g;b=v3(d);for(a=0;15&gt;=a;a++)for(c=0;32&gt;=c;c++)if(d.l[a][c]==b){for(;32&gt;=c;c++)d.l[a][c].reset();break}break;case 37:B3(b,2,d);break;case 38:B3(b,3,d);break;case 39:B3(b,4,d);break;case 40:w3(b.g,0,32);break;case 41:b.style.set(2);b.g=b.i;b.g.g=0;b.g.style=b.style;b.o.mode=1&lt;&lt;b.g.o;break;case 42:d=b.D;d.g=15;d.style.set(4);z3(d);D3(b);break;case 43:D3(b);break;case 44:a=b.i;switch(b.style.get()){case 1:case 2:case 3:u3(a,d)}y3(a,0,15);break;case 45:b:{a=</span>
+<span class="cstat-no" title="statement not covered" >b.g;switch(b.style.get()){default:case 2:case 1:break b;case 4:if(15&gt;a.row){++a.row;a.i=1;break b}case 3:}2&gt;a.g&amp;&amp;(a.g=2,a.row&lt;a.g&amp;&amp;(a.row=a.g));b=a.row-a.g+1;u3(a,d);x3(a,b,b+1,a.g-1);y3(a,a.row,1)}break;case 46:y3(b.l,0,15);break;case 47:u3(b.i,d),b.l.updateTime(b.o.i+0),d=b.l,b.l=b.i,b.i=d,C3(b)}break;case 7:switch(c){case 33:case 34:case 35:d=b.g,32&lt;(d.i+=c&amp;3)&amp;&amp;(d.i=32)}}},E3=function(a,b,c,d,e,f,k){var l=f[0],m=k[l.getAttribute("p")];</span>
+<span class="cstat-no" title="statement not covered" >if(1==m.cd){var n=f[1],q=f[2],t=f[3];l.getAttribute("p");var w=g.gq();l.getAttribute("t");n.getAttribute("t");q.getAttribute("t");t.getAttribute("t");f=w?g.Rd("DIV"):g.Rd("RUBY");l=l.textContent;var z=g.Rd("SPAN");z.textContent=l;f.appendChild(z);n.getAttribute("p");z=w?g.Rd("DIV"):g.Rd("RP");l=n.textContent;z.textContent=l;f.appendChild(z);k=k[q.getAttribute("p")];l=q.textContent;q=w?g.Rd("DIV"):g.Rd("RT");q.textContent=l;f.appendChild(q);l=k.cd;if(10==l||11==l||12==l||13==l||14==l)if(g.bg(q,"text-emphasis",</span>
+<span class="cstat-no" title="statement not covered" >"filled circle"),g.bg(q,"webkit-text-emphasis","filled circle"),k.cd==k.cd==11||13==k.cd)g.bg(q,"webkit-text-emphasis-position","under left"),g.bg(q,"text-emphasis-position","under left");q=!0;if(4==k.cd||7==k.cd||12==k.cd||14==k.cd)g.bg(f,"ruby-position","over"),g.bg(f,"-webkit-ruby-position","before");else if(5==k.cd||6==k.cd||11==k.cd||13==k.cd)g.bg(f,"ruby-position","under"),g.bg(f,"-webkit-ruby-position","after"),q=!1;t.getAttribute("p");l=t.textContent;t=w?g.Rd("DIV"):g.Rd("RP");t.textContent=</span>
+<span class="cstat-no" title="statement not covered" >l;f.appendChild(t);w&amp;&amp;(w=q,g.bg(f,{display:"inline-block",position:"relative"}),t=f.firstElementChild.nextElementSibling,g.bg(t,"display","none"),t=t.nextElementSibling,g.bg(t,{"font-size":"0.5em","line-height":"1.2em","text-align":"center",position:"absolute",left:"50%",transform:"translateX(-50%)",width:"400%"}),g.bg(f.lastElementChild,"display","none"),w?(g.bg(f,"padding-top","0.6em"),g.bg(t,"top","0")):(g.bg(f,"padding-bottom","0.6em"),g.bg(t,"bottom","0")));return new b3(a,b,e,c,f,d,m)}switch(m.cd){case 9:case 10:m.ze=</span>
+<span class="cstat-no" title="statement not covered" >1;break;case 11:m.ze=2;break;case 12:m.ze=3;break;case 13:m.ze=4;break;case 14:m.ze=5}return new b3(a,b,e,c,l.textContent||"",d,m)},F3=function(){g.D.apply(this,arguments)},G3=function(a){F3.call(this);</span>
+<span class="cstat-no" title="statement not covered" >this.l={};this.F={};this.H={};this.u="_"+d3++;this.A=a;this.D={};this.i=this.g=null;this.C=!0},H3=function(a,b){var c=a.getAttribute(b);</span>
+<span class="cstat-no" title="statement not covered" >if(null!=c)return parseFloat(c)},I3=function(a,b){var c=a.getAttribute(b);</span>
+<span class="cstat-no" title="statement not covered" >if(null!=c)return"1"==c},J3=function(a,b){var c=H3(a,b);</span>
+<span class="cstat-no" title="statement not covered" >return void 0!=c?c:null},L3=function(a,b){var c=a.getAttribute(b);</span>
+<span class="cstat-no" title="statement not covered" >if(null!=c)return K3.test(c),c},M3=function(a,b){var c={},d=b.getAttribute("ws");</span>
+<span class="cstat-no" title="statement not covered" >g.Sa(c,d?a.H[d]:a.A);d=J3(b,"mh");null!=d&amp;&amp;(c.Sq=d);d=J3(b,"ju");null!=d&amp;&amp;(c.textAlign=d);d=J3(b,"pd");null!=d&amp;&amp;(c.Ae=d);d=J3(b,"sd");null!=d&amp;&amp;(c.BA=d);d=L3(b,"wfc");null!=d&amp;&amp;(c.windowColor=d);d=H3(b,"wfo");void 0!=d&amp;&amp;(c.windowOpacity=d/255);return c},N3=function(a,b){var c={},d=b.getAttribute("wp");</span>
+<span class="cstat-no" title="statement not covered" >d&amp;&amp;g.Sa(c,a.F[d]);d=J3(b,"ap");null!=d&amp;&amp;(c.Sf=d);d=H3(b,"cc");null!=d&amp;&amp;(c.Nl=d);d=H3(b,"ah");null!=d&amp;&amp;(c.Qe=d);d=H3(b,"rc");null!=d&amp;&amp;(c.Ak=d);d=H3(b,"av");null!=d&amp;&amp;(c.Fg=d);return c},O3=function(a,b,c,d){var e={};</span>
+<span class="cstat-no" title="statement not covered" >g.Sa(e,N3(a,b));g.Sa(e,M3(a,b));d?g.cc(e,a.A)?(d=a.u,e=a.A):d="_"+d3++:d=b.getAttribute("id")||"_"+d3++;a=H3(b,"t")+c;b=H3(b,"d")||0x8000000000000;if(2==e.Ae||3==e.Ae)c=e.Ak,e.Ak=e.Nl,e.Nl=c;return new c3(a,b,0,d,e)},P3=function(a,b,c,d,e,f,k){g3.call(this,a,b,c,d,e,f,k);</span>
+<span class="cstat-no" title="statement not covered" >this.type=1},Q3=function(a,b,c){this.C=c;</span>
+<span class="cstat-no" title="statement not covered" >this.version=this.A=this.o=this.g=0;this.i=new DataView(a);this.l=[]},R3=function(a){var b=a.g;</span>
+<span class="cstat-no" title="statement not covered" >a.g+=1;return a.i.getUint8(b)},S3=function(a){var b=a.g;</span>
+<span class="cstat-no" title="statement not covered" >a.g+=4;return a.i.getUint32(b)},T3=function(a,b){F3.call(this);</span>
+<span class="cstat-no" title="statement not covered" >this.i=a;this.track="CC3"==b.l?4:0;this.g=new n3;this.g.l=1&lt;&lt;this.track},V3=function(a){if("string"===typeof a)return!1;</span>
+<span class="cstat-no" title="statement not covered" >a=new Q3(a,8,0);return U3(a)},U3=function(a){if(!(a.g&lt;a.i.byteLength)||1380139777!=S3(a))return!1;</span>
+<span class="cstat-no" title="statement not covered" >a.version=R3(a);if(1&lt;a.version)return!1;R3(a);R3(a);R3(a);return!0},W3=function(a,b,c,d,e,f,k){g3.call(this,a,b,c,d,e,f,k);</span>
+<span class="cstat-no" title="statement not covered" >g.J(this.element,"ytp-caption-window-rollup");this.type=2;this.F=[];this.I=this.H=this.ea=0;this.M=NaN;this.ya=0;this.Ea=null;this.da=new g.I(this.MK,433,this);g.F(this,this.da);g.bg(this.element,"overflow","hidden")},fqa=function(a,b){return(a.u?b.offsetHeight:b.offsetWidth)+1},gqa=function(a){if(isNaN(a.M)){var b=a.l.Nl;</span>
+<span class="cstat-no" title="statement not covered" >if(b){var c=g.Rd("SPAN");g.ae(c,"\u2013".repeat(b));g.bg(c,h3(a,a.l.ub));a.A.appendChild(c);a.M=c.offsetWidth;a.A.removeChild(c)}else a.M=0}return a.M},hqa=function(a,b){if(!b)return"";</span>
+<span class="cstat-no" title="statement not covered" >a.u&amp;&amp;1!=a.o.params.BA&amp;&amp;(b*=-1);return"translate"+(a.u?"X":"Y")+"("+b+"px)"},X3=function(a){a.F=[].concat(g.ea(document.getElementsByClassName("caption-visual-line")));</span>
+<span class="cstat-no" title="statement not covered" >for(var b=a.o.params.Ak,c=0,d=0,e=a.F.length-1;c&lt;b&amp;&amp;-1&lt;e;){var f=a.F[e];d+=a.u?f.offsetWidth:f.offsetHeight;c++;e--}a.F.length&lt;b&amp;&amp;(d*=b/a.F.length);a.H=d;a.I=Math.max(gqa(a),a.ya,fqa(a,a.A))},iqa=function(a,b){X3(a);</span>
+<span class="cstat-no" title="statement not covered" >var c=a.F.reduce(function(e,f){return(a.u?f.offsetWidth:f.offsetHeight)+e},0);</span>
+<span class="cstat-no" title="statement not covered" >c=a.H-c;if(c!=a.ea){var d=0&lt;c&amp;&amp;0==a.ea;b||isNaN(c)||d||(g.J(a.element,"ytp-rollup-mode"),g.yn(a.da));g.bg(a.A,"transform",hqa(a,c));a.ea=c}X3(a)},Y3=function(){F3.call(this)},Z3=function(a,b,c,d,e,f,k,l,m){switch(k.tagName){case "b":l.bold=!0;</span>
+<span class="cstat-no" title="statement not covered" >break;case "i":l.Pe=!0;break;case "u":l.underline=!0}for(var n=0;n&lt;k.childNodes.length;n++){var q=k.childNodes[n];if(3==q.nodeType){q=new b3(b,c,d,e.id,q.nodeValue,f||0&lt;n,g.Zb(l)?void 0:l);m.push(q);var t=e;g.F(t,q);t.g.push(q)}else t={},g.Sa(t,l),Z3(a,b,c,d,e,!0,q,t,m)}},$3=function(a){var b=0;</span>
+<span class="cstat-no" title="statement not covered" >a=g.p(a.split(":"));for(var c=a.next();!c.done;c=a.next())b=60*b+parseFloat(c.value);return 1E3*b},a4=function(a,b,c,d){d=Object.assign({Sq:0},d);</span>
+<span class="cstat-no" title="statement not covered" >return new c3(a,b,c,"_"+d3++,d)},b4=function(a){g.D.call(this);</span>
+this.i=a;this.g=null},e4=function(a){g.IO.call(this,a);
+<span class="cstat-no" title="statement not covered" >this.l=g.W(a);this.O=a.getVideoData();this.na=g.vK(a);this.M=a;var b=null,c=g.no("yt-html5-player-modules::subtitlesModuleData");c&amp;&amp;(b=new g.Xn(c));this.Z=b;this.o={ub:{}};this.u={ub:{}};this.F=[];this.R={};this.S={};this.I=!1;this.da=g.KO(this.O,this.M);this.va=!!this.O.captionTracks.length;this.wa=!!this.O.dj;this.ma="3"==this.l.l;b=a.app.u;c=!(!b||!b.Ok());this.la=!(!b||!b.Ah());this.A=this.ma&amp;&amp;c&amp;&amp;!this.da;this.H=!this.A&amp;&amp;this.ma&amp;&amp;this.la&amp;&amp;this.da;this.i=this.C=this.D=this.P=this.ea=null;this.X=</span>
+<span class="cstat-no" title="statement not covered" >new b4(this.l);g.F(this,this.X);c=b=this.g=null;this.A||(b=new g.vn(this.QA,void 0,this),g.F(this,b),c=new g.I(this.oM,2E3,this),g.F(this,c));this.W=b;this.Y=c;this.ba=new g.ls(this);g.F(this,this.ba);this.A||this.ba.K(a,"resize",this.Us);this.ba.K(a,"onPlaybackAudioChange",this.oI);this.ba.K(a,g.UD("captions"),this.cF,this);this.ba.K(a,"crx_captions",this.dF,this);c4(this,d4(this,"display-settings")||{})},f4=function(a){if(1==a.l.Xf||1==a.O.Xf||"alwayson"==g.CB(a.O,"yt:cc"))return!0;</span>
+<span class="cstat-no" title="statement not covered" >if(2==a.l.Xf){var b=d4(a,"module-enabled");if(null!=b)return!!b}if(a.O.captionTracks.length)var c=a.player.getAudioTrack().hp;return"ON"==c||"on"==g.CB(a.O,"yt:cc")},g4=function(a,b){if(a.g&amp;&amp;(void 0===b||!b)||!a.O.captionTracks.length)return!1;</span>
+<span class="cstat-no" title="statement not covered" >var c=a.player.getAudioTrack();return!!c.Yl||"FORCED_ON"==c.hp},i4=function(a,b){if(a.i){if(a.C&amp;&amp;a.C.g)return a.C.g;</span>
+<span class="cstat-no" title="statement not covered" >var c=b;c||(c=a.wa?!1:a.va?!1:!0);c=P2(a.i.i,c);for(var d=[a.O.Wf,a.l.Wf,g.CB(a.O,"yt:cc_default_lang")],e=0;e&lt;d.length;e++)for(var f=0;f&lt;c.length;f++)if(O2(c[f])==d[e])return c[f];return a.C&amp;&amp;a.C.Ap?a.C.Ap:(d=c.find(function(k){return k.isDefault}))?d:c[0]||h4(a)}return null},h4=function(a){return a.C&amp;&amp;a.C.Yl},j4=function(a){var b=h4(a);</span>
+<span class="cstat-no" title="statement not covered" >return!!b&amp;&amp;a.g==b},k4=function(a,b){for(var c=a.M.app.u.ga().textTracks,d=a.g.toString(),e=0;e&lt;c.length;e++){var f=c[e];</span>
+<span class="cstat-no" title="statement not covered" >f.id==d&amp;&amp;(b?"showing"!=f.mode&amp;&amp;(f.mode="showing"):"showing"==f.mode&amp;&amp;(f.mode="disabled"))}},m4=function(a,b,c){a.loaded&amp;&amp;a.unload();</span>
+<span class="cstat-no" title="statement not covered" >null!=c&amp;&amp;(a.I=c,a.I&amp;&amp;l4(a,"module-enabled",!!b));a.g=b;g4(a)&amp;&amp;(a.g=h4(a));a.load()},jqa=function(a,b){var c=a.na.getVideoContentRect(!0).height;</span>
+<span class="cstat-no" title="statement not covered" >if(!c)return null;var d=a.na.getPlayerSize();switch(null!=b.params.Sq?b.params.Sq:1&lt;b.g.length?1:0){case 1:return new P3(b,a.o,a.u,c,d.width,d.height,a.l.experiments);case 2:return new W3(b,a.o,a.u,c,d.width,d.height,a.l.experiments);default:return new g3(b,a.o,a.u,c,d.width,d.height,a.l.experiments)}},c4=function(a,b,c){var d=n4.ub;</span>
+<span class="cstat-no" title="statement not covered" >a.o={};g.Sa(a.o,n4);a.o.ub={};g.Sa(a.o.ub,d);a.u={ub:{}};var e=b.backgroundOverride?a.u:a.o,f=b.background||d.background;K3.test(f);e.ub.background=f;e=b.colorOverride?a.u:a.o;f=b.color||d.color;K3.test(f);e.ub.color=f;e=b.windowColorOverride?a.u:a.o;f=b.windowColor||n4.windowColor;K3.test(f);e.windowColor=f;e=b.backgroundOpacityOverride?a.u:a.o;f=b.backgroundOpacity;null==f&amp;&amp;(f=d.backgroundOpacity);e.ub.backgroundOpacity=f;e=b.fontSizeIncrementOverride?a.u:a.o;f=b.fontSizeIncrement;null==f&amp;&amp;(f=d.fontSizeIncrement);</span>
+<span class="cstat-no" title="statement not covered" >e.ub.fontSizeIncrement=f;f=b.fontStyleOverride?a.u:a.o;e=b.fontStyle;null==e&amp;&amp;(e=d.bold&amp;&amp;d.Pe?3:d.bold?1:d.Pe?2:0);f=f.ub;switch(e){case 1:f.bold=!0;delete f.Pe;break;case 2:delete f.bold;f.Pe=!0;break;case 3:f.bold=!0;f.Pe=!0;break;default:delete f.bold,delete f.Pe}e=b.textOpacityOverride?a.u:a.o;f=b.textOpacity;null==f&amp;&amp;(f=d.textOpacity);e.ub.textOpacity=f;e=b.windowOpacityOverride?a.u:a.o;f=b.windowOpacity;null==f&amp;&amp;(f=n4.windowOpacity);e.windowOpacity=f;e=b.charEdgeStyleOverride?a.u:a.o;f=b.charEdgeStyle;</span>
+<span class="cstat-no" title="statement not covered" >null==f&amp;&amp;(f=d.charEdgeStyle);e.ub.charEdgeStyle=f;e=b.fontFamilyOverride?a.u:a.o;f=b.fontFamily;null==f&amp;&amp;(f=d.fontFamily);e.ub.fontFamily=f;a.loaded&amp;&amp;a.Us();c&amp;&amp;l4(a,"display-settings",b)},p4=function(a,b){if(b&amp;&amp;!a.D){var c=e3({Ae:0,</span>
+<span class="cstat-no" title="statement not covered" >lang:"en"});a.D=[c,new b3(c.start,c.end-c.start,0,c.id,"Captions look like this")];g.CK(a.player,a.D)}else!b&amp;&amp;a.D&amp;&amp;(o4(a,a.D),a.D=null)},o4=function(a,b){g.EK(a.player,b);</span>
+<span class="cstat-no" title="statement not covered" >(0,g.y)(b,function(c){g.fb(this.F,c)},a);</span>
+<span class="cstat-no" title="statement not covered" >a.W.zj()},d4=function(a,b){if(!a.Z)return null;</span>
+<span class="cstat-no" title="statement not covered" >try{var c=a.Z.get(b)}catch(d){a.Z.remove(b)}return c},l4=function(a,b,c){if(a.Z)try{a.Z.set(b,c)}catch(d){}};</span>
+<span class="cstat-no" title="statement not covered" >g.lC.prototype.fj=g.ca(13,function(){for(var a=g.Cd(document,"track",void 0,this.g),b=0;b&lt;a.length;b++)g.Wd(a[b])});</span>
+<span class="cstat-no" title="statement not covered" >g.qQ.prototype.fj=g.ca(12,function(){this.g.fj()});</span>
+g.lC.prototype.Ok=g.ca(11,function(){return!!this.g.textTracks});
+<span class="cstat-no" title="statement not covered" >g.qQ.prototype.Ok=g.ca(10,function(){return this.g.Ok()});</span>
+<span class="cstat-no" title="statement not covered" >g.lC.prototype.Xi=g.ca(9,function(a){for(var b=0;b&lt;a.length;b++)this.g.appendChild(a[b])});</span>
+<span class="cstat-no" title="statement not covered" >g.qQ.prototype.Xi=g.ca(8,function(a){this.g.Xi(a)});</span>
+<span class="cstat-no" title="statement not covered" >g.cC.prototype.Ah=g.ca(7,function(){});</span>
+g.lC.prototype.Ah=g.ca(6,function(){return!(!this.g.textTracks||!this.g.textTracks.addEventListener)});
+<span class="cstat-no" title="statement not covered" >g.qQ.prototype.Ah=g.ca(5,function(){return this.g.Ah()});</span>
+<span class="cstat-no" title="statement not covered" >g.Dz.prototype.Yq=g.ca(3,function(a){return a?this.toString()==a.toString():!1});</span>
+<span class="cstat-no" title="statement not covered" >g.Zt.prototype.qm=g.ca(2,function(a){return(a=this.jg(a))?a.i:0});</span>
+<span class="cstat-no" title="statement not covered" >g.zw.prototype.qm=g.ca(1,function(){return 0});</span>
+<span class="cstat-no" title="statement not covered" >var kqa=/^(ar|ckb|dv|he|iw|fa|nqo|ps|sd|ug|ur|yi|.*[-_](Adlm|Arab|Hebr|Nkoo|Rohg|Thaa))(?!.*[-_](Latn|Cyrl)($|-|_))($|-|_)/i,K3=/^#(?:[0-9a-f]{3}){1,2}$/i;g.r(R2,g.D);R2.prototype.Bz=function(){return!1};</span>
+<span class="cstat-no" title="statement not covered" >R2.prototype.V=function(){this.Gg();g.D.prototype.V.call(this)};</span>
+<span class="cstat-no" title="statement not covered" >g.r(S2,R2);S2.prototype.Qq=function(a,b,c){b=this.yj(a,b);var d=(0,g.x)(function(e){this.g=null;c(e.responseText,a)},this);</span>
+<span class="cstat-no" title="statement not covered" >this.Gg();this.g=g.Yp(b,{format:"RAW",onSuccess:d,withCredentials:!0})};</span>
+<span class="cstat-no" title="statement not covered" >S2.prototype.Rq=function(a){if(this.l)for(var b=g.p(this.l.captionTracks),c=b.next();!c.done;c=b.next())Q2(this.i,c.value);a()};</span>
+<span class="cstat-no" title="statement not covered" >S2.prototype.yj=function(a,b){var c=a.F,d={fmt:b};("srv3"==b||"3"==b)&amp;&amp;this.Wa&amp;&amp;g.N(this.Wa.experiments,"caption_rendering_features")&amp;&amp;(g.gq()?Object.assign(d,{xorb:2,xobt:1,xovt:1}):Object.assign(d,{xorb:2,xobt:3,xovt:3}));a.g&amp;&amp;(d.tlang=O2(a));return g.Hp(c,d)};</span>
+<span class="cstat-no" title="statement not covered" >S2.prototype.Gg=function(){this.g&amp;&amp;this.g.abort()};</span>
+<span class="cstat-no" title="statement not covered" >T2.prototype.contains=function(a){a=g.qb(this.Ua,a);return 0&lt;=a||0&gt;a&amp;&amp;1==(-a-1)%2};</span>
+<span class="cstat-no" title="statement not covered" >T2.prototype.length=function(){return this.Ua.length/2};</span>
+<span class="cstat-no" title="statement not covered" >g.r(U2,g.D);g.h=U2.prototype;g.h.V=function(){g.D.prototype.V.call(this);this.i&amp;&amp;this.i.cancel()};</span>
+<span class="cstat-no" title="statement not covered" >g.h.Fx=function(){V2(this,this.l.getCurrentTime())};</span>
+<span class="cstat-no" title="statement not covered" >g.h.reset=function(){this.u=new T2;this.i&amp;&amp;(this.i.cancel(),this.i=null)};</span>
+<span class="cstat-no" title="statement not covered" >g.h.Yw=function(){var a;if(a=null!==this.g)a=this.g,a=a.g.Gf(a);!a||this.i||this.g&amp;&amp;30&lt;this.g.startTime-this.l.getCurrentTime()||(a=this.g,a=a.g.li(a),a.g[0].duration?(this.u.contains(a.g[0].i)||W2(this,a),this.g=g.Xa(a.g)):!g.N(this.R.experiments,"force_caption_seek_for_live_killswitch")&amp;&amp;this.g&amp;&amp;this.g.u&amp;&amp;this.g.u+this.l.yb()&lt;this.l.getCurrentTime()&amp;&amp;V2(this,this.l.getCurrentTime()));this.D.start()};</span>
+<span class="cstat-no" title="statement not covered" >g.h.HK=function(a){var b=!(this.A?a.response:a.responseText)||400&lt;=a.status,c=g.Gw(a);c?(a=g.Qv(this.o,this.H,{}),b=this.o,g.Lv(b.i,a,c),b.requestId=a.get("req_id"),W2(this,this.o)):(b||null===this.C||(c=this.o.g[0],this.A?this.C(a.response,1E3*(c.startTime+this.l.yb())):this.C(a.responseText,1E3*(c.startTime+this.l.yb()))),this.i=this.o=null)};</span>
+<span class="cstat-no" title="statement not covered" >g.r(X2,R2);g.h=X2.prototype;g.h.Qq=function(a,b,c){this.Gg();b=Upa(this,a.getId());b||(b=a.i,b=this.g.i?Z2(this,b,"386"):Z2(this,b));if(b){var d=1E3*(b.index.qm(b.index.te())-b.index.Kc(b.index.te()));this.l=new U2(new g.Gv,this.C,b,function(e,f){c(e,a,f,d)},this.A||g.xv(b.info),(0,g.x)(function(){this.l&amp;&amp;this.l.reset();</span>
+<span class="cstat-no" title="statement not covered" >this.o=!0},this))}};</span>
+<span class="cstat-no" title="statement not covered" >g.h.Bz=function(){var a=this.o;this.o=!1;return a};</span>
+<span class="cstat-no" title="statement not covered" >g.h.Rq=function(a){var b;this.A?b=[new g.Dz({id:"rawcc",languageCode:"rawcc",languageName:"CC1",is_servable:!0,is_default:!0,is_translateable:!1,vss_id:".en"}),new g.Dz({id:"rawcc",languageCode:"rawcc",languageName:"CC3",is_servable:!0,is_default:!0,is_translateable:!1,vss_id:".en"})]:b=this.g.i?Y2(this,"386"):Y2(this);b=g.p(b);for(var c=b.next();!c.done;c=b.next())Q2(this.i,c.value);a()};</span>
+<span class="cstat-no" title="statement not covered" >g.h.Gg=function(){this.l&amp;&amp;(this.l.dispose(),this.l=null)};</span>
+<span class="cstat-no" title="statement not covered" >g.h.yj=function(){return""};</span>
+<span class="cstat-no" title="statement not covered" >g.r($2,R2);$2.prototype.Qq=function(a,b,c){b=this.yj(a,b);var d=(0,g.x)(function(e){this.g=null;c(e.responseText,a)},this);</span>
+<span class="cstat-no" title="statement not covered" >this.Gg();this.g=g.Yp(b,{format:"RAW",onSuccess:d,withCredentials:!0})};</span>
+<span class="cstat-no" title="statement not covered" >$2.prototype.Rq=function(a){var b=this.o,c={type:"list",tlangs:1,v:this.l,vssids:1};this.A&amp;&amp;(c.asrs=1);b=g.Hp(b,c);c=(0,g.x)(function(d){this.g=null;if((d=d.responseXML)&amp;&amp;d.firstChild){for(var e=g.p(d.getElementsByTagName("track")),f=e.next();!f.done;f=e.next()){var k=f.value;f=k.getAttribute("lang_code");var l=k.getAttribute("lang_translated"),m=k.getAttribute("name"),n=k.getAttribute("kind"),q=k.getAttribute("id"),t="true"==k.getAttribute("lang_default"),w="true"==k.getAttribute("cantran");k=k.getAttribute("vss_id");</span>
+<span class="cstat-no" title="statement not covered" >Q2(this.i,new g.Dz({languageCode:f,languageName:l,name:m,kind:n,id:q,is_servable:!0,is_translateable:w,vss_id:k,is_default:t}))}d=d.getElementsByTagName("target");e=d.length;for(f=0;f&lt;e;f++)l=d[f].getAttribute("lang_code"),m=d[f].getAttribute("lang_translated"),n=d[f].getAttribute("lang_original"),q=d[f].getAttribute("id"),t="true"==d[f].getAttribute("lang_default"),l={languageCode:l,languageName:m,languageOriginal:n,id:q,isDefault:t},this.C[l.languageCode]=l.languageName,this.u.push(l)}a()},this);</span>
+<span class="cstat-no" title="statement not covered" >this.Gg();this.g=g.Yp(b,{format:"RAW",onSuccess:c,withCredentials:!0})};</span>
+<span class="cstat-no" title="statement not covered" >$2.prototype.yj=function(a,b){var c=this.o,d={v:this.l,type:"track",lang:a.i,name:a.getName(),kind:a.o,fmt:b};a.g&amp;&amp;(d.tlang=O2(a));return c=g.Hp(c,d)};</span>
+<span class="cstat-no" title="statement not covered" >$2.prototype.Gg=function(){this.g&amp;&amp;this.g.abort()};</span>
+<span class="cstat-no" title="statement not covered" >var Wpa=/#(.)(.)(.)/,Vpa=/^#(?:[0-9a-f]{3}){1,2}$/i;var Xpa=["left","right","center","justify"];var n4={windowColor:"#080808",windowOpacity:0,textAlign:2,Sf:7,Qe:50,Fg:100,ub:{background:"#080808",backgroundOpacity:.75,charEdgeStyle:0,color:"#fff",fontFamily:4,fontSizeIncrement:0,textOpacity:1,offset:1}};g.r(b3,g.RD);b3.prototype.toString=function(){return g.RD.prototype.toString.call(this)};g.r(c3,g.RD);c3.prototype.toString=function(){return g.RD.prototype.toString.call(this)};</span>
+<span class="cstat-no" title="statement not covered" >var d3=0;g.r(g3,g.V);g.h=g3.prototype;g.h.XF=function(a,b){var c=g.sg(this.element,this.element.parentElement);this.na=a-c.x;this.va=b-c.y;g.J(this.element,"ytp-dragging")};</span>
+<span class="cstat-no" title="statement not covered" >g.h.WF=function(a,b){var c=g.vg(this.element),d=a-this.na-.02*this.Pa,e=b-this.va-.02*this.Na,f=(d+c.width/2)/this.Y*3;f=Math.floor(g.nd(f,0,2));var k=(e+c.height/2)/this.wa*3;k=Math.floor(g.nd(k,0,2));var l=f+3*k;d=(d+f/2*c.width)/this.Y;d=100*g.nd(d,0,1);c=(e+k/2*c.height)/this.wa;c=100*g.nd(c,0,1);this.o.params.Sf=l;this.o.params.Fg=c;this.o.params.Qe=d;this.l.Sf=l;this.l.Fg=c;this.l.Qe=d;this.aA()};</span>
+<span class="cstat-no" title="statement not covered" >g.h.VF=function(){g.Hn(this.element,"ytp-dragging")};</span>
+<span class="cstat-no" title="statement not covered" >g.h.aA=function(){this.wh(this.C)};</span>
+<span class="cstat-no" title="statement not covered" >g.h.wh=function(a){var b=Math.min(this.Ov(),this.Y),c=this.Nv(),d="";3==this.o.params.Ae&amp;&amp;(d="rotate(180deg)");g.bg(this.element,{top:0,left:0,right:"",bottom:"",width:b?b+"px":"",height:c?c+"px":"","max-width":"96%","max-height":"96%",margin:"",transform:""});this.Uo(a);a={transform:d,top:"",left:"",width:b?b+"px":"",height:c?c+"px":"","max-width":"","max-height":""};var e=.96*this.l.Qe+2;d=this.l.Sf;switch(d){case 0:case 3:case 6:a.left=e+"%";break;case 1:case 4:case 7:a.left=e+"%";e=this.A.offsetWidth;</span>
+<span class="cstat-no" title="statement not covered" >b||e?(b=b||e+1,a.width=b+"px",a["margin-left"]=b/-2+"px"):a.transform+=" translateX(-50%)";break;case 2:case 5:case 8:a.right=100-e+"%"}b=.96*this.l.Fg+2;switch(d){case 0:case 1:case 2:a.top=b+"%";break;case 3:case 4:case 5:a.top=b+"%";(c=c||this.element.clientHeight)?(a.height=c+"px",a["margin-top"]=c/-2+"px"):a.transform+=" translateY(-50%)";break;case 6:case 7:case 8:a.bottom=100-b+"%"}g.bg(this.element,a)};</span>
+<span class="cstat-no" title="statement not covered" >g.h.Uo=function(a){var b;for(b=0;b&lt;a.length&amp;&amp;a[b]==this.C[b];b++);if(this.P||this.C.length&gt;b)b=0,this.P=!1,this.C=[],this.D=this.X=this.S=null,g.Ud(this.A);for(;b&lt;a.length;b++)k3(this,a[b])};</span>
+<span class="cstat-no" title="statement not covered" >g.h.Ov=function(){return 0};</span>
+<span class="cstat-no" title="statement not covered" >g.h.Nv=function(){return 0};</span>
+<span class="cstat-no" title="statement not covered" >g.h.toString=function(){return g.V.prototype.toString.call(this)};l3.prototype.u=function(){};n3.prototype.clear=function(){this.o=this.i=this.mode=0;this.g=[];this.reset()};</span>
+<span class="cstat-no" title="statement not covered" >n3.prototype.reset=function(){this.mode=0;this.u.reset(0);this.A.reset(1)};</span>
+var o3=[128,1,2,131,4,133,134,7,8,137,138,11,140,13,14,143,16,145,146,19,148,21,22,151,152,25,26,155,28,157,158,31,32,161,162,35,164,37,38,167,168,41,42,171,44,173,174,47,176,49,50,179,52,181,182,55,56,185,186,59,188,61,62,191,64,193,194,67,196,69,70,199,200,73,74,203,76,205,206,79,208,81,82,211,84,213,214,87,88,217,218,91,220,93,94,223,224,97,98,227,100,229,230,103,104,233,234,107,236,109,110,239,112,241,242,115,244,117,118,247,248,121,122,251,124,253,254,127,0,129,130,3,132,5,6,135,136,9,10,139,
+<span class="cstat-no" title="statement not covered" >12,141,142,15,144,17,18,147,20,149,150,23,24,153,154,27,156,29,30,159,160,33,34,163,36,165,166,39,40,169,170,43,172,45,46,175,48,177,178,51,180,53,54,183,184,57,58,187,60,189,190,63,192,65,66,195,68,197,198,71,72,201,202,75,204,77,78,207,80,209,210,83,212,85,86,215,216,89,90,219,92,221,222,95,96,225,226,99,228,101,102,231,232,105,106,235,108,237,238,111,240,113,114,243,116,245,246,119,120,249,250,123,252,125,126,255];q3.prototype.set=function(a){this.g=a};</span>
+<span class="cstat-no" title="statement not covered" >q3.prototype.get=function(){return this.g};</span>
+<span class="cstat-no" title="statement not covered" >r3.prototype.clear=function(){this.g=0};</span>
+<span class="cstat-no" title="statement not covered" >r3.prototype.update=function(){this.g=2==this.g?1:0};</span>
+<span class="cstat-no" title="statement not covered" >r3.prototype.matches=function(a,b){return 0!=this.g&amp;&amp;a==this.l&amp;&amp;b==this.i};</span>
+<span class="cstat-no" title="statement not covered" >s3.prototype.cg=function(a){this.Ud=a.Ud;this.timestamp=a.timestamp};</span>
+<span class="cstat-no" title="statement not covered" >s3.prototype.reset=function(){this.timestamp=this.Ud=0};</span>
+<span class="cstat-no" title="statement not covered" >t3.prototype.updateTime=function(a){for(var b=1;15&gt;=b;++b)for(var c=1;32&gt;=c;++c)this.l[b][c].timestamp=a};</span>
+<span class="cstat-no" title="statement not covered" >t3.prototype.debugString=function(){for(var a="\n",b=1;15&gt;=b;++b){for(var c=1;32&gt;=c;++c){var d=this.l[b][c];a=0==d.Ud?a+"_":a+String.fromCharCode(d.Ud)}a+="\n"}return a};</span>
+<span class="cstat-no" title="statement not covered" >t3.prototype.reset=function(a){for(var b=0;15&gt;=b;b++)for(var c=0;32&gt;=c;c++)this.l[b][c].reset();this.o=a;this.g=0;this.i=this.row=1};</span>
+var aqa=[32,33,34,35,36,37,38,39,40,41,225,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,233,93,237,243,250,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,231,247,209,241,9632],bqa=[174,176,189,191,8482,162,163,9834,224,32,232,226,234,238,244,251],cqa=[193,201,211,218,220,252,8216,161,42,39,9473,169,8480,183,8220,8221,192,194,199,200,202,203,235,
+<span class="cstat-no" title="statement not covered" >206,207,239,212,217,249,219,171,187],dqa=[195,227,205,204,236,210,242,213,245,123,125,92,94,95,124,126,196,228,214,246,223,165,164,9475,197,229,216,248,9487,9491,9495,9499];A3.prototype.reset=function(a,b){this.u=b;this.style.set(2);this.i=this.A;this.l=this.C;this.g=this.i;var c=(a&lt;&lt;2)+(b&lt;&lt;1);this.A.reset(c);this.C.reset(c);this.D.reset((a&lt;&lt;2)+(b&lt;&lt;1)+1)};</span>
+<span class="cstat-no" title="statement not covered" >m3.prototype.reset=function(a){this.u=a;this.g.clear();this.o=this.l;this.l.reset(a,0);this.A.reset(a,1)};g.r(F3,g.D);F3.prototype.reset=function(){};g.r(G3,F3);G3.prototype.reset=function(){this.D={};this.i=this.g=null;this.C=!0};</span>
+<span class="cstat-no" title="statement not covered" >G3.prototype.o=function(a,b){var c=a.firstChild;c.getAttribute("format");b=b||0;Number.isFinite(b);c=Array.from(c.childNodes);c=g.p(c);for(var d=c.next();!d.done;d=c.next())if(d=d.value,1==d.nodeType)switch(d.tagName){case "head":var e=d;break;case "body":var f=d}if(e)for(e=Array.from(e.childNodes),e=g.p(e),c=e.next();!c.done;c=e.next())if(c=c.value,1==c.nodeType)switch(c.tagName){case "pen":d=c.getAttribute("id");var k=this.l,l={},m=c.getAttribute("p");m&amp;&amp;g.Sa(l,this.l[m]);m=I3(c,"b");null!=m&amp;&amp;(l.bold=</span>
+<span class="cstat-no" title="statement not covered" >m);m=I3(c,"i");null!=m&amp;&amp;(l.Pe=m);m=I3(c,"u");null!=m&amp;&amp;(l.underline=m);m=J3(c,"et");null!=m&amp;&amp;(l.charEdgeStyle=m);m=J3(c,"of");null!=m&amp;&amp;(l.offset=m);m=L3(c,"bc");null!=m&amp;&amp;(l.background=m);m=L3(c,"ec");null!=m&amp;&amp;(l.Fu=m);m=L3(c,"fc");null!=m&amp;&amp;(l.color=m);m=J3(c,"fs");null!=m&amp;&amp;0!=m&amp;&amp;(l.fontFamily=m);m=H3(c,"sz");void 0!=m&amp;&amp;(l.fontSizeIncrement=m/100-1);m=H3(c,"bo");void 0!=m&amp;&amp;(l.backgroundOpacity=m/255);m=H3(c,"fo");void 0!=m&amp;&amp;(l.textOpacity=m/255);m=J3(c,"rb");null!=m&amp;&amp;10!=m&amp;&amp;0!=m&amp;&amp;(l.cd=10&lt;m?m-1:m);</span>
+<span class="cstat-no" title="statement not covered" >m=J3(c,"hg");null!=m&amp;&amp;(l.WD=m);c=J3(c,"te");null!=c&amp;&amp;(2==c&amp;&amp;(l.bold=!1,c=1),l.ze=c);k[d]=l;break;case "ws":d=c.getAttribute("id");this.H[d]=M3(this,c);break;case "wp":d=c.getAttribute("id"),this.F[d]=N3(this,c)}if(f){e=b;c=[];f=Array.from(f.childNodes);f=g.p(f);for(d=f.next();!d.done;d=f.next())if(d=d.value,1==d.nodeType)switch(d.tagName){case "w":this.g=O3(this,d,e,!1);g.F(this,this.g);(d=this.D[this.g.id])&amp;&amp;d.end&gt;this.g.start&amp;&amp;(d.end=this.g.start);this.D[this.g.id]=this.g;c.push(this.g);break;case "p":var n=</span>
+<span class="cstat-no" title="statement not covered" >e;k=[];l=d.getAttribute("w")||this.u;m=!!I3(d,"a");n=(H3(d,"t")||0)+n;var q=H3(d,"d")||5E3;m||(!this.C&amp;&amp;this.i&amp;&amp;this.i.windowId==l&amp;&amp;this.i.end&gt;n&amp;&amp;(this.i.end=n),this.i&amp;&amp;"\n"==this.i.text&amp;&amp;(this.i.text=""));var t=m?6:5,w=this.l[d.getAttribute("p")],z=[].concat(g.ea(d.childNodes));z.length&amp;&amp;(this.C=null!=d.getAttribute("d"));for(var C=0;C&lt;z.length;C++){var E=z[C],G=void 0;0&lt;C&amp;&amp;(m=!0);var H=void 0;1==E.nodeType&amp;&amp;(H=E);if(H&amp;&amp;"s"==H.tagName){if((E=this.l[H.getAttribute("p")])&amp;&amp;E.cd&amp;&amp;(1==E.cd?(E=z.slice(C,</span>
+<span class="cstat-no" title="statement not covered" >C+4),4==E.length&amp;&amp;(G=E3(n,q,l,m,t,E,this.l),C+=3)):G=E3(n,q,l,m,t,[H],this.l)),!G){var P=H;G=n;H=q;E=l;var Q=m,ia=t,oa=P.textContent?P.textContent:"",Va=this.l[P.getAttribute("p")];P=H3(P,"t")||0;G=new b3(G+P,H-P,ia,E,oa,Q,Va)}}else G=new b3(n,q,t,l,E.textContent||"",m,w);k.push(G);this.i=G}if(0&lt;k.length)for(k[0].windowId==this.u&amp;&amp;(this.g=O3(this,d,e,!0),g.F(this,this.g),c.push(this.g)),d=g.p(k),k=d.next();!k.done;k=d.next())k=k.value,k.windowId=this.g.id,l=this.g,g.F(l,k),l.g.push(k),c.push(k)}e=</span>
+<span class="cstat-no" title="statement not covered" >c}else e=[];return e};g.r(P3,g3);P3.prototype.Uo=function(a){var b=this.o.g;g3.prototype.Uo.call(this,a);for(a=a.length;a&lt;b.length;a++){var c=b[a];if(f&amp;&amp;c.g==e)var d=f;else{d={};g.Sa(d,c.g);g.Sa(d,lqa);var e=c.g;var f=d}k3(this,c,d)}};</span>
+<span class="cstat-no" title="statement not covered" >var lqa={UD:!0};g.r(Q3,l3);Q3.prototype.u=function(a,b,c,d,e){if(c&lt;d){var f="_"+d3++;c=c/1E3-this.C;d=d/1E3-this.C;a=new c3(c,d-c,5,f,{textAlign:0,Sf:0,Qe:2.5*b,Fg:5.33*a});e=new b3(c,d-c,5,f,e);this.l.push(a);this.l.push(e)}};</span>
+<span class="cstat-no" title="statement not covered" >g.r(T3,F3);T3.prototype.o=function(a){a=new Q3(a,a.byteLength,this.i);if(U3(a)){for(;a.g&lt;a.i.byteLength;)for(0==a.version?a.o=S3(a)*(1E3/45):1==a.version&amp;&amp;(a.o=4294967296*S3(a)+S3(a)),a.A=R3(a);0&lt;a.A;a.A--){var b=R3(a),c=R3(a),d=R3(a);b&amp;4&amp;&amp;(b&amp;3)==this.track&amp;&amp;(0==this.track||1==this.track)&amp;&amp;(b=this.g,b.g.push({time:a.o,type:this.track,zu:c,Au:d,order:b.g.length}))}$pa(this.g,a);return a.l}return[]};</span>
+<span class="cstat-no" title="statement not covered" >T3.prototype.reset=function(){this.g.clear()};g.r(W3,g3);g.h=W3.prototype;g.h.aA=function(){g.zn(this.da)};</span>
+<span class="cstat-no" title="statement not covered" >g.h.MK=function(){g.Hn(this.element,"ytp-rollup-mode");this.wh(this.Ea,!0)};</span>
+<span class="cstat-no" title="statement not covered" >g.h.Nv=function(){return this.u?this.I:this.H};</span>
+<span class="cstat-no" title="statement not covered" >g.h.Ov=function(){return this.u?this.H:this.I};</span>
+<span class="cstat-no" title="statement not covered" >g.h.wh=function(a,b){this.Ea=a;if(this.o.params.Ak){for(var c=0,d=0;d&lt;this.C.length&amp;&amp;c&lt;a.length;d++)this.C[d]==a[c]&amp;&amp;c++;0&lt;c&amp;&amp;c&lt;a.length&amp;&amp;(a=this.C.concat(a.slice(c)));this.ya=this.I;this.H=this.I=0;g3.prototype.wh.call(this,a);iqa(this,b);g3.prototype.wh.call(this,a)}else g3.prototype.wh.call(this,a)};g.r(Y3,F3);</span>
+<span class="cstat-no" title="statement not covered" >Y3.prototype.o=function(a,b){for(var c=[],d=a.split(mqa),e=1;e&lt;d.length;e++){var f=d[e],k=b;if(""!=f&amp;&amp;!nqa.test(f)){var l=q4.exec(f);if(l&amp;&amp;4&lt;=l.length){var m=$3(l[1]),n=$3(l[2])-m;m+=k;var q,t=q=void 0,w=void 0,z=void 0,C=l[3];l={textAlign:2};C=g.p(C?C.split(" "):[]);for(var E=C.next();!E.done;E=C.next())if(E=E.value.split(":"),2==E.length){var G=E[1];switch(E[0]){case "line":E=G.split(",");E[0].endsWith("%")&amp;&amp;(z=E[0],l.Fg=Number.parseInt(z,10),2==E.length&amp;&amp;(w=E[1].trim()));break;case "position":E=G.split(",");</span>
+<span class="cstat-no" title="statement not covered" >t=E[0];l.Qe=Number.parseInt(t,10);2==E.length&amp;&amp;(q=E[1].trim());break;case "align":switch(G){case "start":l.textAlign=0;break;case "middle":l.textAlign=2;break;case "end":l.textAlign=1}}}z||(l.Fg=100,w||(w="end"));if(!t)switch(l.textAlign){case 0:l.Qe=0;break;case 1:l.Qe=100;break;default:l.Qe=50}t=0;switch(w){case "center":t+=3;break;case "end":t+=6;break;default:t+=0}switch(q){case "line-left":t+=0;break;case "center":t+=1;break;case "line-right":t+=2;break;default:switch(l.textAlign){case 0:t+=</span>
+<span class="cstat-no" title="statement not covered" >0;break;case 2:t+=1;break;case 1:t+=2}}l.Sf=0&gt;t||8&lt;t?7:t;q=l;f=f.substring(q4.lastIndex).replace(/[\x01-\x09\x0b-\x1f]/g,"");t=q;q=f;f={};if(0&gt;q.indexOf("&lt;")&amp;&amp;0&gt;q.indexOf("&amp;"))k=a4(m,n,5,t),n=new b3(m,n,5,k.id,q,!1,g.Zb(f)?void 0:f),c.push(k),c.push(n),g.F(k,n),k.g.push(n);else for(w=q.split(oqa),1==w.length?(q=5,t=a4(m,n,q,t)):(z=q=6,t=Object.assign({Nl:32},t),t=new c3(m,n,z,"_"+d3++,t)),c.push(t),z=m,l=0;l&lt;w.length;l++)C=w[l],0==l%2?(E=g.MY("&lt;html&gt;"+C+"&lt;/html&gt;"),E.getElementsByTagName("parsererror").length?</span>
+<span class="cstat-no" title="statement not covered" >(G=E.createElement("span"),G.appendChild(E.createTextNode(C))):G=E.firstChild,Z3(this,z,n-(z-m),q,t,0&lt;l,G,f,c)):z=$3(C)+k}q4.lastIndex=0}}return c};</span>
+<span class="cstat-no" title="statement not covered" >var nqa=/^NOTE/,mqa=/(?:\r\n|\r|\n){2,}/,q4=RegExp("^((?:[\\d]{2}:)?[\\d]{2}:[\\d]{2}\\.[\\d]{3})[\\t ]+--\x3e[\\t ]+((?:[\\d]{2}:)?[\\d]{2}:[\\d]{2}\\.[\\d]{3})(?:[\\t ]*)(.*)(?:\\r\\n|\\r|\\n)","gm"),oqa=/&lt;((?:[\d]{2}:)?[\d]{2}:[\d]{2}\.[\d]{3})&gt;/;g.r(b4,g.D);b4.prototype.clear=function(){this.g&amp;&amp;this.g.dispose();this.g=null};</span>
+<span class="cstat-no" title="statement not covered" >b4.prototype.reset=function(){this.g&amp;&amp;this.g.reset()};</span>
+<span class="cstat-no" title="statement not covered" >b4.prototype.V=function(){this.clear();g.D.prototype.V.call(this)};g.r(e4,g.IO);g.h=e4.prototype;g.h.V=function(){if(this.A||this.H){var a=this.M.app.u;a&amp;&amp;a.fj()}else p4(this,!1);g.IO.prototype.V.call(this)};</span>
+<span class="cstat-no" title="statement not covered" >g.h.Fk=function(){return this.ma?this.A||this.H:g4(this)?!0:f4(this)};</span>
+<span class="cstat-no" title="statement not covered" >g.h.load=function(){g.IO.prototype.load.call(this);var a=!g.N(this.l.experiments,"web_player_captions_track_list_changed_killswitch");this.C=this.player.getAudioTrack();if(this.i)this.g&amp;&amp;(this.X.clear(),this.A?k4(this,!0):3!=this.player.getPresentingPlayerType()&amp;&amp;this.i.Qq(this.g,"srv3",(0,g.x)(this.vL,this)),!a||this.A||this.H||j4(this)||this.player.ia("captionschanged",N2(this.g))),a||(this.g&amp;&amp;!j4(this)?this.player.ia("captionschanged",N2(this.g)):this.player.ia("onCaptionsTrackListChanged"));else{var b;</span>
+<span class="cstat-no" title="statement not covered" >this.da?b=new X2(this.O.ha,this.player):this.va?b=new S2(this.l,this.O,this.player.getAudioTrack()):b=new $2(this.O.dj,this.O.videoId,this.O.Wf||this.l.Wf||g.CB(this.O,"yt:cc_default_lang")||this.l.dc,this.O.fp,this.l);this.i=b;g.F(this,this.i);b.Rq((0,g.x)(this.uL,this))}};</span>
+<span class="cstat-no" title="statement not covered" >g.h.unload=function(){this.A&amp;&amp;this.g?k4(this,!1):(this.Y&amp;&amp;g.An(this.Y),g.FK(this.player,"captions"),this.F=[],this.i&amp;&amp;this.i.Gg(),this.X.clear(),this.D&amp;&amp;g.CK(this.player,this.D),this.Us());g.IO.prototype.unload.call(this);var a=g.U(this.player.app);a&amp;&amp;g.fI(a.u);this.player.ia("captionschanged",{})};</span>
+<span class="cstat-no" title="statement not covered" >g.h.uL=function(){var a;this.I||f4(this)?a=i4(this,this.I):g4(this)&amp;&amp;(a=h4(this));if(this.A||this.H){for(var b=P2(this.i.i,!0),c=[],d=0;d&lt;b.length;d++){var e=b[d],f={kind:"subtitles",label:g.Ez(e),srclang:O2(e),id:e.toString()};this.H||(f.src=this.i.yj(e,"vtt"));e==a&amp;&amp;(f["default"]=1);c.push(g.Qd("TRACK",f))}a=this.M.app.u;a.Xi(c);c=a.ga();this.la&amp;&amp;this.ba.K(c.textTracks,"change",this.wL)}else!this.g&amp;&amp;a&amp;&amp;m4(this,a),this.player.ia("onCaptionsTrackListChanged"),this.player.ia("onApiChange")};</span>
+<span class="cstat-no" title="statement not covered" >g.h.wL=function(){for(var a=this.M.app.u.ga().textTracks,b=null,c=0;c&lt;a.length;c++)if("showing"==a[c].mode)a:{b=a[c].id;var d=P2(this.i.i,!0);for(var e=0;e&lt;d.length;e++)if(d[e].toString()==b){b=d[e];break a}b=null}(this.loaded?this.g:null)!=b&amp;&amp;m4(this,b,!0)};</span>
+<span class="cstat-no" title="statement not covered" >g.h.YM=function(){!this.g&amp;&amp;this.A||this.unload()};</span>
+<span class="cstat-no" title="statement not covered" >g.h.vL=function(a,b,c,d){if(a){this.i.Bz()&amp;&amp;(this.F=[],g.FK(this.M,"captions"),this.W.zj(),this.X.reset());var e=this.X;c=c||0;d=d||0;if("string"!==typeof a){var f=new DataView(a);if(8&lt;=f.byteLength&amp;&amp;1718909296==f.getUint32(4)&amp;&amp;(f=g.tu(f,0,1835295092),a=a.slice(f.dataOffset,f.dataOffset+f.size),!V3(a))){a=new Uint8Array(a);f=[];for(var k=0,l=0;k&lt;a.length;){var m=a[k++];if(128&gt;m)f[l++]=String.fromCharCode(m);else if(191&lt;m&amp;&amp;224&gt;m){var n=a[k++];f[l++]=String.fromCharCode((m&amp;31)&lt;&lt;6|n&amp;63)}else if(239&lt;</span>
+<span class="cstat-no" title="statement not covered" >m&amp;&amp;365&gt;m){n=a[k++];var q=a[k++],t=a[k++];m=((m&amp;7)&lt;&lt;18|(n&amp;63)&lt;&lt;12|(q&amp;63)&lt;&lt;6|t&amp;63)-65536;f[l++]=String.fromCharCode(55296+(m&gt;&gt;10));f[l++]=String.fromCharCode(56320+(m&amp;1023))}else n=a[k++],q=a[k++],f[l++]=String.fromCharCode((m&amp;15)&lt;&lt;12|(n&amp;63)&lt;&lt;6|q&amp;63)}a=f.join("")}}if(a)try{if("string"!==typeof a){var w=a,z=c,C=d;if(!V3(w))throw Error("Invalid binary caption track data");e.g||(e.g=new T3(C,b));var E=e.g.o(w,z)}else{if("WEBVTT"==a.substring(0,6)){b=a;z=c;e.g||(e.g=new Y3);var G=e.g.o(b,z);.01&gt;Math.random()&amp;&amp;</span>
+<span class="cstat-no" title="statement not covered" >g.Wo(Error("Deprecated subtitles format in web player: WebVTT"));w=G}else b:{G=a;z=g.MY(G);if(!z||!z.firstChild){var H=Error("Invalid caption track data");H.params=G;throw H;}if("timedtext"==z.firstChild.tagName){if(3==parseInt(z.firstChild.getAttribute("format"),10)){if(!e.g){G={};if(C=O2(b))G.lang=C,kqa.test(C)&amp;&amp;(G.Ae=1);e.g=new G3(G,e.i)}w=e.g.o(z,c);break b}var P=Error("Unsupported subtitles format in web player (Format2)");P.params=G;throw P;}if("transcript"==z.firstChild.tagName){var Q=Error("Unsupported subtitles format in web player (Format1)");</span>
+<span class="cstat-no" title="statement not covered" >Q.params=G;throw Q;}var ia=Error("Invalid caption track data");ia.params=G;throw ia;}E=w}var oa=E}catch(Va){g.L(Va),e.clear(),oa=[]}else oa=[];g.CK(this.player,oa);!this.I||this.H||j4(this)||g.Wy(this.l)||g.Xy(this.l)||(g.An(this.Y),oa=e3({Sf:0,Qe:5,Fg:5,Ak:2,textAlign:0,Ae:0,lang:"en"}),this.P=[oa],e=["Click "," for settings"],this.ea||(E=new g.OC(g.xL()),g.F(this,E),this.ea=E.element),E=oa.end-oa.start,(b=g.Ez(this.g))&amp;&amp;this.P.push(new b3(oa.start,E,0,oa.id,b)),this.P.push(new b3(oa.start,E,0,oa.id,</span>
+<span class="cstat-no" title="statement not covered" >e[0]),new b3(oa.start,E,0,oa.id,this.ea,!0),new b3(oa.start,E,0,oa.id,e[1],!0)),g.CK(this.player,this.P),g.yn(this.Y));!this.I||this.H||j4(this)||(l4(this,"module-enabled",!0),this.C&amp;&amp;(this.C.g=this.g),(oa=g.U(this.player.app))&amp;&amp;g.fI(oa.u));this.I=!1}};</span>
+<span class="cstat-no" title="statement not covered" >g.h.cF=function(a){this.F.push(a);this.W.zj()};</span>
+<span class="cstat-no" title="statement not covered" >g.h.dF=function(a){g.fb(this.F,a);this.i instanceof X2&amp;&amp;this.i.A&amp;&amp;g.EK(this.player,[a]);this.W.zj()};</span>
+<span class="cstat-no" title="statement not covered" >g.h.iM=function(a){if(a instanceof c3){var b=this.R[a.id];b&amp;&amp;b.o!=a&amp;&amp;(b.dispose(),delete this.R[a.id],b=null);b||(b=jqa(this,a))&amp;&amp;(this.R[a.id]=b)}else b=a.windowId,this.S[b]||(this.S[b]=[]),this.S[b].push(a)};</span>
+<span class="cstat-no" title="statement not covered" >g.h.oM=function(){o4(this,this.P);this.P=null};</span>
+<span class="cstat-no" title="statement not covered" >g.h.QA=function(){this.W.stop();g.$b(this.S);this.F.sort(g.TD);var a=this.F;if(this.D){var b=(0,g.Xd)(a,function(c){return-1==this.D.indexOf(c)},this);</span>
+<span class="cstat-no" title="statement not covered" >b.length&amp;&amp;(a=b)}(0,g.y)(a,this.iM,this);g.Mb(this.R,function(c,d){this.S[d]?(c.element.parentNode||g.JK(this.player,c.element,4),c.wh(this.S[d])):(c.dispose(),delete this.R[d])},this)};</span>
+<span class="cstat-no" title="statement not covered" >g.h.tM=function(){c4(this,{},!0);g.N(this.l.experiments,"web_player_disable_publish_captions_settings_changed_on_reset")||this.player.ia("captionssettingschanged")};</span>
+<span class="cstat-no" title="statement not covered" >g.h.kD=function(){var a=n4.ub;a={background:a.background,backgroundOpacity:a.backgroundOpacity,charEdgeStyle:a.charEdgeStyle,color:a.color,fontFamily:a.fontFamily,fontSizeIncrement:a.fontSizeIncrement,fontStyle:a.bold&amp;&amp;a.Pe?3:a.bold?1:a.Pe?2:0,textOpacity:a.textOpacity,windowColor:n4.windowColor,windowOpacity:n4.windowOpacity};var b=d4(this,"display-settings")||{};null!=b.background&amp;&amp;(a.background=b.background);null!=b.backgroundOverride&amp;&amp;(a.backgroundOverride=b.backgroundOverride);null!=b.backgroundOpacity&amp;&amp;</span>
+<span class="cstat-no" title="statement not covered" >(a.backgroundOpacity=b.backgroundOpacity);null!=b.backgroundOpacityOverride&amp;&amp;(a.backgroundOpacityOverride=b.backgroundOpacityOverride);null!=b.charEdgeStyle&amp;&amp;(a.charEdgeStyle=b.charEdgeStyle);null!=b.charEdgeStyleOverride&amp;&amp;(a.charEdgeStyleOverride=b.charEdgeStyleOverride);null!=b.color&amp;&amp;(a.color=b.color);null!=b.colorOverride&amp;&amp;(a.colorOverride=b.colorOverride);null!=b.fontFamily&amp;&amp;(a.fontFamily=b.fontFamily);null!=b.fontFamilyOverride&amp;&amp;(a.fontFamilyOverride=b.fontFamilyOverride);null!=b.fontSizeIncrement&amp;&amp;</span>
+<span class="cstat-no" title="statement not covered" >(a.fontSizeIncrement=b.fontSizeIncrement);null!=b.fontSizeIncrementOverride&amp;&amp;(a.fontSizeIncrementOverride=b.fontSizeIncrementOverride);null!=b.fontStyle&amp;&amp;(a.fontStyle=b.fontStyle);null!=b.fontStyleOverride&amp;&amp;(a.fontStyleOverride=b.fontStyleOverride);null!=b.textOpacity&amp;&amp;(a.textOpacity=b.textOpacity);null!=b.textOpacityOverride&amp;&amp;(a.textOpacityOverride=b.textOpacityOverride);null!=b.windowColor&amp;&amp;(a.windowColor=b.windowColor);null!=b.windowColorOverride&amp;&amp;(a.windowColorOverride=b.windowColorOverride);</span>
+<span class="cstat-no" title="statement not covered" >null!=b.windowOpacity&amp;&amp;(a.windowOpacity=b.windowOpacity);null!=b.windowOpacityOverride&amp;&amp;(a.windowOpacityOverride=b.windowOpacityOverride);return a};</span>
+<span class="cstat-no" title="statement not covered" >g.h.WA=function(a,b){var c={};g.Sa(c,d4(this,"display-settings"));g.Sa(c,a);c4(this,c,b);this.player.ia("captionssettingschanged")};</span>
+<span class="cstat-no" title="statement not covered" >g.h.Us=function(){!this.A&amp;&amp;this.loaded&amp;&amp;(g.Mb(this.R,function(a,b){a.dispose();delete this.R[b]},this),this.QA())};</span>
+<span class="cstat-no" title="statement not covered" >g.h.wc=function(a,b){switch(a){case "fontSize":if(isNaN(b))break;var c=g.nd(b,-2,4);this.WA({fontSizeIncrement:c});return c;case "reload":b&amp;&amp;!this.A&amp;&amp;m4(this,this.g,!0);break;case "stickyLoading":void 0!=b&amp;&amp;this.l.wb&amp;&amp;l4(this,"module-enabled",!!b);break;case "track":if(!this.i)return{};if(b){if(this.A)break;if(!g.Oa(b))break;if(g.Zb(b)){m4(this,null,!0);break}for(var d=P2(this.i.i,!0),e=0;e&lt;d.length;e++){var f=d[e];f.i!=b.languageCode||c&amp;&amp;f.l!=b.languageName||(c=b.translationLanguage?Spa(f,b.translationLanguage):</span>
+<span class="cstat-no" title="statement not covered" >f)}!c||c==this.g&amp;&amp;this.loaded||m4(this,c,!0)}else return this.loaded&amp;&amp;this.g&amp;&amp;!j4(this)?N2(this.g):{};return"";case "tracklist":return this.i?(0,g.he)(P2(this.i.i,!(!b||!b.includeAsr)),function(k){return N2(k)}):[];</span>
+<span class="cstat-no" title="statement not covered" >case "translationLanguages":return this.i?this.i.u.map(function(k){return Object.assign({},k)}):[];</span>
+<span class="cstat-no" title="statement not covered" >case "sampleSubtitles":this.A||void 0==b||p4(this,!!b)}};</span>
+g.h.getOptions=function(){var a="reload fontSize track tracklist translationLanguages sampleSubtitle".split(" ");this.l.wb&amp;&amp;a.push("stickyLoading");return a};
+<span class="cstat-no" title="statement not covered" >g.h.Yp=function(){var a=this.g;return a?{cc:a.A}:{}};</span>
+<span class="cstat-no" title="statement not covered" >g.h.SM=function(){this.loaded&amp;&amp;this.g&amp;&amp;!j4(this)?(l4(this,"module-enabled",!1),this.unload(),g4(this,!0)&amp;&amp;m4(this,h4(this),!1)):m4(this,j4(this)||!this.g?i4(this,!0):this.g,!0)};</span>
+<span class="cstat-no" title="statement not covered" >g.h.oI=function(){var a=j4(this);g4(this,a)?m4(this,this.player.getAudioTrack().Yl,!1):this.O.captionTracks.length&amp;&amp;(this.loaded&amp;&amp;this.unload(),this.Fk()&amp;&amp;(a?m4(this,i4(this),!1):this.load()))};g.QO.captions=e4;})(_yt_player);</span>
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Sun Sep 01 2019 01:31:37 GMT+0000 (UTC)
+</div>
+</div>
+<script src="../../../../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../../../../sorter.js"></script>
+<script src="../../../../../block-navigation.js"></script>
+</body>
+</html>

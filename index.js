@@ -1,29 +1,216 @@
 /* jslint utility2:true */
+(function (globalThis) {
+    "use strict";
+    var consoleError;
+    var local;
+    // init globalThis
+    globalThis.globalThis = globalThis.globalThis || globalThis;
+    // init debug_inline
+    if (!globalThis["debug\u0049nline"]) {
+        consoleError = console.error;
+        globalThis["debug\u0049nline"] = function () {
+        /*
+         * this function will both print <arguments> to stderr
+         * and return <arguments>[0]
+         */
+            var argList;
+            argList = Array.from(arguments); // jslint ignore:line
+            // debug arguments
+            globalThis["debug\u0049nlineArguments"] = argList;
+            consoleError("\n\ndebug\u0049nline");
+            consoleError.apply(console, argList);
+            consoleError("\n");
+            // return arg0 for inspection
+            return argList[0];
+        };
+    }
+    // init local
+    local = {};
+    local.local = local;
+    globalThis.globalLocal = local;
+    // init isBrowser
+    local.isBrowser = (
+        typeof window === "object"
+        && window === globalThis
+        && typeof window.XMLHttpRequest === "function"
+        && window.document
+        && typeof window.document.querySelector === "function"
+    );
+    // init function
+    local.assertThrow = function (passed, message) {
+    /*
+     * this function will throw err.<message> if <passed> is falsy
+     */
+        var err;
+        if (passed) {
+            return;
+        }
+        err = (
+            (
+                message
+                && typeof message.message === "string"
+                && typeof message.stack === "string"
+            )
+            // if message is errObj, then leave as is
+            ? message
+            : new Error(
+                typeof message === "string"
+                // if message is a string, then leave as is
+                ? message
+                // else JSON.stringify message
+                : JSON.stringify(message, null, 4)
+            )
+        );
+        throw err;
+    };
+    local.fsRmrfSync = function (dir) {
+    /*
+     * this function will sync "rm -rf" <dir>
+     */
+        var child_process;
+        try {
+            child_process = require("child_process");
+        } catch (ignore) {
+            return;
+        }
+        child_process.spawnSync("rm", [
+            "-rf", dir
+        ], {
+            stdio: [
+                "ignore", 1, 2
+            ]
+        });
+    };
+    local.fsWriteFileWithMkdirpSync = function (file, data) {
+    /*
+     * this function will sync write <data> to <file> with "mkdir -p"
+     */
+        var fs;
+        try {
+            fs = require("fs");
+        } catch (ignore) {
+            return;
+        }
+        // try to write file
+        try {
+            fs.writeFileSync(file, data);
+        } catch (ignore) {
+            // mkdir -p
+            require("child_process").spawnSync(
+                "mkdir",
+                [
+                    "-p", require("path").dirname(file)
+                ],
+                {
+                    stdio: [
+                        "ignore", 1, 2
+                    ]
+                }
+            );
+            // rewrite file
+            fs.writeFileSync(file, data);
+        }
+    };
+    local.functionOrNop = function (fnc) {
+    /*
+     * this function will if <fnc> exists,
+     * them return <fnc>,
+     * else return <nop>
+     */
+        return fnc || local.nop;
+    };
+    local.identity = function (value) {
+    /*
+     * this function will return <value>
+     */
+        return value;
+    };
+    local.nop = function () {
+    /*
+     * this function will do nothing
+     */
+        return;
+    };
+    local.objectAssignDefault = function (target, source) {
+    /*
+     * this function will if items from <target> are
+     * null, undefined, or empty-string,
+     * then overwrite them with items from <source>
+     */
+        target = target || {};
+        Object.keys(source || {}).forEach(function (key) {
+            if (
+                target[key] === null
+                || target[key] === undefined
+                || target[key] === ""
+            ) {
+                target[key] = target[key] || source[key];
+            }
+        });
+        return target;
+    };
+    // require builtin
+    if (!local.isBrowser) {
+        local.assert = require("assert");
+        local.buffer = require("buffer");
+        local.child_process = require("child_process");
+        local.cluster = require("cluster");
+        local.crypto = require("crypto");
+        local.dgram = require("dgram");
+        local.dns = require("dns");
+        local.domain = require("domain");
+        local.events = require("events");
+        local.fs = require("fs");
+        local.http = require("http");
+        local.https = require("https");
+        local.net = require("net");
+        local.os = require("os");
+        local.path = require("path");
+        local.querystring = require("querystring");
+        local.readline = require("readline");
+        local.repl = require("repl");
+        local.stream = require("stream");
+        local.string_decoder = require("string_decoder");
+        local.timers = require("timers");
+        local.tls = require("tls");
+        local.tty = require("tty");
+        local.url = require("url");
+        local.util = require("util");
+        local.vm = require("vm");
+        local.zlib = require("zlib");
+    }
+}((typeof globalThis === "object" && globalThis) || (function () {
+    return Function("return this")(); // jslint ignore:line
+}())));
 
-/* jslint ignore:start */
-(function () {
+
+
+(async function (local) {
 "use strict";
-// require builtin
-const EventEmitter = require ('events');
-const fs = require ('fs')
-const child_process = require ('child_process')
-const http = require ('http');
-const https = require ('https');
-const moduleCjs = require ('module')
-const os = require ('os');
-const path = require ('path');
-const readline = require ('readline');
-const url = require ('url');
-function assert(value, message) {
-/**
-  * @param {*} value
-  * @param {string=} message
-  */
-    if (!value)
-        throw new Error(message);
-}
-
-
+// init let
+let browser;
+let covV8;
+let page;
+let puppeteer;
+let timeElapsed;
+// init const
+const debugTimeElapsed = function (msg) {
+    timeElapsed = timeElapsed || Date.now();
+    timeElapsed = String(Date.now() - timeElapsed).padStart(6, " ");
+    console.error(`timeElapsed - ${timeElapsed} ms - ${msg}`);
+    timeElapsed = Date.now();
+};
+const fs = local.fs;
+const fsRmrfSync = local.fsRmrfSync;
+const fsWriteFileWithMkdirpSync = local.fsWriteFileWithMkdirpSync;
+const path = local.path;
+// artifact - reset
+fsRmrfSync("coverage");
+fsRmrfSync(".nyc_output");
+debugTimeElapsed("init");
+process.on("exit", function (exitCode) {
+    debugTimeElapsed(`process.exit(${exitCode})`);
+});
 
 /*
 require puppeteer-to-istanbul/lib/output-files.js
@@ -31,349 +218,180 @@ require puppeteer-to-istanbul/lib/output-files.js
 // output JavaScript bundled in puppeteer output to format
 // that can be eaten by Istanbul.
 
-// TODO: Put function interfaces on this file
-
-const pathLib = path
-
-/*
-require v8-to-istanbul/lib/branch.js
-*/
-class CovBranch {
-    constructor (startLine, startCol, endLine, endCol, count) {
-        this.startLine = startLine
-        this.startCol = startCol
-        this.endLine = endLine
-        this.endCol = endCol
-        this.count = count
-    }
-    toIstanbul () {
-        const location = {
-            start: {
-                line: this.startLine.line,
-                column: this.startCol - this.startLine.startCol
-            },
-            end: {
-                line: this.endLine.line,
-                column: this.endCol - this.endLine.startCol
-            }
-        }
-        return {
-            type: 'branch',
-            line: this.line,
-            loc: location,
-            locations: [Object.assign({}, location)]
-        }
-    }
-}
-
-
-
-/*
-require v8-to-istanbul/lib/function.js
-*/
-class CovFunction {
-    constructor (name, startLine, startCol, endLine, endCol, count) {
-        this.name = name
-        this.startLine = startLine
-        this.startCol = startCol
-        this.endLine = endLine
-        this.endCol = endCol
-        this.count = count
-    }
-    toIstanbul () {
-        const loc = {
-            start: {
-                line: this.startLine.line,
-                column: this.startCol - this.startLine.startCol
-            },
-            end: {
-                line: this.endLine.line,
-                column: this.endCol - this.endLine.startCol
-            }
-        }
-        return {
-            name: this.name,
-            decl: loc,
-            loc: loc,
-            line: this.startLine.line
-        }
-    }
-}
-
-
-
-/*
-require v8-to-istanbul/lib/line.js
-*/
-class CovLine {
-    constructor (line, startCol, endCol) {
-        this.line = line
-        this.startCol = startCol
-        this.endCol = endCol
-        this.count = 0
-    }
-    toIstanbul () {
-        return {
-            start: {
-                line: this.line,
-                column: 0
-            },
-            end: {
-                line: this.line,
-                column: this.endCol - this.startCol
-            }
-        }
-    }
-}
-
-
-
-/*
-require v8-to-istanbul/lib/script.js
-*/
-// Node.js injects a header when executing a script.
-const cjsHeader = moduleCjs.wrapper[0]
-
-class CovScript {
-    constructor (scriptPath) {
-        assert(typeof scriptPath === 'string', 'scriptPath must be a string')
-        const { path, isESM } = parsePath(scriptPath)
-        const source = fs.readFileSync(path, 'utf8')
-        this.path = path
-        this.header = isESM ? '' : cjsHeader
-        this.lines = []
-        this.branches = []
-        this.functions = []
-        this.eof = -1
-        this._buildLines(source, this.lines)
-    }
-    _buildLines (source, lines) {
-        let position = 0
-        source.split('\n').forEach((lineStr, i) => {
-            this.eof = position + lineStr.length
-            lines.push(new CovLine(i + 1, position, this.eof))
-            position += lineStr.length + 1 // also add the \n.
-        })
-    }
-    applyCoverage (blocks) {
-        blocks.forEach(block => {
-            block.ranges.forEach(range => {
-                const startCol = Math.max(0, range.startOffset - this.header.length)
-                const endCol = Math.min(this.eof, range.endOffset - this.header.length)
-                const lines = this.lines.filter(line => {
-                    return startCol <= line.endCol && endCol >= line.startCol
-                })
-
-                if (block.isBlockCoverage && lines.length) {
-                    // record branches.
-                    this.branches.push(new CovBranch(
-                        lines[0],
-                        startCol,
-                        lines[lines.length - 1],
-                        endCol,
-                        range.count
-                    ))
-                } else if (block.functionName && lines.length) {
-                    // record functions.
-                    this.functions.push(new CovFunction(
-                        block.functionName,
-                        lines[0],
-                        startCol,
-                        lines[lines.length - 1],
-                        endCol,
-                        range.count
-                    ))
-                }
-
-                // record the lines (we record these as statements, such that we're
-                // compatible with Istanbul 2.0).
-                lines.forEach(line => {
-                    // make sure branch spans entire line; don't record 'goodbye'
-                    // branch in `const foo = true ? 'hello' : 'goodbye'` as a
-                    // 0 for line coverage.
-                    if (startCol <= line.startCol && endCol >= line.endCol) {
-                        line.count = range.count
-                    }
-                })
-            })
-        })
-    }
-    toIstanbul () {
-        const istanbulInner = Object.assign(
-            { path: this.path },
-            this._statementsToIstanbul(),
-            this._branchesToIstanbul(),
-            this._functionsToIstanbul()
-        )
-        const istanbulOuter = {}
-        istanbulOuter[this.path] = istanbulInner
-        return istanbulOuter
-    }
-    _statementsToIstanbul () {
-        const statements = {
-            statementMap: {},
-            s: {}
-        }
-        this.lines.forEach((line, index) => {
-            statements.statementMap[`${index}`] = line.toIstanbul()
-            statements.s[`${index}`] = line.count
-        })
-        return statements
-    }
-    _branchesToIstanbul () {
-        const branches = {
-            branchMap: {},
-            b: {}
-        }
-        this.branches.forEach((branch, index) => {
-            branches.branchMap[`${index}`] = branch.toIstanbul()
-            branches.b[`${index}`] = [branch.count]
-        })
-        return branches
-    }
-    _functionsToIstanbul () {
-        const functions = {
-            fnMap: {},
-            f: {}
-        }
-        this.functions.forEach((fn, index) => {
-            functions.fnMap[`${index}`] = fn.toIstanbul()
-            functions.f[`${index}`] = fn.count
-        })
-        return functions
-    }
-}
-
-function parsePath (scriptPath) {
-    return {
-        path: scriptPath.replace('file://', ''),
-        isESM: scriptPath.indexOf('file://') !== -1
-    }
-}
-
-
-
 /*
 require puppeteer-to-istanbul
 */
-const puppeteer = require("./lib.puppeteer.js");
+puppeteer = require("puppeteer");
 
 
 
-;(async function () {
-const browser = await puppeteer.launch({
-        args: [
-                '--disable-setuid-sandbox',
-                "--incognito",
-                '--no-sandbox'
-        ],
-        dumpio: true,
-        executablePath: "/root/Documents/puppeteer-to-istanbul-example/node_modules/puppeteer/.local-chromium/linux-674921/chrome-linux/chrome",
-        headless: true
-})
-const page = await browser.newPage()
+browser = await puppeteer.launch({
+    args: [
+        // "--no-sandbox", "--disable-setuid-sandbox"
+        "--disable-setuid-sandbox",
+        "--headless",
+        "--hide-scrollbars",
+        "--incognito",
+        "--mute-audio",
+        "--no-sandbox",
+        "--remote-debugging-port=0"
+    ],
+    dumpio: true,
+    executablePath: (
+        "node_modules/puppeteer/.local-chromium"
+        + "/linux-674921/chrome-linux/chrome"
+    ),
+    headless: true
+});
+page = await browser.newPage();
 
-// Enable both JavaScript and CSS coverage
+// browser - coverage-enable
 await Promise.all([
     page.coverage.startJSCoverage(),
     page.coverage.startCSSCoverage()
-])
-
-// Navigate to page
-var url = 'file:///' + path.resolve('./index.html')
-var url = "https://m.youtube.com"
-await page.goto(url)
-
-
-
-async function coverageCreate () {
-var basename;
-var covPuppeteer;
-var iiInline;
-var storagePath;
-// mkdir -p storagePath
-storagePath = "./.nyc_output/js";
-child_process.spawnSync("mkdir", [
-    "-p", storagePath
-], {
-    stdio: [
-        "ignore", 1, 2
-    ]
+]);
+await page.goto("file:///" + path.resolve("./index.html"));
+//!! // browser - test undefined url
+//!! try {
+    //!! await page.goto("https://undefined");
+//!! } catch (ignore) {}
+//!! // browser - test redirect
+//!! await page.goto("https://www.example.com");
+//!! await page.goto("https://m.youtube.com");
+// browser - wait 2000 ms
+await new Promise(function (resolve) {
+    setTimeout(resolve, 5000);
 });
-// Disable JavaScript coverage
-covPuppeteer = await page.coverage.stopJSCoverage();
-await page.coverage.stopCSSCoverage();
-// init covPuppeteer
-// output JavaScript bundled in puppeteer output to format
-// that can be eaten by Istanbul.
-// Clone covPuppeteer to prevent mutating the passed in data
-covPuppeteer = JSON.parse(JSON.stringify(covPuppeteer));
-// debug
-fs.writeFileSync("tmp/aa.json", JSON.stringify(covPuppeteer, null, 4));
-iiInline = 0;
-covPuppeteer.forEach(function (file) {
-    console.error(file.url);
+// browser - screenshot png
+await page.screenshot({
+    path: "tmp/aa.png"
+});
+// browser - screenshot html
+fs.writeFileSync("tmp/aa.html", await page.content());
+// browser - coverage-disable
+covV8 = await page.coverage.stopJSCoverage();
+page.coverage.stopCSSCoverage();
+// browser - close
+browser.close();
+debugTimeElapsed("browser");
+
+
+
+String.prototype.trimEnd = (
+    String.prototype.trimEnd || String.prototype.trimRight
+);
+function OutputFiles() {
+    this.iterator = 0;
+    this._parseAndIsolate();
+}
+OutputFiles.prototype.rewritePath = function (pathname) {
     // generate a new path relative to ./coverage/js.
     // this would be around where you'd use mkdirp.
+    var str = ``;
     // Get the last element in the path name
-    basename = path.basename(file.url);
+    var truncatedPath = path.basename(pathname);
+
     // Special case: when html present, strip and return specialized string
-    if (basename.includes(".html")) {
-        basename = path.resolve(storagePath, basename) + "puppeteerTemp-inline";
+    if (truncatedPath.includes(".html")) {
+        truncatedPath = path.resolve(
+            "./.nyc_output/js",
+            truncatedPath
+        ) + "puppeteerTemp-inline";
     } else {
-        basename = basename.split(".js")[0];
-        basename = path.resolve(storagePath, basename);
+        truncatedPath = truncatedPath.split(".js")[0];
+        truncatedPath = path.resolve("./.nyc_output/js", truncatedPath);
     }
-    if (fs.existsSync(basename + ".js")) {
-        iiInline += 1;
-        file.url = basename + "-" + iiInline + ".js";
+    if (fs.existsSync(truncatedPath + ".js")) {
+        this.iterator += 1;
+        str = `${truncatedPath}-${this.iterator}.js`;
+        return str;
     } else {
-        file.url = basename + ".js";
+        str = `${truncatedPath}.js`;
+        return str;
     }
-    fs.writeFileSync(file.url, file.text);
-});
-// init cov8
-// Iterate through coverage info and create IDs
-// init covIstanbul
-var covIstanbul = {};
-covPuppeteer.map(function (file, ii) {
-    return {
-        scriptId: ii,
-        url: "file://" + file.url,
-        functions: [
-            {
-                ranges: file.ranges.map(function (range) {
-                    // Takes in a Puppeteer range object with start and end
-                    // properties and converts it to a V8 range
-                    // with startOffset, endOffset, and count properties
-                    return {
-                        startOffset: range.start,
-                        endOffset: range.end,
-                        count: 1
-                    };
-                }),
-                isBlockCoverage: true
-            }
-        ]
-    };
-}).forEach(function (jsFile) {
-    const script = new CovScript(jsFile.url);
-    script.applyCoverage(jsFile.functions);
-    let istanbulCoverage = script.toIstanbul();
-    var key = Object.keys(istanbulCoverage)[0];
-    covIstanbul[key] = istanbulCoverage[key];
-});
-fs.writeFileSync(
-    "./.nyc_output/out.json",
-    JSON.stringify(covIstanbul, null, 4),
-    "utf8"
-);
+};
+OutputFiles.prototype._parseAndIsolate = function () {
+    var that = this;
+    covV8.forEach(function (file) {
+        file.url = that.rewritePath(file.url);
+        fsWriteFileWithMkdirpSync(file.url, file.text);
+    });
+};
+function PuppeteerToV8() {
+    return;
 }
-await coverageCreate();
+PuppeteerToV8.prototype.convertCoverage = function () {
+    // Iterate through coverage info and create IDs
+    return covV8.map(function (coverageItem, ii) {
+        return {
+            scriptId: ii,
+            url: "file://" + coverageItem.url,
+            functions: [
+                {
+// Takes in a Puppeteer range object with start and end properties and
+// converts it to a V8 range with startOffset, endOffset, and count properties
+                    ranges: coverageItem.ranges.map(function (range) {
+                        return {
+                            startOffset: range.start,
+                            endOffset: range.end,
+                            count: 1
+                        };
+                    }),
+                    isBlockCoverage: true
+                }
+            ]
+        };
+    });
+};
 
 
 
-await browser.close()
-})();
-}());
-/* jslint ignore:end */
+// var pti = new PuppeteerToIstanbul(covV8);
+var v8toIstanbul = require("v8-to-istanbul");
+var puppeteerToV8Info = new PuppeteerToV8(
+    new OutputFiles(covV8).covV8
+).convertCoverage();
+// pti.writeIstanbulFormat();
+var fullJson = {};
+var promiseList = puppeteerToV8Info.map(function (jsFile) {
+    return v8toIstanbul(jsFile.url);
+});
+await Promise.all(promiseList.map(function (elem) {
+    return elem.load();
+}));
+promiseList.forEach(function (script, ii) {
+    script.applyCoverage(puppeteerToV8Info[ii].functions);
+    let istanbulCoverage = script.toIstanbul();
+    let keys = Object.keys(istanbulCoverage);
+    fullJson[keys[0]] = istanbulCoverage[keys[0]];
+});
+fsWriteFileWithMkdirpSync(
+    "./.nyc_output/out.json",
+    JSON.stringify(fullJson, null, 4)
+);
+// debug
+fs.writeFileSync("tmp/aa.json", JSON.stringify({
+    covV8,
+    puppeteerToV8Info,
+    fullJson
+}, null, 4));
+debugTimeElapsed("v8-to-istanbul");
+
+
+
+// nyc - coverage-report
+process.argv = [
+    "/usr/bin/node",
+    "/root/Documents/puppeteer-to-istanbul-example/node_modules/.bin/nyc",
+    "report",
+    "--reporter=html"
+];
+require("./node_modules/nyc/bin/nyc.js");
+debugTimeElapsed("nyc");
+
+
+
+// process.exit()
+debugTimeElapsed("process.exit()");
+process.exit();
+}(globalThis.globalLocal));

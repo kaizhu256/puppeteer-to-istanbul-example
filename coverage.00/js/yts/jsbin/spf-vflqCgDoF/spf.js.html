@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for js/yts/jsbin/spf-vflqCgDoF/spf.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../../prettify.css" />
+    <link rel="stylesheet" href="../../../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../../../index.html">All files</a> / <a href="index.html">js/yts/jsbin/spf-vflqCgDoF</a> spf.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">10.67% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>8/75</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>44/44</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/0</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">10.67% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>8/75</span>
+      </div>
+    </div>
+    <p class="quiet">
+      Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+    </p>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">(function(){/*
+&nbsp;
+SPF
+(c) 2012-2017 Google Inc.
+https://ajax.googleapis.com/ajax/libs/spf/2.4.0/LICENSE
+*/
+<span class="cstat-no" title="statement not covered" >function l(a,b,c){var d=Array.prototype.slice.call(arguments,2);return function(){var e=d.slice();e.push.apply(e,arguments);return a.apply(b,e)}}function aa(a,b){if(a){var c=Array.prototype.slice.call(arguments,1);try{return a.apply(null,c)}catch(d){return d}}}function n(a,b){if(document.createEvent){var c=document.createEvent("CustomEvent");c.initCustomEvent(a,!0,!0,b);return document.dispatchEvent(c)}return!0}</span>
+<span class="cstat-no" title="statement not covered" >var p=window.performance&amp;&amp;window.performance.timing&amp;&amp;window.performance.now?function(){return window.performance.timing.navigationStart+window.performance.now()}:function(){return(new Date).getTime()};function ba(){};function q(a,b){if(a.forEach)a.forEach(b,void 0);else for(var c=0,d=a.length;c&lt;d;c++)c in a&amp;&amp;b.call(void 0,a[c],c,a)}function ca(a,b){if(a.every)return a.every(b,void 0);for(var c=0,d=a.length;c&lt;d;c++)if(c in a&amp;&amp;!b.call(void 0,a[c],c,a))return!1;return!0}function da(a,b){if(a.some)return a.some(b,void 0);for(var c=0,d=a.length;c&lt;d;c++)if(c in a&amp;&amp;b.call(void 0,a[c],c,a))return!0;return!1}</span>
+<span class="cstat-no" title="statement not covered" >function ea(a,b){if(a.filter)return a.filter(b,void 0);var c=[];q(a,function(d,e,f){b.call(void 0,d,e,f)&amp;&amp;c.push(d)});return c}function fa(a,b){if(a.map)return a.map(b,void 0);var c=[];c.length=a.length;q(a,function(d,e,f){c[e]=b.call(void 0,d,e,f)});return c}function r(a){return"[object Array]"==Object.prototype.toString.call(a)?a:[a]};function v(a,b){return w[a]=b}var w=window._spf_state||{};window._spf_state=w;function x(a,b){var c=a.length-b.length;return 0&lt;=c&amp;&amp;a.indexOf(b,c)==c}function ha(a){return"[object String]"==Object.prototype.toString.call(a)}var ia=String.prototype.trim?function(a){return a.trim()}:function(a){return a.replace(/^\s+|\s+$/g,"")};function y(a,b){a=a.split(b);var c=1==a.length;return[a[0],c?"":b,c?"":a.slice(1).join(b)]}function ja(){return"spfName".replace(/([A-Z])/g,"-$1").toLowerCase()};function ka(a){a.data&amp;&amp;ha(a.data)&amp;&amp;0==a.data.lastIndexOf("spf:",0)&amp;&amp;la(a.data.substring(4))}function la(a){var b=z[a];b&amp;&amp;(delete z[a],b())}function ma(a){window.addEventListener?window.addEventListener("message",a,!1):window.attachEvent&amp;&amp;window.attachEvent("onmessage",a)}function na(a){window.removeEventListener?window.removeEventListener("message",a,!1):window.detachEvent&amp;&amp;window.detachEvent("onmessage",a)}</span>
+<span class="cstat-no" title="statement not covered" >var oa=function(){function a(){b=!1}if(!window.postMessage)return!1;var b=!0;ma(a);window.postMessage("","*");na(a);return b}(),z={};"async-defers"in w||v("async-defers",z);z=w["async-defers"];oa&amp;&amp;("async-listener"in w&amp;&amp;na(w["async-listener"]),ma(ka),v("async-listener",ka));var qa={"animation-class":"spf-animate","animation-duration":425,"cache-lifetime":6E5,"cache-max":50,"cache-unified":!1,"link-class":"spf-link","nolink-class":"spf-nolink","navigate-limit":20,"navigate-lifetime":864E5,"reload-identifier":null,"request-timeout":0,"url-identifier":"?spf=__type__"},A={};"config"in w||v("config",A);A=w.config;function ra(a){var b=D();a in b&amp;&amp;delete b[a]}function sa(){var a=D();for(b in a)ta(a[b])||delete a[b];a=D();var b=parseInt(A["cache-max"],10);b=isNaN(b)?Infinity:b;b=Object.keys(a).length-b;if(!(0&gt;=b))for(var c=0;c&lt;b;c++){var d=Infinity,e;for(e in a)if(a[e].count&lt;d){var f=e;d=a[e].count}delete a[f]}}function ta(a){if(!(a&amp;&amp;"data"in a))return!1;var b=a.life;b=isNaN(b)?Infinity:b;a=a.time;return p()-a&lt;b}function ua(a){var b=parseInt(w["cache-counter"],10)||0;b++;v("cache-counter",b);a.count=b}</span>
+<span class="cstat-no" title="statement not covered" >function D(a){return!a&amp;&amp;"cache-storage"in w?w["cache-storage"]:v("cache-storage",a||{})};function va(a){return a.classList?a.classList:a.className&amp;&amp;a.className.match(/\S+/g)||[]}function wa(a,b){if(b){if(a.classList)return a.classList.contains(b);a=va(a);return da(a,function(c){return c==b})}return!1}function E(a,b){b&amp;&amp;(a.classList?a.classList.add(b):wa(a,b)||(a.className+=" "+b))}function F(a,b){if(b)if(a.classList)a.classList.remove(b);else{var c=va(a);c=ea(c,function(d){return d!=b});a.className=c.join(" ")}};function xa(a){var b=document.body;b.dataset?b.dataset.spfName=a:b.setAttribute("data-"+ja(),a)};function ya(a,b){b=b||document;return b.querySelectorAll?b.querySelectorAll(a):[]}function za(a,b,c){for(;a;){if(b(a))return a;if(c&amp;&amp;a==c)break;a=a.parentNode}return null}function Aa(a,b,c){b=b||document;var d=b.createElement("iframe");d.id=a||"";d.src='javascript:""';d.style.display="none";c&amp;&amp;(d.onload=l(c,null,d));b.body.appendChild(d);return d};function Ba(a,b,c){var d=null,e=window.history.state;if(e){d={};for(var f in e)d[f]=e[f]}if(b)for(f in d=d||{},b)d[f]=b[f];Ca(!0,a,d,c)}function Ca(a,b,c,d){if(b||c){b=b||window.location.href;c=c||{};var e=p();v("history-timestamp",e);c["spf-timestamp"]=e;if(a)Da(c,b);else if(a=Ea().contentWindow.history.pushState,"function"==typeof a)a.call(window.history,c,"",b);else throw Error("history.pushState is not a function.");v("history-url",b);d&amp;&amp;(d=w["history-callback"])&amp;&amp;d(b,c)}}</span>
+<span class="cstat-no" title="statement not covered" >function Fa(a){var b=window.location.href;if(w["history-ignore-pop"])v("history-ignore-pop",!1);else if(a.state){a=a.state;var c=a["spf-timestamp"];b==w["history-url"]?(v("history-timestamp",c),Da(a,b)):(a["spf-back"]=c&lt;parseInt(w["history-timestamp"],10),a["spf-current"]=w["history-url"],v("history-timestamp",c),v("history-url",b),(c=w["history-callback"])&amp;&amp;c(b,a))}}</span>
+<span class="cstat-no" title="statement not covered" >function Da(a,b){var c=Ea().contentWindow.history.replaceState;if("function"==typeof c)c.call(window.history,a,"",b);else throw Error("history.replaceState is not a function");}function Ea(){var a=document.getElementById("history-iframe");a||(a=Aa("history-iframe"));return a};function Ga(a,b){a&amp;&amp;b&amp;&amp;(a in G||(G[a]=[]),G[a].push(b))}function Ha(a,b){a in G&amp;&amp;b&amp;&amp;ca(G[a],function(c,d,e){return c==b?(e[d]=null,!1):!0})}function Ia(a){a in G&amp;&amp;q(G[a],function(b,c,d){d[c]=null;b&amp;&amp;b()})}var G={};"ps-s"in w||v("ps-s",G);G=w["ps-s"];function J(a,b,c){var d=K[a];return a&amp;&amp;b?(d||(d=K[a]={items:[],o:0,m:0,A:1}),d.items.push({C:b,delay:c||0})):d&amp;&amp;d.items.length||0}function L(a,b){var c=K[a];if(c){var d=!!c.o||!!c.m;0&lt;c.A&amp;&amp;(b||!d)&amp;&amp;Ja(a,b)}}function Ka(a){(a=K[a])&amp;&amp;a.A--}function La(a,b){var c=K[a];c&amp;&amp;(c.A++,L(a,b))}function Na(a){var b=K[a];b&amp;&amp;(Oa(b),delete K[a])}</span>
+<span class="cstat-no" title="statement not covered" >function Ja(a,b){var c=K[a];if(c&amp;&amp;(Oa(c),0&lt;c.A&amp;&amp;c.items.length)){var d=c.items[0];d&amp;&amp;(a=l(function(e,f){f();e()},null,l(Ja,null,a,b)),b?(c.items.shift(),a(d.C)):Pa(c,d,a))}}function Pa(a,b,c){b.delay?(c=l(c,null,ba),a.m=setTimeout(c,b.delay),b.delay=0):(a.items.shift(),c=l(c,null,b.C),(b=(b=A["advanced-task-scheduler"])&amp;&amp;b.addTask)?a.o=b(c):a.m=setTimeout(c,0))}function Oa(a){if(a.o){var b=A["advanced-task-scheduler"];(b=b&amp;&amp;b.cancelTask)&amp;&amp;b(a.o);a.o=0}a.m&amp;&amp;(clearTimeout(a.m),a.m=0)}var K={};function Qa(a){var b=document.createElement("a");b.href=a;b.href=b.href;a={href:b.href,protocol:b.protocol,host:b.host,hostname:b.hostname,port:b.port,pathname:b.pathname,search:b.search,hash:b.hash,username:b.username,password:b.password};a.origin=a.protocol+"//"+a.host;a.pathname&amp;&amp;"/"==a.pathname[0]||(a.pathname="/"+a.pathname);return a}function N(a,b){a=Qa(a);return b?a.href:y(a.href,"#")[0]}</span>
+<span class="cstat-no" title="statement not covered" >function Ra(a,b){var c=y(a,"#");a=c[0];q(b,function(d){a=a.replace(new RegExp("([?&amp;])"+d+"(?:=[^&amp;]*)?(?:(?=[&amp;])|$)","g"),function(e,f){return"?"==f?f:""})});x(a,"?")&amp;&amp;(a=a.slice(0,-1));return a+c[1]+c[2]}function Sa(a){var b=A["advanced-persistent-parameters"]||"",c=y(a,"#");a=c[0];var d=-1!=a.indexOf("?")?"&amp;":"?";return a+(b?d+b:"")+c[1]+c[2]};function Ta(a,b,c,d){var e="js"==a;b=O(a,b);var f=c||"^"+b,g=P(a,f),h;c&amp;&amp;(h=Q[P(a,c)])&amp;&amp;b!=h&amp;&amp;(n(e?"spfjsbeforeunload":"spfcssbeforeunload",{name:c,url:h}),e=h,delete Q[P(a,c)],e&amp;&amp;delete S[P(a,e)],delete G[P(a,c)],Ga(g,l(Ua,null,a,c,h)));if((e=S[P(a,b)])&amp;&amp;f!=e){delete Q[P(a,e)];delete S[P(a,b)];var k=P(a,e);k&amp;&amp;g&amp;&amp;k in G&amp;&amp;(G[g]=(G[g]||[]).concat(G[k]),delete G[k])}S[P(a,b)]=f;Q[P(a,f)]=b;Ga(g,d);d=l(Va,null,a);T[P(a,b,void 0)]?(e&amp;&amp;f!=e&amp;&amp;(a=Wa(a,b))&amp;&amp;a.setAttribute("name",c||""),d()):(a=Xa(a,b,d,void 0,</span>
+<span class="cstat-no" title="statement not covered" >void 0,h))&amp;&amp;c&amp;&amp;a.setAttribute("name",c)}function Ya(a,b){var c=Q[P(a,b)];delete Q[P(a,b)];c&amp;&amp;delete S[P(a,c)];delete G[P(a,b)];Ua(a,b,c)}function Ua(a,b,c){c&amp;&amp;(n("js"==a?"spfjsunload":"spfcssunload",{name:b,url:c}),Za(a,c))}function Va(a){var b=P(a,""),c;for(c in G)0==c.indexOf(b)&amp;&amp;ca(c.substring(b.length).split("|"),l($a,null,a))&amp;&amp;Ia(c)}</span>
+<span class="cstat-no" title="statement not covered" >function Xa(a,b,c,d,e,f){function g(){T[P(a,b,e)]&amp;&amp;(T[P(a,b,e)]=2);h&amp;&amp;m&amp;&amp;m.parentNode&amp;&amp;k==document&amp;&amp;m.parentNode.removeChild(m);c&amp;&amp;setTimeout(c,0);return null}var h="js"==a;b=O(a,b);T[P(a,b,e)]=1;var k=d||document,m=k.createElement(h?"script":"link");if(!b)return g();d=ab(b);m.className=P(a,d);"onload"in m?m.onerror=m.onload=g:m.onreadystatechange=function(){/^c|loade/.test(m.readyState)&amp;&amp;g()};d=k.getElementsByTagName("head")[0]||k.body;h?(m.async=!0,m.src=b,d.insertBefore(m,d.firstChild)):(m.rel=</span>
+<span class="cstat-no" title="statement not covered" >"stylesheet",m.href=b,(f=f?Wa(a,f,d):null)?d.insertBefore(m,f):d.appendChild(m));return m}function Za(a,b){b=O(a,b);var c=Wa(a,b,void 0);c&amp;&amp;c.parentNode&amp;&amp;c.parentNode.removeChild(c);delete T[P(a,b)]}function Wa(a,b,c){b=ab(b);return ya("."+P(a,b),c)[0]}</span>
+function bb(a){var b="js"==a,c=[];q(ya(b?"script[src]":'link[rel~="stylesheet"]'),function(d){var e=b?d.src:d.href;e=O(a,e);if(!T[P(a,e,void 0)]){T[P(a,e,void 0)]=2;var f=ab(e);E(d,P(a,f));if(f=d.getAttribute("name"))S[P(a,e)]=f,Q[P(a,f)]=e;c.push(d)}})}
+<span class="cstat-no" title="statement not covered" >function cb(a,b,c){if(b&amp;&amp;(b=O(a,b),c||!T[P(a,b,void 0)]))if(c&amp;&amp;"img"==a)db(b);else{var d=ab(b),e=P(a,d),f=P(a,"prefetch");d=document.getElementById(f);if(!d)d=Aa(f,null,function(g){g.title=f;L(f,!0)});else if(!c&amp;&amp;d.contentWindow.document.getElementById(e))return;a=l(eb,null,d,a,b,e,f);d.title?a():J(f,a)}}</span>
+<span class="cstat-no" title="statement not covered" >function eb(a,b,c,d,e){var f="js"==b,g="css"==b;a=a.contentWindow.document;var h=a.getElementById(d);h&amp;&amp;h.parentNode.removeChild(h);f?(h=a.createElement("object"),fb?a.createElement("script").src=c:h.data=c,h.id=d,a.body.appendChild(h)):g?(h=Xa(b,c,null,a,e),h.id=d):(h=a.createElement("img"),fb&amp;&amp;(c=c+"#"+p()),h.src=c,h.id=d,a.body.appendChild(h))}function db(a){var b=new Image;fb&amp;&amp;(a=a+"#"+p());b.src=a}</span>
+<span class="cstat-no" title="statement not covered" >function gb(a,b,c){var d="js"==a,e=Q[P(a,c)],f=b.replace(/\s/g,"");f=f||"";for(var g=0,h=0,k=f.length;h&lt;k;++h)g=31*g+f.charCodeAt(h),g%=4294967296;f="hash-"+g;Q[P(a,c)]=f;!hb(a,f)&amp;&amp;(b=ib(a,b))&amp;&amp;(T[P(a,f,void 0)]=2,b&amp;&amp;!d&amp;&amp;(d=ab(f),b.className=P(a,d),b.setAttribute("name",c)),(e=e&amp;&amp;e[0])&amp;&amp;Za(a,e))}</span>
+<span class="cstat-no" title="statement not covered" >function ib(a,b){b=ia(b);if(!b)return null;var c=document.getElementsByTagName("head")[0]||document.body;"js"==a?(a=document.createElement("script"),a.text=b,c.appendChild(a),c.removeChild(a)):(a=document.createElement("style"),c.appendChild(a),"styleSheet"in a?a.styleSheet.cssText=b:a.appendChild(document.createTextNode(b)));return a}</span>
+<span class="cstat-no" title="statement not covered" >function O(a,b){var c="rsrc-p-"+a;if(b){var d=b.indexOf("//");if(0&gt;d){if(0==b.lastIndexOf("hash-",0))return b;c=w[c]||"";if(ha(c))b=c+b;else for(var e in c)b=b.replace(e,c[e]);"img"!=a&amp;&amp;(b=0&gt;b.indexOf("."+a)?b+"."+a:b);b=N(b)}else 0==d&amp;&amp;(b=N(b))}return b}function P(a,b,c){return a+"-"+b+(c?"-"+c:"")}function ab(a){return a?String(a).replace(/[^\w]/g,""):""}function hb(a,b){a=T[P(a,b,void 0)];return""==b||2==a}function $a(a,b){b=Q[P(a,b)];return void 0!=b&amp;&amp;hb(a,b)}var T={},S={},Q={},fb=-1!=navigator.userAgent.indexOf(" Trident/");</span>
+<span class="cstat-no" title="statement not covered" >"rsrc-s"in w||v("rsrc-s",T);T=w["rsrc-s"];"rsrc-n"in w||v("rsrc-n",S);S=w["rsrc-n"];"rsrc-u"in w||v("rsrc-u",Q);Q=w["rsrc-u"];function jb(a){a=r(a);q(a,function(b){cb("img",b,!0)})};function kb(a,b,c){Ta("js",a,b,c)}function lb(a){Ya("js",a)}function mb(a,b){Xa("js",a,b)}function nb(a){a=r(a);q(a,function(b){cb("js",b)})}function ob(a,b,c){a=r(a);a=ea(a,function(g){return!!g});var d=[];q(a,function(g){void 0==Q[P("js",g)]&amp;&amp;d.push(g)});var e=!d.length;if(b){var f=ca(a,l($a,null,"js"));e&amp;&amp;f?b():(a=P("js",a.sort().join("|")),Ga(a,b))}c&amp;&amp;!e&amp;&amp;c(d)}function pb(a,b){a=r(a);q(a,function(c){if(c){var d=qb[c]||c;d=O("js",d);var e=Q[P("js",c)];e&amp;&amp;d!=e&amp;&amp;rb(c)}});ob(a,b,sb)}</span>
+<span class="cstat-no" title="statement not covered" >function sb(a){q(a,function(b){function c(){kb(e,b)}var d=U[b],e=qb[b]||b;d?pb(d,c):c()})}function rb(a){a=r(a);q(a,function(b){var c=[],d;for(d in U){var e=U[d];e=r(e);q(e,function(f){f==b&amp;&amp;c.push(d)})}q(c,function(f){rb(f)});lb(b)})}function tb(a,b){gb("js",a,b)}function ub(a){ib("js",a)}var U={};"js-d"in w||v("js-d",U);U=w["js-d"];var qb={};"js-u"in w||v("js-u",qb);qb=w["js-u"];function vb(a,b,c){Ta("css",a,b,c)}function wb(a,b){Xa("css",a,b)}function xb(a){a=r(a);q(a,function(b){cb("css",b)})};function yb(a,b,c){if(b){b=[];var d=0;c&amp;&amp;(a+="\r\n");var e=a.indexOf("[\r\n",d);for(-1&lt;e&amp;&amp;(d=e+3);-1&lt;(e=a.indexOf(",\r\n",d));){var f=ia(a.substring(d,e));d=e+3;f&amp;&amp;b.push(JSON.parse(f))}e=a.indexOf("]\r\n",d);-1&lt;e&amp;&amp;(f=ia(a.substring(d,e)),d=e+3,f&amp;&amp;b.push(JSON.parse(f)));f="";a.length&gt;d&amp;&amp;(f=a.substring(d),c&amp;&amp;x(f,"\r\n")&amp;&amp;(f=f.substring(0,f.length-2)));b=zb(b);return{w:b,g:f}}a=JSON.parse(a);b=zb(r(a));return{w:b,g:""}}</span>
+<span class="cstat-no" title="statement not covered" >function V(a,b,c,d){var e=c&amp;&amp;0==c.type.lastIndexOf("navigate",0),f=c&amp;&amp;c.reverse,g=c&amp;&amp;!!c.position,h=c&amp;&amp;c.j,k=b.name||"",m="process "+N(a),B=!A["experimental-process-async"];var u=0;b.timing||(b.timing={});b.title&amp;&amp;(document.title=b.title);e&amp;&amp;b.url&amp;&amp;N(b.url)!=N(window.location.href)&amp;&amp;Ba(b.url+window.location.hash);b.head&amp;&amp;(u=l(function(t,C){t=W(t);Ab(t);Bb(t);Ka(m);Cb(t,function(){C.spfProcessHead=p();La(m,B)})},null,b.head,b.timing),u=J(m,u));b.attr&amp;&amp;(u=l(function(t,C){for(var H in t){var M=document.getElementById(H);</span>
+<span class="cstat-no" title="statement not covered" >if(M){var R=void 0,Lb=t[H];for(R in Lb){var pa=Lb[R];"class"==R?M.className=pa:"style"==R?M.style.cssText=pa:(M.setAttribute(R,pa),"value"==R&amp;&amp;(M[R]=pa))}}}C.spfProcessAttr=p()},null,b.attr,b.timing),u=J(m,u));var I=b.body||{},Dc=u,Ma;for(Ma in I)u=l(function(t,C){if(t=document.getElementById(t)){!e||g||h||(v("nav-scroll-position",null),v("nav-scroll-url",null),window.scroll(0,0),h=!0,c&amp;&amp;(c.j=!0));var H=W(C);Bb(H);var M=function(){Ka(m);Cb(H,function(){La(m,B)})};C=A["animation-class"];Db&amp;&amp;wa(t,C)?</span>
+<span class="cstat-no" title="statement not covered" >(t=new Eb(t,H.html,C,k,!!f),Ka(m),L(t.key,!0),J(t.key,l(Fb,null,t),0),J(t.key,l(Gb,null,t),17),J(t.key,l(Hb,null,t),t.duration),J(t.key,l(function(){M();La(m,B)},null),0),L(t.key)):(C=A["experimental-html-handler"])?(Ka(m),C(H.html,t,function(){M();La(m,B)})):(t.innerHTML=H.html,M())}},null,Ma,I[Ma],b.timing),u=J(m,u);I=u-Dc;b.foot?(u=l(function(t,C,H){H&amp;&amp;(C.spfProcessBody=p());t=W(t);Bb(t);Ka(m);Cb(t,function(){C.spfProcessFoot=p();La(m,B)})},null,b.foot,b.timing,I),u=J(m,u)):I&amp;&amp;(u=l(function(t){t.spfProcessBody=</span>
+<span class="cstat-no" title="statement not covered" >p()},null,b.timing),u=J(m,u));d&amp;&amp;(u=J(m,l(d,null,a,b)));L(m,B)}function Ib(a,b,c,d){c="preprocess "+N(a);if(b.head){var e=l(function(h){h=W(h);Ab(h);Jb(h);Kb(h)},null,b.head);J(c,e)}var f=b.body||{},g;for(g in f)f[g]&amp;&amp;(e=l(function(h,k){h=W(k);Jb(h);Kb(h)},null,g,f[g]),J(c,e));b.foot&amp;&amp;(e=l(function(h){h=W(h);Jb(h);Kb(h)},null,b.foot),J(c,e));d&amp;&amp;J(c,l(d,null,a,b));L(c)}</span>
+<span class="cstat-no" title="statement not covered" >function Fb(a){E(a.a,a.s);E(a.a,a.G);E(a.a,a.J);E(a.a,a.H);E(a.a,a.I);a.l=document.createElement("div");a.l.className=a.R;var b=a.a,c=a.l;if(c){for(var d;d=b.firstChild;)c.appendChild(d);b.appendChild(c)}a.f=document.createElement("div");a.f.className=a.P;a.f.innerHTML=a.O;a.reverse?(b=a.l,b.parentNode.insertBefore(a.f,b)):(b=a.l,b.parentNode.insertBefore(a.f,b.nextSibling))}function Gb(a){F(a.a,a.H);F(a.a,a.I);E(a.a,a.D);E(a.a,a.F)}</span>
+<span class="cstat-no" title="statement not covered" >function Hb(a){a.a.removeChild(a.l);var b=a.f,c,d=b.parentNode;if(d&amp;&amp;11!=d.nodeType)if(b.removeNode)b.removeNode(!1);else{for(;c=b.firstChild;)d.insertBefore(c,b);d.removeChild(b)}F(a.a,a.D);F(a.a,a.F);F(a.a,a.G);F(a.a,a.J);F(a.a,a.s)}function zb(a){q(r(a),function(b){if(b){b.head&amp;&amp;(b.head=W(b.head));if(b.body)for(var c in b.body)b.body[c]=W(b.body[c]);b.foot&amp;&amp;(b.foot=W(b.foot))}});return a}</span>
+<span class="cstat-no" title="statement not covered" >function W(a){var b=new Mb;if(!a)return b;if(!ha(a))return a.scripts&amp;&amp;q(a.scripts,function(c){b.scripts.push({url:c.url||"",text:c.text||"",name:c.name||"",async:c.async||!1})}),a.styles&amp;&amp;q(a.styles,function(c){b.styles.push({url:c.url||"",text:c.text||"",name:c.name||""})}),a.links&amp;&amp;q(a.links,function(c){"spf-preconnect"==c.rel&amp;&amp;b.links.push({url:c.url||"",rel:c.rel||""})}),b.html=a.html||"",b;a=a.replace(Nb,function(c,d,e,f){if("script"==d){d=(d=e.match(Ob))?d[1]:"";var g=e.match(Pb);g=g?g[1]:"";</span>
+<span class="cstat-no" title="statement not covered" >var h=Qb.test(e);e=Rb.exec(e);return(e=!e||-1!=e[1].indexOf("/javascript")||-1!=e[1].indexOf("/x-javascript")||-1!=e[1].indexOf("/ecmascript"))?(b.scripts.push({url:g,text:f,name:d,async:h}),""):c}return"style"==d&amp;&amp;(d=(d=e.match(Ob))?d[1]:"",e=Rb.exec(e),e=!e||-1!=e[1].indexOf("text/css"))?(b.styles.push({url:"",text:f,name:d}),""):c});a=a.replace(Sb,function(c,d){var e=d.match(Tb);e=e?e[1]:"";return"stylesheet"==e?(e=(e=d.match(Ob))?e[1]:"",d=(d=d.match(Ub))?d[1]:"",b.styles.push({url:d,text:"",</span>
+<span class="cstat-no" title="statement not covered" >name:e}),""):"spf-preconnect"==e?(d=(d=d.match(Ub))?d[1]:"",b.links.push({url:d,rel:e}),""):c});b.html=a;return b}function Cb(a,b){if(0&gt;=a.scripts.length)b&amp;&amp;b();else{var c=-1,d=function(){c++;if(c&lt;a.scripts.length){var e=a.scripts[c],f=function(){};e.url?f=e.name?l(kb,null,e.url,e.name):l(mb,null,e.url):e.text&amp;&amp;(f=e.name?l(tb,null,e.text,e.name):l(ub,null,e.text));e.url&amp;&amp;!e.async?f(d):(f(),d())}else b&amp;&amp;b()};d()}}</span>
+<span class="cstat-no" title="statement not covered" >function Kb(a){0&gt;=a.scripts.length||(a=fa(a.scripts,function(b){return b.url}),nb(a))}function Bb(a){0&gt;=a.styles.length||q(a.styles,function(b){b.url?b.name?vb(b.url,b.name):wb(b.url):b.text&amp;&amp;(b.name?gb("css",b.text,b.name):ib("css",b.text))})}function Jb(a){0&gt;=a.styles.length||(a=fa(a.styles,function(b){return b.url}),xb(a))}function Ab(a){0&gt;=a.links.length||(a=fa(a.links,function(b){return"spf-preconnect"==b.rel?b.url:""}),jb(a))}</span>
+<span class="cstat-no" title="statement not covered" >function Eb(a,b,c,d,e){var f=parseInt(A["animation-duration"],10);this.a=a;this.O=b;this.duration=f;this.reverse=e;b=document.body;b=(b.dataset?b.dataset.spfName:b.getAttribute("data-"+ja()))||"";f=parseInt(w.uid,10)||0;f++;this.key=a["spf-key"]||(a["spf-key"]=""+v("uid",f));this.G=b&amp;&amp;c+"-from-"+b;this.J=d&amp;&amp;c+"-to-"+d;this.l=null;this.R=c+"-old";this.f=null;this.P=c+"-new";this.s=c+(e?"-reverse":"-forward");this.H=c+"-start";this.I=this.s+"-start";this.D=c+"-end";this.F=this.s+"-end"}</span>
+<span class="cstat-no" title="statement not covered" >function Mb(){this.html="";this.scripts=[];this.styles=[];this.links=[]}</span>
+<span class="cstat-no" title="statement not covered" >var Db=function(){var a=document.createElement("div");return"transition"in a.style?!0:da(["webkit","Moz","Ms","O","Khtml"],function(b){return b+"Transition"in a.style})}(),Sb=/\x3clink([\s\S]*?)\x3e/ig,Nb=/\x3c(script|style)([\s\S]*?)\x3e([\s\S]*?)\x3c\/\1\x3e/ig,Qb=/(?:\s|^)async(?:\s|=|$)/i,Ub=/(?:\s|^)href\s*=\s*["']?([^\s"']+)/i,Ob=/(?:\s|^)name\s*=\s*["']?([^\s"']+)/i,Tb=/(?:\s|^)rel\s*=\s*["']?([^\s"']+)/i,Pb=/(?:\s|^)src\s*=\s*["']?([^\s"']+)/i,Rb=/(?:\s|^)type\s*=\s*["']([^"']+)["']/i;function Vb(a,b,c,d){var e=d||{},f=!1,g=0,h,k=new XMLHttpRequest;k.open(a,b,!0);k.timing={};var m=k.abort;k.abort=function(){clearTimeout(h);k.onreadystatechange=null;m.call(k)};k.onreadystatechange=function(){var u=k.timing;if(2==k.readyState){u.responseStart=u.responseStart||p();if("json"==k.responseType)f=!1;else if(-1&lt;(k.getResponseHeader("Transfer-Encoding")||"").toLowerCase().indexOf("chunked"))f=!0;else{u=k.getResponseHeader("X-Firefox-Spdy");var I=window.chrome&amp;&amp;chrome.loadTimes&amp;&amp;chrome.loadTimes();</span>
+<span class="cstat-no" title="statement not covered" >I=I&amp;&amp;I.wasFetchedViaSpdy;f=!(!u&amp;&amp;!I)}e.L&amp;&amp;e.L(k)}else 3==k.readyState?f&amp;&amp;e.u&amp;&amp;(u=k.responseText.substring(g),g=k.responseText.length,e.u(k,u)):4==k.readyState&amp;&amp;(u.responseEnd=u.responseEnd||p(),window.performance&amp;&amp;window.performance.getEntriesByName&amp;&amp;(k.resourceTiming=window.performance.getEntriesByName(b).pop()),f&amp;&amp;e.u&amp;&amp;k.responseText.length&gt;g&amp;&amp;(u=k.responseText.substring(g),g=k.responseText.length,e.u(k,u)),clearTimeout(h),e.K&amp;&amp;e.K(k))};"responseType"in k&amp;&amp;"json"==e.responseType&amp;&amp;(k.responseType=</span>
+<span class="cstat-no" title="statement not covered" >"json");e.withCredentials&amp;&amp;(k.withCredentials=e.withCredentials);d="FormData"in window&amp;&amp;c instanceof FormData;a="POST"==a&amp;&amp;!d;if(e.headers)for(var B in e.headers)k.setRequestHeader(B,e.headers[B]),"content-type"==B.toLowerCase()&amp;&amp;(a=!1);a&amp;&amp;k.setRequestHeader("Content-Type","application/x-www-form-urlencoded");0&lt;e.N&amp;&amp;(h=setTimeout(function(){k.abort();e.M&amp;&amp;e.M(k)},e.N));k.timing.fetchStart=p();k.send(c);return k};function Wb(a,b){b=b||{};b.method=((b.method||"GET")+"").toUpperCase();b.type=b.type||"request";var c=a,d=A["url-identifier"]||"";if(d){d=d.replace("__type__",b.type||"");var e=y(c,"#"),f=y(e[0],"?");c=f[0];var g=f[1];f=f[2];var h=e[1];e=e[2];if(0==d.lastIndexOf("?",0))g&amp;&amp;(d=d.replace("?","&amp;")),f+=d;else{if(0==d.lastIndexOf(".",0))if(x(c,"/"))d="index"+d;else{var k=c.lastIndexOf(".");-1&lt;k&amp;&amp;(c=c.substring(0,k))}else x(c,"/")&amp;&amp;0==d.lastIndexOf("/",0)&amp;&amp;(d=d.substring(1));c+=d}c=c+g+f+h+e}d=N(c);c={};</span>
+<span class="cstat-no" title="statement not covered" >c.spfUrl=d;c.startTime=p();c.fetchStart=c.startTime;g=Xb(a,b.current,null,b.type,!1);g=Yb(g,b.current);c.spfPrefetched=!!g&amp;&amp;"prefetch"==g.type;c.spfCached=!!g;if(g){a=l(Zb,null,a,b,c,g.key,g.response);b=window._spf_state=window._spf_state||{};var m=parseInt(b.uid,10)||0;m++;b=b.uid=m;z[b]=a;oa?window.postMessage("spf:"+b,"*"):window.setTimeout(l(la,null,b),0);return null}g={};if(f=A["request-headers"])for(m in f)h=f[m],g[m]=null==h?"":String(h);if(b.headers)for(m in b.headers)h=b.headers[m],g[m]=</span>
+<span class="cstat-no" title="statement not covered" >null==h?"":String(h);null!=b.c&amp;&amp;(g["X-SPF-Referer"]=b.c);null!=b.current&amp;&amp;(g["X-SPF-Previous"]=b.current);if(m=A["advanced-header-identifier"])g["X-SPF-Request"]=m.replace("__type__",b.type),g.Accept="application/json";m=new $b;f=l(ac,null,a,b,c,m);a={headers:g,N:A["request-timeout"],L:l(bc,null,a,m),u:l(cc,null,a,b,c,m),K:f,M:f};b.withCredentials&amp;&amp;(a.withCredentials=b.withCredentials);A["advanced-response-type-json"]&amp;&amp;(a.responseType="json");return"POST"==b.method?Vb("POST",d,b.B,a):Vb("GET",d,null,</span>
+<span class="cstat-no" title="statement not covered" >a)}function Zb(a,b,c,d,e){var f=!1;c.responseStart=c.responseEnd=p();b.type&amp;&amp;0==b.type.lastIndexOf("navigate",0)&amp;&amp;(c.navigationStart=c.startTime,A["cache-unified"]||(ra(d),f=!0));b.i&amp;&amp;"multipart"==e.type&amp;&amp;q(e.parts,function(g){g.timing||(g.timing={});g.timing.spfCached=!!c.spfCached;g.timing.spfPrefetched=!!c.spfPrefetched;b.i(a,g)});dc(a,b,c,e,f)}function bc(a,b,c){a=c.getResponseHeader("X-SPF-Response-Type")||"";b.f=-1!=a.toLowerCase().indexOf("multipart")}</span>
+<span class="cstat-no" title="statement not covered" >function cc(a,b,c,d,e,f,g){if(d.f){f=d.g+f;try{var h=yb(f,!0,g)}catch(k){e.abort();b.h&amp;&amp;b.h(a,k,e);return}b.i&amp;&amp;q(h.w,function(k){k.timing||(k.timing={});k.timing.spfCached=!!c.spfCached;k.timing.spfPrefetched=!!c.spfPrefetched;b.i(a,k)});d.a=d.a.concat(h.w);d.g=h.g}}</span>
+<span class="cstat-no" title="statement not covered" >function ac(a,b,c,d,e){if(e.timing)for(var f in e.timing)c[f]=e.timing[f];if(e.resourceTiming)if("load"==b.type)for(var g in e.resourceTiming)c[g]=e.resourceTiming[g];else if(window.performance&amp;&amp;window.performance.timing&amp;&amp;(f=window.performance.timing.navigationStart,f+e.resourceTiming.startTime&gt;=c.startTime))for(var h in e.resourceTiming)g=e.resourceTiming[h],void 0!==g&amp;&amp;(x(h,"Start")||x(h,"End")||"startTime"==h)&amp;&amp;(c[h]=f+Math.round(g));"load"!=b.type&amp;&amp;(c.navigationStart=c.startTime);d.a.length&amp;&amp;</span>
+<span class="cstat-no" title="statement not covered" >(d.g=ia(d.g),d.g&amp;&amp;cc(a,b,c,d,e,"",!0));if("json"==e.responseType){if(!e.response){b.h&amp;&amp;b.h(a,Error("JSON response parsing failed"),e);return}var k=zb(r(e.response))}else try{k=yb(e.responseText).w}catch(B){b.h&amp;&amp;b.h(a,B,e);return}if(b.i&amp;&amp;1&lt;k.length)for(d=d.a.length;d&lt;k.length;d++)e=k[d],e.timing||(e.timing={}),e.timing.spfCached=!!c.spfCached,e.timing.spfPrefetched=!!c.spfPrefetched,b.i(a,e);if(1&lt;k.length){var m;q(k,function(B){B.cacheType&amp;&amp;(m=B.cacheType)});k={parts:k,type:"multipart"};m&amp;&amp;(k.cacheType=</span>
+<span class="cstat-no" title="statement not covered" >m)}else k=1==k.length?k[0]:{};dc(a,b,c,k,!0)}function dc(a,b,c,d,e){if(e&amp;&amp;"POST"!=b.method&amp;&amp;(e=Xb(a,b.current,d.cacheType,b.type,!0))){d.cacheKey=e;var f={response:d,type:b.type||""},g=parseInt(A["cache-lifetime"],10),h=parseInt(A["cache-max"],10);0&gt;=g||0&gt;=h||(h=D(),f={data:f,life:g,time:p(),count:0},ua(f),h[e]=f,setTimeout(sa,1E3))}d.timing=c;b.v&amp;&amp;b.v(a,d)}</span>
+<span class="cstat-no" title="statement not covered" >function Xb(a,b,c,d,e){a=N(a);var f;A["cache-unified"]?f=a:"navigate-back"==d||"navigate-forward"==d?f="history "+a:"navigate"==d?f=(e?"history ":"prefetch ")+a:"prefetch"==d&amp;&amp;(f=e?"prefetch "+a:"");b&amp;&amp;"url"==c?f+=" previous "+b:b&amp;&amp;"path"==c&amp;&amp;(f+=" previous "+Qa(b).pathname);return f||""}</span>
+<span class="cstat-no" title="statement not covered" >function Yb(a,b){var c=[];b&amp;&amp;(c.push(a+" previous "+b),c.push(a+" previous "+Qa(b).pathname));c.push(a);var d=null;da(c,function(e){a:{var f=D();if(e in f){f=f[e];if(ta(f)){ua(f);f=f.data;break a}ra(e)}f=void 0}f&amp;&amp;(d={key:e,response:f.response,type:f.type});return!!f});return d}function $b(){this.f=!1;this.g="";this.a=[]};function ec(a){return za(a,function(b){return wa(b,A["link-class"])})}function fc(a){return za(a,function(b){return wa(b,A["nolink-class"])})}function gc(a,b){return za(a,function(c){return c.href&amp;&amp;"img"!=c.tagName.toLowerCase()},b)}function hc(a){if(a.metaKey||a.altKey||a.ctrlKey||a.shiftKey||0&lt;a.button)return null;var b=ec(a.target);return!b||A["nolink-class"]&amp;&amp;fc(a.target)?null:(a=gc(a.target,b))?a.href:null}function ic(a){return Qa(a).origin!=Qa(window.location.href).origin?!1:!0}</span>
+<span class="cstat-no" title="statement not covered" >function jc(){if(!w["nav-init"])return!1;var a=parseInt(w["nav-counter"],10)||0;a++;var b=parseInt(A["navigate-limit"],10);b=isNaN(b)?Infinity:b;if(a&gt;b)return!1;a=parseInt(w["nav-init-time"],10);a--;a=p()-a;b=parseInt(A["navigate-lifetime"],10);b=isNaN(b)?Infinity:b;return a&gt;b?!1:!0}function kc(a,b){b=b||window.location.href;return-1!=a.indexOf("#")&amp;&amp;(a=N(a),b=N(b),a==b)?!1:!0}</span>
+<span class="cstat-no" title="statement not covered" >function lc(a){if(!a.defaultPrevented){var b=hc(a);b&amp;&amp;(b=Sa(b),ic(b)&amp;&amp;jc()&amp;&amp;n("spfclick",{url:b,target:a.target})&amp;&amp;(mc(b,{},new nc),a.preventDefault()))}}function oc(a){var b=hc(a);b&amp;&amp;setTimeout(function(){pc(b)},0)}function qc(){var a=w["nav-scroll-position"]||null;var b=w["nav-scroll-url"]||"";a=a&amp;&amp;b==window.location.href?a:null;rc();a&amp;&amp;window.scroll.apply(null,a)}</span>
+<span class="cstat-no" title="statement not covered" >function sc(a,b){b=new nc({current:b&amp;&amp;b["spf-current"],history:!0,position:b&amp;&amp;b["spf-position"],c:b&amp;&amp;b["spf-referer"],reverse:!(!b||!b["spf-back"])});var c=A["reload-identifier"];c&amp;&amp;(a=Ra(a,[c]));ic(a)?jc()?n("spfhistory",{url:a,referer:b.c,previous:b.current})&amp;&amp;(b.position&amp;&amp;(v("nav-scroll-position",[window.pageXOffset,window.pageYOffset]),v("nav-scroll-url",window.location.href)),mc(a,{},b)):X(a,"1"):X(a,"9")}</span>
+<span class="cstat-no" title="statement not covered" >function mc(a,b,c){tc();if(kc(a,c.current))if(uc(a,c.c,c.current,b)){v("nav-counter",(parseInt(w["nav-counter"],10)||0)+1);vc(a);var d=N(a),e="preprocess "+N(d);for(f in K)e!=f&amp;&amp;0==f.lastIndexOf("preprocess",0)&amp;&amp;Na(f);d=wc()[d];v("nav-request",d);v("nav-promote",null);v("nav-promote-time",null);if(d&amp;&amp;4!=d.readyState)d="preprocess "+N(a),e="promote "+N(a),v("nav-promote",a),v("nav-promote-time",p()),Na(d),L(e,!0),c.history||xc(a,c.c,l(Y,null,b));else{d=l(Y,null,b);e=l(yc,null,b,c);var f=l(zc,null,</span>
+<span class="cstat-no" title="statement not covered" >b,c);A["advanced-navigate-persist-timing"]||Ac();c.type="navigate";c.history&amp;&amp;(c.type+=c.reverse?"-back":"-forward");b=Wb(a,{method:b.method,headers:b.headers,i:e,h:d,v:f,B:b.postData,type:c.type,current:c.current,c:c.c});v("nav-request",b);c.history||xc(a,c.c,d)}}else X(a,"2");else c.history||xc(a,c.c,l(Y,null,b)),Bc(a,c)}</span>
+<span class="cstat-no" title="statement not covered" >function Bc(a,b){if(b.position)rc(),window.scroll.apply(null,b.position),b.j=!0;else if(a=y(a,"#"),a[2]){if(a=document.getElementById(a[2]))rc(),a.scrollIntoView(),b.j=!0}else b.j||(rc(),window.scroll(0,0),b.j=!0)}function xc(a,b,c){try{Ba(null,{"spf-position":[window.pageXOffset,window.pageYOffset]}),N(a,!0)!=window.location.href&amp;&amp;Ca(!1,a,{"spf-referer":b},void 0)}catch(d){tc(),c(a,d)}}function Y(a,b,c,d){v("nav-request",null);Cc(b,c,a,void 0,d)&amp;&amp;X(b,"10",c)}</span>
+<span class="cstat-no" title="statement not covered" >function yc(a,b,c,d){if(Ec(c,d,a))if(d.reload)X(c,"5");else if(d.redirect)Fc(a,d.redirect);else try{V(c,d,b,function(){Gc(c,d,a)})}catch(e){Y(a,c,e)}else X(c,"3")}</span>
+<span class="cstat-no" title="statement not covered" >function zc(a,b,c,d){v("nav-request",null);if(w["nav-promote"]==b.b){var e=d.timing||{};e.navigationStart=w["nav-promote-time"];e.spfPrefetched=!0}var f="multipart"==d.type;if(!f){if(!Hc(c,d,a)){X(c,"4");return}if(d.reload){X(c,"5");return}if(d.redirect){Fc(a,d.redirect);return}}try{V(c,f?{}:d,b,function(){var g=d.name||"";f&amp;&amp;q(d.parts,function(h){g=h.name||g});xa(g);Bc(c,b);Ic(c,d,a)})}catch(g){Y(a,c,g)}}function Fc(a,b){try{b+=window.location.hash,Ba(b,null,!0)}catch(c){tc(),Y(a,b,c)}}</span>
+<span class="cstat-no" title="statement not covered" >function tc(){var a=w["nav-request"];a&amp;&amp;(a.abort(),v("nav-request",null))}function Z(a,b){if(a){var c=Array.prototype.slice.call(arguments);c[0]=a;c=aa.apply(null,c)}return!1!==c}</span>
+<span class="cstat-no" title="statement not covered" >function X(a,b,c){c=c?c.message:"";tc();vc();var d=b;c&amp;&amp;(d+=" Message: "+c);n("spfreload",{url:a,reason:d});var e=window.location.href;A["experimental-remove-history"]&amp;&amp;e==a&amp;&amp;(v("history-ignore-pop",!0),window.history.back());setTimeout(function(){var f=A["reload-identifier"];if(f){var g={};g[f]=encodeURIComponent(b);f=a;var h=y(f,"#");f=h[0];var k=-1!=f.indexOf("?")?"&amp;":"?",m;for(m in g)f+=k+m,g[m]&amp;&amp;(f+="="+g[m]),k="&amp;";a=f+h[1]+h[2]}window.location.href=a;kc(a,e)||window.location.reload()},0)}</span>
+<span class="cstat-no" title="statement not covered" >function Jc(a,b,c){c.b=c.b||a;if(uc(a,void 0,void 0,b,!0)){var d=l(Kc,null,!1,b,c),e=l(Lc,null,!1,b,c),f=l(Mc,null,!1,b,c);c.type="load";Wb(a,{method:b.method,headers:b.headers,i:e,h:d,v:f,B:b.postData,type:c.type,withCredentials:b.withCredentials})}}function pc(a,b){a=Sa(a);Nc(a,b||{},new nc)}</span>
+<span class="cstat-no" title="statement not covered" >function Nc(a,b,c){c.b=c.b||a;if(uc(a,void 0,void 0,b,!0)){var d=l(Kc,null,!0,b,c),e=l(Lc,null,!0,b,c),f=l(Mc,null,!0,b,c);c.type="prefetch";b=Wb(a,{method:b.method,headers:b.headers,i:e,h:d,v:f,B:b.postData,type:c.type,current:c.current});a=N(a);wc()[a]=b}}function Kc(a,b,c,d,e){a&amp;&amp;Oc(d);a&amp;&amp;w["nav-promote"]==c.b?Y(b,d,e):Cc(d,e,b,!0)}</span>
+<span class="cstat-no" title="statement not covered" >function Lc(a,b,c,d,e){if(Ec(d,e,b,!0)){if(e.reload){if(!a)return;if(w["nav-promote"]==c.b){X(d,"5");return}}if(e.redirect)Pc(a,b,c,e.redirect);else{if(a){var f=l(yc,null,b,c,d,e),g="promote "+N(c.b);J(g,f);if(w["nav-promote"]==c.b){L(g,!0);return}}(a?Ib:V)(d,e,c,function(){Gc(d,e,b,!0)})}}}</span>
+<span class="cstat-no" title="statement not covered" >function Mc(a,b,c,d,e){var f="multipart"==e.type;if(!f){if(!Hc(d,e,b,!0)){X(d,"4");return}if(e.reload){if(!a)return;if(w["nav-promote"]==c.b){X(d,"5");return}}if(e.redirect){Pc(a,b,c,e.redirect);return}}var g="promote "+N(c.b);if(a){Oc(d);if(w["nav-promote"]==c.b){J(g,l(zc,null,b,c,d,e));L(g,!0);return}Na(g)}g=a?Ib:V;try{g(d,f?{}:e,c,function(){Ic(d,e,b,!0)})}catch(h){Kc(a,b,c,d,h)}}</span>
+<span class="cstat-no" title="statement not covered" >function Pc(a,b,c,d){a=a?Nc:Jc;var e={};q("onError onRequest onPartProcess onPartDone onProcess onDone".split(" "),function(f){e[f]=b[f]});a(d,e,c)}function Cc(a,b,c,d,e){a={url:a,err:b,xhr:e};(c=Z((c||{}).onError,a))&amp;&amp;!d&amp;&amp;(c=n("spferror",a));return c}function uc(a,b,c,d,e){a={url:a,referer:b,previous:c};(d=Z((d||{}).onRequest,a))&amp;&amp;!e&amp;&amp;(d=n("spfrequest",a));return d}function Ec(a,b,c,d){a={url:a,part:b};(c=Z((c||{}).onPartProcess,a))&amp;&amp;!d&amp;&amp;(c=n("spfpartprocess",a));return c}</span>
+<span class="cstat-no" title="statement not covered" >function Gc(a,b,c,d){a={url:a,part:b};(c=Z((c||{}).onPartDone,a))&amp;&amp;!d&amp;&amp;n("spfpartdone",a)}function Hc(a,b,c,d){a={url:a,response:b};(c=Z((c||{}).onProcess,a))&amp;&amp;!d&amp;&amp;(c=n("spfprocess",a));return c}function Ic(a,b,c,d){a={url:a,response:b};(c=Z((c||{}).onDone,a))&amp;&amp;!d&amp;&amp;n("spfdone",a)}function Oc(a){a=N(a);var b=wc(),c=b[a];c&amp;&amp;c.abort();delete b[a]}function vc(a){var b=wc();a=a&amp;&amp;N(a);for(var c in b)a!=c&amp;&amp;Oc(c)}</span>
+<span class="cstat-no" title="statement not covered" >var Ac,Qc=window.performance&amp;&amp;(window.performance.clearResourceTimings||window.performance.webkitClearResourceTimings||window.performance.mozClearResourceTimings||window.performance.msClearResourceTimings||window.performance.oClearResourceTimings);Ac=Qc?l(Qc,window.performance):ba;function wc(){return"nav-prefetches"in w?w["nav-prefetches"]:v("nav-prefetches",{})}function rc(){v("nav-scroll-position",null);v("nav-scroll-url",null)}</span>
+<span class="cstat-no" title="statement not covered" >function nc(a){a=a||{};this.current=a.history&amp;&amp;a.current?a.current:window.location.href;this.history=!!a.history;this.b=a.b||"";this.position=a.position||null;this.c=void 0!=a.c?a.c:window.location.href;this.reverse=!!a.reverse;this.j=!!a.j;this.type=a.type||""};function Rc(){bb("js");bb("css");"complete"==document.readyState&amp;&amp;(document.removeEventListener?document.removeEventListener("DOMContentLoaded",Rc,!1):document.detachEvent&amp;&amp;document.detachEvent("onreadystatechange",Rc))}document.addEventListener?document.addEventListener("DOMContentLoaded",Rc,!1):document.attachEvent&amp;&amp;document.attachEvent("onreadystatechange",Rc);Rc();</span>
+<span class="cstat-no" title="statement not covered" >var Sc={init:function(a){var b=!("function"!=typeof window.history.pushState&amp;&amp;!Ea().contentWindow.history.pushState);a=a||{};for(var c in qa)A[c]=c in a?a[c]:qa[c];for(c in a)c in qa||(A[c]=a[c]);if(b){c=Cc;if(!w["history-init"]&amp;&amp;window.addEventListener){a=window.location.href;window.addEventListener("popstate",Fa,!1);v("history-init",!0);v("history-callback",sc);v("history-error-callback",c);v("history-listener",Fa);v("history-url",a);v("history-timestamp",p());var d={"spf-referer":document.referrer};</span>
+<span class="cstat-no" title="statement not covered" >try{Ba(a,d)}catch(e){c&amp;&amp;c(a,e)}}!w["nav-init"]&amp;&amp;document.addEventListener&amp;&amp;(v("nav-init",!0),v("nav-init-time",p()),v("nav-counter",0),document.addEventListener("click",lc,!1),v("nav-listener",lc),!A["experimental-prefetch-mousedown"]||"ontouchstart"in window||0&lt;window.navigator.maxTouchPoints||0&lt;window.navigator.msMaxTouchPoints||(document.addEventListener("mousedown",oc,!1),v("nav-mousedown-listener",oc)),document.addEventListener("scroll",qc,!1),v("nav-scroll-listener",qc))}return b},dispose:function(){"undefined"!=</span>
+<span class="cstat-no" title="statement not covered" >typeof History&amp;&amp;History.prototype.pushState&amp;&amp;(tc(),w["nav-init"]&amp;&amp;(document.removeEventListener&amp;&amp;(document.removeEventListener("click",w["nav-listener"],!1),document.removeEventListener("mousedown",w["nav-mousedown-listener"],!1),document.removeEventListener("scroll",w["nav-scroll-listener"],!1)),v("nav-listener",null),v("nav-mousedown-listener",null),v("nav-scroll-listener",null),v("nav-scroll-position",null),v("nav-scroll-url",null),v("nav-init",!1),v("nav-init-time",null),v("nav-counter",null)),</span>
+<span class="cstat-no" title="statement not covered" >w["history-init"]&amp;&amp;(window.removeEventListener&amp;&amp;window.removeEventListener("popstate",w["history-listener"],!1),v("history-init",!1),v("history-callback",null),v("history-error-callback",null),v("history-listener",null),v("history-url",null),v("history-timestamp",0)));for(var a in A)delete A[a]},navigate:function(a,b){a&amp;&amp;(a=Sa(a),ic(a)?jc()?mc(a,b||{},new nc):X(a,"1"):X(a,"9"))},load:function(a,b){a=Sa(a);Jc(a,b||{},new nc)},prefetch:pc,process:function(a,b){function c(f,g,h,k){f==g&amp;&amp;b&amp;&amp;b(k)}var d=</span>
+<span class="cstat-no" title="statement not covered" >window.location.href;if("multipart"==a.type){a=a.parts;var e=a.length-1;q(a,function(f,g){V(d,f,null,l(c,null,g,e))})}else V(d,a,null,l(c,null,0,0))}},Tc={cache:{remove:ra,clear:function(){D({})}},script:{load:kb,get:mb,ready:ob,done:function(a){Q[P("js",a)]="";Va("js")},require:pb,declare:function(a,b){if(a){for(var c in a)U[c]=a[c];if(b)for(c in b)qb[c]=b[c]}},path:function(a){v("rsrc-p-js",a)},unload:lb,ignore:function(a,b){a=r(a);a=P("js",a.sort().join("|"));Ha(a,b)},unrequire:rb,prefetch:nb},</span>
+<span class="cstat-no" title="statement not covered" >style:{load:vb,get:wb,unload:function(a){Ya("css",a)},path:function(a){v("rsrc-p-css",a)},prefetch:xb}},Uc=this.spf=this.spf||{},Vc;for(Vc in Sc)Uc[Vc]=Sc[Vc];for(var Wc in Tc)for(var Xc in Tc[Wc])Uc[Wc]=Uc[Wc]||{},Uc[Wc][Xc]=Tc[Wc][Xc];n("spfready");}).call(this);</span>
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Sun Sep 01 2019 01:31:37 GMT+0000 (UTC)
+</div>
+</div>
+<script src="../../../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../../../sorter.js"></script>
+<script src="../../../../block-navigation.js"></script>
+</body>
+</html>
