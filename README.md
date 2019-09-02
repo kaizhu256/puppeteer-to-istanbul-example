@@ -20,11 +20,6 @@ This will:
 4. open `coverage/index.html`, displaying the coverage information collected.
 
 ## changelog
-- 2019.8.30
-- inline dependency https://github.com/istanbuljs/nyc/tree/v14.1.1
-- inline dependency https://github.com/istanbuljs/istanbuljs/tree/istanbul-reports@2.2.5
-- inline dependency https://github.com/istanbuljs/puppeteer-to-istanbul/tree/v1.2.2
-- inline dependency https://github.com/istanbuljs/v8-to-istanbul/tree/v3.2.3
-- add reference coverage.00 of youtube
-- add file raw.istanbuljs.js
-- remove dependency https://github.com/STRML/async-limiter
+2019.9.1
+- debug css-coverage in index.json
+- none

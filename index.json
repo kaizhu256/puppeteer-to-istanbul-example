@@ -1,4 +1,16 @@
 {
+    "covCss": [
+        {
+            "url": "file:///root/Documents/puppeteer-to-istanbul-example/index.html",
+            "ranges": [
+                {
+                    "start": 24,
+                    "end": 47
+                }
+            ],
+            "text": "\n.aa {\n    margin: 0;\n}\nbody {\n    margin: 0;\n}\n"
+        }
+    ],
     "covV8": [
         {
             "url": "/root/Documents/puppeteer-to-istanbul-example/.nyc_output/js/index.htmlpuppeteerTemp-inline.js",

@@ -188,11 +188,12 @@
 (async function (local) {
 "use strict";
 // init let
-let browser;
-let covV8;
-let page;
-let puppeteer;
-let timeElapsed;
+var browser;
+var covCss;
+var covV8;
+var page;
+var puppeteer;
+var timeElapsed;
 // init const
 const debugTimeElapsed = function (msg) {
     timeElapsed = timeElapsed || Date.now();
@@ -270,7 +271,7 @@ await page.screenshot({
 fs.writeFileSync("tmp/aa.html", await page.content());
 // browser - coverage-disable
 covV8 = await page.coverage.stopJSCoverage();
-page.coverage.stopCSSCoverage();
+covCss = await page.coverage.stopCSSCoverage();
 // browser - close
 browser.close();
 debugTimeElapsed("browser");
@@ -371,6 +372,7 @@ fsWriteFileWithMkdirpSync(
 );
 // debug
 fs.writeFileSync("tmp/aa.json", JSON.stringify({
+    covCss,
     covV8,
     puppeteerToV8Info,
     fullJson
